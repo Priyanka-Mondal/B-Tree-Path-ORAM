@@ -1,0 +1,8 @@
+borion_debug
+orion_debug
+orion2_debug
+*.o
+build/*
+site_scons/site_tools/grpc.pyc
+site_scons/site_tools/protoc.pyc
+.sconsign.dblite
