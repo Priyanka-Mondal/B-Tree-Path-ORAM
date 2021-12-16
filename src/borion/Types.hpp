@@ -6,7 +6,8 @@
 #include <iostream>
 
 #define ID_SIZE 64 // it was 16 before
-
+#define COM 16
+#define FID_SIZE 4
 // 1kb, 10kb, and 100kb filesize 
 #define SMALL 1024
 #define MEDIUM 10240

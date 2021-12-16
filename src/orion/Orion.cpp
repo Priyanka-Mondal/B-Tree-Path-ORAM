@@ -129,5 +129,6 @@ Bid Orion::createBid(string keyword, int number) {
     Bid bid(keyword);
     auto arr = to_bytes(number);
     std::copy(arr.begin(), arr.end(), bid.id.end() - 4);
+    cout <<"AT Bid:"<<number<<"::"<<bid<<endl;
     return bid;
 }

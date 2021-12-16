@@ -1,5 +1,6 @@
 #include "borion/BOrion.h"
 //#include "utils/Utilities.h"
+#include<string.h>
 
 using namespace std;
 
@@ -110,15 +111,51 @@ int main(int, char**) {
      //for (auto i: blocks)
      //{
      //   bcnt++;
-     //   cout <<bcnt << "blocks:[" << i << "]\n";
+     //   cout <<bcnt << "input blocks: [" << i << "]\n";
      //}
-    borion.insertWrapper(kw, blocks, "test2");
+    //The file ids are always 4bytes.
+    borion.insertWrapper(kw, blocks, "0002");
     
     kw = getUniquedWords("test1.txt");
     //for (auto i: kw) 
     //    cout << "kws: " << i << "\n";
     blocks = divideString("test1.txt",BLOCK);
-    borion.insertWrapper(kw, blocks, "test1");
+    borion.insertWrapper(kw, blocks, "0001");
+
+    kw = getUniquedWords("test5.txt");
+    blocks = divideString("test5.txt",BLOCK);
+    borion.insertWrapper(kw, blocks, "0005");
+    
+    kw = getUniquedWords("test6.txt");
+    blocks = divideString("test6.txt",BLOCK);
+    borion.insertWrapper(kw, blocks, "0006");
+
+    kw = getUniquedWords("test7.txt");
+    blocks = divideString("test7.txt",BLOCK);
+    borion.insertWrapper(kw, blocks, "0007");
+
+    kw = getUniquedWords("test8.txt");
+    blocks = divideString("test8.txt",BLOCK);
+    borion.insertWrapper(kw, blocks, "0008");
+
+     kw = getUniquedWords("test9.txt");
+     blocks = divideString("test9.txt",BLOCK);
+     borion.insertWrapper(kw, blocks, "0009");
+
+    for (int k = 10; k<=19; k++)
+    {
+	string ks=to_string(k);
+	string fl = "test";
+        fl.append(ks);
+        fl.append(".txt");
+
+        kw = getUniquedWords(fl);
+    blocks = divideString(fl,BLOCK);
+    string id = "00";
+	    id.append(ks);
+    borion.insertWrapper(kw, blocks, id);    
+    }
+	 //
     // first searches ids 
     vector<string> allid = borion.search("Hello");
     for(auto id : allid)
@@ -129,8 +166,9 @@ int main(int, char**) {
 	    for(auto blk: blocks)
 	    {
 		 bcnt++;
-	   	 cout << bcnt <<" Blocks:[" << blk << "]\n";
+	   	 cout << bcnt <<" OUTPUT Blocks :[" << blk << "]\n";
 	    }
     }
+
     return 0;
 }

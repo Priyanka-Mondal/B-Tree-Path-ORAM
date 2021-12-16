@@ -138,7 +138,7 @@ int main(int, char**) {
 	    orion2.insertFile(4,blocks);
     //}
     // first searches ids 
-    vector<int> allid = orion2.search("key");
+    vector<int> allid = orion2.search("bell");
     for(auto id : allid)
     {
 	    bcnt=0;

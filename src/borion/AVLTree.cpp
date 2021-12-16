@@ -195,7 +195,9 @@ void AVLTree::batchSearch(Node* head, vector<Bid> keys, vector<Node*>* results) 
     head = oram->ReadNode(head->key, head->pos, head->pos);
     bool getLeft = false, getRight = false;
     vector<Bid> leftkeys,rightkeys;
+    int count = 1;
     for (Bid bid : keys) {
+	   //cout << bid ;
         if (head->key > bid) {
             getLeft = true;
             leftkeys.push_back(bid);

@@ -1,5 +1,6 @@
 #include "BOrion.h"
 #include<string>
+#include<math.h>
 
 BOrion::BOrion(bool usehdd, int maxSize) {
     this->useHDD = usehdd;
@@ -25,14 +26,17 @@ void BOrion::insertWrapper(vector<string> kws, vector<string> blocks, string ind
 void BOrion::insertFile(string ind, vector<string> blocks)
 {
 	Bid mapKey = createBid(ind, 0);
+	//Bid kwKey = createBid(ind, -1);
 	int sz = blocks.size();
 	srch->insert(mapKey, to_string(sz));
+	//srch->insert(kwKey,"text,keywords");
 	int i =1;
         for(auto block : blocks)
 	{
 		Bid mapKey = createBid(ind, i);
-		i++;
 		srch->insert(mapKey,block);
+		////cout << i <<"in if BLK["<<block <<"\n";
+		i++;
 	}
 
 }
@@ -42,6 +46,8 @@ void BOrion::insert(string keyword, string ind) {
     //auto updt_cnt = updt->find(mapKey);
     Bid mapKey = createBid(keyword, 0);
     auto updt_cnt = srch->find(mapKey);
+    //updt_cnt/4 will give us actual updc, 
+    //because now we store 4 files in one block
     int updc; 
     if (updt_cnt == "") {  
          updc=0;
@@ -51,12 +57,41 @@ void BOrion::insert(string keyword, string ind) {
         stringstream convstoi(updt_cnt);
         convstoi >> updc;
     }
-       
         //cout << "updatecnt " << updt_cnt <<" updc:"  <<updc <<"\n" ;
-        updc = updc+1;
-        srch->insert(mapKey, to_string(updc));
-        Bid key = createBid(keyword, updc);
-        srch->insert(key, ind);
+       updc = updc+1;
+       srch->insert(mapKey, to_string(updc));
+       cout << "updc value:"<< updc << endl;
+       int pos_in_block = updc%COM; // 1,2,3,4, ..., 16
+       if (pos_in_block == 0) pos_in_block = COM;
+       float bnum = ceil(updc/COM); // 4 file-ids each block
+      
+       int block_num ;
+       if(updc%COM==0)
+	      block_num = bnum;
+       else 
+	       block_num = bnum+1;
+
+       cout << "block_num value:"<< block_num << endl;
+       cout << "pos_in_block value:"<< pos_in_block << endl;
+       Bid key = createBid(keyword, block_num);
+	
+	if(updc%COM == 1)
+	{
+           //cout << "SIZEofIND:"<< ind.length() << endl;
+	   ind.insert(pos_in_block*FID_SIZE,ID_SIZE-pos_in_block*FID_SIZE,'#');
+           srch->insert(key, ind);
+	   cout <<"NEWBLOCK:"<< ind <<endl;
+
+	}
+	else
+	{
+	    string oldblock = srch->find(key);
+            cout << "SIZEofOLDIND:"<< oldblock.length() << endl;
+	    cout <<"OLDBLOCK:" << oldblock << endl;
+	    oldblock.replace((pos_in_block-1)*FID_SIZE,FID_SIZE,ind);
+	    cout <<"OLDNEWBLOCK:" << oldblock << endl;
+	    srch->insert(key, oldblock);
+	}
         //LastIND[keyword] = ind; // no need to keep this
     //}
 }
@@ -172,7 +207,11 @@ vector<string> BOrion::search(string keyword) {
     vector<Bid> bids;
     Bid mapKey = createBid(keyword, 0);
     auto updt_cnt = srch->find(mapKey);
-    //cout << "I am printing updt_cnt in search:" << updt_cnt << "\n";
+//    cout << "I am printing updt_cnt in search:" << updt_cnt << "\n";
+//    Bid mk = createBid("test2", 1);
+//         string first = srch->find(mk);
+//	      cout << "Indi[["<< first <<"]\n";
+
     int updc;
 
     if (updt_cnt != "") {
@@ -187,7 +226,6 @@ vector<string> BOrion::search(string keyword) {
     auto tmpRes = srch->batchSearch(bids);
     for(auto item:tmpRes){
         //result.push_back(stoi(item));
-        //cout << "item:"<< item;
         result.push_back(item);
     }
     return result;
@@ -213,6 +251,7 @@ Bid BOrion::createBid(string keyword, int number) {
     Bid bid(keyword);
     auto arr = to_bytes(number);
     std::copy(arr.begin(), arr.end(), bid.id.end() - 4);
+    //cout << "AT createbid:" << number <<"::"<<bid << endl;
     return bid;
 }
 
