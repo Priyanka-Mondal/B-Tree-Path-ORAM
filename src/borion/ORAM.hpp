@@ -1,6 +1,7 @@
 #ifndef ORAM_H
 #define ORAM_H
 
+#include <utility>
 #include "AES.hpp"
 #include <random>
 #include <vector>
@@ -24,7 +25,7 @@ public:
     ~Node() {
     }
     Bid key;
-    std::array< byte_t, 64> value; // 16 before 
+    pair <int, std::array< byte_t, 64> > value; // 16 before 
     int pos;
     Bid leftID;
     int leftPos;

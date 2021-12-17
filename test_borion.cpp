@@ -1,6 +1,7 @@
 #include "borion/BOrion.h"
 //#include "utils/Utilities.h"
 #include<string.h>
+#include<utility>
 
 using namespace std;
 
@@ -83,6 +84,17 @@ vector<string> divideString(string filename, int sz)
     }
 
 int main(int, char**) {
+    pair<int , std::array< byte_t, 64>> val;
+    val.first = 100;
+    string sec = "byte me";
+    std::fill(val.second.begin(), val.second.end(), 0);
+    std::copy(sec.begin(), sec.end(), val.second.begin());
+    string res ="";
+   res.assign(val.second.begin(), val.second.end());
+   res = res.c_str(); 
+   cout << "pair :[" << val.first <<"]["<< res << "]" <<endl;
+
+
     bool usehdd = false;
     BOrion borion(usehdd, 1024);  // This 4*max-size does not have effect, was able to insert a lot more elements
     /*
@@ -157,7 +169,8 @@ int main(int, char**) {
     }
 	 //
     // first searches ids 
-    vector<string> allid = borion.search("Hello");
+    vector<pair<int,string>> allid = borion.searchWrapper("friend");
+    /*
     for(auto id : allid)
     {
 	    bcnt=0;
@@ -169,6 +182,6 @@ int main(int, char**) {
 	   	 cout << bcnt <<" OUTPUT Blocks :[" << blk << "]\n";
 	    }
     }
-
+    */
     return 0;
 }

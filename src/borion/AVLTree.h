@@ -1,6 +1,7 @@
 #ifndef AVLTREE_H
 #define AVLTREE_H
 #include <iostream>
+#include<utility>
 #include "ORAM.hpp"
 #include "RAMStore.hpp"
 #include <functional>
@@ -26,7 +27,7 @@ private:
 
     int height(Bid N, int& leaf);
     int max(int a, int b);
-    Node* newNode(Bid key, string value);
+    Node* newNode(Bid key, pair<int,string> value);
     Node* rightRotate(Node* y);
     Node* leftRotate(Node* x);
     int getBalance(Node* N);
@@ -35,7 +36,7 @@ private:
 public:
     AVLTree(int maxSize, bytes<Key> key);
     virtual ~AVLTree();
-    Bid insert(Bid rootKey, int& pos, Bid key, string value);
+    Bid insert(Bid rootKey, int& pos, Bid key, pair<int,string> value);
     Node* search(Node* head, Bid key);
     void batchSearch(Node* head, vector<Bid> keys, vector<Node*>* results);
     void printTree(Node* root, int indent);

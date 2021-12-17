@@ -3,6 +3,7 @@
 #include "OMAP.h"
 #include<iostream>
 #include<sstream>
+#include<utility>
 #include <bits/stdc++.h>
 
 using namespace std;
@@ -10,8 +11,8 @@ using namespace std;
 class BOrion {
 private:
     bool useHDD;
-    map<Bid,string > setupPairs1;
-    map<Bid,string > setupPairs2;
+    map<Bid,pair<int,string>> setupPairs1;
+    map<Bid,pair<int,string>> setupPairs2;
     OMAP* srch; //*updt;
     map<string, int> UpdtCnt;
     //map<string, int> LastIND;        
@@ -22,11 +23,13 @@ public:
     void insert(string keyword, string ind);
     void insertFile(string keyword, vector<string> blocks);
     //void insertblk(string keyword, int ind);
-    void setupInsert(string keyword, string ind);
+    void setupInsert(string keyword, pair<int,string> ind);
     //void remove(string keyword, int ind); /* LATER*/
     //void setupRemove(string keyword, int ind);
     //vector<string> searchWrapper(string keyword);
-    vector<string> search(string keyword);
+    vector<pair<int,string>> search(string keyword);
+    vector<pair<int,string>> searchWrapper(string keyword);
+
     BOrion(bool useHDD,int maxSize);    
     virtual ~BOrion();
     void beginSetup();

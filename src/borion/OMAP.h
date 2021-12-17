@@ -1,6 +1,7 @@
 #ifndef OMAP_H
 #define OMAP_H
 #include <iostream>
+#include<utility>
 #include "ORAM.hpp"
 #include "RAMStore.hpp"
 #include <functional>
@@ -20,11 +21,11 @@ private:
 public:
     OMAP(int maxSize, bytes<Key> key);
     virtual ~OMAP();
-    void insert(Bid key, string value);
-    string find(Bid key);
+    void insert(Bid key, pair<int,string> value);
+    pair<int,string> find(Bid key);
     void printTree();
-    void batchInsert(map<Bid, string> pairs);
-    vector<string> batchSearch(vector<Bid> keys);
+    void batchInsert(map<Bid, pair<int,string>> pairs);
+    vector<pair<int,string>> batchSearch(vector<Bid> keys);
 };
 
 #endif /* OMAP_H */

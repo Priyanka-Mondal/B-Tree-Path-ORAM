@@ -14,6 +14,9 @@
 #define LARGE 102400
 #define BLOCK 64 // 128 caused seg_fault
 
+#define FB 1
+#define ID 0
+
 // The main type for passing around raw file data
 using byte_t = uint8_t;
 using block = std::vector<byte_t>;

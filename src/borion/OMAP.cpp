@@ -10,25 +10,27 @@ OMAP::~OMAP() {
 
 }
 
-string OMAP::find(Bid key) {
+pair<int,string> OMAP::find(Bid key) {
     if (rootKey == 0) {
-        return "";
+        return (make_pair(-1,""));
     }
     treeHandler->startOperation();
     Node* node = new Node();
     node->key = rootKey;
     node->pos = rootPos;
     auto resNode = treeHandler->search(node, key);
-    string res = "";
+    //string res1 = "";
+    pair <int,string> res;
     if (resNode != NULL) {
-        res.assign(resNode->value.begin(), resNode->value.end());
-        res = res.c_str();
+	res.first=resNode->value.first;
+        res.second.assign(resNode->value.second.begin(), resNode->value.second.end());
+        res.second = res.second.c_str();
     }
     treeHandler->finishOperation(true, rootKey, rootPos);
     return res;
 }
 
-void OMAP::insert(Bid key, string value) {
+void OMAP::insert(Bid key, pair<int,string> value) {
     treeHandler->startOperation();
     if (rootKey == 0) {
         rootKey = treeHandler->insert(0, rootPos, key, value);
@@ -51,7 +53,7 @@ void OMAP::printTree() {
 /**
  * This function is used for batch insert which is used at the end of setup phase.
  */
-void OMAP::batchInsert(map<Bid, string> pairs) {
+void OMAP::batchInsert(map<Bid, pair<int,string>> pairs) {
     treeHandler->startOperation(true);
     int cnt = 0;
     for (auto pair : pairs) {
@@ -71,8 +73,8 @@ void OMAP::batchInsert(map<Bid, string> pairs) {
 /**
  * This function is used for batch search which is used in the real search procedure
  */
-vector<string> OMAP::batchSearch(vector<Bid> keys) {
-    vector<string> result;
+vector<pair<int,string>> OMAP::batchSearch(vector<Bid> keys) {
+    vector<pair<int,string>> result;
     treeHandler->startOperation(false);
     Node* node = new Node();
     node->key = rootKey;
@@ -81,12 +83,15 @@ vector<string> OMAP::batchSearch(vector<Bid> keys) {
     vector<Node*> resNodes;
     treeHandler->batchSearch(node, keys, &resNodes);
     for (Node* n : resNodes) {
-        string res;
+        pair<int,string> res;
+	string res1="";
         if (n != NULL) {
-            res.assign(n->value.begin(), n->value.end());
+            res.first=n->value.first;
+            res1.assign(n->value.second.begin(), n->value.second.end());
+	    res.second = res1.c_str();
             result.push_back(res);
         } else {
-            result.push_back("");
+            result.push_back(make_pair(-1,"")); // not sure if first ia -1
         }
     }
     treeHandler->finishOperation(true, rootKey, rootPos);

@@ -25,11 +25,12 @@ int AVLTree::max(int a, int b) {
 
 /* Helper function that allocates a new node with the given key and
    NULL left and right pointers. */
-Node* AVLTree::newNode(Bid key, string value) {
+Node* AVLTree::newNode(Bid key, pair<int,string> value) {
     Node* node = new Node();
     node->key = key;
-    std::fill(node->value.begin(), node->value.end(), 0);
-    std::copy(value.begin(), value.end(), node->value.begin());
+    node->value.first = value.first;
+    std::fill(node->value.second.begin(), node->value.second.end(), 0);
+    std::copy(value.second.begin(), value.second.end(), node->value.second.begin());
     node->leftID = 0;
     node->rightID = 0;
     node->pos = RandomPath();
@@ -44,7 +45,7 @@ Node* AVLTree::rightRotate(Node* y) {
     Node* x = oram->ReadNode(y->leftID);
     Node* T2;
     if (x->rightID == 0) {
-        T2 = newNode(0, "");
+        T2 = newNode(0, make_pair(x->value.first,""));
     } else {
         T2 = oram->ReadNode(x->rightID);
     }
@@ -72,7 +73,7 @@ Node* AVLTree::leftRotate(Node* x) {
     Node* y = oram->ReadNode(x->rightID);
     Node* T2;
     if (y->leftID == 0) {
-        T2 = newNode(0, "");
+        T2 = newNode(0, make_pair(y->value.first,""));
     } else {
         T2 = oram->ReadNode(y->leftID);
     }
@@ -101,7 +102,7 @@ int AVLTree::getBalance(Node* N) {
     return height(N->leftID, N->leftPos) - height(N->rightID, N->rightPos);
 }
 
-Bid AVLTree::insert(Bid rootKey, int& pos, Bid key, string value) {
+Bid AVLTree::insert(Bid rootKey, int& pos, Bid key, pair<int, string> value) {
     /* 1. Perform the normal BST rotation */
     if (rootKey == 0) {
         Node* nnode = newNode(key, value);
@@ -114,8 +115,9 @@ Bid AVLTree::insert(Bid rootKey, int& pos, Bid key, string value) {
     } else if (key > node->key) {
         node->rightID = insert(node->rightID, node->rightPos, key, value);
     } else {
-        std::fill(node->value.begin(), node->value.end(), 0);
-        std::copy(value.begin(), value.end(), node->value.begin());
+	    node->value.first = value.first;
+        std::fill(node->value.second.begin(), node->value.second.end(), 0);
+        std::copy(value.second.begin(), value.second.end(), node->value.second.begin());
         oram->WriteNode(rootKey, node);
         return node->key;
     }
@@ -225,9 +227,10 @@ void AVLTree::printTree(Node* root, int indent) {
             printTree(oram->ReadNode(root->leftID, root->leftPos, root->leftPos), indent + 4);
         if (indent > 0)
             cout << setw(indent) << " ";
-        string value;
-        value.assign(root->value.begin(), root->value.end());
-        cout << root->key << ":" << value.c_str() << ":" << root->pos << ":" << root->leftID << ":" << root->leftPos << ":" << root->rightID << ":" << root->rightPos << endl;
+        pair<int, string> value;
+	value.first = root->value.first;
+        value.second.assign(root->value.second.begin(), root->value.second.end());
+        cout << root->key << ":" << value.second.c_str() << ":" << root->pos << ":" << root->leftID << ":" << root->leftPos << ":" << root->rightID << ":" << root->rightPos << endl;
         if (root->rightID != 0)
             printTree(oram->ReadNode(root->rightID, root->rightPos, root->rightPos), indent + 4);
 
