@@ -117,7 +117,7 @@ void ORAM::FetchPath(int leaf) {
             if (block.id != 0) { // It isn't a dummy block   
                 Node* n = convertBlockToNode(block.data);
                 if (cache.count(block.id) == 0) {
-                    cache.insert(make_pair(block.id, n));
+                    cache.insert(make_pair(block.id, n)); //
                 } else {
                     delete n;
                 }

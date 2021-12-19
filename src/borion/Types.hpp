@@ -14,8 +14,10 @@
 #define LARGE 102400
 #define BLOCK 64 // 128 caused seg_fault
 
-#define FB 1
-#define ID 0
+#define KS 0
+#define KB 1
+#define FS 2
+#define FB 3 
 
 // The main type for passing around raw file data
 using byte_t = uint8_t;

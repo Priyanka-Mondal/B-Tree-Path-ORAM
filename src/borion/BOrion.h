@@ -28,7 +28,7 @@ public:
     //void setupRemove(string keyword, int ind);
     //vector<string> searchWrapper(string keyword);
     vector<pair<int,string>> search(string keyword);
-    vector<pair<int,string>> searchWrapper(string keyword);
+    map<string,string> searchWrapper(string keyword);
 
     BOrion(bool useHDD,int maxSize);    
     virtual ~BOrion();

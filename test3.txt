@@ -1,6 +1,6 @@
 bell The following SSH key was added to your account
 
-four ubuntu VM for system wide security
+Hello four ubuntu VM for system wide security
 
 If you believe this key was added in error you can remove the key and disable
 access at the following location you how

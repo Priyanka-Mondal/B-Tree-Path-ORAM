@@ -7,7 +7,7 @@ using namespace std;
 
 
 
-vector<string> getUniquedWords(string filename)
+vector<string> getUniquedWords(string filename, string fileid)
 {
     // Open a file stream
     fstream fs(filename);
@@ -25,6 +25,7 @@ vector<string> getUniquedWords(string filename)
         else
             mp[word]++;
     }
+    mp.erase(fileid);
   
     fs.close();
   
@@ -39,18 +40,23 @@ vector<string> getUniquedWords(string filename)
 return kw;
 }
 
-vector<string> divideString(string filename, int sz)
+vector<string> divideString(string filename, int sz, string id)
     {
 	 fstream fs(filename); 
          string str((istreambuf_iterator<char>(fs)),
                        (istreambuf_iterator<char>()));
 
         int str_size = str.length();
-	if (str_size<= SMALL)
+
+	
+	if (str_size% sz !=0)
 	{
-	//	cout << "Its a SMALL file:" << str_size << " " << SMALL - str.size() << "\n" ;
-        str.insert(str.size(), SMALL - str.size(), '#');
-	}
+		int pad = ceil(str_size/sz)+1;
+		//cout << filename<< " pad:" << pad << endl;
+		pad = pad*sz-str_size;
+		//cout << "again pad:" << pad << endl; 
+	        str.insert(str.size(), pad, '#');
+	}/*
 	else if (str_size <= MEDIUM)
 	{
 		cout << "Its a MEDIUM file:" << MEDIUM;
@@ -60,9 +66,11 @@ vector<string> divideString(string filename, int sz)
 	{
 		cout << "Its a LARGE file:" << LARGE;
         str.insert(str.size(), LARGE - str.size(), '#');
-	}
-        
+	} */
+         
 	str_size = str.length();
+	//cout << "the new size of the file:" <<str_size << endl;
+	cout << str << endl << endl ;
   	int i;
         vector<string> result;
         string temp="";
@@ -70,20 +78,26 @@ vector<string> divideString(string filename, int sz)
 	for (i = 0; i < str_size; i++) {
             if (i % sz == 0) {
 		  if(i!=0)
-                  { 
-                     result.push_back(temp);    
-		     //cout << "PUSHING:[" << temp << "]\n";
+                  {
+		     string ttemp =id;
+		     ttemp.append(temp); 
+                     result.push_back(ttemp);    
+		     cout << "New Node:[" << ttemp << "]\n";
                   }
                   temp="";
             }
 	    temp +=str[i];
 	}
-	result.push_back(temp); 
+        string ttemp = id;
+	ttemp.append(temp);	
+	    cout << "New Node::"<< ttemp << endl; 
+	result.push_back(ttemp); 
 	
 	return result;
     }
 
 int main(int, char**) {
+	/*
     pair<int , std::array< byte_t, 64>> val;
     val.first = 100;
     string sec = "byte me";
@@ -93,10 +107,10 @@ int main(int, char**) {
    res.assign(val.second.begin(), val.second.end());
    res = res.c_str(); 
    cout << "pair :[" << val.first <<"]["<< res << "]" <<endl;
-
+*/
 
     bool usehdd = false;
-    BOrion borion(usehdd, 1024);  // This 4*max-size does not have effect, was able to insert a lot more elements
+    BOrion borion(usehdd, 102400);  // This 4*max-size does not have effect, was able to insert a lot more elements
     /*
     borion.insert("test1", "1");
     borion.insert("test1", "2");
@@ -115,10 +129,10 @@ int main(int, char**) {
     vector<string> kw;
     vector<string> blocks;
     
-    kw = getUniquedWords("test2.txt");
+    kw = getUniquedWords("test2.txt","0002");
     //for (auto i: kw) 
     //    cout << "kws: " << i << "\n";
-    blocks = divideString("test2.txt",BLOCK);
+    blocks = divideString("test2.txt",BLOCK-4,"0002");
     int bcnt = 0;
      //for (auto i: blocks)
      //{
@@ -128,31 +142,39 @@ int main(int, char**) {
     //The file ids are always 4bytes.
     borion.insertWrapper(kw, blocks, "0002");
     
-    kw = getUniquedWords("test1.txt");
+    kw = getUniquedWords("test1.txt","0001");
     //for (auto i: kw) 
     //    cout << "kws: " << i << "\n";
-    blocks = divideString("test1.txt",BLOCK);
+    blocks = divideString("test1.txt",BLOCK-4,"0001");
     borion.insertWrapper(kw, blocks, "0001");
 
-    kw = getUniquedWords("test5.txt");
-    blocks = divideString("test5.txt",BLOCK);
+    kw = getUniquedWords("test5.txt", "0005");
+    blocks = divideString("test5.txt",BLOCK-4,"0005");
     borion.insertWrapper(kw, blocks, "0005");
     
-    kw = getUniquedWords("test6.txt");
-    blocks = divideString("test6.txt",BLOCK);
+    kw = getUniquedWords("test6.txt","0006");
+    blocks = divideString("test6.txt",BLOCK-4,"0006");
     borion.insertWrapper(kw, blocks, "0006");
 
-    kw = getUniquedWords("test7.txt");
-    blocks = divideString("test7.txt",BLOCK);
+    kw = getUniquedWords("test7.txt","0007");
+    blocks = divideString("test7.txt",BLOCK-4,"0007");
     borion.insertWrapper(kw, blocks, "0007");
 
-    kw = getUniquedWords("test8.txt");
-    blocks = divideString("test8.txt",BLOCK);
+    kw = getUniquedWords("test8.txt","0008");
+    blocks = divideString("test8.txt",BLOCK-4,"0008");
     borion.insertWrapper(kw, blocks, "0008");
 
-     kw = getUniquedWords("test9.txt");
-     blocks = divideString("test9.txt",BLOCK);
+     kw = getUniquedWords("test9.txt","0009");
+     blocks = divideString("test9.txt",BLOCK-4,"0009");
      borion.insertWrapper(kw, blocks, "0009");
+
+     kw = getUniquedWords("test3.txt","0003");
+         blocks = divideString("test3.txt",BLOCK-4,"0003");
+	     borion.insertWrapper(kw, blocks, "0003");
+
+     kw = getUniquedWords("test4.txt","0004");
+     blocks = divideString("test4.txt",BLOCK-4,"0004");
+     borion.insertWrapper(kw, blocks, "0004");
 
     for (int k = 10; k<=19; k++)
     {
@@ -160,16 +182,16 @@ int main(int, char**) {
 	string fl = "test";
         fl.append(ks);
         fl.append(".txt");
-
-        kw = getUniquedWords(fl);
-    blocks = divideString(fl,BLOCK);
-    string id = "00";
-	    id.append(ks);
+ 
+   string id = "00";
+ id.append(ks);
+        kw = getUniquedWords(fl,id);
+    blocks = divideString(fl,BLOCK,id);
     borion.insertWrapper(kw, blocks, id);    
     }
 	 //
     // first searches ids 
-    vector<pair<int,string>> allid = borion.searchWrapper("friend");
+    map<string,string> allid = borion.searchWrapper("Occasional");
     /*
     for(auto id : allid)
     {
