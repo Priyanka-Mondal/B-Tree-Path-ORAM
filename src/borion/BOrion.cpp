@@ -20,16 +20,27 @@ BOrion::~BOrion() {
 
 void BOrion::insertWrapper(vector<string> kws, vector<string> blocks, string ind)
 {
-     
-     for (auto kw: kws)
-	     insert(kw,ind);
-     insertFile(ind,blocks);
+     for (auto kw: kws) // cannot batchinsert as updtCount is at server
+     {
+   	insert(kw,ind); // insert all keywords
+     }
+     // so add some fake accesses
+     int ran = rand()%(kws.size())+ceil(0.5*kws.size());
+     int cnt = 0;
+     while(cnt < ran)  
+     {
+	Bid bid = createBid("dummy",cnt);
+	//cout <<"ran:" << ran << "cnt:" << cnt;
+	srch->find(bid);
+	cnt++;
+     }
+     insertFile(ind,blocks); // insert all file blocks
 }
 
 void BOrion::insertFile(string ind, vector<string> blocks)
 {
 	Bid mapKey = createBid(ind, 0);
-	//Bid kwKey = createBid(ind, -1);
+	map<Bid,pair<int,string>> batch;
 	int sz = blocks.size();
         pair <int, string> par;
 	par.first = FS;
@@ -44,11 +55,15 @@ void BOrion::insertFile(string ind, vector<string> blocks)
 		pr.first = FB;
 		pr.second = block;
 		Bid mapKey = createBid(ind, i);
-		srch->insert(mapKey,pr);
+		batch.insert(make_pair(mapKey,pr));
+		//srch->insert(mapKey,pr); //batchinsert and fakeinsert
 		////cout << i <<"in if BLK["<<block <<"\n";
 		i++;
 	}
-
+	// no need for fake blocks as batchInsert calls 
+	// treeHandler->finishOperation at the end to pad 
+	// 4.35 * (depth of AVLTree) times
+	srch->batchInsert(batch);
 }
 
 void BOrion::insert(string keyword, string ind) 
@@ -308,7 +323,7 @@ map<string,string> BOrion::searchWrapper(string keyword)
 	    }
 	    result = srch->batchSearch(batch);
 	    totOMAPacc = totOMAPacc+batch.size();
-cout << "TOTAL OMAP ACCESS so far:"<<totOMAPacc<< endl;
+cout << "TOTAL OMAP ACCESS so far::"<<totOMAPacc<< endl;
 	    for(auto blk : result)
 	    {
 	       //cout << "first:" << blk.first << "second:" <<blk.second <<endl;
@@ -365,7 +380,9 @@ cout << "TOTAL OMAP ACCESS so far:"<<totOMAPacc<< endl;
 //	cout << "FIRST:"<< itr->first<< " SECOND:" << itr->second <<endl;
 //	cout << "--------------------------------" << endl;
 //}
-cout << "TOTAL OMAP ACCESS so far:"<<totOMAPacc<< endl;
+//cout << "TOTAL OMAP ACCESS so far:"<<totOMAPacc<< endl;
+//Do we need the following padding ?
+//As batchSearch already pads with (depth * 1.45) fake reads
 if(totOMAPacc<SMALL)
 {
 	while(totOMAPacc<SMALL)
@@ -379,7 +396,20 @@ if(totOMAPacc<SMALL)
 			cnt++;
 			batch.push_back(b);
 		}
-		srch->batchSearch(batch);
+		auto fake = srch->batchSearch(batch);
+		for (auto fak : fake)
+		{ 
+		//	if(fak.second != NULL)
+			{
+			cout << "FAKE:"<< cnt << " :" << fak.second <<endl;
+			}
+		//	else
+		//	{
+		//cout << "There no entry for (dummy," << cnt <<")" << endl;
+		//	}
+
+		}
+
 		totOMAPacc = totOMAPacc+ran;
 		cout << "IM dummy access at SMALL:"<<totOMAPacc<< endl;
 	}
@@ -397,7 +427,16 @@ else if(totOMAPacc<MEDIUM)
 			cnt++;
 			batch.push_back(b);
 		}
-		srch->batchSearch(batch);
+		auto fake = srch->batchSearch(batch);
+		cout << "Size of fake:" << fake.size();
+		for (auto fak : fake)
+		{ 
+		//	if(fak.second != NULL)
+			{
+			cout << "FAKE:"<< cnt << " :" << fak.second <<endl;
+
+			}
+		}
 		totOMAPacc = totOMAPacc+ran;
 		cout << "IM dummy access at MEDIUM:"<<totOMAPacc<< endl;
 	}
@@ -415,7 +454,7 @@ else // if totOMAPacc > LARGE already then no dummy access done
 			cnt++;
 			batch.push_back(b);
 		}
-		srch->batchSearch(batch);
+		auto fake = srch->batchSearch(batch);
 		totOMAPacc = totOMAPacc+ran;
 		cout << "IM dummy access at LARGE:"<<totOMAPacc<< endl;
 	}

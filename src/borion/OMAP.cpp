@@ -91,7 +91,8 @@ vector<pair<int,string>> OMAP::batchSearch(vector<Bid> keys) {
 	    res.second = res1.c_str();
             result.push_back(res);
         } else {
-            result.push_back(make_pair(-1,"")); // not sure if first ia -1
+		cout << "Pushing -1" << endl;
+            result.push_back(make_pair(-1,"")); // not sure if first is -1
         }
     }
     treeHandler->finishOperation(true, rootKey, rootPos);

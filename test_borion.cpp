@@ -70,7 +70,7 @@ vector<string> divideString(string filename, int sz, string id)
          
 	str_size = str.length();
 	//cout << "the new size of the file:" <<str_size << endl;
-	cout << str << endl << endl ;
+	//cout << str << endl << endl ;
   	int i;
         vector<string> result;
         string temp="";
@@ -82,7 +82,7 @@ vector<string> divideString(string filename, int sz, string id)
 		     string ttemp =id;
 		     ttemp.append(temp); 
                      result.push_back(ttemp);    
-		     cout << "New Node:[" << ttemp << "]\n";
+		     //cout << "New Node:[" << ttemp << "]\n";
                   }
                   temp="";
             }
@@ -90,38 +90,17 @@ vector<string> divideString(string filename, int sz, string id)
 	}
         string ttemp = id;
 	ttemp.append(temp);	
-	    cout << "New Node::"<< ttemp << endl; 
+	    //cout << "New Node::"<< ttemp << endl; 
 	result.push_back(ttemp); 
 	
 	return result;
     }
 
 int main(int, char**) {
-	/*
-    pair<int , std::array< byte_t, 64>> val;
-    val.first = 100;
-    string sec = "byte me";
-    std::fill(val.second.begin(), val.second.end(), 0);
-    std::copy(sec.begin(), sec.end(), val.second.begin());
-    string res ="";
-   res.assign(val.second.begin(), val.second.end());
-   res = res.c_str(); 
-   cout << "pair :[" << val.first <<"]["<< res << "]" <<endl;
-*/
-
+    
     bool usehdd = false;
-    BOrion borion(usehdd, 102400);  // This 4*max-size does not have effect, was able to insert a lot more elements
-    /*
-    borion.insert("test1", "1");
-    borion.insert("test1", "2");
-    borion.insert("test1", "3");
-    borion.insert("test1", "4");
-    borion.insert("test1", "5");
-    borion.insert("test1", "6");
-    borion.insert("test1", "7");
-    borion.insert("test1", "8");
-    borion.insert("test1", "9");
-    */
+    BOrion borion(usehdd, 2048000);  
+    // This 4*max-size does not have effect, was able to insert a lot more elements
     //cout << borion.search("test1").size() << endl;
     //borion.remove("test1", 1);
     //for(int i=0;i<=8;i++)
@@ -169,12 +148,12 @@ int main(int, char**) {
      borion.insertWrapper(kw, blocks, "0009");
 
      kw = getUniquedWords("test3.txt","0003");
-         blocks = divideString("test3.txt",BLOCK-4,"0003");
-	     borion.insertWrapper(kw, blocks, "0003");
+     blocks = divideString("test3.txt",BLOCK-4,"0003");
+     borion.insertWrapper(kw, blocks, "0003");
 
-     kw = getUniquedWords("test4.txt","0004");
-     blocks = divideString("test4.txt",BLOCK-4,"0004");
-     borion.insertWrapper(kw, blocks, "0004");
+     //kw = getUniquedWords("test4.txt","0004");
+     //blocks = divideString("test4.txt",BLOCK-4,"0004");
+     //borion.insertWrapper(kw, blocks, "0004");
 
     for (int k = 10; k<=19; k++)
     {
@@ -183,27 +162,21 @@ int main(int, char**) {
         fl.append(ks);
         fl.append(".txt");
  
-   string id = "00";
- id.append(ks);
+        string id = "00";
+        id.append(ks);
         kw = getUniquedWords(fl,id);
-    blocks = divideString(fl,BLOCK,id);
-    borion.insertWrapper(kw, blocks, id);    
+        blocks = divideString(fl,BLOCK,id);
+        borion.insertWrapper(kw, blocks, id);    
     }
-	 //
+    //insert a dummy file for fake entries at the end -- maybe not required
     // first searches ids 
-    map<string,string> allid = borion.searchWrapper("Occasional");
-    /*
-    for(auto id : allid)
+    map<string,string> allfiles = borion.searchWrapper("hell");
+    
+    for(auto itr= allfiles.begin(); itr!=allfiles.end();itr++)
     {
-	    bcnt=0;
-	    // then searches for blocks for all files one by one
-	    vector<string> blocks = borion.search(id);
-	    for(auto blk: blocks)
-	    {
-		 bcnt++;
-	   	 cout << bcnt <<" OUTPUT Blocks :[" << blk << "]\n";
-	    }
+	   	 cout << " OUTPUT Blocks :[" << itr->first << "]\n";
+		 cout << itr->second << endl << endl;
     }
-    */
+    
     return 0;
 }
