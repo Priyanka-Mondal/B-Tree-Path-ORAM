@@ -35,11 +35,15 @@ void BOrion::insertWrapper(vector<string> kws, vector<string> blocks, string ind
 	cnt++;
      }
      insertFile(ind,blocks); // insert all file blocks
-     cout <<ind<< " : IN THE END" << endl;
+     cout << ind << " : IN THE END" << endl;
      Bid bid = createBid(ind,0);
-     insert(ind,"dummy");
      auto ret = srch->find(bid);
-     cout <<ind << " REWRITING:" << ret.first <<" /" << ret.second;
+     cout <<ind << " WRITING:" << ret.first <<" /" << ret.second<<endl;
+     string st = ind;
+     st.append("1");
+     srch->insert(bid,make_pair(FS,st));
+     ret = srch->find(bid);
+     cout <<ind << " REWRITING:" << ret.first <<" /" << ret.second<<endl;
 }
 
 void BOrion::insertFile(string ind, vector<string> blocks)
@@ -269,7 +273,7 @@ map<string,string> BOrion::searchWrapper(string keyword)
     int pos = 0;
     while(fetched < updc && fetched < COM)
     {
-	    string str = freq.second.substr(pos*FID_SIZE,FID_SIZE);
+	    string str = freq.second.substr(pos*4,4);
 	    //cout <<"the index:["<<str<<"]"<<endl<<endl;
             Bid bid = createBid(str,0); // for first file block
 	    fileids.push(bid);
@@ -346,7 +350,7 @@ cout << "TOTAL OMAP ACCESS so far::"<<totOMAPacc<< endl;
 			int cnt = 0;
 			while(cnt < COM && fetched<updc)
 			{
-			string str = blk.second.substr(cnt*FID_SIZE,FID_SIZE);
+			string str = blk.second.substr(cnt*4,4);
 				Bid bid = createBid(str,0);
 				fileids.push(bid);
 				fetched++;
@@ -356,18 +360,18 @@ cout << "TOTAL OMAP ACCESS so far::"<<totOMAPacc<< endl;
 		
 		if(blk.first==2)
 		{
-			string id = blk.second.substr(0,FID_SIZE);
+			string id = blk.second.substr(0,4);
 			int sz = blk.second.length(); // change to :until #
-			string bnum = blk.second.substr(FID_SIZE,sz);
-			//cout << "SIZE of the File:"<< bnum << endl;
+			string bnum = blk.second.substr(4,sz);
+			cout << "SIZE of File: "<< id << " IS:"<< bnum << endl;
 			firstblocknum.push(bnum);
 			firstblockid.push(id);
 		}
 		if(blk.first==3)
 		{
-			string id = blk.second.substr(0,FID_SIZE);
+			string id = blk.second.substr(0,4);
 			int sz = blk.second.length();
-			string bcontent = blk.second.substr(FID_SIZE,sz);
+			string bcontent = blk.second.substr(4,sz);
 			//cout << "CONT ofFile:"<< id << "IS:"<< bcontent << endl;
 
 			if(files.find(id)!=files.end())

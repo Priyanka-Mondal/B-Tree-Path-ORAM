@@ -10,6 +10,25 @@ OMAP::~OMAP() {
 
 }
 
+void OMAP::remove(Bid key)
+{
+    //if (rootKey == 0) {
+      //  return (make_pair(-1,""));
+    //}
+    treeHandler->startOperation();
+    Node* node = new Node();
+    node->key = rootKey;
+    node->pos = rootPos;
+    auto resNode = treeHandler->search(node, key);
+    if(resNode!=NULL)
+    {
+	    cout << "Found the node to be deleted" << endl;
+	    resNode->key = 0;
+	    //need to write this into tree not in resNode.
+    }
+}
+
+
 pair<int,string> OMAP::find(Bid key) {
     if (rootKey == 0) {
         return (make_pair(-1,""));

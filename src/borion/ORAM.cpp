@@ -157,7 +157,7 @@ void ORAM::WritePath(int leaf, int d) {
         for (int z = 0; z < std::min((int) validBlocks.size(), Z); z++) {
             Block &block = bucket[z];
             block.id = validBlocks[z];
-            Node* curnode = cache[block.id];
+            Node* curnode = cache[block.id]; /// MAYBE HERE put 0, another cacheto remember deleted nodes
             block.data = convertNodeToBlock(curnode);
             delete curnode;
             cache.erase(block.id);
@@ -255,7 +255,7 @@ Node* ORAM::ReadNode(Bid bid, int lastLeaf, int newLeaf) {
 
 int ORAM::WriteNode(Bid bid, Node* node) {
     if (bid == 0) {
-	    cout<<"NODE IS NOT SET"<< endl;
+	    //cout<<"NODE IS NOT SET"<< endl;
         throw runtime_error("Node id is not set");
     }
     if (cache.count(bid) == 0) {

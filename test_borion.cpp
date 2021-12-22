@@ -99,7 +99,7 @@ vector<string> divideString(string filename, int sz, string id)
 int main(int, char**) {
     
     bool usehdd = false;
-    BOrion borion(usehdd, 2048000);  
+    BOrion borion(usehdd, 3000000);  
     // This 4*max-size does not have effect, was able to insert a lot more elements
     //cout << borion.search("test1").size() << endl;
     //borion.remove("test1", 1);
@@ -151,9 +151,9 @@ int main(int, char**) {
      blocks = divideString("test3.txt",BLOCK-4,"0003");
      borion.insertWrapper(kw, blocks, "0003");
 
-    // kw = getUniquedWords("test4.txt","0004");
-    // blocks = divideString("test4.txt",BLOCK-4,"0004");
-    // borion.insertWrapper(kw, blocks, "0004");
+     //kw = getUniquedWords("test4.txt","0004");
+     //blocks = divideString("test4.txt",BLOCK-4,"0004");
+     //borion.insertWrapper(kw, blocks, "0004");
 
     for (int k = 10; k<=19; k++)
     {
