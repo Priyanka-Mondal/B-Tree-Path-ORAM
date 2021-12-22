@@ -151,9 +151,9 @@ int main(int, char**) {
      blocks = divideString("test3.txt",BLOCK-4,"0003");
      borion.insertWrapper(kw, blocks, "0003");
 
-     //kw = getUniquedWords("test4.txt","0004");
-     //blocks = divideString("test4.txt",BLOCK-4,"0004");
-     //borion.insertWrapper(kw, blocks, "0004");
+    // kw = getUniquedWords("test4.txt","0004");
+    // blocks = divideString("test4.txt",BLOCK-4,"0004");
+    // borion.insertWrapper(kw, blocks, "0004");
 
     for (int k = 10; k<=19; k++)
     {

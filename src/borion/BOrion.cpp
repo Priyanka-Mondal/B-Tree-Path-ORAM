@@ -35,6 +35,11 @@ void BOrion::insertWrapper(vector<string> kws, vector<string> blocks, string ind
 	cnt++;
      }
      insertFile(ind,blocks); // insert all file blocks
+     cout <<ind<< " : IN THE END" << endl;
+     Bid bid = createBid(ind,0);
+     insert(ind,"dummy");
+     auto ret = srch->find(bid);
+     cout <<ind << " REWRITING:" << ret.first <<" /" << ret.second;
 }
 
 void BOrion::insertFile(string ind, vector<string> blocks)
@@ -226,15 +231,19 @@ void BOrion::setupRemove(string keyword, int ind) {
 
 map<string,string> BOrion::searchWrapper(string keyword)
 {
-	cout << "SEARCHING FOR:" << keyword << endl;
+	//cout << "SEARCHING FOR:" << keyword << endl;
 	srand(time(NULL));
 	vector<pair<int,string>> result;
 	map<string,string> files;
         int fetched=0, updc;
         int totOMAPacc = 0;
-    vector<Bid> bids;
-    Bid mapKey = createBid(keyword, 0);
-    auto updt = srch->find(mapKey); // mandatory first search
+    	vector<Bid> bids;
+    	Bid mapKey = createBid(keyword, 0);
+
+    
+    auto updt = srch->find(mapKey); // mandatory first search: #fileids
+
+
     totOMAPacc++;
     string updt_cnt = updt.second;
     if (updt_cnt != "") {
@@ -246,18 +255,21 @@ map<string,string> BOrion::searchWrapper(string keyword)
 	    return files;
     }
     
-    queue<Bid> fileids;
-    queue<string> firstblockid;
-    queue<string> firstblocknum;
-
+    queue<Bid> fileids; // fileids
+    queue<string> firstblockid; //ids of files
+    queue<string> firstblocknum;//#blocks of files
     mapKey = createBid(keyword,1);
-    auto freq = srch->find(mapKey); //mandatory second search
+    
+    
+    auto freq = srch->find(mapKey); //mandatory second search: first 16 fileids
+    
+    
     totOMAPacc++;
     auto fileids1 = freq.second;  // get first <=16 fileids
     int pos = 0;
     while(fetched < updc && fetched < COM)
     {
-	    string str = freq.second.substr(pos*4,4);
+	    string str = freq.second.substr(pos*FID_SIZE,FID_SIZE);
 	    //cout <<"the index:["<<str<<"]"<<endl<<endl;
             Bid bid = createBid(str,0); // for first file block
 	    fileids.push(bid);
@@ -265,9 +277,11 @@ map<string,string> BOrion::searchWrapper(string keyword)
 	    fetched++;
     }
     //cout <<"fetched at the end:" << fetched <<endl;
- 
-    int ran; // randomly select between 3 options
+    int ran; // random number
     int idblock = 2; // next index block to be fetched is block 2
+    
+    
+    //randomize next OMAP accesses 
     while(fetched < updc || fileids.size()>0 || firstblockid.size()>0)
     {
 	    vector<Bid> batch;
@@ -310,7 +324,7 @@ map<string,string> BOrion::searchWrapper(string keyword)
 			    stringstream convstoi(numb);
 			            convstoi >> num;
 			    int bnums = 1;
-			    while(bnums<=num)
+			    while(bnums<=num) // all blocks of file fetched
 			    {
 			        Bid bid = createBid(str,bnums);
 				bnums++;
@@ -332,7 +346,7 @@ cout << "TOTAL OMAP ACCESS so far::"<<totOMAPacc<< endl;
 			int cnt = 0;
 			while(cnt < COM && fetched<updc)
 			{
-				string str = blk.second.substr(cnt*4,4);
+			string str = blk.second.substr(cnt*FID_SIZE,FID_SIZE);
 				Bid bid = createBid(str,0);
 				fileids.push(bid);
 				fetched++;
@@ -342,18 +356,18 @@ cout << "TOTAL OMAP ACCESS so far::"<<totOMAPacc<< endl;
 		
 		if(blk.first==2)
 		{
-			string id = blk.second.substr(0,4);
+			string id = blk.second.substr(0,FID_SIZE);
 			int sz = blk.second.length(); // change to :until #
-			string bnum = blk.second.substr(4,sz);
+			string bnum = blk.second.substr(FID_SIZE,sz);
 			//cout << "SIZE of the File:"<< bnum << endl;
 			firstblocknum.push(bnum);
 			firstblockid.push(id);
 		}
 		if(blk.first==3)
 		{
-			string id = blk.second.substr(0,4);
+			string id = blk.second.substr(0,FID_SIZE);
 			int sz = blk.second.length();
-			string bcontent = blk.second.substr(4,sz);
+			string bcontent = blk.second.substr(FID_SIZE,sz);
 			//cout << "CONT ofFile:"<< id << "IS:"<< bcontent << endl;
 
 			if(files.find(id)!=files.end())
@@ -454,6 +468,7 @@ else // if totOMAPacc > LARGE already then no dummy access done
 			cnt++;
 			batch.push_back(b);
 		}
+		//TODO: shuffle entries of batch
 		auto fake = srch->batchSearch(batch);
 		totOMAPacc = totOMAPacc+ran;
 		cout << "IM dummy access at LARGE:"<<totOMAPacc<< endl;

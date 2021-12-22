@@ -36,10 +36,10 @@ public:
 
 struct Block {
     Bid id;
-    block data;
+    block data; // block vector of uint_8
 };
 
-using Bucket = std::array<Block, Z>;
+using Bucket = std::array<Block, Z>; // Types.hpp constexpr int Z = 4;
 
 class ORAM {
 private:
