@@ -20,10 +20,12 @@ BOrion::~BOrion() {
 
 void BOrion::insertWrapper(vector<string> kws, vector<string> blocks, string ind)
 {
+	cout << "inserting kw " << endl;
      for (auto kw: kws) // cannot batchinsert as updtCount is at server
      {
    	insert(kw,ind); // insert all keywords
      }
+	cout << "inserted all the  kw " << endl;
      // so add some fake accesses
      int ran = rand()%(kws.size())+ceil(0.5*kws.size());
      int cnt = 0;
@@ -36,18 +38,20 @@ void BOrion::insertWrapper(vector<string> kws, vector<string> blocks, string ind
      }
      insertFile(ind,blocks); // insert all file blocks
      cout << ind << " : IN THE END" << endl;
-     Bid bid = createBid(ind,0);
+     Bid bid = createBid(ind, 0);
      auto ret = srch->find(bid);
      cout <<ind << " WRITING:" << ret.first <<" /" << ret.second<<endl;
-     string st = ind;
-     st.append("1");
-     srch->insert(bid,make_pair(FS,st));
-     ret = srch->find(bid);
+     srch->printTree();
+     srch->remove(bid);
+     //srch->find(bid);
      cout <<ind << " REWRITING:" << ret.first <<" /" << ret.second<<endl;
+     srch->printTree();
+
 }
 
 void BOrion::insertFile(string ind, vector<string> blocks)
 {
+	cout << "at insertfile:" << ind << endl;
 	Bid mapKey = createBid(ind, 0);
 	map<Bid,pair<int,string>> batch;
 	int sz = blocks.size();
@@ -59,6 +63,7 @@ void BOrion::insertFile(string ind, vector<string> blocks)
 	srch->insert(mapKey, par);
 	//srch->insert(kwKey,"text,keywords");
 	int i =1;
+	cout << "a bout to insert blockss" << endl;
         for(auto block : blocks)
 	{       pair <int, string> pr;
 		pr.first = FB;
@@ -73,6 +78,7 @@ void BOrion::insertFile(string ind, vector<string> blocks)
 	// treeHandler->finishOperation at the end to pad 
 	// 4.35 * (depth of AVLTree) times
 	srch->batchInsert(batch);
+	cout << "inserted blocks" << endl;
 }
 
 void BOrion::insert(string keyword, string ind) 

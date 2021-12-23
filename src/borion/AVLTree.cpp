@@ -187,6 +187,137 @@ Node* AVLTree::search(Node* head, Bid key) {
         return head;
 }
 
+
+Node* AVLTree::minValueNode(Node* head)
+{
+	Node* current = head;
+	while((current!= NULL || current->key !=0) && current->leftID!=0)
+		current = oram->ReadNode(current->leftID);
+         
+	return current;
+}
+
+
+
+Bid AVLTree::remove(Bid rootKey, int& pos, Bid key) 
+{
+  cout << "in AVLTree delete rootKey :" << rootKey <<endl; 
+     if (rootKey == 0)
+     {
+	     cout << "rootKey is 0:" << rootKey <<endl;
+	     return 0; // need to check the base case
+     }
+     
+     Node* node = oram->ReadNode(rootKey, pos, pos);
+
+     if(key<node->key)
+     {
+	     cout << "key<node->key,key/rootKey "<< key << "/"<< rootKey<< endl;
+	     node->leftID = remove(node->leftID, node->leftPos, key);
+     }
+     else if(key>node->key)
+     {
+	cout << "key>node->key,key/rootKey "<< key << "/"<< rootKey<< endl;
+	     node->rightID = remove(node->rightID, node->rightPos, key);
+     }
+     else
+     {
+     cout << "key == node->key,key/rootKey "<< key << "="<< rootKey<< endl;
+	if((node->leftID == 0) || (node->rightID == 0))
+	{ cout << "in (node->leftID == 0) || (node->rightID == 0" << endl;
+	  Node* temp = new Node();
+	  if (node->leftID != 0)
+	  { 
+	    cout << "oram read happenning node->leftID!=0" << endl;
+	    temp = oram->ReadNode(node->leftID,node->leftPos, node->leftPos); 
+	  }
+	  else
+	  {
+	    cout << "oram read happenning node->rightID!=0" << endl;
+	    temp = oram->ReadNode(node->rightID,node->rightPos,node->rightPos);
+	  }
+	  cout << "is tem =NULL?"<< endl;
+	  if(temp == NULL)
+	  {
+
+	  cout << "yes it is" << endl;
+	     temp = oram->ReadNode(node->key, node->pos, node->pos); 
+	     cout << "so I read, now I will write NULL" << endl;
+	     //Node* nul = newNode(0, make_pair(-1,"-1"));
+	     //pos = oram->WriteNode(node->key, nul); // WriteNode(head, 0)/Here
+	     node = NULL; // should we do an oram->write instead ?
+	     cout << "I wrote Null" << endl;
+          }
+          else
+	  {
+	  	cout << "No its not" << endl;
+		*node = *temp; // do we need this ??
+                oram->WriteNode(node->key, temp);
+	  }
+	     temp = newNode(0,make_pair(0,"0"));// free(temp);
+	     cout << " I freed temp" << endl;
+	 }
+	 else
+	 {
+	     Node* tem = minValueNode(oram->ReadNode(node->rightID));
+	     oram->WriteNode(node->key,tem);
+ Node* min = oram->ReadNode(remove(node->rightID, node->rightPos, tem->key));
+	     oram->WriteNode(node->rightID,min);
+	  }
+       }
+     if(node == NULL)
+	return 0;
+    
+     /* 2. Update height of this ancestor node */
+    cout << "UPDATING HEIGHT of ANCESTOR" << endl << endl;
+    node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
+
+    /* 3. Get the balance factor of this ancestor node to check whether
+       this node became unbalanced */
+    int balance = getBalance(node);
+
+    // If this node becomes unbalanced, then there are 4 cases
+
+    // Left Left Case
+    if (balance > 1 && key < oram->ReadNode(node->leftID)->key) {
+        Node* res = rightRotate(node);
+        pos = res->pos;
+        return res->key;
+    }
+
+    // Right Right Case
+    if (balance < -1 && key > oram->ReadNode(node->rightID)->key) {
+        Node* res = leftRotate(node);
+        pos = res->pos;
+        return res->key;
+    }
+
+    // Left Right Case
+    if (balance > 1 && key > oram->ReadNode(node->leftID)->key) {
+        Node* res = leftRotate(oram->ReadNode(node->leftID));
+        node->leftID = res->key;
+        node->leftPos = res->pos;
+        oram->WriteNode(node->key, node);
+        Node* res2 = rightRotate(node);
+        pos = res2->pos;
+        return res2->key;
+    }
+
+    // Right Left Case
+    if (balance < -1 && key < oram->ReadNode(node->rightID)->key) {
+        auto res = rightRotate(oram->ReadNode(node->rightID));
+        node->rightID = res->key;
+        node->rightPos = res->pos;
+        oram->WriteNode(node->key, node);
+        auto res2 = leftRotate(node);
+        pos = res2->pos;
+        return res2->key;
+    }
+
+    /* return the (unchanged) node pointer */
+    oram->WriteNode(node->key, node);
+    return node->key;
+}
 /**
  * a recursive search function which traverse binary tree to find the target node
  */
@@ -221,6 +352,7 @@ void AVLTree::batchSearch(Node* head, vector<Bid> keys, vector<Node*>* results) 
 }
 
 void AVLTree::printTree(Node* root, int indent) {
+	cout << "AT print" << endl;
     if (root != 0 && root->key != 0) {
         root = oram->ReadNode(root->key, root->pos, root->pos);
         if (root->leftID != 0)
@@ -230,7 +362,9 @@ void AVLTree::printTree(Node* root, int indent) {
         pair<int, string> value;
 	value.first = root->value.first;
         value.second.assign(root->value.second.begin(), root->value.second.end());
-        cout << root->key << ":" << value.second.c_str() << ":" << root->pos << ":" << root->leftID << ":" << root->leftPos << ":" << root->rightID << ":" << root->rightPos << endl;
+	//cout << "AT print" << endl;
+        //cout << root->key << ":" << value.second.c_str() << ":" << root->pos << ":" << root->leftID << ":" << root->leftPos << ":" << root->rightID << ":" << root->rightPos << endl << endl << endl <<  endl;
+	cout << (root->key) << "::" << value.first << "::" << value.second << endl << endl << endl;
         if (root->rightID != 0)
             printTree(oram->ReadNode(root->rightID, root->rightPos, root->rightPos), indent + 4);
 

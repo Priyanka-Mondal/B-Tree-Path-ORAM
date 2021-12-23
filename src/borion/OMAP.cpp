@@ -12,20 +12,14 @@ OMAP::~OMAP() {
 
 void OMAP::remove(Bid key)
 {
-    //if (rootKey == 0) {
-      //  return (make_pair(-1,""));
-    //}
     treeHandler->startOperation();
-    Node* node = new Node();
-    node->key = rootKey;
-    node->pos = rootPos;
-    auto resNode = treeHandler->search(node, key);
-    if(resNode!=NULL)
+cout<< "in OMAP remove" << endl;
+    Bid success = treeHandler->remove(rootKey, rootPos, key);
+    if(success == 0)
     {
-	    cout << "Found the node to be deleted" << endl;
-	    resNode->key = 0;
-	    //need to write this into tree not in resNode.
+	    cout << "No such node" << endl;
     }
+    else cout << "Node deleted" << success <<endl;
 }
 
 

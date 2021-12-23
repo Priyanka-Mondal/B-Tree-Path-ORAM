@@ -99,7 +99,8 @@ vector<string> divideString(string filename, int sz, string id)
 int main(int, char**) {
     
     bool usehdd = false;
-    BOrion borion(usehdd, 3000000);  
+ //   BOrion borion(usehdd, 3000000);  
+ BOrion borion(usehdd, 2048);
     // This 4*max-size does not have effect, was able to insert a lot more elements
     //cout << borion.search("test1").size() << endl;
     //borion.remove("test1", 1);
@@ -120,8 +121,8 @@ int main(int, char**) {
      //}
     //The file ids are always 4bytes.
     borion.insertWrapper(kw, blocks, "0002");
-    
     kw = getUniquedWords("test1.txt","0001");
+   
     //for (auto i: kw) 
     //    cout << "kws: " << i << "\n";
     blocks = divideString("test1.txt",BLOCK-4,"0001");
@@ -131,6 +132,7 @@ int main(int, char**) {
     blocks = divideString("test5.txt",BLOCK-4,"0005");
     borion.insertWrapper(kw, blocks, "0005");
     
+    /* 
     kw = getUniquedWords("test6.txt","0006");
     blocks = divideString("test6.txt",BLOCK-4,"0006");
     borion.insertWrapper(kw, blocks, "0006");
@@ -168,6 +170,7 @@ int main(int, char**) {
         blocks = divideString(fl,BLOCK,id);
         borion.insertWrapper(kw, blocks, id);    
     }
+    */
     //insert a dummy file for fake entries at the end -- maybe not required
     // first searches ids 
     map<string,string> allfiles = borion.searchWrapper("hell");
