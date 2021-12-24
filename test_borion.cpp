@@ -132,7 +132,6 @@ int main(int, char**) {
     blocks = divideString("test5.txt",BLOCK-4,"0005");
     borion.insertWrapper(kw, blocks, "0005");
     
-    /* 
     kw = getUniquedWords("test6.txt","0006");
     blocks = divideString("test6.txt",BLOCK-4,"0006");
     borion.insertWrapper(kw, blocks, "0006");
@@ -145,6 +144,7 @@ int main(int, char**) {
     blocks = divideString("test8.txt",BLOCK-4,"0008");
     borion.insertWrapper(kw, blocks, "0008");
 
+    /* 
      kw = getUniquedWords("test9.txt","0009");
      blocks = divideString("test9.txt",BLOCK-4,"0009");
      borion.insertWrapper(kw, blocks, "0009");

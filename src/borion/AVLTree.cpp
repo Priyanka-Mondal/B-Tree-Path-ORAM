@@ -209,15 +209,17 @@ Bid AVLTree::remove(Bid rootKey, int& pos, Bid key)
      }
      
      Node* node = oram->ReadNode(rootKey, pos, pos);
-
+     Node* par = node;
      if(key<node->key)
      {
 	     cout << "key<node->key,key/rootKey "<< key << "/"<< rootKey<< endl;
+	     par = node;
 	     node->leftID = remove(node->leftID, node->leftPos, key);
      }
      else if(key>node->key)
      {
 	cout << "key>node->key,key/rootKey "<< key << "/"<< rootKey<< endl;
+		par = node;
 	     node->rightID = remove(node->rightID, node->rightPos, key);
      }
      else
@@ -227,12 +229,14 @@ Bid AVLTree::remove(Bid rootKey, int& pos, Bid key)
 	{ cout << "in (node->leftID == 0) || (node->rightID == 0" << endl;
 	  Node* temp = new Node();
 	  if (node->leftID != 0)
-	  { 
+	  {
+		 par = node; 
 	    cout << "oram read happenning node->leftID!=0" << endl;
 	    temp = oram->ReadNode(node->leftID,node->leftPos, node->leftPos); 
 	  }
 	  else
 	  {
+		  par = node;
 	    cout << "oram read happenning node->rightID!=0" << endl;
 	    temp = oram->ReadNode(node->rightID,node->rightPos,node->rightPos);
 	  }
@@ -240,25 +244,30 @@ Bid AVLTree::remove(Bid rootKey, int& pos, Bid key)
 	  if(temp == NULL)
 	  {
 
-	  cout << "yes it is" << endl;
-	     temp = oram->ReadNode(node->key, node->pos, node->pos); 
+	     cout << "yes it is NULL" << endl;
+	     //temp = oram->ReadNode(node->key, node->pos, node->pos); 
 	     cout << "so I read, now I will write NULL" << endl;
-	     //Node* nul = newNode(0, make_pair(-1,"-1"));
-	     //pos = oram->WriteNode(node->key, nul); // WriteNode(head, 0)/Here
-	     node = NULL; // should we do an oram->write instead ?
+	     Node* n = newNode(node->key,make_pair(0,"-1"));
+	     *node = *n;
+	     oram->WriteNode(node->key,n); // WriteNode(head, 0)/Here
 	     cout << "I wrote Null" << endl;
           }
           else
 	  {
-	  	cout << "No its not" << endl;
+	  	cout << "No its not NULL" << endl;
 		*node = *temp; // do we need this ??
                 oram->WriteNode(node->key, temp);
 	  }
-	     temp = newNode(0,make_pair(0,"0"));// free(temp);
+	     //Node* temp1 = newNode(0,make_pair(-1,"-1"));// 
+	     //Node* temp1 = new Node();
+	     //oram->WriteNode(temp->key,temp1); // because temp is a node
+	     //free(temp);
+	     //temp = NULL;
 	     cout << " I freed temp" << endl;
 	 }
 	 else
 	 {
+		 cout <<"minValueNode" << endl;
 	     Node* tem = minValueNode(oram->ReadNode(node->rightID));
 	     oram->WriteNode(node->key,tem);
  Node* min = oram->ReadNode(remove(node->rightID, node->rightPos, tem->key));
@@ -352,7 +361,7 @@ void AVLTree::batchSearch(Node* head, vector<Bid> keys, vector<Node*>* results) 
 }
 
 void AVLTree::printTree(Node* root, int indent) {
-	cout << "AT print" << endl;
+	//cout << "AT print" << endl;
     if (root != 0 && root->key != 0) {
         root = oram->ReadNode(root->key, root->pos, root->pos);
         if (root->leftID != 0)
