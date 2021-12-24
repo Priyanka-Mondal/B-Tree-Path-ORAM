@@ -144,7 +144,6 @@ int main(int, char**) {
     blocks = divideString("test8.txt",BLOCK-4,"0008");
     borion.insertWrapper(kw, blocks, "0008");
 
-    /* 
      kw = getUniquedWords("test9.txt","0009");
      blocks = divideString("test9.txt",BLOCK-4,"0009");
      borion.insertWrapper(kw, blocks, "0009");
@@ -170,7 +169,6 @@ int main(int, char**) {
         blocks = divideString(fl,BLOCK,id);
         borion.insertWrapper(kw, blocks, id);    
     }
-    */
     //insert a dummy file for fake entries at the end -- maybe not required
     // first searches ids 
     map<string,string> allfiles = borion.searchWrapper("hell");

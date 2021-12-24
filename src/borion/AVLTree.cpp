@@ -191,7 +191,8 @@ Node* AVLTree::search(Node* head, Bid key) {
 Node* AVLTree::minValueNode(Node* head)
 {
 	Node* current = head;
-	while((current!= NULL || current->key !=0) && current->leftID!=0)
+	//while((current!= NULL || current->key !=0) && current->leftID!=0)
+	while(current->leftID!=0)
 		current = oram->ReadNode(current->leftID);
          
 	return current;
@@ -201,6 +202,7 @@ Node* AVLTree::minValueNode(Node* head)
 
 Bid AVLTree::remove(Bid rootKey, int& pos, Bid key) 
 {
+	//NEED TO FIX IT LATER
   cout << "in AVLTree delete rootKey :" << rootKey <<endl; 
      if (rootKey == 0)
      {
@@ -247,13 +249,15 @@ Bid AVLTree::remove(Bid rootKey, int& pos, Bid key)
 	     cout << "yes it is NULL" << endl;
 	     //temp = oram->ReadNode(node->key, node->pos, node->pos); 
 	     cout << "so I read, now I will write NULL" << endl;
-	     Node* n = newNode(node->key,make_pair(0,"-1"));
-	     *node = *n;
-	     oram->WriteNode(node->key,n); // WriteNode(head, 0)/Here
+	     //Node* n = newNode(Bid(),make_pair(0,"-1"));
+	     node = NULL;
+	     //oram->WriteNode(node->key,n); // WriteNode(head, 0)/Here
 	     cout << "I wrote Null" << endl;
           }
           else
-	  {
+	  { 
+		// if this block of code works then why not the 
+		// above ?
 	  	cout << "No its not NULL" << endl;
 		*node = *temp; // do we need this ??
                 oram->WriteNode(node->key, temp);
@@ -269,6 +273,7 @@ Bid AVLTree::remove(Bid rootKey, int& pos, Bid key)
 	 {
 		 cout <<"minValueNode" << endl;
 	     Node* tem = minValueNode(oram->ReadNode(node->rightID));
+		 cout <<"minValueNode  DONE" << endl;
 	     oram->WriteNode(node->key,tem);
  Node* min = oram->ReadNode(remove(node->rightID, node->rightPos, tem->key));
 	     oram->WriteNode(node->rightID,min);

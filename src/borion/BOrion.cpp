@@ -42,7 +42,7 @@ void BOrion::insertWrapper(vector<string> kws, vector<string> blocks, string ind
      auto ret = srch->find(bid);
      cout <<ind << " WRITING:" << ret.first <<" /" << ret.second<<endl;
      srch->printTree();
-     srch->remove(bid);
+     srch->insert(bid,make_pair(4,"27"));
      ret = srch->find(bid);
      if(ret.second != "\0")
      cout <<ind << " REWRITING:" << ret.first <<" /" << ret.second<<endl << endl<< endl;
