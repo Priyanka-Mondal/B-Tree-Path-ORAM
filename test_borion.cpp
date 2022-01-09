@@ -2,22 +2,29 @@
 //#include "utils/Utilities.h"
 #include<string.h>
 #include<utility>
+#include <dirent.h>
+#include <boost/algorithm/string.hpp>
+#include<limits.h>
+#include<set>
 
 using namespace std;
 
 
+int fileid = 1;
+bool usehdd = false;
+BOrion borion(usehdd, 3000000);  
+set<string> neg;
 
-vector<string> getUniquedWords(string filename, string fileid)
+vector<string> getUniquedWords(vector<string> kws, string fileid)
 {
     // Open a file stream
-    fstream fs(filename);
     vector<string> kw;
     // Create a map to store count of all words
     map<string, int> mp;
   
     // Keep reading words while there are words to read
     string word;
-    while (fs >> word)
+    for(auto word : kws)
     {
         // If this is first occurrence of word
         if (!mp.count(word))
@@ -27,7 +34,6 @@ vector<string> getUniquedWords(string filename, string fileid)
     }
     mp.erase(fileid);
   
-    fs.close();
   
     // Traverse map and print all words whose count
     //is 1
@@ -96,88 +102,176 @@ vector<string> divideString(string filename, int sz, string id)
 	return result;
     }
 
+
+string toS(int id)
+{
+	string s = to_string(id);
+	string front ="";
+	if (id < 10)
+		front = "000";
+	else if(id < 100)
+		front = "00";
+	else if(id < 1000)
+		front = "0";
+	s=front.append(s);
+
+	return s;
+}
+
+string getFileContent(string path)
+{
+	  ifstream file(path);
+	  string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+
+	      return content;
+}
+
+
+static void list_dir (const char * dir_name)
+{
+    string delimiters("|?@,:!\"> -./  \n");
+    DIR * d;
+    d = opendir (dir_name);
+
+   if (! d) 
+   {
+      fprintf (stderr, "Cannot open directory '%s': %s\n",
+         dir_name, strerror (errno));
+       exit (EXIT_FAILURE);
+   }
+   while (1) 
+   {
+      struct dirent * entry;
+      const char * d_name;
+
+        /* "Readdir" gets subsequent entries from "d". */
+      entry = readdir (d);
+      if (! entry) 
+      {
+            break;
+      }
+      d_name = entry->d_name;
+           /* Print the name of the file and directory. */
+          //printf ("%s/%s\n", dir_name, d_name);
+
+           /* If you don't want to print the directories, use the
+            *     following line: */
+
+            if (! (entry->d_type & DT_DIR)) {
+              printf ("%s/%s\n", dir_name, d_name);
+	      string file = dir_name;
+	      file = file.append("/");
+	      file = file.append(d_name);
+	      vector<string> kws1, kws;
+	      string id = toS(fileid);
+	      string cont = getFileContent(file);
+    	      //cout << endl << "FILEID:" << fileid<< endl;
+	      //cout << "["<<file <<"]"<< endl;
+	      //cout << cont << endl << endl;
+	      cout <<"=====================================" << endl;
+
+	      boost::split(kws1, cont, boost::is_any_of(delimiters));
+	      kws =  getUniquedWords(kws1, id);
+	      int pos = 0;
+	      for (auto it = kws.begin(); it != kws.end(); it++)
+	      {
+		      //cout <<"pos:"<<pos<<"-";
+		      if(neg.find(*it)!=neg.end())
+		      {
+			 //cout << endl <<"Deleted:["<<*it<<"]"<<endl ;
+			 kws.erase(it--);
+		      }
+		      //else
+		      //{
+			//cout <<"["<<*it<<"]" <<"     " ;
+		      //}
+		      //pos++;
+	      }
+	      cout << endl <<file<< " " << id <<endl << endl;
+	      cout << "============================" << endl;
+    		vector<string> blocks;
+		blocks = divideString(file,BLOCK,id);
+        	borion.insertWrapper(kws, blocks, id);
+                fileid++;
+               }
+
+
+
+             if (entry->d_type & DT_DIR) {
+
+                /* Check that the directory is not "d" or d's parent. */
+                
+                if (strcmp (d_name, "..") != 0 &&
+                  strcmp (d_name, ".") != 0) {
+			cout <<"HERE 1: " << d_name<< endl ;
+                 int path_length;
+                   char path[PATH_MAX];
+                     
+                     path_length = snprintf (path, PATH_MAX,
+                         "%s/%s", dir_name, d_name);
+                       //printf ("%s\n", path);
+                         if (path_length >= PATH_MAX) {
+				 cout << "Here 2" << endl ;
+                             fprintf (stderr, "Path length has got too long.\n");
+                               exit (EXIT_FAILURE);
+                                 }
+                           /* Recursively call "list_dir" with the new path. */
+                           list_dir (path);
+                            }
+                }
+             }
+    /* After going through all the entries, close the directory. */
+    if (closedir (d)) {
+       fprintf (stderr, "Could not close '%s': %s\n",
+          dir_name, strerror (errno));
+        exit (EXIT_FAILURE);
+        }
+}
+
+
 int main(int, char**) {
-    
-    bool usehdd = false;
- //   BOrion borion(usehdd, 3000000);  
- BOrion borion(usehdd, 2048);
-    // This 4*max-size does not have effect, was able to insert a lot more elements
-    //cout << borion.search("test1").size() << endl;
-    //borion.remove("test1", 1);
-    //for(int i=0;i<=8;i++)
-    //	cout << borion.search("test1")[i] << endl;
-    vector<string> kw;
-    vector<string> blocks;
-    
-    kw = getUniquedWords("test2.txt","0002");
-    //for (auto i: kw) 
-    //    cout << "kws: " << i << "\n";
-    blocks = divideString("test2.txt",BLOCK-4,"0002");
-    int bcnt = 0;
-     //for (auto i: blocks)
-     //{
-     //   bcnt++;
-     //   cout <<bcnt << "input blocks: [" << i << "]\n";
-     //}
-    //The file ids are always 4bytes.
-    borion.insertWrapper(kw, blocks, "0002");
-    kw = getUniquedWords("test1.txt","0001");
    
-    //for (auto i: kw) 
-    //    cout << "kws: " << i << "\n";
-    blocks = divideString("test1.txt",BLOCK-4,"0001");
-    borion.insertWrapper(kw, blocks, "0001");
+	/*string inputString("One!Two,Three:Four Five--Six ,  Seven,8.9");
+	string delimiters("|,:! -.");
+	vector<string> parts;
+	boost::split(parts, inputString, boost::is_any_of(delimiters));
+	for(auto v : parts)
+		cout << v << endl;*/
+neg.insert("and");
+neg.insert("the");
+neg.insert("The");
+neg.insert("a");
+neg.insert("A");
+neg.insert("an");
+neg.insert("An");
+neg.insert("to");
+neg.insert("To");
+neg.insert("in");
+neg.insert("of");
+neg.insert("or");
+neg.insert("as");
+neg.insert("for");
+neg.insert("on");
+neg.insert(",");
+neg.insert(" ");
+neg.insert("\n");
+neg.insert("\0");
+neg.insert("?");
+neg.insert("by");
+neg.insert("\t");
 
-    kw = getUniquedWords("test5.txt", "0005");
-    blocks = divideString("test5.txt",BLOCK-4,"0005");
-    borion.insertWrapper(kw, blocks, "0005");
-    
-    kw = getUniquedWords("test6.txt","0006");
-    blocks = divideString("test6.txt",BLOCK-4,"0006");
-    borion.insertWrapper(kw, blocks, "0006");
 
-    kw = getUniquedWords("test7.txt","0007");
-    blocks = divideString("test7.txt",BLOCK-4,"0007");
-    borion.insertWrapper(kw, blocks, "0007");
-
-    kw = getUniquedWords("test8.txt","0008");
-    blocks = divideString("test8.txt",BLOCK-4,"0008");
-    borion.insertWrapper(kw, blocks, "0008");
-
-     kw = getUniquedWords("test9.txt","0009");
-     blocks = divideString("test9.txt",BLOCK-4,"0009");
-     borion.insertWrapper(kw, blocks, "0009");
-
-     kw = getUniquedWords("test3.txt","0003");
-     blocks = divideString("test3.txt",BLOCK-4,"0003");
-     borion.insertWrapper(kw, blocks, "0003");
-
-     //kw = getUniquedWords("test4.txt","0004");
-     //blocks = divideString("test4.txt",BLOCK-4,"0004");
-     //borion.insertWrapper(kw, blocks, "0004");
-
-    for (int k = 10; k<=19; k++)
-    {
-	string ks=to_string(k);
-	string fl = "test";
-        fl.append(ks);
-        fl.append(".txt");
- 
-        string id = "00";
-        id.append(ks);
-        kw = getUniquedWords(fl,id);
-        blocks = divideString(fl,BLOCK,id);
-        borion.insertWrapper(kw, blocks, id);    
-    }
+    list_dir("enron");
+    cout << endl << "FILEID:" << fileid<< endl;
     //insert a dummy file for fake entries at the end -- maybe not required
     // first searches ids 
-    map<string,string> allfiles = borion.searchWrapper("hell");
-    
+    //map<string,string> allfiles = borion.searchWrapper("hell");
+    /*
     for(auto itr= allfiles.begin(); itr!=allfiles.end();itr++)
     {
 	   	 cout << " OUTPUT Blocks :[" << itr->first << "]\n";
 		 cout << itr->second << endl << endl;
-    }
+    }*/
     
     return 0;
 }

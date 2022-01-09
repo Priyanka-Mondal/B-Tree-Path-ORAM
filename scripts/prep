@@ -1,0 +1,26 @@
+#/bin/sh
+
+for f in $(find enron -type f); 
+do 
+ sed '/Message-ID:/d' $f> tmpfile && mv tmpfile $f; 
+ sed '/From:/d' $f> tmpfile && mv tmpfile $f; 
+ sed '/To:/d' $f> tmpfile && mv tmpfile $f; 
+ sed '/Subject:/d' $f> tmpfile && mv tmpfile $f; 
+ sed '/Mime-Version:/d' $f> tmpfile && mv tmpfile $f; 
+ sed '/Content-Type:/d' $f> tmpfile && mv tmpfile $f; 
+ sed '/Content-Transfer-Encoding:/d' $f> tmpfile && mv tmpfile $f; 
+ sed '/X-From:/d' $f> tmpfile && mv tmpfile $f; 
+ sed '/X-cc:/d' $f> tmpfile && mv tmpfile $f; 
+ sed '/X-bcc:/d' $f> tmpfile && mv tmpfile $f; 
+ sed '/X-Folder:/d' $f> tmpfile && mv tmpfile $f; 
+ sed '/X-Origin:/d' $f> tmpfile && mv tmpfile $f; 
+ sed '/X-FileName:/d' $f> tmpfile && mv tmpfile $f; 
+ sed '/Sent:/d' $f> tmpfile && mv tmpfile $f; 
+ sed '/---Original Message---/d' $f> tmpfile && mv tmpfile $f; 
+ sed '/> \*/d' $f> tmpfile && mv tmpfile $f; 
+ sed 'MIME-Version' $f>tmpfile && mv tmpfile $f;
+ sed 'X-Mailer' $f> tmpfile && mv tmpfile $f; 
+ sed 'Precedence:' $f> tmpfile && mv tmpfile $f; 
+ sed 'Sender' $f> tmpfile && mv tmpfile $f; 
+ sed -e "s/^M//" $f > tmpfile && mv tmpfile $f;
+done

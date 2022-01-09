@@ -5,4 +5,5 @@ orion2_debug
 build/*
 site_scons/site_tools/grpc.pyc
 site_scons/site_tools/protoc.pyc
+enron/*
 .sconsign.dblite

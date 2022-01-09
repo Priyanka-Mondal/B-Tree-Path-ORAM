@@ -4,6 +4,7 @@
 #include<queue>
 #include <unistd.h>
 #include<tuple>
+#include <boost/algorithm/string.hpp>
 
 BOrion::BOrion(bool usehdd, int maxSize) {
     this->useHDD = usehdd;
@@ -23,6 +24,7 @@ void BOrion::insertWrapper(vector<string> kws, vector<string> blocks, string ind
 	cout << "inserting kw " << endl;
      for (auto kw: kws) // cannot batchinsert as updtCount is at server
      {
+    	cout << "[" << kw << "]]";
    	insert(kw,ind); // insert all keywords
      }
 	cout << "inserted all the  kw " << endl;
@@ -37,18 +39,6 @@ void BOrion::insertWrapper(vector<string> kws, vector<string> blocks, string ind
 	cnt++;
      }
      insertFile(ind,blocks); // insert all file blocks
-     cout << ind << " : IN THE END" << endl;
-     Bid bid = createBid(ind, 0);
-     auto ret = srch->find(bid);
-     cout <<ind << " WRITING:" << ret.first <<" /" << ret.second<<endl;
-     srch->printTree();
-     srch->insert(bid,make_pair(4,"27"));
-     ret = srch->find(bid);
-     if(ret.second != "\0")
-     cout <<ind << " REWRITING:" << ret.first <<" /" << ret.second<<endl << endl<< endl;
-     else
-     cout <<ind << " REWRITING:" << ret.first <<" /" << "NULL" <<endl << endl<< endl;
-     srch->printTree();
 
 }
 
@@ -66,7 +56,7 @@ void BOrion::insertFile(string ind, vector<string> blocks)
 	srch->insert(mapKey, par);
 	//srch->insert(kwKey,"text,keywords");
 	int i =1;
-	cout << "a bout to insert blockss" << endl;
+	cout << "about to insert blockss" << endl;
         for(auto block : blocks)
 	{       pair <int, string> pr;
 		pr.first = FB;
@@ -88,6 +78,7 @@ void BOrion::insert(string keyword, string ind)
 {
     //Bid mapKey = createBid(keyword, ind);
     //auto updt_cnt = updt->find(mapKey);
+    //cout << "[" << keyword << "]]";
     Bid mapKey = createBid(keyword, 0);
     auto updt_cnt = (srch->find(mapKey)).second;
 
@@ -102,7 +93,6 @@ void BOrion::insert(string keyword, string ind)
         stringstream convstoi(updt_cnt);
         convstoi >> updc;
     }
-        //cout << "updatecnt " << updt_cnt <<" updc:"  <<updc <<"\n" ;
        updc = updc+1;
        pair<int , string> par;
        par.first = KS;
@@ -148,6 +138,7 @@ void BOrion::insert(string keyword, string ind)
 	     srch->insert(key, pr);
 	}
         //LastIND[keyword] = ind; // no need to keep this
+        cout << "->updatecnt " << updt_cnt <<" updc:"  <<updc <<"\n" ;
 }
 
 /**
