@@ -44,13 +44,17 @@ pair<int,string> OMAP::find(Bid key) {
 }
 
 void OMAP::insert(Bid key, pair<int,string> value) {
+//	cout << "in OMAP insert 6[" << value.second << "]"<< endl;
     treeHandler->startOperation();
     if (rootKey == 0) {
+//	cout << "in OMAP inserted as root 7.1[" << value.second << "]"<< endl;
         rootKey = treeHandler->insert(0, rootPos, key, value);
     } else {
+  //     cout << "in OMAP inserted as NONroot 7.2[" << value.second << "]"<< endl;
         rootKey = treeHandler->insert(rootKey, rootPos, key, value);
     }
     treeHandler->finishOperation(false, rootKey, rootPos);
+    //cout << "in OMAP inserted fake access 8[" << value.second << "]"<< endl;
 }
 
 void OMAP::printTree() {

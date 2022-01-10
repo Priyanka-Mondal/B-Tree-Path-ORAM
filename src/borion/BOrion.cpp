@@ -6,6 +6,7 @@
 #include<tuple>
 #include <boost/algorithm/string.hpp>
 
+int inserted = 0;
 BOrion::BOrion(bool usehdd, int maxSize) {
     this->useHDD = usehdd;
     bytes<Key> key1{0};
@@ -20,15 +21,18 @@ BOrion::~BOrion() {
 }
 
 void BOrion::insertWrapper(vector<string> kws, vector<string> blocks, string ind)
-{
+{ int totk=0;
 	cout << "inserting kw " << endl;
      for (auto kw: kws) // cannot batchinsert as updtCount is at server
      {
     	cout << "[" << kw << "]]";
    	insert(kw,ind); // insert all keywords
+	totk++;
      }
-	cout << "inserted all the  kw " << endl;
+	cout << "inserted all the  kw totk: " <<totk<< endl;
      // so add some fake accesses
+     // Will uncomment later
+     /*
      int ran = rand()%(kws.size())+ceil(0.5*kws.size());
      int cnt = 0;
      while(cnt < ran)  
@@ -37,9 +41,89 @@ void BOrion::insertWrapper(vector<string> kws, vector<string> blocks, string ind
 	//cout <<"ran:" << ran << "cnt:" << cnt;
 	srch->find(bid);
 	cnt++;
-     }
+     }*/
      insertFile(ind,blocks); // insert all file blocks
 
+}
+
+void BOrion::insert(string keyword, string ind) 
+{
+	inserted++;
+    //Bid mapKey = createBid(keyword, ind);
+    //auto updt_cnt = updt->find(mapKey);
+    cout << "[at insert 1:" << inserted <<"]";
+    Bid mapKey = createBid(keyword, 0);
+    auto uc = (srch->find(mapKey));
+    cout << "got uc 2" << endl;
+    auto updt_cnt = uc.second;
+    cout << "got updt_cnt 3" << endl;
+    //updt_cnt/16 will give us actual updc, 
+    //because now we store 16 files in one block
+    int updc; 
+    if (updt_cnt == "") {  
+         updc=0;
+    }
+    else
+    {
+        cout << "got convstoi 3.5[" << updt_cnt <<"]"<< endl;
+        stringstream convstoi(updt_cnt);
+        cout << "got convstoi 3.6[" << updt_cnt <<"]"<< endl;
+        convstoi >> updc;
+        cout << "got updc 4[" <<updc<<"]"<< endl;
+    }
+       updc = updc+1;
+       pair<int , string> par;
+       par.first = KS;
+       par.second = to_string(updc);
+       srch->insert(mapKey, par);
+       cout << "inserted updc 5" << endl;
+       //cout << "updc value:"<< updc << endl;
+       int pos_in_block = updc%COM; // 1,2,3,4, ..., 16
+       if (pos_in_block == 0) pos_in_block = COM;
+       float bnum = ceil(updc/COM); // 16 file-ids each block
+       int block_num ;
+       if(updc%COM == 0)
+	      block_num = bnum;
+       else 
+	      block_num = bnum+1;
+       
+       //cout <<"Keyword-" << keyword << endl;
+       //cout << "block_num value:"<< block_num << endl;
+       //cout << "pos_in_block value:"<< pos_in_block << endl;
+       Bid key = createBid(keyword, block_num);
+	
+	//if(updc%COM == 1)
+	if(pos_in_block == 1)
+	{
+           //cout << "SIZEofIND:"<< ind.length() << endl;
+	//ind.insert(pos_in_block*FID_SIZE, ID_SIZE-pos_in_block*FID_SIZE, '#');
+	ind.insert(FID_SIZE, ID_SIZE-FID_SIZE, '#');
+	   pair <int, string> pr;
+	   pr.first =KB;
+	   pr.second = ind;
+           srch->insert(key, pr);
+	   //cout <<"NEWBLOCK:"<< ind <<endl;
+        cout <<" updc:"  <<updc <<"::"<< ind <<"\n" ;
+
+	}
+	else if (pos_in_block >=2 && pos_in_block <=16)
+	{
+	    string oldblock = (srch->find(key)).second;
+            //cout << "SIZEofOLDIND:"<< oldblock.length() << endl;
+	    //cout <<"OLDBLOCK:" << oldblock << endl;
+	    oldblock.replace((pos_in_block-1)*FID_SIZE,FID_SIZE,ind);
+	    //cout <<"OLDNEWBLOCK:" << oldblock << endl;
+	     pair <int, string> pr;
+	     pr.first =KB;
+	     pr.second = oldblock;
+	     srch->insert(key, pr);
+        cout <<" updc:"  <<updc <<"::"<< oldblock <<"\n" ;
+	}
+       else
+       {
+	   cout << endl << "{pos_in_block greater than 16}" << endl;
+       }
+        //LastIND[keyword] = ind; // no need to keep this
 }
 
 void BOrion::insertFile(string ind, vector<string> blocks)
@@ -61,7 +145,8 @@ void BOrion::insertFile(string ind, vector<string> blocks)
 	{       pair <int, string> pr;
 		pr.first = FB;
 		pr.second = block;
-		Bid mapKey = createBid(ind, i);
+		Bid mk = createBid(ind, i);
+		//srch->insert(mk,pr);
 		batch.insert(make_pair(mapKey,pr));
 		//srch->insert(mapKey,pr); //batchinsert and fakeinsert
 		////cout << i <<"in if BLK["<<block <<"\n";
@@ -74,72 +159,6 @@ void BOrion::insertFile(string ind, vector<string> blocks)
 	cout << "inserted blocks" << endl;
 }
 
-void BOrion::insert(string keyword, string ind) 
-{
-    //Bid mapKey = createBid(keyword, ind);
-    //auto updt_cnt = updt->find(mapKey);
-    //cout << "[" << keyword << "]]";
-    Bid mapKey = createBid(keyword, 0);
-    auto updt_cnt = (srch->find(mapKey)).second;
-
-    //updt_cnt/16 will give us actual updc, 
-    //because now we store 16 files in one block
-    int updc; 
-    if (updt_cnt == "") {  
-         updc=0;
-    }
-    else
-    {
-        stringstream convstoi(updt_cnt);
-        convstoi >> updc;
-    }
-       updc = updc+1;
-       pair<int , string> par;
-       par.first = KS;
-       par.second = to_string(updc);
-       srch->insert(mapKey, par);
-       //cout << "updc value:"<< updc << endl;
-       int pos_in_block = updc%COM; // 1,2,3,4, ..., 16
-       if (pos_in_block == 0) pos_in_block = COM;
-       float bnum = ceil(updc/COM); // 4 file-ids each block
-      
-       int block_num ;
-       if(updc%COM==0)
-	      block_num = bnum;
-       else 
-	       block_num = bnum+1;
-       
-       //cout <<"Keyword-" << keyword << endl;
-       //cout << "block_num value:"<< block_num << endl;
-       //cout << "pos_in_block value:"<< pos_in_block << endl;
-       Bid key = createBid(keyword, block_num);
-	
-	if(updc%COM == 1)
-	{
-           //cout << "SIZEofIND:"<< ind.length() << endl;
-	   ind.insert(pos_in_block*FID_SIZE,ID_SIZE-pos_in_block*FID_SIZE,'#');
-	   pair <int, string> pr;
-	   pr.first =KB;
-	   pr.second = ind;
-           srch->insert(key, pr);
-	   //cout <<"NEWBLOCK:"<< ind <<endl;
-
-	}
-	else
-	{
-	    string oldblock = (srch->find(key)).second;
-            //cout << "SIZEofOLDIND:"<< oldblock.length() << endl;
-	    //cout <<"OLDBLOCK:" << oldblock << endl;
-	    oldblock.replace((pos_in_block-1)*FID_SIZE,FID_SIZE,ind);
-	    //cout <<"OLDNEWBLOCK:" << oldblock << endl;
-	     pair <int, string> pr;
-	     pr.first =KB;
-	     pr.second = oldblock;
-	     srch->insert(key, pr);
-	}
-        //LastIND[keyword] = ind; // no need to keep this
-        cout << "->updatecnt " << updt_cnt <<" updc:"  <<updc <<"\n" ;
-}
 
 /**
  * This function executes an insert in setup mode. Indeed, it is not applied until endSetup()

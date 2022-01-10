@@ -12,8 +12,9 @@ using namespace std;
 
 int fileid = 1;
 bool usehdd = false;
-BOrion borion(usehdd, 3000000);  
+BOrion borion(usehdd, 2000000);  
 set<string> neg;
+int totk=0;
 
 vector<string> getUniquedWords(vector<string> kws, string fileid)
 {
@@ -129,7 +130,7 @@ string getFileContent(string path)
 
 static void list_dir (const char * dir_name)
 {
-    string delimiters("|?@,:!\"> -./  \n");
+    string delimiters("|?@,:!\">; -./  \n");
     DIR * d;
     d = opendir (dir_name);
 
@@ -192,6 +193,11 @@ static void list_dir (const char * dir_name)
     		vector<string> blocks;
 		blocks = divideString(file,BLOCK,id);
         	borion.insertWrapper(kws, blocks, id);
+		/*for(auto k: kws)
+		{
+			borion.insert(k,id);
+			totk++;
+		}*/
                 fileid++;
                }
 
@@ -259,10 +265,11 @@ neg.insert("\0");
 neg.insert("?");
 neg.insert("by");
 neg.insert("\t");
+neg.insert("from");
 
 
     list_dir("enron");
-    cout << endl << "FILEID:" << fileid<< endl;
+    cout << endl << "FILEID:" << fileid << " totk:" << totk << endl;
     //insert a dummy file for fake entries at the end -- maybe not required
     // first searches ids 
     //map<string,string> allfiles = borion.searchWrapper("hell");
