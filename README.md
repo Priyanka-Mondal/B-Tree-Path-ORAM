@@ -141,7 +141,7 @@ sudo ldconfig
 
 ```shell
 git clone https://github.com/Priyanka-Mondal/BaselinesSSE.git
-cd SSE
+cd BaselinesSSE.git
 ```
 
 
