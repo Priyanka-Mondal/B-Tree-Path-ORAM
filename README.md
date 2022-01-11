@@ -111,6 +111,15 @@ cd ../..
 
 
 
+6.5 Install Java if not installed 
+```shell
+sudo apt update
+sudo apt install default-jdk
+sudo apt update
+sudo apt install default-jre
+```
+
+
 
 7. Protobuf:
 
@@ -136,7 +145,7 @@ sudo ldconfig
 
 9. copy some libraries
 ```shell
-cd usr/lib 
+cd usr/lib/aarch64-linux-gnu
 cp libcrypt.a libcrypto.a libcrypt.so libcrypto.so usr/local/lib
 ```
 
