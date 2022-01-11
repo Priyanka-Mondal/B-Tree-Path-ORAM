@@ -16,7 +16,7 @@ sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 1
 
 2. CMake:
 
-
+```shell
  wget https://cmake.org/files/v3.14/cmake-3.14.0.tar.gz
  tar -xvzf cmake-3.14.0.tar.gz 
  cd cmake-3.14.0/
@@ -24,7 +24,7 @@ sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 1
  make
  sudo make install
  cd ..
-
+```
 
 
 
