@@ -22,14 +22,14 @@ BOrion::~BOrion() {
 
 void BOrion::insertWrapper(vector<string> kws, vector<string> blocks, string ind)
 { int totk=0;
-//	cout << "inserting kw " << endl;
-/*     for (auto kw: kws) // cannot batchinsert as updtCount is at server
+	cout << "inserting kw " << endl;
+     for (auto kw: kws) // cannot batchinsert as updtCount is at server
      {
-    	//cout << "[" << kw << "]]";
+    	cout << "[" << kw << "]]" << endl;
    	insert(kw,ind); // insert all keywords
 	totk++;
      }
-	cout << "inserted all the  kw totk: " <<totk<< endl;*/
+	cout << "inserted all the  kw totk: " <<totk<< endl;
 
      // so add some fake accesses
      // Will uncomment later
@@ -75,7 +75,7 @@ void BOrion::insert(string keyword, string ind)
        updc = updc+1;
        pair<int , string> par;
        par.first = KS;
-       par.second = to_string(updc);
+       par.second = to_string(updc); // pad here
        srch->insert(mapKey, par);
        //cout << "inserted updc 5" << endl;
        //cout << "updc value:"<< updc << endl;
@@ -98,10 +98,10 @@ void BOrion::insert(string keyword, string ind)
 	{
            //cout << "SIZEofIND:"<< ind.length() << endl;
 	//ind.insert(pos_in_block*FID_SIZE, ID_SIZE-pos_in_block*FID_SIZE, '#');
-	ind.insert(FID_SIZE, ID_SIZE-FID_SIZE, '#');
+	ind.insert(FID_SIZE, ID_SIZE-FID_SIZE, '#'); // padding happpens
 	   pair <int, string> pr;
 	   pr.first =KB;
-	   pr.second = ind;
+	   pr.second = ind; // pad later
            srch->insert(key, pr);
 	   //cout <<"NEWBLOCK:"<< ind <<endl;
         //cout <<" updc:"  <<updc <<"::"<< ind <<"\n" ;
@@ -152,16 +152,15 @@ void BOrion::insertFile(string ind, vector<string> blocks)
 		pr.second = block;
 		Bid mk = createBid(ind, i);
 		cout << "Block inserteD:[[" << block <<  "]]"<< endl <<endl ;
-		//srch->insert(mk,pr);
-		batch.insert(make_pair(mk,pr));
-		//srch->insert(mapKey,pr); //batchinsert and fakeinsert
+		srch->insert(mk,pr);
+		//batch.insert(make_pair(mk,pr));
 		////cout << i <<"in if BLK["<<block <<"\n";
 		i++;
 	}
 	// no need for fake blocks as batchInsert calls 
 	// treeHandler->finishOperation at the end to pad 
 	// 4.35 * (depth of AVLTree) times
-	srch->batchInsert(batch);
+	//srch->batchInsert(batch);
 	cout << "inserted blocks" << endl;
 }
 
