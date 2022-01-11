@@ -85,9 +85,10 @@ cd ..
 
 
 
-DOXYGEN
-5. sudo apt-get install doxygen
-
+5.DOXYGEN
+```shell
+sudo apt-get install doxygen
+```
 
 
 
