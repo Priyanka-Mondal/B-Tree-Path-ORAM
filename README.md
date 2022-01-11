@@ -1,4 +1,4 @@
-1. g++ stuff:
+1. g++:
 
 ```shell
 sudo apt-get update
