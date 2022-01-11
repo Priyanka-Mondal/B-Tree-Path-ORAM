@@ -134,10 +134,14 @@ cd ..
 sudo ldconfig
 ```
 
+9. copy some libraries
+```shell
+cd usr/lib 
+cp libcrypt.a libcrypto.a libcrypt.so libcrypto.so usr/local/lib
+```
 
 
-
-9. Get and build the code:
+10. Get and build the code:
 
 ```shell
 git clone https://github.com/Priyanka-Mondal/BaselinesSSE.git
@@ -147,7 +151,7 @@ cd BaselinesSSE.git
 
 
 
-10. Change the build configuration:
+11. Change the build configuration:
 
 Add the following line to the `SConstruct` file (ex. at line 37):
 
@@ -168,7 +172,7 @@ scons: building terminated because of errors.
 
 There should be a better way to fix this, i.e., adding a `-l<libname>` flag, which is done by adding a lib to the `LIBS` env var, but adding ssl (`-lssl`) didn't help and I don't know what will. So this workaround makes the linker use the library when linking, even though the DSO is missing in the linker flags.
 
-11. Build it:
+12. Build it:
 
 ```shell
 scons deps
