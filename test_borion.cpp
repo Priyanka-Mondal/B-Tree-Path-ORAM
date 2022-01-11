@@ -12,9 +12,8 @@ using namespace std;
 
 int fileid = 1;
 bool usehdd = false;
-BOrion borion(usehdd, 2000000);  
+BOrion borion(usehdd, 3000000);  
 set<string> neg;
-int totk=0;
 
 vector<string> getUniquedWords(vector<string> kws, string fileid)
 {
@@ -47,8 +46,9 @@ vector<string> getUniquedWords(vector<string> kws, string fileid)
 return kw;
 }
 
-vector<string> divideString(string filename, int sz, string id)
+vector<string> divideString(string filename, int blk, string id)
     {
+	 int sz = blk-FID_SIZE; // ID size is 4
 	 fstream fs(filename); 
          string str((istreambuf_iterator<char>(fs)),
                        (istreambuf_iterator<char>()));
@@ -63,33 +63,22 @@ vector<string> divideString(string filename, int sz, string id)
 		pad = pad*sz-str_size;
 		//cout << "again pad:" << pad << endl; 
 	        str.insert(str.size(), pad, '#');
-	}/*
-	else if (str_size <= MEDIUM)
-	{
-		cout << "Its a MEDIUM file:" << MEDIUM;
-        str.insert(str.size(), MEDIUM - str.size(), '#');
 	}
-	else 
-	{
-		cout << "Its a LARGE file:" << LARGE;
-        str.insert(str.size(), LARGE - str.size(), '#');
-	} */
+		cout << "again pad:[" <<str.size() <<"::"<< str << "]" << endl; 
+		cout << "++++++++++++++++++++++++++" << endl;
          
-	str_size = str.length();
-	//cout << "the new size of the file:" <<str_size << endl;
-	//cout << str << endl << endl ;
   	int i;
         vector<string> result;
         string temp="";
-        
-	for (i = 0; i < str_size; i++) {
+         
+	for (i = 0; i < str.length(); i++) {
             if (i % sz == 0) {
 		  if(i!=0)
                   {
 		     string ttemp =id;
 		     ttemp.append(temp); 
                      result.push_back(ttemp);    
-		     //cout << "New Node:[" << ttemp << "]\n";
+		     cout << "New Node:[" << ttemp << "]\n";
                   }
                   temp="";
             }
@@ -128,7 +117,7 @@ string getFileContent(string path)
 }
 
 
-static void list_dir (const char * dir_name)
+static void insert_dir (const char * dir_name)
 {
     string delimiters("|?@,:!\">; -./  \n");
     DIR * d;
@@ -193,10 +182,10 @@ static void list_dir (const char * dir_name)
     		vector<string> blocks;
 		blocks = divideString(file,BLOCK,id);
         	borion.insertWrapper(kws, blocks, id);
+		cout << "number of keywords :" << kws.size() <<endl;
 		/*for(auto k: kws)
 		{
 			borion.insert(k,id);
-			totk++;
 		}*/
                 fileid++;
                }
@@ -222,7 +211,7 @@ static void list_dir (const char * dir_name)
                                exit (EXIT_FAILURE);
                                  }
                            /* Recursively call "list_dir" with the new path. */
-                           list_dir (path);
+                           insert_dir (path);
                             }
                 }
              }
@@ -267,10 +256,21 @@ neg.insert("by");
 neg.insert("\t");
 neg.insert("from");
 
+//INSERT keywords and file blocks of Enron
+    insert_dir("enron");
 
-    list_dir("enron");
-    cout << endl << "FILEID:" << fileid << " totk:" << totk << endl;
-    //insert a dummy file for fake entries at the end -- maybe not required
+//***NOW TEST search and delete
+
+//SEARCH
+/*map <string,string> files = borion.searchWrapper("Heather");
+
+for (map<string, string> :: iterator p = files.begin();
+		         p != files.end(); p++)
+{
+	cout << "FILE[" << p->first <<":"<< p->second <<"]"<< endl<< endl << endl ;
+}
+cout << "RESULT size: " << files.size() << endl;*/
+//
     // first searches ids 
     //map<string,string> allfiles = borion.searchWrapper("hell");
     /*

@@ -12,7 +12,7 @@ using namespace std;
 
 int fileid = 1;
 bool usehdd = false;
-Orion orion(usehdd, 2000000);  
+Orion orion(usehdd, 3000000);  
 set<string> neg;
 int totk = 0;
 vector<string> getUniquedWords(vector<string> kws, string fileid)
@@ -268,6 +268,7 @@ neg.insert("from");
 
     list_dir("enron");
     cout << endl << "FILEID:" << fileid << " totk:"<<totk<< endl;
+    cout << "SEARCH" << orion.search("you").size() << endl << endl;
     //insert a dummy file for fake entries at the end -- maybe not required
     // first searches ids 
     //map<string,string> allfiles = borion.searchWrapper("hell");

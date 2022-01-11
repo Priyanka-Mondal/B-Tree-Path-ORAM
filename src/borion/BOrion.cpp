@@ -22,14 +22,15 @@ BOrion::~BOrion() {
 
 void BOrion::insertWrapper(vector<string> kws, vector<string> blocks, string ind)
 { int totk=0;
-	cout << "inserting kw " << endl;
-     for (auto kw: kws) // cannot batchinsert as updtCount is at server
+//	cout << "inserting kw " << endl;
+/*     for (auto kw: kws) // cannot batchinsert as updtCount is at server
      {
-    	cout << "[" << kw << "]]";
+    	//cout << "[" << kw << "]]";
    	insert(kw,ind); // insert all keywords
 	totk++;
      }
-	cout << "inserted all the  kw totk: " <<totk<< endl;
+	cout << "inserted all the  kw totk: " <<totk<< endl;*/
+
      // so add some fake accesses
      // Will uncomment later
      /*
@@ -51,12 +52,12 @@ void BOrion::insert(string keyword, string ind)
 	inserted++;
     //Bid mapKey = createBid(keyword, ind);
     //auto updt_cnt = updt->find(mapKey);
-    cout << "[at insert 1:" << inserted <<"]";
+  //  cout << "[at insert 1:" << inserted <<"]";
     Bid mapKey = createBid(keyword, 0);
     auto uc = (srch->find(mapKey));
-    cout << "got uc 2" << endl;
+    //cout << "got uc 2" << endl;
     auto updt_cnt = uc.second;
-    cout << "got updt_cnt 3" << endl;
+    //cout << "got updt_cnt 3" << endl;
     //updt_cnt/16 will give us actual updc, 
     //because now we store 16 files in one block
     int updc; 
@@ -65,18 +66,18 @@ void BOrion::insert(string keyword, string ind)
     }
     else
     {
-        cout << "got convstoi 3.5[" << updt_cnt <<"]"<< endl;
+        //cout << "got convstoi 3.5[" << updt_cnt <<"]"<< endl;
         stringstream convstoi(updt_cnt);
-        cout << "got convstoi 3.6[" << updt_cnt <<"]"<< endl;
+        //cout << "got convstoi 3.6[" << updt_cnt <<"]"<< endl;
         convstoi >> updc;
-        cout << "got updc 4[" <<updc<<"]"<< endl;
+        //cout << "got updc 4[" <<updc<<"]"<< endl;
     }
        updc = updc+1;
        pair<int , string> par;
        par.first = KS;
        par.second = to_string(updc);
        srch->insert(mapKey, par);
-       cout << "inserted updc 5" << endl;
+       //cout << "inserted updc 5" << endl;
        //cout << "updc value:"<< updc << endl;
        int pos_in_block = updc%COM; // 1,2,3,4, ..., 16
        if (pos_in_block == 0) pos_in_block = COM;
@@ -103,7 +104,7 @@ void BOrion::insert(string keyword, string ind)
 	   pr.second = ind;
            srch->insert(key, pr);
 	   //cout <<"NEWBLOCK:"<< ind <<endl;
-        cout <<" updc:"  <<updc <<"::"<< ind <<"\n" ;
+        //cout <<" updc:"  <<updc <<"::"<< ind <<"\n" ;
 
 	}
 	else if (pos_in_block >=2 && pos_in_block <=16)
@@ -117,7 +118,7 @@ void BOrion::insert(string keyword, string ind)
 	     pr.first =KB;
 	     pr.second = oldblock;
 	     srch->insert(key, pr);
-        cout <<" updc:"  <<updc <<"::"<< oldblock <<"\n" ;
+        //cout <<" updc:"  <<updc <<"::"<< oldblock <<"\n" ;
 	}
        else
        {
@@ -128,26 +129,31 @@ void BOrion::insert(string keyword, string ind)
 
 void BOrion::insertFile(string ind, vector<string> blocks)
 {
-	cout << "at insertfile:" << ind << endl;
+	//cout << "at insertfile:" << ind << endl;
 	Bid mapKey = createBid(ind, 0);
 	map<Bid,pair<int,string>> batch;
 	int sz = blocks.size();
         pair <int, string> par;
 	par.first = FS;
-	par.second = ind;
+	par.second = ind; 
 	//par.second.append(" ");
-	par.second.append(to_string(sz));
+	par.second.append(to_string(sz));// pad later to 64 byte
 	srch->insert(mapKey, par);
 	//srch->insert(kwKey,"text,keywords");
 	int i =1;
-	cout << "about to insert blockss" << endl;
+	//cout << "about to insert blockss" << endl;
+	for(auto block : blocks)
+	{
+		cout << "block printing[" << block <<"]" << endl;
+	}
         for(auto block : blocks)
 	{       pair <int, string> pr;
 		pr.first = FB;
 		pr.second = block;
 		Bid mk = createBid(ind, i);
+		cout << "Block inserteD:[[" << block <<  "]]"<< endl <<endl ;
 		//srch->insert(mk,pr);
-		batch.insert(make_pair(mapKey,pr));
+		batch.insert(make_pair(mk,pr));
 		//srch->insert(mapKey,pr); //batchinsert and fakeinsert
 		////cout << i <<"in if BLK["<<block <<"\n";
 		i++;
@@ -338,20 +344,22 @@ map<string,string> BOrion::searchWrapper(string keyword)
 	    if(firstblockid.size() > 0)
 	    {
 		    ran = rand()%firstblockid.size()+1;
-		    int cnt = 0;
-		    while(cnt<ran)
+		    int cnt = 1;
+		    while(cnt<=ran)
 		    {
 			    string str = firstblockid.front();
 			    string numb = firstblocknum.front();
 			    int num;
 			    stringstream convstoi(numb);
 			            convstoi >> num;
+		cout << endl <<"****num:***" << num << endl;
 			    int bnums = 1;
 			    while(bnums<=num) // all blocks of file fetched
 			    {
 			        Bid bid = createBid(str,bnums);
 				bnums++;
 			        batch.push_back(bid);
+				cout << endl <<"****bnum:***" << bnums << endl;
 			    }
 			    cnt++;
 			    firstblockid.pop();
@@ -359,11 +367,11 @@ map<string,string> BOrion::searchWrapper(string keyword)
 		    }
 	    }
 	    result = srch->batchSearch(batch);
-	    totOMAPacc = totOMAPacc+batch.size();
-cout << "TOTAL OMAP ACCESS so far::"<<totOMAPacc<< endl;
+	    //totOMAPacc = totOMAPacc+batch.size();
+//cout << "TOTAL OMAP ACCESS so far::"<<totOMAPacc<< endl;
 	    for(auto blk : result)
 	    {
-	       //cout << "first:" << blk.first << "second:" <<blk.second <<endl;
+	       cout << "first:" << blk.first << "second:" <<blk.second <<endl;
 	        if(blk.first==1)
 		{
 			int cnt = 0;
@@ -391,7 +399,7 @@ cout << "TOTAL OMAP ACCESS so far::"<<totOMAPacc<< endl;
 			string id = blk.second.substr(0,4);
 			int sz = blk.second.length();
 			string bcontent = blk.second.substr(4,sz);
-			//cout << "CONT ofFile:"<< id << "IS:"<< bcontent << endl;
+			cout << "CONT ofFile:"<< id << "IS:"<< bcontent << endl;
 
 			if(files.find(id)!=files.end())
 			{
@@ -399,13 +407,13 @@ cout << "TOTAL OMAP ACCESS so far::"<<totOMAPacc<< endl;
 				con.append(bcontent);
 				files.erase(id);
 				files.insert(pair<string,string>(id,con));
-			   //cout << "CONT:"<< id << " :"<< con << endl;
-			   //cout<<"------------------------------------"<<endl;
+			   cout << "CONT:"<< id << " :"<< con << endl;
+			   cout<<"------------------------------------"<<endl;
 			}
 			else
 			{
 				files.insert(pair<string,string>(id,bcontent));
-			   //cout << "11CONT:"<< id << " :"<< bcontent << endl;
+			   cout << "***CONT:"<< id << " :"<< bcontent << endl;
 			   //cout<<"------------------------------------"<<endl;
 			}
 		}
@@ -420,6 +428,7 @@ cout << "TOTAL OMAP ACCESS so far::"<<totOMAPacc<< endl;
 //cout << "TOTAL OMAP ACCESS so far:"<<totOMAPacc<< endl;
 //Do we need the following padding ?
 //As batchSearch already pads with (depth * 1.45) fake reads
+/*
 if(totOMAPacc<SMALL)
 {
 	while(totOMAPacc<SMALL)
@@ -496,7 +505,7 @@ else // if totOMAPacc > LARGE already then no dummy access done
 		totOMAPacc = totOMAPacc+ran;
 		cout << "IM dummy access at LARGE:"<<totOMAPacc<< endl;
 	}
-}
+}*/
 return files;
 }
 
