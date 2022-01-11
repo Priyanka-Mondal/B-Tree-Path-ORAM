@@ -139,7 +139,7 @@ sudo ldconfig
 9. Get and build the code:
 
 ```shell
-git clone https://github.com/jgharehchamani/SSE.git
+git clone https://github.com/Priyanka-Mondal/BaselinesSSE.git
 cd SSE
 ```
 
