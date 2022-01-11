@@ -12,7 +12,7 @@ using namespace std;
 
 int fileid = 1;
 bool usehdd = false;
-BOrion borion(usehdd, 3000000);  
+BOrion borion(usehdd, 7000000);  
 set<string> neg;
 
 vector<string> getUniquedWords(vector<string> kws, string fileid)
