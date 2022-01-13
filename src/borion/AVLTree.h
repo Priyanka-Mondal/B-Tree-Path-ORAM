@@ -38,7 +38,7 @@ public:
     virtual ~AVLTree();
     Bid insert(Bid rootKey, int& pos, Bid key, pair<int,string> value);
     Node* minValueNode(Node* head);
-    Bid remove(Bid rootKey, int& pos, Bid key);
+    //Bid remove(Bid rootKey, int& pos, Bid key);
     Node* search(Node* head, Bid key);
     void batchSearch(Node* head, vector<Bid> keys, vector<Node*>* results);
     void printTree(Node* root, int indent);

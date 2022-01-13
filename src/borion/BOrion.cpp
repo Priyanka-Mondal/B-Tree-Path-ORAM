@@ -12,12 +12,12 @@ BOrion::BOrion(bool usehdd, int maxSize) {
     bytes<Key> key1{0};
     bytes<Key> key2{1};
     srch = new OMAP(maxSize*4, key1);
-    //updt = new OMAP(maxSize*4, key2);
+    updt = new OMAPf(maxSize*4, key1); // use key2
 }
 
 BOrion::~BOrion() {
     delete srch;
-    //delete updt;
+    delete updt;
 }
 
 void BOrion::insertWrapper(vector<string> kws, vector<string> blocks, string ind)
@@ -77,6 +77,16 @@ void BOrion::insert(string keyword, string ind)
        par.first = KS;
        par.second = to_string(updc); // pad here
        srch->insert(mapKey, par);
+       
+       Bid lastKey = createBid(keyword, LAST); // last
+       par.first = LAST;
+       par.second = ind;  // last // pad later
+       srch->insert(lastKey,par); //last
+
+       Bid updKey = createBid(keyword, ind);
+       updt->insert(updKey, to_string(updc));//pad, can we store number in updc 
+       //string test = updt->find(updKey);
+
        //cout << "inserted updc 5" << endl;
        //cout << "updc value:"<< updc << endl;
        int pos_in_block = updc%COM; // 1,2,3,4, ..., 16
@@ -141,17 +151,17 @@ void BOrion::insertFile(string ind, vector<string> blocks)
 	srch->insert(mapKey, par);
 	//srch->insert(kwKey,"text,keywords");
 	int i =1;
-	//cout << "about to insert blockss" << endl;
+	/*cout << "about to insert blockss" << endl;
 	for(auto block : blocks)
 	{
 		cout << "block printing[" << block <<"]" << endl;
-	}
+	}*/
         for(auto block : blocks)
 	{       pair <int, string> pr;
 		pr.first = FB;
 		pr.second = block;
 		Bid mk = createBid(ind, i);
-		cout << "Block inserteD:[[" << block <<  "]]"<< endl <<endl ;
+		//cout << "Block inserteD:[[" << block <<  "]]"<< endl <<endl ;
 		srch->insert(mk,pr);
 		//batch.insert(make_pair(mk,pr));
 		////cout << i <<"in if BLK["<<block <<"\n";
@@ -182,8 +192,8 @@ void BOrion::setupInsert(string keyword, pair<int,string> ind) {
     Bid key = createBid(keyword, UpdtCnt[keyword]);
 */
     Bid mapKey = createBid(keyword, 0);
-    auto updt = srch->find(mapKey);
-    string updt_cnt = updt.second;
+    auto upd = srch->find(mapKey);
+    string updt_cnt = upd.second;
     int updc;
     if (updt_cnt == "") {
          updc=0;
@@ -203,30 +213,89 @@ void BOrion::setupInsert(string keyword, pair<int,string> ind) {
     //LastIND[keyword] = ind;
 }
 
-/*
-void BOrion::remove(string keyword, int ind) {
+
+void BOrion::removekw(string keyword, string ind) 
+{
     Bid mapKey = createBid(keyword, ind);
-    string updt_cnt = updt->find(mapKey);
-    if (stoi(updt_cnt) > 0) {
-        updt->insert(mapKey, to_string(-1));
-        UpdtCnt[keyword]--;
-        if (UpdtCnt[keyword] > 0) {
-            if (UpdtCnt[keyword] + 1 != stoi(updt_cnt)) {
-                Bid curKey = createBid(keyword, LastIND[keyword]);
-                updt->insert(curKey, updt_cnt);
-                Bid curKey2 = createBid(keyword, stoi(updt_cnt));
-                srch->insert(curKey2, to_string(LastIND[keyword]));
+    string delcnt = updt->find(mapKey);
+    stringstream convstoi(delcnt);
+    int del_cnt;
+    convstoi >> del_cnt;
+    cout << "DELCNT:"<< del_cnt << endl;
+    
+    Bid lastKey = createBid(keyword,LAST);
+    auto last = srch->find(lastKey);
+    if (del_cnt > 0) {
+        updt->insert(mapKey, to_string(LAST)); 
+	Bid mk = createBid(keyword,0);
+	
+	string updtcnt = srch->find(mk).second;
+        stringstream convstoi(updtcnt);
+        int updt_cnt;
+        convstoi >> updt_cnt;
+	int updc = updt_cnt;
+	updc--;
+        
+if (updc > 0) 
+{
+      if (updc + 1 != del_cnt) 
+      {
+            Bid curKey = createBid(keyword, last.second); // retrieve (last)
+            updt->insert(curKey, delcnt);
+
+       
+       int pos_in_blockdel = del_cnt%COM; // 1,2,3,4, ..., 16
+       if (pos_in_blockdel == 0) pos_in_blockdel = COM;
+       float bnum = ceil(del_cnt/COM); // 16 file-ids each block
+       int block_del ;
+       if(del_cnt%COM == 0)
+	      block_del = bnum;
+       else 
+	      block_del = bnum+1;
+
+                Bid cur = createBid(keyword, block_del);
+                auto bl_del = srch->find(cur);
+       		string blsec = bl_del.second;
+
+       int pos_in_block = updt_cnt%COM; // 1,2,3,4, ..., 16
+       if (pos_in_block == 0) pos_in_block = COM;
+       bnum = ceil(updt_cnt/COM); // 16 file-ids each block
+       int block_num ;
+       if(updt_cnt%COM == 0)
+	      block_num = bnum;
+       else 
+	      block_num = bnum+1;
+
+                Bid cur2 = createBid(keyword, block_num);
+                auto bl = srch->find(cur2);
+	    	string block = bl.second;
+
+	    string st = block.substr((pos_in_block-1)*FID_SIZE,FID_SIZE);
+	    block.insert((pos_in_block-1)*FID_SIZE,FID_SIZE,'#');
+	    bl.second = block;
+	    srch->insert(cur,bl);
+
+            blsec.replace((pos_in_blockdel-1)*FID_SIZE,FID_SIZE,st);
+	    bl_del.second = blsec;
+	    srch->insert(cur,bl_del);
             }
-            Bid key = createBid(keyword, UpdtCnt[keyword]);
-            string idstr = srch->find(key);
-            int lastID = stoi(idstr);
-            LastIND[keyword] = lastID;
+            
+	    Bid key = createBid(keyword, updc);
+            string lastid = srch->find(key).second;
+            pair <int, string> lst;
+	    lst.first = LAST; // -1
+	    lst.second = lastid;
+	    srch->insert(lastKey, lst);
         } else {
-            LastIND.erase(keyword);
+            //LastIND.erase(keyword);
+		pair <int, string> lst;
+		lst.first = LAST;
+		lst.second = "";
+	    srch->insert(lastKey, lst); // or -1 ?
         }
     }
 }
-*/
+
 
 
 /**
@@ -351,14 +420,14 @@ map<string,string> BOrion::searchWrapper(string keyword)
 			    int num;
 			    stringstream convstoi(numb);
 			            convstoi >> num;
-		cout << endl <<"****num:***" << num << endl;
+		//cout << endl <<"****num:***" << num << endl;
 			    int bnums = 1;
 			    while(bnums<=num) // all blocks of file fetched
 			    {
 			        Bid bid = createBid(str,bnums);
 				bnums++;
 			        batch.push_back(bid);
-				cout << endl <<"****bnum:***" << bnums << endl;
+			//cout << endl <<"****bnum:***" << bnums << endl;
 			    }
 			    cnt++;
 			    firstblockid.pop();
@@ -370,7 +439,7 @@ map<string,string> BOrion::searchWrapper(string keyword)
 //cout << "TOTAL OMAP ACCESS so far::"<<totOMAPacc<< endl;
 	    for(auto blk : result)
 	    {
-	       cout << "first:" << blk.first << "second:" <<blk.second <<endl;
+	       //cout << "first:" << blk.first << "second:" <<blk.second <<endl;
 	        if(blk.first==1)
 		{
 			int cnt = 0;
@@ -389,7 +458,7 @@ map<string,string> BOrion::searchWrapper(string keyword)
 			string id = blk.second.substr(0,4);
 			int sz = blk.second.length(); // change to :until #
 			string bnum = blk.second.substr(4,sz);
-			cout << "SIZE of File: "<< id << " IS:"<< bnum << endl;
+		//cout << "SIZE of File: "<< id << " IS:"<< bnum << endl;
 			firstblocknum.push(bnum);
 			firstblockid.push(id);
 		}
@@ -398,7 +467,7 @@ map<string,string> BOrion::searchWrapper(string keyword)
 			string id = blk.second.substr(0,4);
 			int sz = blk.second.length();
 			string bcontent = blk.second.substr(4,sz);
-			cout << "CONT ofFile:"<< id << "IS:"<< bcontent << endl;
+		//cout << "CONT ofFile:"<< id << "IS:"<< bcontent << endl;
 
 			if(files.find(id)!=files.end())
 			{
@@ -406,13 +475,13 @@ map<string,string> BOrion::searchWrapper(string keyword)
 				con.append(bcontent);
 				files.erase(id);
 				files.insert(pair<string,string>(id,con));
-			   cout << "CONT:"<< id << " :"<< con << endl;
-			   cout<<"------------------------------------"<<endl;
+		//   cout << "CONT:"<< id << " :"<< con << endl;
+		//	   cout<<"------------------------------------"<<endl;
 			}
 			else
 			{
 				files.insert(pair<string,string>(id,bcontent));
-			   cout << "***CONT:"<< id << " :"<< bcontent << endl;
+		//   cout << "***CONT:"<< id << " :"<< bcontent << endl;
 			   //cout<<"------------------------------------"<<endl;
 			}
 		}
@@ -563,3 +632,11 @@ Bid BOrion::createBid(string keyword, int number) {
     return bid;
 }
 
+Bid BOrion::createBid(string keyword, string id) {
+    Bid bid(keyword);
+    //auto arr = to_bytes(id);
+    cout << "size of ras-id:" << id.size() << endl;
+    std::copy(id.begin(), id.end(), bid.id.end() - id.size());
+    //cout << "AT createbid:" << number <<"::"<<bid << endl;
+    return bid;
+}

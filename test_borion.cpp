@@ -12,8 +12,9 @@ using namespace std;
 
 int fileid = 1;
 bool usehdd = false;
-BOrion borion(usehdd, 9000000);  
+BOrion borion(usehdd, 10000);  
 set<string> neg;
+string delimiters("|*?@,:!\"><; _-./  \n");
 
 vector<string> getUniquedWords(vector<string> kws, string fileid)
 {
@@ -78,7 +79,7 @@ vector<string> divideString(string filename, int blk, string id)
 		     string ttemp =id;
 		     ttemp.append(temp); 
                      result.push_back(ttemp);    
-		     cout << "New Node:[" << ttemp << "]\n";
+		     //cout << "New Node:[" << ttemp << "]\n";
                   }
                   temp="";
             }
@@ -119,7 +120,6 @@ string getFileContent(string path)
 
 static void insert_dir (const char * dir_name)
 {
-    string delimiters("|?@,:!\">; -./  \n");
     DIR * d;
     d = opendir (dir_name);
 
@@ -255,21 +255,53 @@ neg.insert("?");
 neg.insert("by");
 neg.insert("\t");
 neg.insert("from");
+neg.insert("_");
+neg.insert("*");
+neg.insert("<");
+neg.insert(">");
+
 
 //INSERT keywords and file blocks of Enron
-    insert_dir("enron");
+    //insert_dir("enron");
+    insert_dir("synth");
 
 //***NOW TEST search and delete
 
 //SEARCH
-/*map <string,string> files = borion.searchWrapper("Heather");
+map <string,string> files = borion.searchWrapper("you");
+
 
 for (map<string, string> :: iterator p = files.begin();
 		         p != files.end(); p++)
 {
-	cout << "FILE[" << p->first <<":"<< p->second <<"]"<< endl<< endl << endl ;
+	cout << "FILE[" << p->first << "]";
 }
-cout << "RESULT size: " << files.size() << endl;*/
+
+
+cout << endl;
+cout << "RESULT size1: " << files.size() << endl;
+cout << "DELETE" << endl;
+borion.removekw("you","0002");
+files.clear();
+files = borion.searchWrapper("you");
+for (map<string, string> :: iterator p = files.begin();
+		         p != files.end(); p++)
+{
+	cout << "FILE[" << p->first << "]";
+}
+cout << endl;
+cout << "RESULT size2: " << files.size() << endl;
+
+borion.removekw("you","0006");
+files.clear();
+files = borion.searchWrapper("you");
+for (map<string, string> :: iterator p = files.begin();
+		         p != files.end(); p++)
+{
+	cout << "FILE[" << p->first << "]";
+}
+cout << endl;
+cout << "RESULT size2: " << files.size() << endl;
 //
     // first searches ids 
     //map<string,string> allfiles = borion.searchWrapper("hell");

@@ -1,53 +1,46 @@
-#include "OMAP.h"
+#include "OMAPf.h"
 using namespace std;
 
-OMAP::OMAP(int maxSize, bytes<Key> key) {
-    treeHandler = new AVLTree(maxSize, key);
+OMAPf::OMAPf(int maxSize, bytes<Key> key) {
+    treeHandler = new AVLTreef(maxSize, key);
     rootKey = 0;
 }
 
-OMAP::~OMAP() {
+OMAPf::~OMAPf() {
 
 }
 
-
-pair<int,string> OMAP::find(Bid key) {
+string OMAPf::find(Bid key) {
     if (rootKey == 0) {
-        return (make_pair(-1,""));
+        return "";
     }
     treeHandler->startOperation();
-    Node* node = new Node();
+    Nodef* node = new Nodef();
     node->key = rootKey;
     node->pos = rootPos;
     auto resNode = treeHandler->search(node, key);
-    //string res1 = "";
-    pair <int,string> res;
+    string res = "";
     if (resNode != NULL) {
-	res.first=resNode->value.first;
-        res.second.assign(resNode->value.second.begin(), resNode->value.second.end());
-        res.second = res.second.c_str();
+        res.assign(resNode->value.begin(), resNode->value.end());
+        res = res.c_str();
     }
     treeHandler->finishOperation(true, rootKey, rootPos);
     return res;
 }
 
-void OMAP::insert(Bid key, pair<int,string> value) {
-//	cout << "in OMAP insert 6[" << value.second << "]"<< endl;
+void OMAPf::insert(Bid key, string value) {
     treeHandler->startOperation();
     if (rootKey == 0) {
-//	cout << "in OMAP inserted as root 7.1[" << value.second << "]"<< endl;
         rootKey = treeHandler->insert(0, rootPos, key, value);
     } else {
-  //     cout << "in OMAP inserted as NONroot 7.2[" << value.second << "]"<< endl;
         rootKey = treeHandler->insert(rootKey, rootPos, key, value);
     }
     treeHandler->finishOperation(false, rootKey, rootPos);
-    //cout << "in OMAP inserted fake access 8[" << value.second << "]"<< endl;
 }
 
-void OMAP::printTree() {
+void OMAPf::printTree() {
     treeHandler->startOperation();
-    Node* node = new Node();
+    Nodef* node = new Nodef();
     node->key = rootKey;
     node->pos = rootPos;
     treeHandler->printTree(node, 0);
@@ -58,7 +51,7 @@ void OMAP::printTree() {
 /**
  * This function is used for batch insert which is used at the end of setup phase.
  */
-void OMAP::batchInsert(map<Bid, pair<int,string>> pairs) {
+void OMAPf::batchInsert(map<Bid, string> pairs) {
     treeHandler->startOperation(true);
     int cnt = 0;
     for (auto pair : pairs) {
@@ -78,26 +71,22 @@ void OMAP::batchInsert(map<Bid, pair<int,string>> pairs) {
 /**
  * This function is used for batch search which is used in the real search procedure
  */
-vector<pair<int,string>> OMAP::batchSearch(vector<Bid> keys) {
-    vector<pair<int,string>> result;
+vector<string> OMAPf::batchSearch(vector<Bid> keys) {
+    vector<string> result;
     treeHandler->startOperation(false);
-    Node* node = new Node();
+    Nodef* node = new Nodef();
     node->key = rootKey;
     node->pos = rootPos;
 
-    vector<Node*> resNodes;
+    vector<Nodef*> resNodes;
     treeHandler->batchSearch(node, keys, &resNodes);
-    for (Node* n : resNodes) {
-        pair<int,string> res;
-	string res1="";
+    for (Nodef* n : resNodes) {
+        string res;
         if (n != NULL) {
-            res.first=n->value.first;
-            res1.assign(n->value.second.begin(), n->value.second.end());
-	    res.second = res1.c_str();
+            res.assign(n->value.begin(), n->value.end());
             result.push_back(res);
         } else {
-		cout << "Pushing -1" << endl;
-            result.push_back(make_pair(-1,"")); // not sure if first is -1
+            result.push_back("");
         }
     }
     treeHandler->finishOperation(true, rootKey, rootPos);

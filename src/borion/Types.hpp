@@ -14,6 +14,7 @@
 #define LARGE 102400
 #define BLOCK 64 // 128 caused seg_fault
 
+#define LAST -1
 #define KS 0
 #define KB 1
 #define FS 2
