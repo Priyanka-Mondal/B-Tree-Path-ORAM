@@ -7,6 +7,26 @@
 #include <boost/algorithm/string.hpp>
 
 int inserted = 0;
+int get_block_num(int updc, int com)
+{
+       float bnum = ceil(updc/com); // 16 file-ids each block
+       int block_num ;
+       if(updc%com == 0)
+	      block_num = bnum;
+       else 
+	      block_num = bnum+1;
+
+	return block_num;
+}
+
+int get_position(int updc, int com)
+{
+       int pos_in_block = updc%com; // 1,2,3,4, ..., 16
+       if (pos_in_block == 0) 
+	       pos_in_block = com;
+
+       return pos_in_block;
+}
 BOrion::BOrion(bool usehdd, int maxSize) {
     this->useHDD = usehdd;
     bytes<Key> key1{0};
@@ -89,14 +109,16 @@ void BOrion::insert(string keyword, string ind)
 
        //cout << "inserted updc 5" << endl;
        //cout << "updc value:"<< updc << endl;
-       int pos_in_block = updc%COM; // 1,2,3,4, ..., 16
-       if (pos_in_block == 0) pos_in_block = COM;
-       float bnum = ceil(updc/COM); // 16 file-ids each block
-       int block_num ;
-       if(updc%COM == 0)
-	      block_num = bnum;
-       else 
-	      block_num = bnum+1;
+       //int pos_in_block = updc%COM; // 1,2,3,4, ..., 16
+       //if (pos_in_block == 0) pos_in_block = COM;
+	int pos_in_block = get_position(updc,COM);
+       //float bnum = ceil(updc/COM); // 16 file-ids each block
+       //int block_num ;
+       //if(updc%COM == 0)
+//	      block_num = bnum;
+ //      else 
+//	      block_num = bnum+1;
+	int block_num = get_block_num(updc,COM);
        
        //cout <<"Keyword-" << keyword << endl;
        //cout << "block_num value:"<< block_num << endl;
@@ -214,6 +236,8 @@ void BOrion::setupInsert(string keyword, pair<int,string> ind) {
 }
 
 
+
+
 void BOrion::removekw(string keyword, string ind) 
 {
     Bid mapKey = createBid(keyword, ind);
@@ -225,6 +249,7 @@ void BOrion::removekw(string keyword, string ind)
     
     Bid lastKey = createBid(keyword,LAST);
     auto last = srch->find(lastKey);
+    cout << "DELCNT::"<< del_cnt <<" last.sec [" << last.second<<"]" << endl;
     if (del_cnt > 0) {
         updt->insert(mapKey, to_string(LAST)); 
 	Bid mk = createBid(keyword,0);
@@ -235,6 +260,7 @@ void BOrion::removekw(string keyword, string ind)
         convstoi >> updt_cnt;
 	int updc = updt_cnt;
 	updc--;
+	srch->insert(mk,make_pair(KS,to_string(updc)));
         
 if (updc > 0) 
 {
@@ -243,51 +269,102 @@ if (updc > 0)
             Bid curKey = createBid(keyword, last.second); // retrieve (last)
             updt->insert(curKey, delcnt);
 
+    //cout << "DELCNT::"<< del_cnt <<" last.sec [" << last.second<<"]" << endl;
        
-       int pos_in_blockdel = del_cnt%COM; // 1,2,3,4, ..., 16
-       if (pos_in_blockdel == 0) pos_in_blockdel = COM;
-       float bnum = ceil(del_cnt/COM); // 16 file-ids each block
-       int block_del ;
-       if(del_cnt%COM == 0)
-	      block_del = bnum;
-       else 
-	      block_del = bnum+1;
+       //int pos_in_blockdel = del_cnt%COM; // 1,2,3,4, ..., 16
+       //if (pos_in_blockdel == 0) pos_in_blockdel = COM;
+       int pos_in_blockdel = get_position(del_cnt,COM);
+       int block_del = get_block_num(del_cnt, COM);
+//       float bnum = ceil(del_cnt/COM); // 16 file-ids each block
+//       int block_del ;
+//       if(del_cnt%COM == 0)
+//	      block_del = bnum;
+//       else 
+//	      block_del = bnum+1;
 
                 Bid cur = createBid(keyword, block_del);
                 auto bl_del = srch->find(cur);
-       		string blsec = bl_del.second;
+		string blsec;
 
-       int pos_in_block = updt_cnt%COM; // 1,2,3,4, ..., 16
-       if (pos_in_block == 0) pos_in_block = COM;
-       bnum = ceil(updt_cnt/COM); // 16 file-ids each block
-       int block_num ;
-       if(updt_cnt%COM == 0)
-	      block_num = bnum;
-       else 
-	      block_num = bnum+1;
+       int pos_in_block = get_position(updt_cnt,COM);
+       int block_num = get_block_num(updt_cnt, COM);
+//       int pos_in_block = updt_cnt%COM; // 1,2,3,4, ..., 16
+//       if (pos_in_block == 0) pos_in_block = COM;
+//       bnum = ceil(updt_cnt/COM); // 16 file-ids each block
+//       int block_num ;
+//       if(updt_cnt%COM == 0)
+//	      block_num = bnum;
+//       else 
+//	      block_num = bnum+1;
 
                 Bid cur2 = createBid(keyword, block_num);
                 auto bl = srch->find(cur2);
 	    	string block = bl.second;
 
-	    string st = block.substr((pos_in_block-1)*FID_SIZE,FID_SIZE);
-	    block.insert((pos_in_block-1)*FID_SIZE,FID_SIZE,'#');
-	    bl.second = block;
-	    srch->insert(cur,bl);
 
+	    cout << "BLOCKBe[" << block <<"]"<< endl << endl ; 
+	    string st = block.substr((pos_in_block-1)*FID_SIZE,FID_SIZE);
+	    block.replace((pos_in_block-1)*FID_SIZE,FID_SIZE,"####");
+	    bl.second = block;
+	    cout << "BLOCKAf[" << block <<"]"<< endl << endl ;
+	    srch->insert(cur2,bl); // cur
+
+		if(block_num == block_del)
+			blsec = block;
+		else
+       			blsec = bl_del.second;
+	    cout << "BLOCKBE[" << blsec <<"]"<< endl << endl ; 
             blsec.replace((pos_in_blockdel-1)*FID_SIZE,FID_SIZE,st);
 	    bl_del.second = blsec;
+	    cout << "BLOCKAF[" << blsec <<"]"<< endl << endl ;
 	    srch->insert(cur,bl_del);
             }
+      else
+      {
+	      cout << "IN ELLSE" << endl << endl ;
+       int pos_in_block = get_position(updt_cnt,COM);
+       int block_num = get_block_num(updt_cnt, COM);
+//       int pos_in_block = updt_cnt%COM; // 1,2,3,4, ..., 16
+//       if (pos_in_block == 0) pos_in_block = COM;
+//       int bnum = ceil(updt_cnt/COM); // 16 file-ids each block
+//       int block_num ;
+//       if(updt_cnt%COM == 0)
+//	      block_num = bnum;
+//       else 
+//	      block_num = bnum+1;
+
+                Bid cur2 = createBid(keyword, block_num);
+                auto bl = srch->find(cur2);
+	    	string block = bl.second;
+
+	    block.replace((pos_in_block-1)*FID_SIZE,FID_SIZE,"####");
+	    bl.second = block;
+	    cout << "BLOLAa[" << block <<"]"<< endl << endl;
+	    srch->insert(cur2,bl);
+      }
+       int pos_in_block = get_position(updc,COM);
+       int block_num = get_block_num(updc, COM);
+//       int pos_in_block = updc%COM; // 1,2,3,4, ..., 16
+//       if (pos_in_block == 0) pos_in_block = COM;
+//       int bnum = ceil(updc/COM); // 16 file-ids each block
+//       int block_num ;
+//       if(updc%COM == 0)
+//	      block_num = bnum;
+//       else 
+//	      block_num = bnum+1;
             
-	    Bid key = createBid(keyword, updc);
-            string lastid = srch->find(key).second;
+	    Bid key = createBid(keyword, block_num);
+            string lastidblock = (srch->find(key)).second;
+	    //get the id of pos_in_block;
+ string lastid = lastidblock.substr((pos_in_block-1)*FID_SIZE,FID_SIZE);
             pair <int, string> lst;
 	    lst.first = LAST; // -1
 	    lst.second = lastid;
 	    srch->insert(lastKey, lst);
+	    // delete the last entry of the last block
+	    //
         } else {
-            //LastIND.erase(keyword);
+		cout << "MAKING last empty" << endl;
 		pair <int, string> lst;
 		lst.first = LAST;
 		lst.second = "";
@@ -635,8 +712,10 @@ Bid BOrion::createBid(string keyword, int number) {
 Bid BOrion::createBid(string keyword, string id) {
     Bid bid(keyword);
     //auto arr = to_bytes(id);
-    cout << "size of ras-id:" << id.size() << endl;
+    //cout << "size of ras-id:" << id.size() << endl;
     std::copy(id.begin(), id.end(), bid.id.end() - id.size());
     //cout << "AT createbid:" << number <<"::"<<bid << endl;
     return bid;
 }
+
+

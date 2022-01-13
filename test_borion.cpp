@@ -301,7 +301,49 @@ for (map<string, string> :: iterator p = files.begin();
 	cout << "FILE[" << p->first << "]";
 }
 cout << endl;
-cout << "RESULT size2: " << files.size() << endl;
+cout << "RESULT size3: " << files.size() << endl;
+borion.removekw("you","0007");
+files.clear();
+files = borion.searchWrapper("you");
+for (map<string, string> :: iterator p = files.begin();
+		         p != files.end(); p++)
+{
+	cout << "FILE[" << p->first << "]";
+}
+cout << endl;
+cout << "RESULT size4: " << files.size() << endl;
+borion.removekw("you","0001");
+files.clear();
+files = borion.searchWrapper("you");
+for (map<string, string> :: iterator p = files.begin();
+		         p != files.end(); p++)
+{
+	cout << "FILE[" << p->first << "]";
+}
+cout << endl;
+cout << "RESULT size5: " << files.size() << endl;
+
+
+borion.removekw("you","0017");
+files.clear();
+files = borion.searchWrapper("you");
+for (map<string, string> :: iterator p = files.begin();
+		         p != files.end(); p++)
+{
+	cout << "FILE[" << p->first << "]";
+}
+cout << endl;
+cout << "RESULT size5: " << files.size() << endl;
+borion.removekw("you","0018");
+files.clear();
+files = borion.searchWrapper("you");
+for (map<string, string> :: iterator p = files.begin();
+		         p != files.end(); p++)
+{
+	cout << "FILE[" << p->first << "]";
+}
+cout << endl;
+cout << "RESULT size5: " << files.size() << endl;
 //
     // first searches ids 
     //map<string,string> allfiles = borion.searchWrapper("hell");
