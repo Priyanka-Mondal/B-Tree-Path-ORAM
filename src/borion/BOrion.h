@@ -24,7 +24,7 @@ public:
     Bid createBid(string keyword,string id);
     //Bid createBidS(string keyword,string id);
     void insertWrapper(vector<string> kws, vector<string> blocks, string ind);
-    void insert(string keyword, string ind);
+    void insert(string keyword, string ind); // inserts a keyword for ind
     void insertdel(string ind);
     void insertFile(string keyword, vector<string> blocks);
     //void insertblk(string keyword, int ind);
