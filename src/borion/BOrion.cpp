@@ -238,6 +238,36 @@ void BOrion::setupInsert(string keyword, pair<int,string> ind) {
 
 
 
+
+string BOrion::removefileblock(string ind, int blk) 
+{
+	Bid del = createBid(ind, blk);
+	auto ret = (srch->find(del)).second;
+	ret = ret.substr(4,ret.size());
+	pair <int, string> pr;
+	pr.first = -1;
+	pr.second = "";
+	srch->insert(del, pr);
+	return ret;
+
+}
+
+string BOrion::searchfileblocknum(string ind) 
+{
+	Bid firs = createBid(ind, 0);
+	auto ret = srch->find(firs).second;
+	if(ret.size() > 4)
+	{
+	ret = ret.substr(4,ret.size());
+	cout << "num bloc:" << ret << endl;
+	pair <int, string> pr;
+	pr.first = -1;
+	pr.second = "";
+	srch->insert(firs, pr);
+	}
+	return ret;
+
+}
 void BOrion::removekw(string keyword, string ind) 
 {
     Bid mapKey = createBid(keyword, ind);
@@ -655,7 +685,15 @@ return files;
 }
 
 
-vector<pair<int,string>> BOrion::search(string keyword) 
+pair<int,string> BOrion::searchfileblock(string ind, int blk) 
+{
+    Bid mapKey = createBid(ind, blk);
+    auto result = srch->find(mapKey);
+    return result;
+}
+
+
+vector<pair<int,string>> BOrion::searchkw(string keyword) 
 {
     vector<pair<int,string>> result;
     vector<Bid> bids;
@@ -667,8 +705,9 @@ vector<pair<int,string>> BOrion::search(string keyword)
     if (updt_cnt != "") {
         stringstream convstoi(updt_cnt);
         convstoi >> updc;
+	int block_num = get_block_num(updc,COM);
 
-        for (int i = 1; i <= updc; i++) {
+        for (int i = 1; i <= block_num; i++) {  // 
             Bid bid = createBid(keyword, i);
             bids.push_back(bid);
         }

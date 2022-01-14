@@ -14,7 +14,14 @@ int fileid = 1;
 bool usehdd = false;
 BOrion borion(usehdd, 10000);  
 set<string> neg;
-string delimiters("|*?@,:!\"><; _-./  \n");
+string delimiters("|#*?@,:!\"><; _-./  \n");
+
+
+//string retrieve(string s)
+//{
+//	    size_t end = s.find_last_not_of('#');
+//	        return (end == std::string::npos) ? "" : s.substr(0, end + 1);
+//}
 
 vector<string> getUniquedWords(vector<string> kws, string fileid)
 {
@@ -224,6 +231,59 @@ static void insert_dir (const char * dir_name)
 }
 
 
+void deletefile(string id)
+{
+	string cont ="";
+	string block = (borion.searchfileblocknum(id));
+	if(block.size()>0)
+	{
+	stringstream convstoi(block);
+	int blocks;
+	convstoi >> blocks;
+ cout << "number of blocks" << blocks << endl;	
+	for(int blk = 1; blk<= blocks; blk++)
+	{
+		cont.append((borion.removefileblock(id,blk)));
+
+	}
+	cout << "content[" << cont << "]" << endl;
+	//cont = retrieve(cont);
+	cout << "Newcontent[" << cont << "]" << endl;
+	vector<string> kws ,kws1;
+	boost::split(kws1, cont, boost::is_any_of(delimiters));
+	kws =  getUniquedWords(kws1, id);
+	      for (auto it = kws.begin(); it != kws.end(); it++)
+	      {
+		      //cout <<"pos:"<<pos<<"-";
+		      if(neg.find(*it)!=neg.end())
+		      {
+			 //cout << endl <<"Deleted:["<<*it<<"]"<<endl ;
+			 kws.erase(it--);
+		      }
+		      //else
+		      //{
+			//cout <<"["<<*it<<"]" <<"     " ;
+		      //}
+		      //pos++;
+	      }
+
+	for(auto d : kws)
+	{
+		cout << "removing keyword:[" << d <<"]"<< endl;
+		borion.removekw(d,id);
+	}
+	cout << "Total deleted:"<< kws.size() << endl;
+}
+else
+{
+	cout <<"file " << id <<" does not exist!!" << endl;
+}
+}
+
+
+
+
+
 int main(int, char**) {
    
 	/*string inputString("One!Two,Three:Four Five--Six ,  Seven,8.9");
@@ -259,7 +319,8 @@ neg.insert("_");
 neg.insert("*");
 neg.insert("<");
 neg.insert(">");
-
+neg.insert("#");
+neg.insert("");
 
 //INSERT keywords and file blocks of Enron
     //insert_dir("enron");
@@ -281,9 +342,22 @@ for (map<string, string> :: iterator p = files.begin();
 cout << endl;
 cout << "RESULT size1: " << files.size() << endl;
 cout << "DELETE" << endl;
-borion.removekw("you","0002");
+deletefile("0007");
 files.clear();
 files = borion.searchWrapper("you");
+cout << "RESULT size2: " << files.size() << endl;
+deletefile("0007");
+deletefile("0002");
+deletefile("0013");
+deletefile("0011");
+deletefile("0011");
+deletefile("0017");
+deletefile("0016");
+deletefile("0011");
+deletefile("0010");
+deletefile("0010");
+deletefile("0015");
+    /*
 for (map<string, string> :: iterator p = files.begin();
 		         p != files.end(); p++)
 {
@@ -347,7 +421,6 @@ cout << "RESULT size5: " << files.size() << endl;
 //
     // first searches ids 
     //map<string,string> allfiles = borion.searchWrapper("hell");
-    /*
     for(auto itr= allfiles.begin(); itr!=allfiles.end();itr++)
     {
 	   	 cout << " OUTPUT Blocks :[" << itr->first << "]\n";
