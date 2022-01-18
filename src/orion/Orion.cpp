@@ -12,7 +12,15 @@ Orion::~Orion() {
     delete srch;
     delete updt;
 }
-
+/*
+int stoi(string updt_cnt)
+{
+	int updc;
+	stringstream convstoi(updt_cnt);
+	convstoi >> updc;
+	return updc;
+}
+*/
 void Orion::insert(string keyword, int ind) {
     Bid mapKey = createBid(keyword, ind);
     auto updt_cnt = updt->find(mapKey);
@@ -20,7 +28,7 @@ void Orion::insert(string keyword, int ind) {
         if (UpdtCnt.count(keyword) == 0) {
             UpdtCnt[keyword] = 0;
         }
-         cout << "updatecnt" << UpdtCnt[keyword] <<"\n" ;
+         //cout << "updatecnt" << UpdtCnt[keyword] <<"\n" ;
         UpdtCnt[keyword]++;
         updt->insert(mapKey, to_string(UpdtCnt[keyword]));
         Bid key = createBid(keyword, UpdtCnt[keyword]);
@@ -47,6 +55,9 @@ void Orion::setupInsert(string keyword, int ind) {
 void Orion::remove(string keyword, int ind) {
     Bid mapKey = createBid(keyword, ind);
     string updt_cnt = updt->find(mapKey);
+    if(updt_cnt != "")
+    {
+	    cout <<"In delete:" << endl;
     if (stoi(updt_cnt) > 0) {
         updt->insert(mapKey, to_string(-1));
         UpdtCnt[keyword]--;
@@ -61,9 +72,15 @@ void Orion::remove(string keyword, int ind) {
             string idstr = srch->find(key);
             int lastID = stoi(idstr);
             LastIND[keyword] = lastID;
+	    //new lines
+	    Bid key2 = createBid(keyword, UpdtCnt[keyword]+1);
+	    key2 = srch->remove(key2);
+	    cout << "DELETED bid id is :"<< key2 << endl;
+	    //new lines ends
         } else {
             LastIND.erase(keyword);
         }
+    }
     }
 }
 
@@ -105,6 +122,7 @@ vector<int> Orion::search(string keyword) {
     auto tmpRes = srch->batchSearch(bids);
     for(auto item:tmpRes){
         result.push_back(stoi(item));
+        //result.push_back((item));
     }
     return result;
 }
@@ -129,6 +147,6 @@ Bid Orion::createBid(string keyword, int number) {
     Bid bid(keyword);
     auto arr = to_bytes(number);
     std::copy(arr.begin(), arr.end(), bid.id.end() - 4);
-    cout <<"AT Bid:"<<number<<"::"<<bid<<endl;
+    //cout <<"AT Bid:"<<number<<"::"<<bid<<endl;
     return bid;
 }

@@ -101,6 +101,80 @@ int AVLTreef::getBalance(Nodef* N) {
     return height(N->leftID, N->leftPos) - height(N->rightID, N->rightPos);
 }
 
+
+Bid AVLTreef::remove(Bid rootKey, int& pos, Bid delKey) {
+    /* 1. Perform the normal BST rotation */
+    Bid key = ZKEY;
+    string value = "0";
+    
+    if (rootKey == 0) {
+        Nodef* nnode = newNodef(key, value);
+        pos = oram->WriteNodef(delKey, nnode);
+        return nnode->key;
+    }
+    Nodef* node = oram->ReadNodef(rootKey, pos, pos);
+    if (key < node->key) {
+        node->leftID = insert(node->leftID, node->leftPos, key, value);
+    } else if (key > node->key) {
+        node->rightID = insert(node->rightID, node->rightPos, key, value);
+    } else {
+        std::fill(node->value.begin(), node->value.end(), 0);
+        std::copy(value.begin(), value.end(), node->value.begin());
+        oram->WriteNodef(rootKey, node);
+        return node->key;
+    }
+
+    /* 2. Update height of this ancestor node */
+    node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
+
+    /* 3. Get the balance factor of this ancestor node to check whether
+       this node became unbalanced */
+    int balance = getBalance(node);
+
+    // If this node becomes unbalanced, then there are 4 cases
+
+    // Left Left Case
+    if (balance > 1 && key < oram->ReadNodef(node->leftID)->key) {
+        Nodef* res = rightRotate(node);
+        pos = res->pos;
+        return res->key;
+    }
+
+    // Right Right Case
+    if (balance < -1 && key > oram->ReadNodef(node->rightID)->key) {
+        Nodef* res = leftRotate(node);
+        pos = res->pos;
+        return res->key;
+    }
+
+    // Left Right Case
+    if (balance > 1 && key > oram->ReadNodef(node->leftID)->key) {
+        Nodef* res = leftRotate(oram->ReadNodef(node->leftID));
+        node->leftID = res->key;
+        node->leftPos = res->pos;
+        oram->WriteNodef(node->key, node);
+        Nodef* res2 = rightRotate(node);
+        pos = res2->pos;
+        return res2->key;
+    }
+
+    // Right Left Case
+    if (balance < -1 && key < oram->ReadNodef(node->rightID)->key) {
+        auto res = rightRotate(oram->ReadNodef(node->rightID));
+        node->rightID = res->key;
+        node->rightPos = res->pos;
+        oram->WriteNodef(node->key, node);
+        auto res2 = leftRotate(node);
+        pos = res2->pos;
+        return res2->key;
+    }
+
+    /* return the (unchanged) node pointer */
+    oram->WriteNodef(node->key, node);
+    return node->key;
+}
+
+
 Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, string value) {
     /* 1. Perform the normal BST rotation */
     if (rootKey == 0) {

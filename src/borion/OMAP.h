@@ -26,7 +26,7 @@ public:
     void printTree();
     void batchInsert(map<Bid, pair<int,string>> pairs);
     vector<pair<int,string>> batchSearch(vector<Bid> keys);
-    //void remove(Bid key);
+    Bid remove(Bid key);
 };
 
 #endif /* OMAP_H */

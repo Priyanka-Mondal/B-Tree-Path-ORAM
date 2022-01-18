@@ -31,6 +31,19 @@ pair<int,string> OMAP::find(Bid key) {
     return res;
 }
 
+
+Bid OMAP::remove(Bid delKey)
+{
+    treeHandler->startOperation();
+    if (rootKey == 0) {
+        rootKey = treeHandler->remove(0, rootPos, delKey);
+    } else {
+        rootKey = treeHandler->remove(rootKey, rootPos, delKey);
+    }
+    treeHandler->finishOperation(false, rootKey, rootPos);
+}
+
+
 void OMAP::insert(Bid key, pair<int,string> value) {
 //	cout << "in OMAP insert 6[" << value.second << "]"<< endl;
     treeHandler->startOperation();

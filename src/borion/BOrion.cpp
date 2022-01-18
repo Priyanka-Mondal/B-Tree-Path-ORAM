@@ -53,7 +53,7 @@ void BOrion::insertWrapper(vector<string> kws, vector<string> blocks, string ind
 	cout << "inserted all the kw (total keywords: " <<totk <<")"<< endl;
 
 
-     // so add some fake accesses
+     // add some fake accesses
      // Will uncomment later
      /*
      int ran = rand()%(kws.size())+ceil(0.5*kws.size());
@@ -221,6 +221,8 @@ void BOrion::removekw(string keyword, string ind)
 {
     Bid mapKey = createBid(keyword, ind);
     string delcnt = updt->find(mapKey);
+    if (delcnt!="")
+    {
     stringstream convstoi(delcnt);
     int del_cnt;
     convstoi >> del_cnt;
@@ -231,7 +233,8 @@ void BOrion::removekw(string keyword, string ind)
     cout << " last id:[" << last.second<<"]" << endl;
     if (del_cnt > 0) 
     {
-        updt->insert(mapKey, to_string(LAST)); 
+        //updt->insert(mapKey, to_string(LAST)); 
+	updt->remove(mapKey); // delete in updt
 	Bid mk = createBid(keyword,0);
 	string updtcnt = srch->find(mk).second;
         stringstream convstoi(updtcnt);
@@ -313,6 +316,7 @@ void BOrion::removekw(string keyword, string ind)
 		lst.second = "";
 	        srch->insert(lastKey, lst); // or -1 ?
         }
+    }
     }
 }
 

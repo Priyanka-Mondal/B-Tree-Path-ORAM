@@ -5,6 +5,9 @@
 #include <vector>
 #include <iostream>
 
+
+#define ZKEY 0
+
 #define ID_SIZE 64 // it was 16 before
 #define FID_SIZE 4
 #define COM 16

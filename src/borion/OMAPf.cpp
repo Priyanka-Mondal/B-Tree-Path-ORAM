@@ -28,6 +28,17 @@ string OMAPf::find(Bid key) {
     return res;
 }
 
+Bid OMAPf::remove(Bid delKey) 
+{
+    treeHandler->startOperation();
+    if (rootKey == 0) {
+        rootKey = treeHandler->remove(0, rootPos, delKey);
+    } else {
+        rootKey = treeHandler->remove(0, rootPos, delKey);
+    }
+    treeHandler->finishOperation(false, rootKey, rootPos);
+}
+
 void OMAPf::insert(Bid key, string value) {
     treeHandler->startOperation();
     if (rootKey == 0) {

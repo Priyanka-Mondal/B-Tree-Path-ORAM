@@ -102,45 +102,36 @@ int AVLTree::getBalance(Node* N) {
     return height(N->leftID, N->leftPos) - height(N->rightID, N->rightPos);
 }
 
-Bid AVLTree::insert(Bid rootKey, int& pos, Bid key, pair<int, string> value) {
+
+
+Bid AVLTree::remove(Bid rootKey, int& pos, Bid delKey) {
     /* 1. Perform the normal BST rotation */
-	//cout << "AVL insert 6.0[" <<  value.first<< " "<<value.second << "]"<< endl;
+	Bid key = ZKEY;
+	pair<int, string> value;
+	value.first = -1;
+	value.second ="-1";
+
     if (rootKey == 0) {
-	//cout << "AVL insert 6.1[" << value.first<< " "<< value.second << "]"<< endl;
         Node* nnode = newNode(key, value);
-	//cout << "AVL insert 6.2[" <<  value.first<< " "<<value.second << "]"<< endl;
-        pos = oram->WriteNode(key, nnode);
-	//cout << "AVL insert 6.3[" <<  value.first<< " "<<value.second << "]"<< endl;
+        pos = oram->WriteNode(delKey, nnode);
         return nnode->key;
     }
-//cout << "AVL ins 6.4[" <<  value.first<< " "<<value.second << "]"<< endl;
     Node* node = oram->ReadNode(rootKey, pos, pos);
-//cout << "AVL insroot 6.5[" <<  value.first<< " "<<value.second << "]"<< endl;
     if (key < node->key) {
-//	cout << "AVL insert 6.6.0[" <<  value.first<< " "<<value.second << "]"<< endl;
         node->leftID = insert(node->leftID, node->leftPos, key, value);
-	//cout << "AVL insert 6.6.1[" <<  value.first<< " "<<value.second << "]"<< endl;
     } else if (key > node->key) {
-	//cout << "AVL insert 6.7[" <<  value.first<< " "<<value.second << "]"<< endl;
         node->rightID = insert(node->rightID, node->rightPos, key, value);
-	//cout << "AVL insert 6.7.1[" <<  value.first<< " "<<value.second << "]"<< endl;
     } else {
-	//cout << "AVL insert 6.8.0[" <<  value.first<< " "<<value.second << "]"<< endl;
 	    node->value.first = value.first;
-	//cout << "AVL ins val 6.8.1[" <<  value.first<< " "<<value.second << "]"<< endl;
         std::fill(node->value.second.begin(), node->value.second.end(), 0);
-	//cout << "in AVL ins val 6.8.2[" <<  value.first<< " "<<value.second << "]"<< endl;
         std::copy(value.second.begin(), value.second.end(), node->value.second.begin());
-	//cout << "in AVL ins val 6.8.3[" <<  value.first<< " "<<value.second << "]"<< endl;
         oram->WriteNode(rootKey, node);
-	//cout << "in AVL ins val 6.8.4[" <<  value.first<< " "<<value.second << "]"<< endl;
         return node->key;
     }
 
     /* 2. Update height of this ancestor node */
     node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
 
-	//cout << "Adjusting AVL height 1" <<  value.first<< " "<<value.second << "]"<< endl;
     /* 3. Get the balance factor of this ancestor node to check whether
        this node became unbalanced */
     int balance = getBalance(node);
@@ -149,16 +140,13 @@ Bid AVLTree::insert(Bid rootKey, int& pos, Bid key, pair<int, string> value) {
 
     // Left Left Case
     if (balance > 1 && key < oram->ReadNode(node->leftID)->key) {
-	//cout << "Adjusting AVL height 2" <<  value.first<< " "<<value.second << "]"<< endl;
         Node* res = rightRotate(node);
-	//cout << "Adjusting AVL height 3" <<  value.first<< " "<<value.second << "]"<< endl;
         pos = res->pos;
         return res->key;
     }
 
     // Right Right Case
     if (balance < -1 && key > oram->ReadNode(node->rightID)->key) {
-	//cout << "Adjusting AVL height 4" <<  value.first<< " "<<value.second << "]"<< endl;
         Node* res = leftRotate(node);
         pos = res->pos;
         return res->key;
@@ -166,7 +154,6 @@ Bid AVLTree::insert(Bid rootKey, int& pos, Bid key, pair<int, string> value) {
 
     // Left Right Case
     if (balance > 1 && key > oram->ReadNode(node->leftID)->key) {
-	//cout << "Adjusting AVL height 5" <<  value.first<< " "<<value.second << "]"<< endl;
         Node* res = leftRotate(oram->ReadNode(node->leftID));
         node->leftID = res->key;
         node->leftPos = res->pos;
@@ -178,7 +165,6 @@ Bid AVLTree::insert(Bid rootKey, int& pos, Bid key, pair<int, string> value) {
 
     // Right Left Case
     if (balance < -1 && key < oram->ReadNode(node->rightID)->key) {
-	//cout << "Adjusting AVL height 6" <<  value.first<< " "<<value.second << "]"<< endl;
         auto res = rightRotate(oram->ReadNode(node->rightID));
         node->rightID = res->key;
         node->rightPos = res->pos;
@@ -189,9 +175,78 @@ Bid AVLTree::insert(Bid rootKey, int& pos, Bid key, pair<int, string> value) {
     }
 
     /* return the (unchanged) node pointer */
-	//cout << "Adjusting AVL height 7" <<  value.first<< " "<<value.second << "]"<< endl;
     oram->WriteNode(node->key, node);
-	//cout << "Adjusting AVL height 8" <<  value.first<< " "<<value.second << "]"<< endl;
+    return node->key;
+}
+
+
+Bid AVLTree::insert(Bid rootKey, int& pos, Bid key, pair<int, string> value) {
+    /* 1. Perform the normal BST rotation */
+    if (rootKey == 0) {
+        Node* nnode = newNode(key, value);
+        pos = oram->WriteNode(key, nnode);
+        return nnode->key;
+    }
+    Node* node = oram->ReadNode(rootKey, pos, pos);
+    if (key < node->key) {
+        node->leftID = insert(node->leftID, node->leftPos, key, value);
+    } else if (key > node->key) {
+        node->rightID = insert(node->rightID, node->rightPos, key, value);
+    } else {
+	    node->value.first = value.first;
+        std::fill(node->value.second.begin(), node->value.second.end(), 0);
+        std::copy(value.second.begin(), value.second.end(), node->value.second.begin());
+        oram->WriteNode(rootKey, node);
+        return node->key;
+    }
+
+    /* 2. Update height of this ancestor node */
+    node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
+
+    /* 3. Get the balance factor of this ancestor node to check whether
+       this node became unbalanced */
+    int balance = getBalance(node);
+
+    // If this node becomes unbalanced, then there are 4 cases
+
+    // Left Left Case
+    if (balance > 1 && key < oram->ReadNode(node->leftID)->key) {
+        Node* res = rightRotate(node);
+        pos = res->pos;
+        return res->key;
+    }
+
+    // Right Right Case
+    if (balance < -1 && key > oram->ReadNode(node->rightID)->key) {
+        Node* res = leftRotate(node);
+        pos = res->pos;
+        return res->key;
+    }
+
+    // Left Right Case
+    if (balance > 1 && key > oram->ReadNode(node->leftID)->key) {
+        Node* res = leftRotate(oram->ReadNode(node->leftID));
+        node->leftID = res->key;
+        node->leftPos = res->pos;
+        oram->WriteNode(node->key, node);
+        Node* res2 = rightRotate(node);
+        pos = res2->pos;
+        return res2->key;
+    }
+
+    // Right Left Case
+    if (balance < -1 && key < oram->ReadNode(node->rightID)->key) {
+        auto res = rightRotate(oram->ReadNode(node->rightID));
+        node->rightID = res->key;
+        node->rightPos = res->pos;
+        oram->WriteNode(node->key, node);
+        auto res2 = leftRotate(node);
+        pos = res2->pos;
+        return res2->key;
+    }
+
+    /* return the (unchanged) node pointer */
+    oram->WriteNode(node->key, node);
     return node->key;
 }
 

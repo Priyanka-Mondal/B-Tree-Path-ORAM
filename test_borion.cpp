@@ -14,7 +14,7 @@ int fileid = 1;
 bool usehdd = false;
 BOrion borion(usehdd, 10000);  
 set<string> neg;
-string delimiters("|#*?@,:!\"><; _-./  \n");
+string delimiters("|+#*?@,:!\"><; _-./  \n");
 
 
 //string retrieve(string s)
@@ -320,6 +320,7 @@ neg.insert("*");
 neg.insert("<");
 neg.insert(">");
 neg.insert("#");
+neg.insert("+");
 neg.insert("");
 
 //INSERT keywords and file blocks of Enron

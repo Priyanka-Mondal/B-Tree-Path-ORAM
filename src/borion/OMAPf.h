@@ -20,6 +20,7 @@ private:
 public:
     OMAPf(int maxSize, bytes<Key> key);
     virtual ~OMAPf();
+    Bid remove(Bid delKey);
     void insert(Bid key, string value);
     string find(Bid key);
     void printTree();
