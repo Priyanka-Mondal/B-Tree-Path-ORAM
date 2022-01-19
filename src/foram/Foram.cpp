@@ -8,12 +8,22 @@
 
 int inserted = 0;
 
-Foram::Foram(bool usehdd, int maxSize) {
+int to_Int(string s)
+{
+	stringstream convstoi(s);
+	int ret;
+	convstoi >> ret;
+	return ret;
+}
+
+
+Foram::Foram(bool usehdd, int maxSize) 
+{
     this->useHDD = usehdd;
     bytes<Key> key1{0};
     bytes<Key> key2{1};
     srch = new OMAP(maxSize*4, key1);
-    updt = new OMAPf(maxSize*4, key1); // use key2
+    updt = new OMAPf(maxSize*4, key2);
 }
 
 Foram::~Foram() {
@@ -21,243 +31,189 @@ Foram::~Foram() {
     delete updt;
 }
 
-void Foram::insertWrapper(vector<string> kws, vector<string> blocks, string ind)
+void Foram::insert(vector<string> kws, vector<string> blocks, string ind)
 { 
-     int totk=0;
+     inserted =0;
+//INSERTING KEYWORDS*******************************
      cout << "inserting kw for:"<< ind << endl;
-     for (auto kw: kws) // cannot batchinsert as updtCount is at server
+     map<string,int> U;
+     for(auto kw: kws)
+     {
+        Bid key = createBid(kw, FCNT);
+        auto uc = (updt->find(key));
+        int updc; 
+    
+        if (uc == "") 
+        {  
+             updc=0;
+        }
+        else
+        {
+            //stringstream convstoi(uc);
+            //convstoi >> updc;
+	    updc = to_Int(uc);
+        }
+       
+        updc = updc+1;
+        updt->insert(key, to_string(updc));
+	U.insert(pair<string,int>(kw,updc));
+        Bid updKey = createBid(kw, ind);
+        updt->insert(updKey, to_string(updc));//pad,can we store number in updc 
+     }
+     //updt->finalize(x);
+     
+     for (auto kw: kws) 
      {
     	cout << "[" << kw << "] :" << ind << endl;
-   	insert(kw,ind); // insert all keywords
-	totk++;
+        Bid key = createBid(kw, U.at(kw));
+        string pr = ind; // pad later
+        srch->insert(key, pr);
+        inserted++;
      }
-	cout << "inserted all the kw (total keywords: " <<totk <<")"<< endl;
+     //srch->finalize(x);
+     cout << "inserted all the kw (total keywords: "<<inserted<<")"<< endl;
 
-     insertFile(ind,blocks); // insert all file blocks
-
+//INSERTING FILES************************************************
+     string blk;
+     int i =1;
+     for(auto block : blocks)
+     {       
+         blk = block;
+   	 Bid mk = createBid(ind, i);
+   	 srch->insert(mk,blk);
+   	 //batch.insert(make_pair(mk,pr)); // gives **ERROR
+   	 i++;
+     }
+     blk = "";
+     Bid mk = createBid(ind, blocks.size()+1);
+     srch->insert(mk,blk);
+     //srch->batchInsert(batch); // gives **ERROR
+     cout << "inserted "<<  blocks.size() <<" blocks of " << ind << endl;
 }
 
-void Foram::insert(string keyword, string ind) 
+
+
+void Foram::setupInsert(vector <string> kws, vector<string> blocks, string ind) 
 {
-    inserted++;
-    Bid mapKey = createBid(keyword, FCNT);
-    auto uc = (updt->find(mapKey));
-    int updc; 
-    if (uc == "") 
-    {  
-         updc=0;
-    }
-    else
-    {
-        stringstream convstoi(uc);
-        convstoi >> updc;
-    }
-   
-    updc = updc+1;
-    updt->insert(mapKey, to_string(updc));
-    Bid updKey = createBid(keyword, ind);
-    updt->insert(updKey, to_string(updc));//pad, can we store number in updc 
+     inserted =0;
+//INSERTING KEYWORDS*******************************
+     map<Bid,string> batchUpd1;
+     map<Bid,string> batchUpd2;
+     cout << "inserting kw for:"<< ind << endl;
+     map<string,int> U;
+     for(auto kw: kws)
+     {
+        Bid key = createBid(kw, FCNT);
+        auto uc = (updt->find(key));
+        int updc; 
     
-
-    Bid key = createBid(keyword, updc);
-    pair <int, string> pr;
-    pr.first =KB;
-    pr.second = ind; // pad later
-    srch->insert(key, pr);
-
-
-}
-
-void Foram::insertFile(string ind, vector<string> blocks)
-{
-	pair <int, string> pr;
-	int i =1;
-        for(auto block : blocks)
-	{       
-		pr.first = FB;
-		pr.second = block;
-		Bid mk = createBid(ind, i);
-		srch->insert(mk,pr);
-		//batch.insert(make_pair(mk,pr)); // gives **ERROR
-		i++;
-	}
-	pr.first = FB;
-	pr.second = "";
-	Bid mk = createBid(ind, blocks.size()+1);
-	srch->insert(mk,pr);
-	//srch->batchInsert(batch); // gives **ERROR
-	cout << "inserted "<<  blocks.size() <<" blocks of " << ind << endl;
-}
-
-
-/**
- * This function executes an insert in setup mode. Indeed, it is not applied until endSetup()
- */
-
-void Foram::setupInsert(string keyword, pair<int,string> ind) 
-{
-    //** NEED MODIFICATION
-    Bid mapKey = createBid(keyword, 0);
-    auto upd = srch->find(mapKey);
-    string updt_cnt = upd.second;
-    int updc;
-    if (updt_cnt == "") {
-         updc=0;
-    }
-    else
-    {
-        stringstream convstoi(updt_cnt);
-        convstoi >> updc;
-    }
-        //cout << "updatecnt " << updt_cnt <<" updc:"  <<updc <<"\n" ;
-        updc=updc+1;
-        //Bid key = createBid(keyword, id);
-        //setupPairs1[key]=to_string(updc);
-        Bid key = createBid(keyword, updc);
-        setupPairs2[key].first= ind.first;
-	setupPairs2[key].second= ind.second;
-    //LastIND[keyword] = ind;
-}
-
-
-
-
-string Foram::removefileblock(string ind, int blk) 
-{
-	Bid del = createBid(ind, blk);
-	auto ret = (srch->find(del)).second;
-	if (ret != "")
-	{
-	ret = ret.substr(FID_SIZE,ret.size());
-	cout <<"ret is :" << ret << endl;
-	pair <int, string> pr;
-	pr.first = LAST;
-	pr.second = "";
-	srch->insert(del, pr);
-	}
-	return ret;
-
-}
-
-string Foram::searchfileblocknum(string ind) 
-{
-	Bid firs = createBid(ind, 0);
-	auto ret = srch->find(firs).second;
-	if(ret.size() > FID_SIZE)
-	{
- 		ret = ret.substr(FID_SIZE,ret.size());
-		pair <int, string> pr;
-		pr.first = LAST;
-		pr.second = "";
-		srch->insert(firs, pr);
-	}
-	return ret;
-}
-
-/*
-void Foram::removekw(string keyword, string ind) 
-{
-    Bid mapKey = createBid(keyword, ind);
-    string delcnt = updt->find(mapKey);
-    if (delcnt!="")
-    {
-    stringstream convstoi(delcnt);
-    int del_cnt;
-    convstoi >> del_cnt;
-    cout << "DELCNT:"<< del_cnt << endl;
-    
-    Bid lastKey = createBid(keyword,LAST);
-    auto last = srch->find(lastKey);
-    cout << " last id:[" << last.second<<"]" << endl;
-    if (del_cnt > 0) 
-    {
-        //updt->insert(mapKey, to_string(LAST)); 
-	updt->remove(mapKey); // delete in updt
-	Bid mk = createBid(keyword,0);
-	string updtcnt = srch->find(mk).second;
-        stringstream convstoi(updtcnt);
-        int updt_cnt;
-        convstoi >> updt_cnt;
-	int updc = updt_cnt;
-	updc--;
-	srch->insert(mk,make_pair(KS,to_string(updc)));
-        
-	if (updc > 0) 
-	{
-        	if (updc + 1 != del_cnt) 
-      		{
-            		Bid curKey = createBid(keyword, last.second); 
-            		updt->insert(curKey, delcnt);
-       			int pos_in_blockdel = get_position(del_cnt,COM);
-       			int block_del = get_block_num(del_cnt, COM);
-
-	                Bid cur = createBid(keyword, block_del);
-        	        auto bl_del = srch->find(cur);
-			string blsec;
-
-		        int pos_in_block = get_position(updt_cnt,COM);
-       			int block_num = get_block_num(updt_cnt, COM);
-
-	                Bid cur2 = createBid(keyword, block_num);
-        	        auto bl = srch->find(cur2);
-	    		string block = bl.second;
-
-
-	    cout << "Before[" << block <<"]"<< endl << endl ; 
-	    string st = block.substr((pos_in_block-1)*FID_SIZE,FID_SIZE);
-	    block.replace((pos_in_block-1)*FID_SIZE,FID_SIZE,"####");
-	    bl.second = block;
-	    cout << "After[" << block <<"]"<< endl << endl ;
-	    srch->insert(cur2,bl); // cur
-
-		if(block_num == block_del)
-			blsec = block;
-		else
-       			blsec = bl_del.second;
-	    cout << "BEFORE[" << blsec <<"]"<< endl << endl ; 
-            blsec.replace((pos_in_blockdel-1)*FID_SIZE,FID_SIZE,st);
-	    bl_del.second = blsec;
-	    cout << "AFTER[" << blsec <<"]"<< endl << endl ;
-	    srch->insert(cur,bl_del);
-            }
-      else
-      {
-	       int pos_in_block = get_position(updt_cnt,COM);
-       	       int block_num = get_block_num(updt_cnt, COM);
-
-                Bid cur2 = createBid(keyword, block_num);
-                auto bl = srch->find(cur2);
-	    	string block = bl.second;
-
-	        block.replace((pos_in_block-1)*FID_SIZE,FID_SIZE,"####");
-	        bl.second = block;
-	        cout << "LAST after[" << block <<"]"<< endl << endl;
-	        srch->insert(cur2,bl);
-      }
-        int pos_in_block = get_position(updc,COM);
-	int block_num = get_block_num(updc, COM);
-            
-	Bid key = createBid(keyword, block_num);
-	string lastidblock = (srch->find(key)).second;
-	string lastid = lastidblock.substr((pos_in_block-1)*FID_SIZE,FID_SIZE);
-        pair <int, string> lst;
-	
-	lst.first = LAST; // -1
-	lst.second = lastid;
-	srch->insert(lastKey, lst);
-        } 
-	else 
-	{
-		cout << "MAKING last empty" << endl;
-		pair <int, string> lst;
-		lst.first = LAST;
-		lst.second = "";
-	        srch->insert(lastKey, lst); // or -1 ?
+        if (uc == "") 
+        {  
+             updc=0;
         }
-    }
-    }
+        else
+        {
+            stringstream convstoi(uc);
+            convstoi >> updc;
+        }
+       
+        updc = updc+1;
+	batchUpd1.insert(pair<Bid, string>(key,to_string(updc)));
+        Bid updKey = createBid(kw, ind);
+        batchUpd2.insert(pair<Bid, string>(updKey, to_string(updc)));//pad 
+	U.insert(pair<string,int>(kw,updc));
+     }
+     updt->batchInsert(batchUpd1);
+     updt->batchInsert(batchUpd2);
+     //updt->finalize(x);
+
+     map<Bid,string> batchSrchInsert;     
+     for (auto kw: kws) 
+     {
+    	cout << "[" << kw << "] :" << ind << endl;
+        Bid srcKey = createBid(kw, U.at(kw));
+	batchSrchInsert.insert(pair<Bid, string>(srcKey,ind));
+        inserted++;
+     }
+     srch->batchInsert(batchSrchInsert);
+     cout << "inserted all the kw (total keywords: "<<inserted<<")"<< endl;
+
+//INSERTING FILES BLOCKS IN BATCH****************************************
+     map<Bid,string> batchFileBlocks;
+     int i =1;
+     Bid fb;
+     for(auto block : blocks)
+     {       
+   	 fb = createBid(ind, i);
+	 batchFileBlocks.insert(pair<Bid,string>(fb,block));
+   	 i++;
+     }
+     string blk = "";
+     fb = createBid(ind, blocks.size()+1);
+     batchFileBlocks.insert(pair<Bid,string>(fb,blk));
+     srch->batchInsert(batchFileBlocks); 
+     //srch->finalize(x);
+     cout << "inserted "<<  blocks.size() <<" blocks of " << ind << endl;
 }
-*/
+
+
+
+string Foram::removefileblock(string ind) 
+{
+	string file = "";
+	int blk = 1;
+	Bid del = createBid(ind, blk);
+	string ret = (srch->find(del));
+	while (ret != "")
+	{
+		file = file.append(ret.substr(FID_SIZE,ret.size()));
+		blk++;
+		del = createBid(ind, blk);
+		ret = srch->find(del);
+	}
+	for(int i = 1; i<=blk ; i++)
+	{
+		del= createBid(ind,i);
+		srch->remove(del);	
+	}
+	return file;
+}
+
+
+
+void Foram::removekw(vector <string> kws, string ind) 
+{
+	for(auto kw : kws)
+	{
+		//cout << "removing kw:["<< kw <<"]"<< endl;
+    		Bid delKey = createBid(kw, ind);
+    		string delcnt = updt->find(delKey);
+	    	int del_cnt = to_Int(delcnt);
+		cout << "The del cnt is :"<< delcnt << "/"<<del_cnt<<endl;
+	    	
+		Bid fcntKey = createBid(kw,FCNT);
+		string fcnt = updt->find(fcntKey);
+	    	int updc = to_Int(fcnt);
+		int newfilecnt = updc-1;
+		updt->insert(fcntKey,to_string(newfilecnt));
+//cout << "updated updc:"<<(updt->find(fcntKey)) <<" /"<<(updc-1) << endl;
+		updt->remove(delKey);
+
+		Bid lastKey = createBid(kw,updc);
+		string last_id = srch->find(lastKey);
+//		cout << "last id is:" << last_id << endl;
+		if(del_cnt != updc)
+		{
+			Bid delkwKey = createBid(kw,del_cnt);
+			srch->insert(delkwKey, last_id);
+			Bid lastupdKey = createBid(kw,last_id);
+			updt->insert(lastupdKey,delcnt);
+		}
+			//srch->remove(lastKey);
+	}
+	//updt->finalize();
+	//srch->finalize();
+}
 
 
 /**
@@ -290,7 +246,7 @@ void Foram::setupRemove(string keyword, int ind) {
 
 map<string,string> Foram::search(string keyword)
 {
-    vector<pair<int,string>> result;
+    vector<string> result;
     int updc;
     vector<Bid> bids;
     map<string,string> files;
@@ -300,11 +256,12 @@ map<string,string> Foram::search(string keyword)
 
     if (updt_cnt != "") 
     {
-        stringstream convstoi(updt_cnt);
-        convstoi >> updc;
+	updc = to_Int(updt_cnt);
+	//cout <<"updc is not NULL "<< endl;
     }
     else
     {
+	//cout <<"updc is NULL "<< endl;
 	    return files;
     }
 
@@ -313,7 +270,7 @@ map<string,string> Foram::search(string keyword)
     for(int id = 1; id <= updc; id++)
     {
 	Bid fileid = createBid(keyword,id);
-	auto ret = (srch->find(fileid)).second;
+	auto ret = (srch->find(fileid));
 	ids.push_back(ret);
 
     } 
@@ -322,7 +279,7 @@ map<string,string> Foram::search(string keyword)
     {
 	int j = 1;
 	Bid block = createBid(id,j);
-        string cont = (srch->find(block)).second;
+        string cont = (srch->find(block));
 	while(cont != "")
 	{
 		if(files.find(id)!=files.end())
@@ -339,15 +296,14 @@ map<string,string> Foram::search(string keyword)
 		j++;
 		block = createBid(id,j);
 		//cout << "blocknum j:" << j << endl;
-		cont = (srch->find(block)).second;
+		cont = (srch->find(block));
 	}
     }
     return files;
 }
 
 
-
-pair<int,string> Foram::searchfileblock(string ind, int blk) 
+string Foram::searchfileblock(string ind, int blk) 
 {
     Bid mapKey = createBid(ind, blk);
     auto result = srch->find(mapKey);
@@ -355,9 +311,9 @@ pair<int,string> Foram::searchfileblock(string ind, int blk)
 }
 
 
-vector<pair<int,string>> Foram::searchkw(string keyword) 
+vector<string> Foram::searchkw(string keyword) 
 {
-    vector<pair<int,string>> result;
+    vector<string> result;
     vector<Bid> bids;
     Bid mapKey = createBid(keyword, FCNT);
     auto updt_cnt = updt->find(mapKey);

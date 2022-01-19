@@ -277,6 +277,10 @@ neg.insert("from");
     cout << "SEARCH size2:" << orion.search("you").size() << endl << endl;
     orion.remove("you",4);
     cout << "SEARCH size2:" << orion.search("you").size() << endl << endl;
+    orion.remove("you",4);
+    cout << "SEARCH size2:" << orion.search("you").size() << endl << endl;
+    orion.remove("you",4);
+    cout << "SEARCH size2:" << orion.search("you").size() << endl << endl;
     //insert a dummy file for fake entries at the end -- maybe not required
     // first searches ids 
     //map<string,string> allfiles = borion.searchWrapper("hell");

@@ -254,7 +254,8 @@ Nodef* ORAMf::ReadNodef(Bid bid, int lastLeaf, int newLeaf) {
 }
 
 int ORAMf::WriteNodef(Bid bid, Nodef* node) {
-    if (bid == 0) {
+    if (bid == 0) 
+    {
         throw runtime_error("Nodef id is not set in WriteNode");
     }
     if (cache.count(bid) == 0) {

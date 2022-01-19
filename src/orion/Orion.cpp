@@ -75,6 +75,7 @@ void Orion::remove(string keyword, int ind) {
 	    //new lines
 	    Bid key2 = createBid(keyword, UpdtCnt[keyword]+1);
 	    key2 = srch->remove(key2);
+	    updt->remove(mapKey);
 	    cout << "DELETED bid id is :"<< key2 << endl;
 	    //new lines ends
         } else {

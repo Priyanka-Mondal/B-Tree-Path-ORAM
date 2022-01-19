@@ -102,21 +102,20 @@ int AVLTreef::getBalance(Nodef* N) {
 }
 
 
-Bid AVLTreef::remove(Bid rootKey, int& pos, Bid delKey) {
+Bid AVLTreef::remove(Bid rootKey, int& pos, Bid delKey, Bid key, string value) 
+{
     /* 1. Perform the normal BST rotation */
-    Bid key = ZKEY;
-    string value = "0";
-    
     if (rootKey == 0) {
+	    cout << "**in AVL remove of keywords***" << endl << endl;
         Nodef* nnode = newNodef(key, value);
         pos = oram->WriteNodef(delKey, nnode);
         return nnode->key;
     }
     Nodef* node = oram->ReadNodef(rootKey, pos, pos);
     if (key < node->key) {
-        node->leftID = insert(node->leftID, node->leftPos, key, value);
+        node->leftID = remove(node->leftID, node->leftPos, delKey, key, value);
     } else if (key > node->key) {
-        node->rightID = insert(node->rightID, node->rightPos, key, value);
+        node->rightID = remove(node->rightID, node->rightPos,delKey,key, value);
     } else {
         std::fill(node->value.begin(), node->value.end(), 0);
         std::copy(value.begin(), value.end(), node->value.begin());

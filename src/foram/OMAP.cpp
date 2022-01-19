@@ -35,9 +35,9 @@ Bid OMAP::remove(Bid delKey)
 {
     treeHandler->startOperation();
     if (rootKey == 0) {
-        rootKey = treeHandler->remove(0, rootPos, delKey);
+        rootKey = treeHandler->remove(0, rootPos, delKey, ZKEY, "-1");
     } else {
-        rootKey = treeHandler->remove(rootKey, rootPos, delKey);
+        rootKey = treeHandler->remove(rootKey, rootPos, delKey, ZKEY, "-1");
     }
     treeHandler->finishOperation(false, rootKey, rootPos);
 }

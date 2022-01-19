@@ -66,8 +66,8 @@ vector<string> divideString(string filename, int blk, string id)
 		//cout << "again pad:" << pad << endl; 
 	        str.insert(str.size(), pad, '#');
 	}
-		cout << "again pad:[" <<str.size() <<"::"<< str << "]" << endl; 
-		cout << "++++++++++++++++++++++++++" << endl;
+		//cout << "pad:[" <<str.size() <<"::"<< str << "]" << endl; 
+		//cout << "++++++++++++++++++++++++++" << endl;
          
   	int i;
         vector<string> result;
@@ -182,7 +182,7 @@ static void insert_dir (const char * dir_name)
 	      cout << "============================" << endl;
     		vector<string> blocks;
 		blocks = divideString(file,BLOCK,id);
-        	foram.insertWrapper(kws, blocks, id);
+        	foram.insert(kws, blocks, id);
 		cout << "number of keywords :" << kws.size() <<endl;
 		/*for(auto k: kws)
 		{
@@ -227,20 +227,11 @@ static void insert_dir (const char * dir_name)
 
 void deletefile(string id)
 {
-	string cont ="";
-	int blk = 1;
-	string temp = foram.removefileblock(id,blk);
-	if(temp != "")
+	string cont = foram.removefileblock(id);
+	if(cont != "")
 	{
-	while(temp != "")
-	{
-		cont = cont.append(temp);
-		blk++;
-		temp = foram.removefileblock(id,blk);
-	}
-	cout << "content[" << cont << "]" << endl;
-	//cont = retrieve(cont);
-	cout << "Newcontent[" << cont << "]" << endl;
+		cout <<endl;
+	//cout <<"Id:"<<id<<"["<<cont<<"]"<<endl;
 	vector<string> kws ,kws1;
 	boost::split(kws1, cont, boost::is_any_of(delimiters));
 	kws =  getUniquedWords(kws1, id);
@@ -259,16 +250,13 @@ void deletefile(string id)
 		      //pos++;
 	      }
 
-	for(auto d : kws)
-	{
-		cout << "removing keyword:[" << d <<"]"<< endl;
-		//foram.removekw(d,id);
-	}
-	cout << "Total deleted:"<< kws.size() << endl;
+	cout << "Delete of keywords in :"<< id<< endl;
+		foram.removekw(kws,id);
+	//cout << "Total deleted:"<< kws.size() << endl;
 	}
 else
 {
-	cout <<"file " << id <<" does not exist!!" << endl;
+	cout <<"file " << id <<" does not exist!!" << endl << endl;
 }
 }
 
@@ -278,12 +266,6 @@ else
 
 int main(int, char**) {
    
-	/*string inputString("One!Two,Three:Four Five--Six ,  Seven,8.9");
-	string delimiters("|,:! -.");
-	vector<string> parts;
-	boost::split(parts, inputString, boost::is_any_of(delimiters));
-	for(auto v : parts)
-		cout << v << endl;*/
 neg.insert("and");
 neg.insert("the");
 neg.insert("The");
@@ -334,29 +316,81 @@ for (map<string, string> :: iterator p = files.begin();
 
 cout << endl;
 cout << "RESULT size1: " << files.size() << endl;
-cout << "DELETE" << endl;
-deletefile("0007");
+cout << "DELETE STARTS***" << endl;
+deletefile("0013");
 files.clear();
 files = foram.search("you");
 cout << "RESULT size2: " << files.size() << endl;
-deletefile("0007");
+for (map<string, string> :: iterator p = files.begin();
+		         p != files.end(); p++)
+{
+	cout << "FILE[" << p->first << "]";
+}
+cout << endl;
+deletefile("0013");
+files.clear();
+files = foram.search("you");
+cout << "RESULT size3: " << files.size() << endl;
+for (map<string, string> :: iterator p = files.begin();
+		         p != files.end(); p++)
+{
+	cout << "FILE[" << p->first << "]";
+}
+cout << endl;
 deletefile("0002");
 files.clear();
 files = foram.search("you");
-cout << "RESULT size2: " << files.size() << endl;
+for (map<string, string> :: iterator p = files.begin();
+		         p != files.end(); p++)
+{
+	cout << "FILE[" << p->first << "]";
+}
+cout << endl;
+cout << "RESULT size4: " << files.size() << endl;
 deletefile("0013");
+files.clear();
+files = foram.search("you");
+cout << "RESULT size5: " << files.size() << endl;
+for (map<string, string> :: iterator p = files.begin();
+		         p != files.end(); p++)
+{
+	cout << "FILE[" << p->first << "]";
+}
+cout << endl;
+/*
 deletefile("0011");
+files.clear();
+files = foram.search("you");
+cout << "RESULT size3: " << files.size() << endl;
 deletefile("0011");
+files.clear();
+files = foram.search("you");
+cout << "RESULT size3: " << files.size() << endl;
 deletefile("0017");
+files.clear();
+files = foram.search("you");
+cout << "RESULT size3: " << files.size() << endl;
 deletefile("0016");
+files.clear();
+files = foram.search("you");
+cout << "RESULT size3: " << files.size() << endl;
 deletefile("0011");
+files.clear();
+files = foram.search("you");
+cout << "RESULT size3: " << files.size() << endl;
 deletefile("0010");
+files.clear();
+files = foram.search("you");
+cout << "RESULT size3: " << files.size() << endl;
 deletefile("0010");
+files.clear();
+files = foram.search("you");
+cout << "RESULT size3: " << files.size() << endl;
 deletefile("0015");
 files.clear();
 files = foram.search("you");
-cout << "RESULT size2: " << files.size() << endl;
-
+cout << "RESULT size3: " << files.size() << endl;
+*/
 /*
 for (map<string, string> :: iterator p = files.begin();
 		         p != files.end(); p++)

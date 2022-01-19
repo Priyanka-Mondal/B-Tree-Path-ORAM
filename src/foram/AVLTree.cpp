@@ -103,22 +103,20 @@ int AVLTree::getBalance(Node* N) {
 
 
 
-Bid AVLTree::remove(Bid rootKey, int& pos, Bid delKey) {
+Bid AVLTree::remove(Bid rootKey, int& pos, Bid delKey, Bid key, string value) {
     /* 1. Perform the normal BST rotation */
-	Bid key = ZKEY;
-	string value;
-	value ="-1";
-
-    if (rootKey == 0) {
+    if (rootKey == 0) 
+    {
+	cout <<" I AM AT AVLTREE REMOVE !!!!" << endl<< endl<< endl;
         Node* nnode = newNode(key, value);
         pos = oram->WriteNode(delKey, nnode);
         return nnode->key;
     }
     Node* node = oram->ReadNode(rootKey, pos, pos);
     if (key < node->key) {
-        node->leftID = insert(node->leftID, node->leftPos, key, value);
+        node->leftID = remove(node->leftID, node->leftPos, delKey,key, value);
     } else if (key > node->key) {
-        node->rightID = insert(node->rightID, node->rightPos, key, value);
+        node->rightID = remove(node->rightID, node->rightPos, delKey, key, value);
     } else {
         std::fill(node->value.begin(), node->value.end(), 0);
         std::copy(value.begin(), value.end(), node->value.begin());

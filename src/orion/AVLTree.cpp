@@ -101,21 +101,15 @@ int AVLTree::getBalance(Node* N) {
     return height(N->leftID, N->leftPos) - height(N->rightID, N->rightPos);
 }
 
-/*
-Bid AVLTree::remove(Bid delKey)
-{
-	Node* nnode = newNode(0, "-1"); // what will be the value ?
-	int pos = oram->WriteNode(delKey, nnode);
-	return 0;
-	//MAY be balance the tree
-}
-*/
 
 Bid AVLTree::remove(Bid rootKey, int& pos, Bid delkey) {
     /* 1. Perform the normal BST rotation */
-	string value = "-1";
 	Bid key = ZKEY;
-    if (rootKey == 0) {
+	string value = "-1";
+
+    if (rootKey == 0) 
+    {
+        cout <<" I AM AT AVLTREE REMOVE !!!!" << endl<< endl<< endl;
         Node* nnode = newNode(key, value);
         pos = oram->WriteNode(delkey, nnode);
         return nnode->key;

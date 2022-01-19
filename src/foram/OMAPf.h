@@ -24,7 +24,7 @@ public:
     void insert(Bid key, string value);
     string find(Bid key);
     void printTree();
-    void batchInsert(map<Bid, string> pairs);
+    void batchInsert(map<Bid, string> cont);
     vector<string> batchSearch(vector<Bid> keys);
 };
 

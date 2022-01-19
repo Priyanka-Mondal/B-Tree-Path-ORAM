@@ -32,9 +32,9 @@ Bid OMAPf::remove(Bid delKey)
 {
     treeHandler->startOperation();
     if (rootKey == 0) {
-        rootKey = treeHandler->remove(0, rootPos, delKey);
+        rootKey = treeHandler->remove(0, rootPos, delKey, ZKEY, "0");
     } else {
-        rootKey = treeHandler->remove(0, rootPos, delKey);
+        rootKey = treeHandler->remove(0, rootPos, delKey, ZKEY, "0");
     }
     treeHandler->finishOperation(false, rootKey, rootPos);
 }

@@ -255,7 +255,6 @@ Node* ORAM::ReadNode(Bid bid, int lastLeaf, int newLeaf) {
 
 int ORAM::WriteNode(Bid bid, Node* node) {
     if (bid == 0) {
-            //cout<<"NODE IS NOT SET"<< endl;
         throw runtime_error("Node id is not set in WriteNode");
     }
     if (cache.count(bid) == 0) {
