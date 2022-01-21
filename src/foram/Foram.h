@@ -35,11 +35,10 @@ public:
     string searchfileblock(string ind, int blk);
     map<string,string> search(string keyword);
 
-    Foram(bool useHDD,int maxSize);    
+    Foram(bool useHDD,int maxSize, int updSize);    
     virtual ~Foram();
     void beginSetup();
     void endSetup();
-
 };
 
 #endif /* BORION_H */

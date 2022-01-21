@@ -12,7 +12,7 @@ using namespace std;
 
 int fileid = 1;
 bool usehdd = false;
-Foram foram(usehdd, 10000);  
+Foram foram(usehdd, 100, 25);  
 set<string> neg;
 string delimiters("|+#*?@,:!\"><; _-./  \n");
 
@@ -256,7 +256,7 @@ void deletefile(string id)
 	}
 else
 {
-	cout <<"file " << id <<" does not exist!!" << endl << endl;
+	cout <<endl<<"file " << id <<" does not exist!!" << endl << endl;
 }
 }
 
@@ -299,12 +299,12 @@ neg.insert("");
 
 //INSERT keywords and file blocks of Enron
     //insert_dir("enron");
-    insert_dir("synth");
+    insert_dir("tiny");
 
 //***NOW TEST search and delete
 
 //SEARCH
-map <string,string> files = foram.search("you");
+map <string,string> files = foram.search("3");
 
 
 for (map<string, string> :: iterator p = files.begin();
@@ -317,9 +317,9 @@ for (map<string, string> :: iterator p = files.begin();
 cout << endl;
 cout << "RESULT size1: " << files.size() << endl;
 cout << "DELETE STARTS***" << endl;
-deletefile("0013");
+deletefile("0001");
 files.clear();
-files = foram.search("you");
+files = foram.search("3");
 cout << "RESULT size2: " << files.size() << endl;
 for (map<string, string> :: iterator p = files.begin();
 		         p != files.end(); p++)
@@ -327,6 +327,7 @@ for (map<string, string> :: iterator p = files.begin();
 	cout << "FILE[" << p->first << "]";
 }
 cout << endl;
+/*
 deletefile("0013");
 files.clear();
 files = foram.search("you");
@@ -357,7 +358,6 @@ for (map<string, string> :: iterator p = files.begin();
 	cout << "FILE[" << p->first << "]";
 }
 cout << endl;
-/*
 deletefile("0011");
 files.clear();
 files = foram.search("you");

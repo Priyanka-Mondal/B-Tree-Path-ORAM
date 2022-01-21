@@ -17,13 +17,13 @@ int to_Int(string s)
 }
 
 
-Foram::Foram(bool usehdd, int maxSize) 
+Foram::Foram(bool usehdd, int maxSize, int updSize) 
 {
     this->useHDD = usehdd;
     bytes<Key> key1{0};
     bytes<Key> key2{1};
     srch = new OMAP(maxSize*4, key1);
-    updt = new OMAPf(maxSize*4, key2);
+    updt = new OMAPf(updSize*4, key2);
 }
 
 Foram::~Foram() {
@@ -44,27 +44,24 @@ void Foram::insert(vector<string> kws, vector<string> blocks, string ind)
         int updc; 
     
         if (uc == "") 
-        {  
              updc=0;
-        }
         else
-        {
-            //stringstream convstoi(uc);
-            //convstoi >> updc;
 	    updc = to_Int(uc);
-        }
        
         updc = updc+1;
         updt->insert(key, to_string(updc));
+	cout << "Inserting:"<< key << endl;
 	U.insert(pair<string,int>(kw,updc));
         Bid updKey = createBid(kw, ind);
         updt->insert(updKey, to_string(updc));//pad,can we store number in updc 
+	cout << "Inserting:"<< updKey <<":"<< to_string(updc)<< endl;
+	//cout << "Searched:"<< updt->find(updKey) << endl;
      }
      //updt->finalize(x);
      
      for (auto kw: kws) 
      {
-    	cout << "[" << kw << "] :" << ind << endl;
+    	//cout << "[" << kw << "] :" << ind << endl;
         Bid key = createBid(kw, U.at(kw));
         string pr = ind; // pad later
         srch->insert(key, pr);
@@ -108,23 +105,19 @@ void Foram::setupInsert(vector <string> kws, vector<string> blocks, string ind)
         int updc; 
     
         if (uc == "") 
-        {  
-             updc=0;
-        }
+             updc = 0;
         else
-        {
-            stringstream convstoi(uc);
-            convstoi >> updc;
-        }
-       
+      	     updc = to_Int(uc);
+
         updc = updc+1;
 	batchUpd1.insert(pair<Bid, string>(key,to_string(updc)));
         Bid updKey = createBid(kw, ind);
         batchUpd2.insert(pair<Bid, string>(updKey, to_string(updc)));//pad 
 	U.insert(pair<string,int>(kw,updc));
      }
-     updt->batchInsert(batchUpd1);
-     updt->batchInsert(batchUpd2);
+     //UNCOMMENT LATER
+     //updt->batchInsert(batchUpd1);
+     //updt->batchInsert(batchUpd2);
      //updt->finalize(x);
 
      map<Bid,string> batchSrchInsert;     
@@ -160,6 +153,10 @@ void Foram::setupInsert(vector <string> kws, vector<string> blocks, string ind)
 
 string Foram::removefileblock(string ind) 
 {
+	updt->printTree();
+	cout <<"-------------------------------------" << endl;
+	srch->printTree();
+	cout <<"++++++++++++++++++++++++++++++++++++++" << endl;
 	string file = "";
 	int blk = 1;
 	Bid del = createBid(ind, blk);
@@ -174,7 +171,8 @@ string Foram::removefileblock(string ind)
 	for(int i = 1; i<=blk ; i++)
 	{
 		del= createBid(ind,i);
-		srch->remove(del);	
+		srch->insert(del,"deleted");
+		//srch->remove(del);	
 	}
 	return file;
 }
@@ -189,19 +187,19 @@ void Foram::removekw(vector <string> kws, string ind)
     		Bid delKey = createBid(kw, ind);
     		string delcnt = updt->find(delKey);
 	    	int del_cnt = to_Int(delcnt);
-		cout << "The del cnt is :"<< delcnt << "/"<<del_cnt<<endl;
+		//cout << kw<<":The del cnt is :"<< delcnt << "/"<<del_cnt<<endl;
 	    	
 		Bid fcntKey = createBid(kw,FCNT);
 		string fcnt = updt->find(fcntKey);
+		//cout << kw<<":The UPD cnt is :"<< fcnt<<endl;
 	    	int updc = to_Int(fcnt);
 		int newfilecnt = updc-1;
 		updt->insert(fcntKey,to_string(newfilecnt));
 //cout << "updated updc:"<<(updt->find(fcntKey)) <<" /"<<(updc-1) << endl;
-		updt->remove(delKey);
 
 		Bid lastKey = createBid(kw,updc);
 		string last_id = srch->find(lastKey);
-//		cout << "last id is:" << last_id << endl;
+		//cout << "last id is:" << last_id << endl;
 		if(del_cnt != updc)
 		{
 			Bid delkwKey = createBid(kw,del_cnt);
@@ -209,40 +207,27 @@ void Foram::removekw(vector <string> kws, string ind)
 			Bid lastupdKey = createBid(kw,last_id);
 			updt->insert(lastupdKey,delcnt);
 		}
-			//srch->remove(lastKey);
+		//	srch->remove(lastKey);
+		//cout << "adjustments done" <<endl;
+		//cout << "key to bedeleted:" << delKey << endl;
+		//string cn = updt->find(delKey);
+		//cout << "searche updc:[" << cn <<"]"<< endl;
+		Bid u = updt->remove(delKey);
+		updt->printTree();
+		//cout << "The min value node is :" << u;
 	}
 	//updt->finalize();
 	//srch->finalize();
+	/*
+	cout <<"======AFTER============================="<<endl;
+	updt->printTree();
+	cout <<"-------------------------------------" << endl;
+	srch->printTree();
+	cout <<"++++++++++++++++++++++++++++++++++++++" << endl;
+	*/
 }
 
 
-/**
- * This function executes a remove in setup mode. Indeed, it is not applied until endSetup()
-  */
-/*
-void Foram::setupRemove(string keyword, int ind) {
- Bid mapKey = createBid(keyword, ind);
-    string updt_cnt = setupPairs1[mapKey];
-    if (stoi(updt_cnt) > 0) {
-        setupPairs1[mapKey]= to_string(-1);
-        UpdtCnt[keyword]--;
-        if (UpdtCnt[keyword] > 0) {
-            if (UpdtCnt[keyword] + 1 != stoi(updt_cnt)) {
-                Bid curKey = createBid(keyword, LastIND[keyword]);
-                setupPairs1[curKey]= updt_cnt;
-                Bid curKey2 = createBid(keyword, stoi(updt_cnt));
-                setupPairs2[curKey2]= to_string(LastIND[keyword]);
-            }
-            Bid key = createBid(keyword, UpdtCnt[keyword]);
-            string idstr = setupPairs2[key];
-            int lastID = stoi(idstr);
-            LastIND[keyword] = lastID;
-        } else {
-            LastIND.erase(keyword);
-        }
-    }
-}
-*/
 
 map<string,string> Foram::search(string keyword)
 {

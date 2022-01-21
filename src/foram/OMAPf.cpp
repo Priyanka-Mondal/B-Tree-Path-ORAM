@@ -32,9 +32,9 @@ Bid OMAPf::remove(Bid delKey)
 {
     treeHandler->startOperation();
     if (rootKey == 0) {
-        rootKey = treeHandler->remove(0, rootPos, delKey, ZKEY, "0");
+        rootKey = treeHandler->remove(0, rootPos, delKey, ZKEY, "-1");
     } else {
-        rootKey = treeHandler->remove(0, rootPos, delKey, ZKEY, "0");
+        rootKey = treeHandler->remove(rootKey, rootPos, delKey, ZKEY, "-1");
     }
     treeHandler->finishOperation(false, rootKey, rootPos);
 }
@@ -54,9 +54,10 @@ void OMAPf::printTree() {
     Nodef* node = new Nodef();
     node->key = rootKey;
     node->pos = rootPos;
-    treeHandler->printTree(node, 0);
+    treeHandler->printTree(node, 10);
     delete node;
     treeHandler->finishOperation(true, rootKey, rootPos);
+    cout << endl << endl;
 }
 
 /**

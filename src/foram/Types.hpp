@@ -18,7 +18,7 @@
 #define BLOCK 64 // 128 caused seg_fault
 
 #define LAST -1
-#define FCNT 0
+#define FCNT "0000"
 #define KS 0
 #define KB 1
 #define FS 2

@@ -221,13 +221,22 @@ void ORAMf::Access(Bid bid, Nodef*& node) {
         leafList.push_back(node->pos);
     }
 }
+void ORAMf::AccessDelete(Bid bid, Nodef*& node) {
+    if (!batchWrite) {
+        FetchPath(node->pos);
+    }
+    WriteData(bid, node);
+    if (find(leafList.begin(), leafList.end(), node->pos) == leafList.end()) {
+        leafList.push_back(node->pos);
+    }
+}
 
 Nodef* ORAMf::ReadNodef(Bid bid) {
     if (bid == 0) {
         throw runtime_error("Nodef id is not set");
     }
     if (cache.count(bid) == 0) {
-        throw runtime_error("Nodef not found in the cache");
+        throw runtime_error("Nodef not found in the cache!!");
     } else {
         Nodef* node = cache[bid];
         return node;
@@ -256,11 +265,26 @@ Nodef* ORAMf::ReadNodef(Bid bid, int lastLeaf, int newLeaf) {
 int ORAMf::WriteNodef(Bid bid, Nodef* node) {
     if (bid == 0) 
     {
-        throw runtime_error("Nodef id is not set in WriteNode");
+       throw runtime_error("Nodef id is not set in WriteNode");
     }
     if (cache.count(bid) == 0) {
         modified.insert(bid);
         Access(bid, node);
+        return node->pos;
+    } else {
+        modified.insert(bid);
+        return node->pos;
+    }
+}
+
+int ORAMf::DeleteNodef(Bid bid, Nodef* node) {
+    //if (bid == 0) 
+    //{
+    //   throw runtime_error("Nodef id is not set in WriteNode");
+    //}
+    if (cache.count(bid) == 0) {
+        modified.insert(bid);
+        AccessDelete(bid, node);
         return node->pos;
     } else {
         modified.insert(bid);

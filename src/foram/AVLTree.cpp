@@ -105,17 +105,17 @@ int AVLTree::getBalance(Node* N) {
 
 Bid AVLTree::remove(Bid rootKey, int& pos, Bid delKey, Bid key, string value) {
     /* 1. Perform the normal BST rotation */
-    if (rootKey == 0) 
+    if (rootKey == delKey) 
     {
-	cout <<" I AM AT AVLTREE REMOVE !!!!" << endl<< endl<< endl;
+	//cout <<" I AM AT AVLTREE REMOVE !!!!" << endl<< endl<< endl;
         Node* nnode = newNode(key, value);
         pos = oram->WriteNode(delKey, nnode);
         return nnode->key;
     }
     Node* node = oram->ReadNode(rootKey, pos, pos);
-    if (key < node->key) {
+    if (delKey < node->key) {
         node->leftID = remove(node->leftID, node->leftPos, delKey,key, value);
-    } else if (key > node->key) {
+    } else if (delKey > node->key) {
         node->rightID = remove(node->rightID, node->rightPos, delKey, key, value);
     } else {
         std::fill(node->value.begin(), node->value.end(), 0);
@@ -317,7 +317,7 @@ void AVLTree::printTree(Node* root, int indent) {
         value.assign(root->value.begin(), root->value.end());
 	//cout << "AT print" << endl;
         //cout << root->key << ":" << value.second.c_str() << ":" << root->pos << ":" << root->leftID << ":" << root->leftPos << ":" << root->rightID << ":" << root->rightPos << endl << endl << endl <<  endl;
-	cout << (root->key) << "::" << value << endl << endl << endl;
+	cout << (root->key) << "::" << value << endl;
         if (root->rightID != 0)
             printTree(oram->ReadNode(root->rightID, root->rightPos, root->rightPos), indent + 4);
 

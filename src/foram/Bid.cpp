@@ -64,6 +64,7 @@ bool Bid::operator<(const Bid& b)const {
     for (int i = 0; i < ID_SIZE; i++) {
         if (id[i] < b.id[i]) {
             return true;
+	    //continue;
         } else if (id[i] > b.id[i]) {
             return false;
         }
@@ -131,7 +132,7 @@ Bid& Bid::operator=(std::vector<byte_t> other) {
 ostream& operator<<(ostream &o, Bid& bid) {
     o << "[";
     for(int i=0;i<ID_SIZE;i++){
-    o << (int)bid.id[i];//<<"|"; //(int)
+    o << (char)bid.id[i];//<<"|"; //(int)
     }
 //    o << "/";
 //    for(int i=0;i<ID_SIZE;i++)

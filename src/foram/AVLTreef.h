@@ -36,6 +36,9 @@ public:
     AVLTreef(int maxSize, bytes<Key> key);
     virtual ~AVLTreef();
     Bid remove(Bid rootKey, int& pos, Bid delKey, Bid key, string value);
+    Nodef* minValueNode(Bid rootKey, int pos, Nodef* rootroot);
+    Nodef* parentOf(Bid parentKey, int ppos, Bid childKey, int cpos, Bid key);
+Bid deleteHelper(Bid rootKey,int& pos,Bid delKey,Bid minkey,int posk,string value);
     Bid insert(Bid rootKey, int& pos, Bid key, string value);
     Nodef* search(Nodef* head, Bid key);
     void batchSearch(Nodef* head, vector<Bid> keys, vector<Nodef*>* results);

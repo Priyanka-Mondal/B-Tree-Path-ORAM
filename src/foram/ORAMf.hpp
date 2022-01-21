@@ -76,6 +76,7 @@ private:
     void WriteBucket(int pos, Bucketf bucket);
     void Access(Bid bid, Nodef*& node, int lastLeaf, int newLeaf);
     void Access(Bid bid, Nodef*& node);
+    void AccessDelete(Bid bid, Nodef*& node); 
 
 
     size_t plaintext_size;
@@ -93,6 +94,7 @@ public:
     Nodef* ReadNodef(Bid bid, int lastLeaf, int newLeaf);
     Nodef* ReadNodef(Bid bid);
     int WriteNodef(Bid bid, Nodef* n);
+    int DeleteNodef(Bid bid, Nodef* node);
     void start(bool batchWrite);
     void finilize(bool find, Bid& rootKey, int& rootPos);
     static Nodef* convertBlockToNodef(block b);
