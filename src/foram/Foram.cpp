@@ -147,6 +147,7 @@ void Foram::setupInsert(vector <string> kws, vector<string> blocks, string ind)
      srch->batchInsert(batchFileBlocks); 
      //srch->finalize(x);
      cout << "inserted "<<  blocks.size() <<" blocks of " << ind << endl;
+    updt->printTree();
 }
 
 

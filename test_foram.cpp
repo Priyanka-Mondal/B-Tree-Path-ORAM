@@ -299,7 +299,7 @@ neg.insert("");
 
 //INSERT keywords and file blocks of Enron
     //insert_dir("enron");
-    insert_dir("tiny");
+    insert_dir("tiny2");
 
 //***NOW TEST search and delete
 
@@ -318,6 +318,16 @@ cout << endl;
 cout << "RESULT size1: " << files.size() << endl;
 cout << "DELETE STARTS***" << endl;
 deletefile("0001");
+files.clear();
+files = foram.search("3");
+cout << "RESULT size2: " << files.size() << endl;
+for (map<string, string> :: iterator p = files.begin();
+		         p != files.end(); p++)
+{
+	cout << "FILE[" << p->first << "]";
+}
+cout << endl;
+deletefile("0002");
 files.clear();
 files = foram.search("3");
 cout << "RESULT size2: " << files.size() << endl;

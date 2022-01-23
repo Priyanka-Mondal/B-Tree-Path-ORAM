@@ -381,51 +381,69 @@ Bid AVLTreef::remove(Bid rootKey, int& pos, Bid delKey)
 	
 	Nodef* parent = parentOf(rootKey, pos, rootKey, pos, nodef->key);
 	Nodef* parmin = parentOf(rootKey,pos,rootKey,pos,minnode->key);
-	cout <<"parent of" <<node->key<<"is"<< parmin->key<<endl;
 	//1. parent = NULL & parmin = NULL -> delnode's right subtree is NULL
 	//2. parent = NULL & parmin != NULL  ****DONE
 	//4. parent != NULL & parmin != NULL
 	//	4a. parmin == delkey ?/*
 	if(parent == NULL && parmin == NULL)
-	{
+	{//node->leftID becomes root
 		cout << "parent NULL parmin NULL"<< endl;
-		node = oram->ReadNodef(rootKey,pos,pos);
-		//node->leftID becomes root
+		node=oram->ReadNodef(node->leftID,node->leftPos,node->leftPos);
 	}
 	else if(parent == NULL && parmin != NULL)
 	{
-		//if(parmin->key != delKey)
-		//{
-		Nodef* tr = oram->ReadNodef(minnode->rightID,minnode->rightPos,minnode->rightPos);
-		Nodef* pm = oram->ReadNodef(parmin->key,parmin->pos,parmin->pos);
-		if(tr ==NULL || tr->key ==0)
+		if(parmin->key != delKey)
 		{
-			tr = newNodef(0,"");
+			Nodef* tr = oram->ReadNodef(minnode->rightID,minnode->rightPos,minnode->rightPos);
+			Nodef* pm = oram->ReadNodef(parmin->key,parmin->pos,parmin->pos);
+			if(tr ==NULL || tr->key ==0)
+			{
+				tr = newNodef(0,"");
+			}
+				pm->leftID = tr->key;//tr->key<parmin->key ever
+				pm->leftPos = tr->pos;
+				oram->WriteNodef(pm->key,pm);
+			
+			Nodef* nr = oram->ReadNodef(nodef->rightID,nodef->rightPos,nodef->rightPos);
+			if(nr ==NULL || nr->key==0)
+			{
+				nr = newNodef(0,"");
+			}
+			node->rightID = nr->key;
+			node->rightPos = nr->pos;
+			Nodef* nl = oram->ReadNodef(nodef->leftID,nodef->leftPos,nodef->leftPos);
+			if(nl ==NULL || nl->key == 0) // && before 
+			{
+				nl = newNodef(0,"");
+			}
+			node->leftID = nl->key;
+			node->leftPos = nl->pos; 
+			node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
+			pos = node->pos;
+			Nodef* free = newNodef(0,"");
+			oram->WriteNodef(nodef->key,free);
+			goto BALANCE; // balance the tree
 		}
-			pm->leftID = tr->key;//tr->key< parmin->key always
-			pm->leftPos = tr->pos;
-			oram->WriteNodef(pm->key,pm);
-		
-		Nodef* nr = oram->ReadNodef(nodef->rightID,nodef->rightPos,nodef->rightPos);
-		if(nr ==NULL || nr->key==0)
+		else if (parmin->key == delKey)
 		{
-			nr = newNodef(0,"");
+			Nodef* nl=oram->ReadNodef(nodef->leftID,nodef->leftPos,nodef->leftPos);
+			Nodef* nr=oram->ReadNodef(nodef->rightID,nodef->rightPos,nodef->rightPos);
+			if(node->key > delKey)
+			{
+				node->leftID = nl->key;
+				node->leftPos = nl->pos;
+			}
+			else if(node->key < delKey)//not required
+			{
+				node->rightID = nr->key;
+				node->rightPos = nr->pos;
+			}
+			node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
+			pos = node->pos;
+                        Nodef* free = newNodef(0,"");
+                        oram->WriteNodef(nodef->key,free);
+                        goto BALANCE; 
 		}
-		node->rightID = nr->key;
-		node->rightPos = nr->pos;
-		Nodef* nl = oram->ReadNodef(nodef->leftID,nodef->leftPos,nodef->leftPos);
-		if(nl ==NULL || nl->key == 0) // && before 
-		{
-			nl = newNodef(0,"");
-		}
-		node->leftID = nl->key;
-		node->leftPos = nl->pos; 
-		node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
-		pos = node->pos;
-		Nodef* free = newNodef(0,"");
-		oram->WriteNodef(nodef->key,free);
-		goto BALANCE; // balance the tree
-		//}
 	}
 	else if(parent!=NULL && parmin!=NULL)
 	{
@@ -471,29 +489,89 @@ Bid AVLTreef::remove(Bid rootKey, int& pos, Bid delKey)
 		goto BALANCE;
 			}
 		}
-		else if(delKey == node->key) //delkey is a leaf node
+		else if(delKey == node->key) //delkey has no right child
 		{
-		Nodef* pm = oram->ReadNodef(parmin->key,parmin->pos,parmin->pos);
-			Nodef* leaf = newNodef(0,"");
-		if(pm->key < delKey)
-		{
-			pm->rightID = leaf->key;
-			pm->rightPos = leaf->pos;
-		}
-		else if(pm->key > delKey)
-		{
-			pm->leftID = leaf->key;
-			pm->leftPos = leaf->pos;
-		}
+			Nodef* pm = oram->ReadNodef(parmin->key,parmin->pos,parmin->pos);
+			Nodef* lc = oram->ReadNodef(node->leftID,node->leftPos,node->leftPos);
+			if(lc==NULL || lc->key == 0)
+				lc = newNodef(0,"");
+			if(pm->key < delKey)
+			{
+				pm->rightID = lc->key;
+				pm->rightPos = lc->pos;
+			}
+			else if(pm->key > delKey)
+			{
+				pm->leftID = lc->key;
+				pm->leftPos = lc->pos;
+			}
 			pm->height = max(height(pm->leftID, pm->leftPos), height(pm->rightID, pm->rightPos)) + 1;
+			oram->WriteNodef(pm->key,pm);
+			Nodef* free = newNodef(0,"");
+			oram->WriteNodef(nodef->key,free);
+			if(pm->key!=rootKey)
+				return rootKey;
+			else
+				node =oram->ReadNodef(pm->key,pm->pos,pm->pos);
 		}
-		
+		else // if(what condition?)
+		{
+			Nodef* lc = oram->ReadNodef(nodef->leftID,nodef->leftPos,nodef->leftPos);
+			if(lc==NULL || lc->key == 0)
+				lc= newNodef(0,"");
+			Nodef* rc = oram->ReadNodef(nodef->rightID,nodef->rightPos,nodef->rightPos);
+			if(rc==NULL || rc->key == 0)
+				rc= newNodef(0,"");
+			Nodef* mrc = oram->ReadNodef(node->rightID,node->rightPos,node->rightPos);
+			if(mrc==NULL || mrc->key == 0)
+				mrc= newNodef(0,"");
+			Nodef* par = oram->ReadNodef(parent->key,parent->pos,parent->pos);
+			Nodef* pm = oram->ReadNodef(parmin->key,parmin->pos,parmin->pos);
+			if(node->key > pm->key)
+			{
+				pm->rightID = mrc->key;
+				pm->rightPos = mrc->pos;
+			}
+			else if(node->key < pm->key)
+			{
+				pm->leftID = mrc->key;
+				pm->leftPos = mrc->pos;
+			}
+			pm->height = max(height(pm->leftID, pm->leftPos), height(pm->rightID, pm->rightPos)) + 1;
+			oram->WriteNodef(pm->key,pm);
+			node->leftID = lc->key;
+			node->leftPos = lc->pos;
+			node->rightID = rc->key;
+			node->rightPos = rc->pos;
+			node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
+			oram->WriteNodef(node->key, node);
+			if(nodef->key < par->key)
+			{
+				par->leftID = node->key;
+				par->leftPos = node->pos;
+			}
+			else if(nodef->key > par->key)
+			{
+				par->rightID = node->key;
+				par->rightPos = node->pos;
+			}
+			par->height = max(height(par->leftID, par->leftPos), height(par->rightID, par->rightPos)) + 1;
+			oram->WriteNodef(par->key,par);
+			Bid n = balance(node,node->pos);
+			if(node->key!=rootKey)
+				return rootKey;
+			else pos=node->pos;
+		}
+		/*else
+		{
+		node = oram->ReadNodef(rootKey,pos,pos);
+		}*/
+		//if()
 	/*	else if(parmin->key != delKey)
 		{
 			cout << "parmin key =/= delkey"<< endl;
 		node = oram->ReadNodef(rootKey,pos,pos);
 		}*/
-		node = oram->ReadNodef(rootKey,pos,pos);
 	}
 	else
 	{
