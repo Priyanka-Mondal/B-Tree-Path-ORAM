@@ -16,6 +16,7 @@ string OMAPf::find(Bid key) {
     }
     treeHandler->startOperation();
     Nodef* node = new Nodef();
+    //cout <<"rootKey in find" << rootKey<< ":"<< rootPos<<endl;
     node->key = rootKey;
     node->pos = rootPos;
     auto resNode = treeHandler->search(node, key);
@@ -28,15 +29,17 @@ string OMAPf::find(Bid key) {
     return res;
 }
 
-Bid OMAPf::remove(Bid delKey) 
+void OMAPf::remove(Bid delKey) 
 {
+    //cout << "THE rootkey at OMAPf 1:"<< rootKey<< endl;
     treeHandler->startOperation();
     if (rootKey == 0) {
-        rootKey = treeHandler->remove(0, rootPos, delKey, ZKEY, "-1");
+        rootKey = treeHandler->remove(0, rootPos, delKey);
     } else {
-        rootKey = treeHandler->remove(rootKey, rootPos, delKey, ZKEY, "-1");
+        rootKey = treeHandler->remove(rootKey, rootPos, delKey);
     }
     treeHandler->finishOperation(false, rootKey, rootPos);
+    //cout << "THE rootkey at OMAPf 2:"<< rootKey<< endl;
 }
 
 void OMAPf::insert(Bid key, string value) {

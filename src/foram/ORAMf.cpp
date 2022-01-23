@@ -233,7 +233,7 @@ void ORAMf::AccessDelete(Bid bid, Nodef*& node) {
 
 Nodef* ORAMf::ReadNodef(Bid bid) {
     if (bid == 0) {
-        throw runtime_error("Nodef id is not set");
+        throw runtime_error("Nodef id is not set in ReadNode");
     }
     if (cache.count(bid) == 0) {
         throw runtime_error("Nodef not found in the cache!!");

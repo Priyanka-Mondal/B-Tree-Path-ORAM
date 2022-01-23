@@ -183,23 +183,22 @@ void Foram::removekw(vector <string> kws, string ind)
 {
 	for(auto kw : kws)
 	{
-		//cout << "removing kw:["<< kw <<"]"<< endl;
     		Bid delKey = createBid(kw, ind);
+		cout << "removing delkey:["<< delKey <<"]"<< endl;
     		string delcnt = updt->find(delKey);
 	    	int del_cnt = to_Int(delcnt);
-		//cout << kw<<":The del cnt is :"<< delcnt << "/"<<del_cnt<<endl;
 	    	
 		Bid fcntKey = createBid(kw,FCNT);
+		cout << kw<<":The del cnt is :"<< delcnt << "/"<<del_cnt<<endl;
 		string fcnt = updt->find(fcntKey);
-		//cout << kw<<":The UPD cnt is :"<< fcnt<<endl;
+		cout << kw<<":The del cnt is 2:"<< delcnt << "/"<<del_cnt<<endl;
 	    	int updc = to_Int(fcnt);
 		int newfilecnt = updc-1;
 		updt->insert(fcntKey,to_string(newfilecnt));
-//cout << "updated updc:"<<(updt->find(fcntKey)) <<" /"<<(updc-1) << endl;
+		cout << kw<<":The del cnt is 3:"<< delcnt << "/"<<updc<<endl;
 
 		Bid lastKey = createBid(kw,updc);
 		string last_id = srch->find(lastKey);
-		//cout << "last id is:" << last_id << endl;
 		if(del_cnt != updc)
 		{
 			Bid delkwKey = createBid(kw,del_cnt);
@@ -208,23 +207,11 @@ void Foram::removekw(vector <string> kws, string ind)
 			updt->insert(lastupdKey,delcnt);
 		}
 		//	srch->remove(lastKey);
-		//cout << "adjustments done" <<endl;
-		//cout << "key to bedeleted:" << delKey << endl;
-		//string cn = updt->find(delKey);
-		//cout << "searche updc:[" << cn <<"]"<< endl;
-		Bid u = updt->remove(delKey);
+		updt->remove(delKey);
 		updt->printTree();
-		//cout << "The min value node is :" << u;
 	}
 	//updt->finalize();
 	//srch->finalize();
-	/*
-	cout <<"======AFTER============================="<<endl;
-	updt->printTree();
-	cout <<"-------------------------------------" << endl;
-	srch->printTree();
-	cout <<"++++++++++++++++++++++++++++++++++++++" << endl;
-	*/
 }
 
 
