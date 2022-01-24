@@ -260,7 +260,28 @@ else
 }
 }
 
-
+void kwfileblocks(string file)
+{
+	vector<string> kws, kws1, blocks;
+	string cont = getFileContent(file);
+	cout <<"==================================="<< endl;
+	string id = toS(fileid);
+	boost::split(kws1, cont, boost::is_any_of(delimiters));
+	kws = getUniquedWords(kws1, id);
+	int pos =0;
+	for(auto it = kws.begin(); it != kws.end(); it++)
+	{
+		if(neg.find(*it)!=neg.end())
+		{
+			kws.erase(it--);
+		}
+	}
+	cout << endl << file<<" "<< id << endl;
+	cout <<"=================================="<<endl;
+	blocks = divideString(file,BLOCK,id);
+	fileid++;
+	foram.insert(kws, blocks, id);
+}
 
 
 
@@ -303,13 +324,13 @@ neg.insert("");
 
 //***NOW TEST search and delete
 
-cout << " SETUP INSERT DONE!"<< endl;
+cout << endl<<" SETUP INSERT DONE!"<< endl;
 cout <<"=================================="<< endl;
 cout <<"READY TO PERFORM QUERIES!" << endl;
 while(1)
 {
 	char c;
-	cout <<endl<<endl<<endl<<endl;
+	cout <<endl<<endl<<endl;
 	cout <<"Enter your choice (s/i/d/p/q): "<<endl;
 	cout <<"s/S: Search"<<endl;
 	cout <<"i/I: Insert"<<endl;
@@ -340,7 +361,7 @@ while(1)
 		cout << "Enter file name to be inserted:";
 		string file;
 		cin>> file;
-		//kwfileblocks(file);
+		kwfileblocks(file);
 		cout <<endl;
 	}
 	else if(c=='d'|| c=='D')
