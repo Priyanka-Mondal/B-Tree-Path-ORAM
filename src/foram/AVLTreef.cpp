@@ -498,7 +498,7 @@ Bid AVLTreef::remove(Bid rootKey, int& pos, Bid delKey)
 				pm->leftPos = tr->pos;
 			pm->height = max(height(pm->leftID, pm->leftPos), height(pm->rightID, pm->rightPos)) + 1;
 			Nodef* parpm =parentOf(rootKey,pos,rootKey,pos,pm->key);
-			balanceAndAttachtoParent(parpm,pm);
+			pm=balanceAndAttachtoParent(parpm,pm);
 			
 			Nodef* nr = oram->ReadNodef(nodef->rightID,nodef->rightPos,nodef->rightPos);
 			if(nr ==NULL || nr->key==0)
@@ -515,10 +515,14 @@ Bid AVLTreef::remove(Bid rootKey, int& pos, Bid delKey)
 			node->leftID = nl->key;
 			node->leftPos = nl->pos; 
 			node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
-			//pos = node->pos; // As parent = NULL
-			//balanceAndAttachtoParent(pm,node); Not required
-			oram->WriteNodef(node->key,node);
+			int pos = node->pos; // As parent = NULL
+			//balanceAndAttachtoParent(pm,node); //Not required
+			Bid nodekey = balance(node,node->pos);
+			//node = oram->ReadNode(nodekey,no)
+			//oram->WriteNodef(node->,node);
 			deleteNode(nodef);
+			return nodekey;
+
 		}
 		else if (parmin->key == delKey)
 		{
@@ -536,8 +540,10 @@ Bid AVLTreef::remove(Bid rootKey, int& pos, Bid delKey)
 			}
 			node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
 			//pos = node->pos;
+			Bid nodekey = balance(node,node->pos);
 			oram->WriteNodef(node->key,node);
 			deleteNode(nodef);
+			return nodekey;
 		}
 		else
 		{//*? need code here
@@ -586,10 +592,11 @@ Bid AVLTreef::remove(Bid rootKey, int& pos, Bid delKey)
 				{
 					return rootKey;
 				}
-				else
+				else if(par->key==rootKey)
 				{
 					pos = par->pos;
 					node = oram->ReadNodef(par->key,par->pos,par->pos);
+					return node->key;
 				}
 			}
 			else if(par->key >delKey) //seg fault happens after adding this block
@@ -621,10 +628,11 @@ Bid AVLTreef::remove(Bid rootKey, int& pos, Bid delKey)
 				{
 					return rootKey;
 				}
-				else
+				else if(par->key==rootKey)
 				{
 					pos = par->pos;
 					node = oram->ReadNodef(par->key,par->pos,par->pos);
+					return node->key;
 				}
 			}
 		}
@@ -652,8 +660,11 @@ Bid AVLTreef::remove(Bid rootKey, int& pos, Bid delKey)
 			deleteNode(nodef);
 			if(pm->key!=rootKey)
 				return rootKey;
-			else
+			else if(pm->key==rootKey)
+			{
 				node =oram->ReadNodef(pm->key,pm->pos,pm->pos);
+				return node->key;
+			}
 		}
 		else // if(what condition?)
 		{
@@ -711,8 +722,11 @@ Bid AVLTreef::remove(Bid rootKey, int& pos, Bid delKey)
 			int parpos = par->pos;
 			Bid bpar = balance(par,parpos); //balanceRec
 			node = oram->ReadNodef(bpar,parpos,parpos);
+			deleteNode(nodef);
 			if(node->key !=rootKey)
 				return rootKey;
+			else 
+				return node->key;
 		}
 	}
 	else
@@ -720,42 +734,6 @@ Bid AVLTreef::remove(Bid rootKey, int& pos, Bid delKey)
 		cout <<"This LAST case of remove should never execute"<< endl;
 		//node = oram->ReadNodef(rootKey,pos,pos);
 	}
-BALANCE:	
-    int balance = getBalance(node);
-    Bid key = node->key;
-    // Left Left Case
-    if (balance > 1 && key < oram->ReadNodef(node->leftID)->key) {
-        Nodef* res = rightRotate(node);
-        pos = res->pos;
-        return res->key;
-    }
-    // Right Right Case
-    if (balance < -1 && key > oram->ReadNodef(node->rightID)->key) {
-        Nodef* res = leftRotate(node);
-        pos = res->pos;
-        return res->key;
-    }
-    // Left Right Case
-    if (balance > 1 && key > oram->ReadNodef(node->leftID)->key) {
-        Nodef* res = leftRotate(oram->ReadNodef(node->leftID));
-        node->leftID = res->key;
-        node->leftPos = res->pos;
-        oram->WriteNodef(node->key, node);
-        Nodef* res2 = rightRotate(node);
-        pos = res2->pos;
-        return res2->key;
-    }
-    // Right Left Case
-    if (balance < -1 && key < oram->ReadNodef(node->rightID)->key) {
-        auto res = rightRotate(oram->ReadNodef(node->rightID));
-        node->rightID = res->key;
-        node->rightPos = res->pos;
-        oram->WriteNodef(node->key, node);
-        auto res2 = leftRotate(node);
-        pos = res2->pos;
-        return res2->key;
-    }
-    oram->WriteNodef(node->key,node);
-    return node->key;	
+return rootKey;	
 }
 

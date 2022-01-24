@@ -299,23 +299,64 @@ neg.insert("");
 
 //INSERT keywords and file blocks of Enron
     //insert_dir("enron");
-    insert_dir("tiny2");
+    insert_dir("tiny");
 
 //***NOW TEST search and delete
 
-//SEARCH
-map <string,string> files = foram.search("3");
-
-
-for (map<string, string> :: iterator p = files.begin();
-		         p != files.end(); p++)
+cout << " SETUP INSERT DONE!"<< endl;
+cout <<"=================================="<< endl;
+cout <<"READY TO PERFORM QUERIES!" << endl;
+while(1)
 {
-	cout << "FILE[" << p->first << "]";
+	char c;
+	cout <<endl<<endl<<endl<<endl;
+	cout <<"Enter your choice (s/i/d/p/q): "<<endl;
+	cout <<"s/S: Search"<<endl;
+	cout <<"i/I: Insert"<<endl;
+	cout <<"d/D: Delete"<<endl;
+	cout <<"p/P: Print"<<endl;
+	cout <<"q/Q: Quit"<<endl;
+	cout <<"------------------"<<endl;
+	cout <<"_";
+
+	cin >> c;
+
+	if(c=='s' || c=='S')
+	{
+		cout << "Enter the keyword to be searched: ";
+		string keyword;
+		cin>> keyword;
+		map <string,string> files = foram.search(keyword);
+		for (map<string, string> :: iterator p = files.begin();
+		         p != files.end(); p++)
+		{
+			cout << "FILE[" << p->first << "]";
+		}
+		cout << endl;
+		cout << "RESULT size: " << files.size() << endl;
+	}
+	else if(c=='i' || c=='I')
+	{
+		cout << "Enter file name to be inserted:";
+		string file;
+		cin>> file;
+		//kwfileblocks(file);
+		cout <<endl;
+	}
+	else if(c=='d'|| c=='D')
+	{
+		cout <<"Enter file id to be deleted: ";
+		string fid;
+		cin>>fid;
+		deletefile(fid);
+	}
+	else //if(c=='q'||c=='Q')
+	{
+		cout <<"QUITTING..."<<endl<<endl;
+		break;
+	}
 }
-
-
-cout << endl;
-cout << "RESULT size1: " << files.size() << endl;
+/*
 cout << "DELETE STARTS***" << endl;
 deletefile("0001");
 files.clear();
@@ -337,7 +378,6 @@ for (map<string, string> :: iterator p = files.begin();
 	cout << "FILE[" << p->first << "]";
 }
 cout << endl;
-/*
 deletefile("0003");
 files.clear();
 files = foram.search("3");
@@ -359,140 +399,7 @@ for (map<string, string> :: iterator p = files.begin();
 	cout << "FILE[" << p->first << "]";
 }
 cout << endl;
-
-///////////////////
-deletefile("0013");
-files.clear();
-files = foram.search("you");
-cout << "RESULT size3: " << files.size() << endl;
-for (map<string, string> :: iterator p = files.begin();
-		         p != files.end(); p++)
-{
-	cout << "FILE[" << p->first << "]";
-}
-cout << endl;
-deletefile("0002");
-files.clear();
-files = foram.search("you");
-for (map<string, string> :: iterator p = files.begin();
-		         p != files.end(); p++)
-{
-	cout << "FILE[" << p->first << "]";
-}
-cout << endl;
-cout << "RESULT size4: " << files.size() << endl;
-deletefile("0013");
-files.clear();
-files = foram.search("you");
-cout << "RESULT size5: " << files.size() << endl;
-for (map<string, string> :: iterator p = files.begin();
-		         p != files.end(); p++)
-{
-	cout << "FILE[" << p->first << "]";
-}
-cout << endl;
-deletefile("0011");
-files.clear();
-files = foram.search("you");
-cout << "RESULT size3: " << files.size() << endl;
-deletefile("0011");
-files.clear();
-files = foram.search("you");
-cout << "RESULT size3: " << files.size() << endl;
-deletefile("0017");
-files.clear();
-files = foram.search("you");
-cout << "RESULT size3: " << files.size() << endl;
-deletefile("0016");
-files.clear();
-files = foram.search("you");
-cout << "RESULT size3: " << files.size() << endl;
-deletefile("0011");
-files.clear();
-files = foram.search("you");
-cout << "RESULT size3: " << files.size() << endl;
-deletefile("0010");
-files.clear();
-files = foram.search("you");
-cout << "RESULT size3: " << files.size() << endl;
-deletefile("0010");
-files.clear();
-files = foram.search("you");
-cout << "RESULT size3: " << files.size() << endl;
-deletefile("0015");
-files.clear();
-files = foram.search("you");
-cout << "RESULT size3: " << files.size() << endl;
 */
-/*
-for (map<string, string> :: iterator p = files.begin();
-		         p != files.end(); p++)
-{
-	cout << "FILE[" << p->first << "]";
-}
-cout << endl;
-cout << "RESULT size2: " << files.size() << endl;
-
-foram.removekw("you","0006");
-files.clear();
-files = foram.searchWrapper("you");
-for (map<string, string> :: iterator p = files.begin();
-		         p != files.end(); p++)
-{
-	cout << "FILE[" << p->first << "]";
-}
-cout << endl;
-cout << "RESULT size3: " << files.size() << endl;
-foram.removekw("you","0007");
-files.clear();
-files = foram.searchWrapper("you");
-for (map<string, string> :: iterator p = files.begin();
-		         p != files.end(); p++)
-{
-	cout << "FILE[" << p->first << "]";
-}
-cout << endl;
-cout << "RESULT size4: " << files.size() << endl;
-foram.removekw("you","0001");
-files.clear();
-files = foram.searchWrapper("you");
-for (map<string, string> :: iterator p = files.begin();
-		         p != files.end(); p++)
-{
-	cout << "FILE[" << p->first << "]";
-}
-cout << endl;
-cout << "RESULT size5: " << files.size() << endl;
-
-
-foram.removekw("you","0017");
-files.clear();
-files = foram.searchWrapper("you");
-for (map<string, string> :: iterator p = files.begin();
-		         p != files.end(); p++)
-{
-	cout << "FILE[" << p->first << "]";
-}
-cout << endl;
-cout << "RESULT size5: " << files.size() << endl;
-foram.removekw("you","0018");
-files.clear();
-files = foram.searchWrapper("you");
-for (map<string, string> :: iterator p = files.begin();
-		         p != files.end(); p++)
-{
-	cout << "FILE[" << p->first << "]";
-}
-cout << endl;
-cout << "RESULT size5: " << files.size() << endl;
-//
-    // first searches ids 
-    //map<string,string> allfiles = foram.searchWrapper("hell");
-    for(auto itr= allfiles.begin(); itr!=allfiles.end();itr++)
-    {
-	   	 cout << " OUTPUT Blocks :[" << itr->first << "]\n";
-		 cout << itr->second << endl << endl;
-    }*/
     
     return 0;
 }
