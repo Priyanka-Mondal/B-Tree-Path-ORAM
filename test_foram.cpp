@@ -338,6 +338,29 @@ for (map<string, string> :: iterator p = files.begin();
 }
 cout << endl;
 /*
+deletefile("0003");
+files.clear();
+files = foram.search("3");
+cout << "RESULT size2: " << files.size() << endl;
+for (map<string, string> :: iterator p = files.begin();
+		         p != files.end(); p++)
+{
+	cout << "FILE[" << p->first << "]";
+}
+cout << endl;
+//gives error
+deletefile("0004");
+files.clear();
+files = foram.search("3");
+cout << "RESULT size2: " << files.size() << endl;
+for (map<string, string> :: iterator p = files.begin();
+		         p != files.end(); p++)
+{
+	cout << "FILE[" << p->first << "]";
+}
+cout << endl;
+
+///////////////////
 deletefile("0013");
 files.clear();
 files = foram.search("you");
