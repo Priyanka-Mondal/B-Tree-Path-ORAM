@@ -41,6 +41,7 @@ Nodef* AVLTreef::newNodef(Bid key, string value) {
 // See the diagram given above.
 
 Nodef* AVLTreef::rightRotate(Nodef* y) {
+cout <<"ONE"<<endl;
     Nodef* x = oram->ReadNodef(y->leftID,y->leftPos,y->leftPos);
     Nodef* T2;
     if (x->rightID == 0) {
@@ -48,7 +49,6 @@ Nodef* AVLTreef::rightRotate(Nodef* y) {
     } else {
         T2 = oram->ReadNodef(x->rightID,x->rightPos,x->rightPos);
     }
-
     // Perform rotation
     x->rightID = y->key;
     x->rightPos = y->pos;
@@ -61,7 +61,6 @@ Nodef* AVLTreef::rightRotate(Nodef* y) {
     x->height = max(height(x->leftID, x->leftPos), height(x->rightID, x->rightPos)) + 1;
     oram->WriteNodef(x->key, x);
     // Return new root
-
     return x;
 }
 
@@ -228,7 +227,7 @@ void AVLTreef::batchSearch(Nodef* head, vector<Bid> keys, vector<Nodef*>* result
 void AVLTreef::printTree(Nodef* root, int indent) {
     if (root != 0 && root->key != 0) {
         root = oram->ReadNodef(root->key, root->pos, root->pos);
-	cout <<"root"<<root->key<<endl;
+	//cout <<"root"<<root->key<<endl;
         if (root->leftID != 0)
             printTree(oram->ReadNodef(root->leftID, root->leftPos, root->leftPos), indent + 4);
         if (indent > 0)
@@ -318,7 +317,7 @@ Bid AVLTreef::balance(Nodef* node, int &pos)
     int balance = getBalance(node);
     if(balance<-1 || balance >1)
     {
-    cout <<"balance is:"<< balance<< endl;
+    cout <<"balance of"<<node->key<<"is:"<< balance<< endl;
     Bid key = node->key;
     Nodef* nl = oram->ReadNodef(node->leftID,node->leftPos,node->leftPos);
     Nodef* nr = oram->ReadNodef(node->rightID,node->rightPos,node->rightPos);
@@ -737,3 +736,219 @@ Bid AVLTreef::remove(Bid rootKey, int& pos, Bid delKey)
 return rootKey;	
 }
 
+Bid AVLTreef::balanceParmin(Bid key, int& pos, Nodef* parmin, Nodef* minnode)
+{
+	if(parmin == NULL || parmin->key == 0)
+		return 0;
+	if(key == parmin->leftID || key == parmin->rightID)
+	{
+		Nodef* mlc = oram->ReadNodef(minnode->leftID,minnode->leftPos,minnode->leftPos);
+		if(mlc == NULL || mlc->key == 0)
+		     mlc = newNodef(0,"");
+		return mlc->key;
+	}
+
+	Nodef* node = oram->ReadNodef(key, pos, pos);
+	if(parmin->key < node->key)
+	{
+	  node->leftID=balanceParmin(node->leftID,node->leftPos,parmin,minnode);
+	}
+	else if(parmin->key > node->key)
+	{
+	  node->rightID=balanceParmin(node->rightID,node->rightPos,parmin,minnode);
+	}
+	else if (parmin->key == node->key)
+	{
+		Nodef* mrc = oram->ReadNodef(minnode->rightID,minnode->rightPos,minnode->rightPos);
+			
+		if(mrc == NULL || mrc->key == 0)
+				mrc = newNodef(0,"");
+		
+		if(minnode->key < parmin->key)
+		{
+			parmin->leftID = mrc->key;
+			parmin->leftPos = mrc->pos;
+		}
+		else if(minnode->key > parmin->key)
+		{
+			parmin->rightID = mrc->key;
+			parmin->rightPos = mrc->pos;
+		}
+		parmin->height =  max(height(parmin->leftID, parmin->leftPos), height(parmin->rightID, parmin->rightPos)) + 1;
+		int parminpos = parmin->pos;
+		Bid bparmin = balance(parmin,parminpos);
+		parmin = oram->ReadNodef(bparmin,parminpos,parminpos);
+		oram->WriteNodef(parmin->key,parmin);
+		return parmin->key; //node
+	}
+    
+	node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
+
+    int balance = getBalance(node);
+
+    // Left Left Case
+    if (balance > 1 && key < oram->ReadNodef(node->leftID)->key) {
+        Nodef* res = rightRotate(node);
+        pos = res->pos;
+        return res->key;
+    }
+
+    // Right Right Case
+    if (balance < -1 && key > oram->ReadNodef(node->rightID)->key) {
+        Nodef* res = leftRotate(node);
+        pos = res->pos;
+        return res->key;
+    }
+
+    // Left Right Case
+    if (balance > 1 && key > oram->ReadNodef(node->leftID)->key) {
+        Nodef* res = leftRotate(oram->ReadNodef(node->leftID));
+        node->leftID = res->key;
+        node->leftPos = res->pos;
+        oram->WriteNodef(node->key, node);
+        Nodef* res2 = rightRotate(node);
+        pos = res2->pos;
+        return res2->key;
+    }
+
+    // Right Left Case
+    if (balance < -1 && key < oram->ReadNodef(node->rightID)->key) {
+        auto res = rightRotate(oram->ReadNodef(node->rightID));
+        node->rightID = res->key;
+        node->rightPos = res->pos;
+        oram->WriteNodef(node->key, node);
+        auto res2 = leftRotate(node);
+        pos = res2->pos;
+        return res2->key;
+    }
+
+    /* return the (unchanged) node pointer */
+    oram->WriteNodef(node->key, node);
+    return node->key;
+}
+
+Bid AVLTreef::callRemove(Bid rootkey, int& pos, int rootpos,Bid delKey)
+{
+	cout <<"root is:"<< rootkey<<endl;
+	Bid root = removenew(rootkey,pos,rootkey,rootpos,delKey);
+	return root;
+}
+
+Bid AVLTreef::removenew(Bid key, int& pos,Bid rootKey, int rootPos, Bid delKey) {
+
+    if (key == 0) {
+	    cout << "nothing to delete"<<endl;
+        return key;
+    }
+    Nodef* node = oram->ReadNodef(key, pos, pos);
+    if (key < delKey) 
+    {
+        cout<<"( key < delKey):"<<key << delKey<< endl;
+        node->rightID=removenew(node->rightID, node->rightPos, rootKey,rootPos, delKey);
+    } 
+    else if (key > delKey) 
+    {
+        cout<<"(key > delKey):"<<key << delKey<< endl;
+        node->leftID = removenew(node->leftID, node->leftPos, rootKey, rootPos, delKey);
+    } 
+    else if(key == delKey)
+    { 
+	cout<<"(key == delKey):"<<key << delKey << endl;
+        Nodef* rc=oram->ReadNodef(node->rightID,node->rightPos,node->rightPos);
+	Nodef* minnode;
+
+	if(rc == NULL || rc->key == 0)
+	{
+		rc = newNodef(0,"");
+		cout << "the min value node is->"<< node->key<<endl;
+		minnode = oram->ReadNodef(key, pos, pos);
+	}
+	else
+	{
+		Nodef* temp = minValueNode(rc->key,rc->pos,rc);
+		cout << "the min value node is:"<< temp->key<<endl;
+		minnode = oram->ReadNodef(temp->key,temp->pos,temp->pos);
+	}
+	Nodef* parmin = parentOf(rootKey,rootPos,rootKey,rootPos,minnode->key);
+
+	if (delKey == parmin->leftID || delKey== parmin->rightID)
+	{
+		Nodef* mlc = oram->ReadNodef(minnode->leftID,minnode->leftPos,minnode->leftPos);
+		if(mlc == NULL || mlc->key == 0)
+		     mlc = newNodef(0,"");
+		return mlc->key ;
+	}
+	else
+	{
+		if(parmin != NULL)
+		cout <<"parent of minnode is :"<< parmin->key<<endl;
+		else 
+		cout <<"parent is NULL"<<endl;
+
+		int npos = node->pos;
+		Bid bnode = balanceParmin(node->key,npos,parmin,minnode);
+		cout << "node was:"<<node->key<< delKey<<endl;
+		node = oram->ReadNodef(bnode,npos,npos);
+		cout << "node is:"<<node->key<< delKey<<endl;
+	       // if this returns a different node then ? 
+	 Nodef* lc=oram->ReadNodef(node->leftID,node->leftPos,node->leftPos);
+	       	rc=oram->ReadNodef(node->rightID,node->rightPos,node->rightPos);
+		if(lc == NULL || lc->key == 0)
+			lc = newNodef(0,"");
+		if(rc == NULL || rc->key == 0)
+			rc = newNodef(0,"");
+		
+		minnode->leftID = lc->key;
+		minnode->leftPos = lc->pos;
+		minnode->rightID = rc->key;
+		minnode->rightPos = rc->pos;
+		minnode->height = max(height(minnode->leftID, minnode->leftPos), height(minnode->rightID, minnode->rightPos)) + 1;
+		oram->WriteNodef(minnode->key, minnode);
+		return minnode->key;
+	}
+    }
+
+    node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
+
+    int balance = getBalance(node);
+
+    // Left Left Case
+    if (balance > 1 && key < oram->ReadNodef(node->leftID)->key) {
+        Nodef* res = rightRotate(node);
+        pos = res->pos;
+        return res->key;
+    }
+
+    // Right Right Case
+    if (balance < -1 && key > oram->ReadNodef(node->rightID)->key) {
+        Nodef* res = leftRotate(node);
+        pos = res->pos;
+        return res->key;
+    }
+
+    // Left Right Case
+    if (balance > 1 && key > oram->ReadNodef(node->leftID)->key) {
+        Nodef* res = leftRotate(oram->ReadNodef(node->leftID));
+        node->leftID = res->key;
+        node->leftPos = res->pos;
+        oram->WriteNodef(node->key, node);
+        Nodef* res2 = rightRotate(node);
+        pos = res2->pos;
+        return res2->key;
+    }
+
+    // Right Left Case
+    if (balance < -1 && key < oram->ReadNodef(node->rightID)->key) {
+        auto res = rightRotate(oram->ReadNodef(node->rightID));
+        node->rightID = res->key;
+        node->rightPos = res->pos;
+        oram->WriteNodef(node->key, node);
+        auto res2 = leftRotate(node);
+        pos = res2->pos;
+        return res2->key;
+    }
+
+    /* return the (unchanged) node pointer */
+    oram->WriteNodef(node->key, node);
+    return node->key;
+}

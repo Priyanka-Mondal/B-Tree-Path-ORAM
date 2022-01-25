@@ -36,6 +36,9 @@ public:
     AVLTreef(int maxSize, bytes<Key> key);
     virtual ~AVLTreef();
     Bid remove(Bid rootKey, int& pos, Bid delKey);
+    Bid callRemove(Bid key, int& pos, int rootpos, Bid delKey);
+    Bid removenew(Bid key, int& pos, Bid rootKey, int rootpos, Bid delKey);
+    Bid balanceParmin(Bid key, int& pos, Nodef* parmin, Nodef* minnode);
     Nodef* minValueNode(Bid rootKey, int pos, Nodef* rootroot);
     string minValue(Bid rootKey, int rootPos, Nodef* rootroot, string v);
     Bid balance(Nodef* node, int &pos);

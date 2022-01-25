@@ -19,16 +19,11 @@ string delimiters("|+#*?@,:!\"><; _-./  \n");
 
 vector<string> getUniquedWords(vector<string> kws, string fileid)
 {
-    // Open a file stream
     vector<string> kw;
-    // Create a map to store count of all words
     map<string, int> mp;
-  
-    // Keep reading words while there are words to read
     string word;
     for(auto word : kws)
     {
-        // If this is first occurrence of word
         if (!mp.count(word))
             mp.insert(make_pair(word, 1));
         else
@@ -36,9 +31,6 @@ vector<string> getUniquedWords(vector<string> kws, string fileid)
     }
     mp.erase(fileid);
   
-  
-    // Traverse map and print all words whose count
-    //is 1
     for (map<string, int> :: iterator p = mp.begin();
          p != mp.end(); p++)
     {
@@ -54,21 +46,13 @@ vector<string> divideString(string filename, int blk, string id)
 	 fstream fs(filename); 
          string str((istreambuf_iterator<char>(fs)),
                        (istreambuf_iterator<char>()));
-
         int str_size = str.length();
-
-	
 	if (str_size% sz !=0)
 	{
 		int pad = ceil(str_size/sz)+1;
-		//cout << filename<< " pad:" << pad << endl;
 		pad = pad*sz-str_size;
-		//cout << "again pad:" << pad << endl; 
 	        str.insert(str.size(), pad, '#');
 	}
-		//cout << "pad:[" <<str.size() <<"::"<< str << "]" << endl; 
-		//cout << "++++++++++++++++++++++++++" << endl;
-         
   	int i;
         vector<string> result;
         string temp="";
@@ -80,7 +64,6 @@ vector<string> divideString(string filename, int blk, string id)
 		     string ttemp =id;
 		     ttemp.append(temp); 
                      result.push_back(ttemp);    
-		     //cout << "New Node:[" << ttemp << "]\n";
                   }
                   temp="";
             }
@@ -88,9 +71,7 @@ vector<string> divideString(string filename, int blk, string id)
 	}
         string ttemp = id;
 	ttemp.append(temp);	
-	    //cout << "New Node::"<< ttemp << endl; 
 	result.push_back(ttemp); 
-	
 	return result;
     }
 
@@ -156,9 +137,6 @@ static void insert_dir (const char * dir_name)
 	      vector<string> kws1, kws;
 	      string id = toS(fileid);
 	      string cont = getFileContent(file);
-    	      //cout << endl << "FILEID:" << fileid<< endl;
-	      //cout << "["<<file <<"]"<< endl;
-	      //cout << cont << endl << endl;
 	      cout <<"=====================================" << endl;
 
 	      boost::split(kws1, cont, boost::is_any_of(delimiters));
@@ -166,17 +144,10 @@ static void insert_dir (const char * dir_name)
 	      int pos = 0;
 	      for (auto it = kws.begin(); it != kws.end(); it++)
 	      {
-		      //cout <<"pos:"<<pos<<"-";
 		      if(neg.find(*it)!=neg.end())
 		      {
-			 //cout << endl <<"Deleted:["<<*it<<"]"<<endl ;
 			 kws.erase(it--);
 		      }
-		      //else
-		      //{
-			//cout <<"["<<*it<<"]" <<"     " ;
-		      //}
-		      //pos++;
 	      }
 	      cout << endl <<file<< " " << id <<endl << endl;
 	      cout << "============================" << endl;
@@ -184,10 +155,6 @@ static void insert_dir (const char * dir_name)
 		blocks = divideString(file,BLOCK,id);
         	foram.insert(kws, blocks, id);
 		cout << "number of keywords :" << kws.size() <<endl;
-		/*for(auto k: kws)
-		{
-			foram.insert(k,id);
-		}*/
                 fileid++;
                }
 
@@ -228,36 +195,27 @@ static void insert_dir (const char * dir_name)
 void deletefile(string id)
 {
 	string cont = foram.removefileblock(id);
+	cout << cont << endl;
 	if(cont != "")
 	{
 		cout <<endl;
-	//cout <<"Id:"<<id<<"["<<cont<<"]"<<endl;
-	vector<string> kws ,kws1;
-	boost::split(kws1, cont, boost::is_any_of(delimiters));
-	kws =  getUniquedWords(kws1, id);
-	      for (auto it = kws.begin(); it != kws.end(); it++)
-	      {
-		      //cout <<"pos:"<<pos<<"-";
-		      if(neg.find(*it)!=neg.end())
+		vector<string> kws ,kws1;
+		boost::split(kws1, cont, boost::is_any_of(delimiters));
+		kws =  getUniquedWords(kws1, id);
+		      for (auto it = kws.begin(); it != kws.end(); it++)
 		      {
-			 //cout << endl <<"Deleted:["<<*it<<"]"<<endl ;
-			 kws.erase(it--);
+			      if(neg.find(*it)!=neg.end())
+			      {
+				 kws.erase(it--);
+			      }
 		      }
-		      //else
-		      //{
-			//cout <<"["<<*it<<"]" <<"     " ;
-		      //}
-		      //pos++;
-	      }
-
-	cout << "Delete of keywords in :"<< id<< endl;
+		cout << "Deletion of keywords in :"<< id<< endl;
 		foram.removekw(kws,id);
-	//cout << "Total deleted:"<< kws.size() << endl;
 	}
-else
-{
-	cout <<endl<<"file " << id <<" does not exist!!" << endl << endl;
-}
+	else
+	{
+	cout <<endl<<endl<<"FILE" << id <<" does NOT exist!!" << endl << endl;
+	}
 }
 
 void kwfileblocks(string file)
@@ -276,11 +234,11 @@ void kwfileblocks(string file)
 			kws.erase(it--);
 		}
 	}
-	cout << endl << file<<" "<< id << endl;
-	cout <<"=================================="<<endl;
+	cout << endl <<"Insertion of "<< file<<" "<< id << endl;
 	blocks = divideString(file,BLOCK,id);
 	fileid++;
 	foram.insert(kws, blocks, id);
+	cout <<"=================================="<<endl;
 }
 
 
