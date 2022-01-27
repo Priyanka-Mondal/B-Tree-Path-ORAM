@@ -191,7 +191,6 @@ void Foram::removekw(vector <string> kws, string ind)
 		string fcnt = updt->find(fcntKey);
 	    	int updc = to_Int(fcnt);
 		int newfilecnt = updc-1;
-		updt->insert(fcntKey,to_string(newfilecnt));
 
 		Bid lastKey = createBid(kw,updc);
 		string last_id = srch->find(lastKey);
@@ -204,7 +203,11 @@ void Foram::removekw(vector <string> kws, string ind)
 		}
 		//	srch->remove(lastKey);
 		updt->remove(delKey);
-		cout <<"REMOVED||"<<endl;
+		if(newfilecnt == 0)
+			updt->remove(fcntKey);
+		else
+			updt->insert(fcntKey,to_string(newfilecnt));
+		cout <<"REMOVED"<<endl;
 		updt->printTree();
 		}
 	}

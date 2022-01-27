@@ -35,30 +35,23 @@ private:
 public:
     AVLTreef(int maxSize, bytes<Key> key);
     virtual ~AVLTreef();
-    /*
-    Bid remove(Bid rootKey, int& pos, Bid delKey);
-    Bid callRemove(Bid key, int& pos, int rootpos, Bid delKey);
-    Bid removenaive(Bid key, int& pos, Bid delKey);
-    Bid removenew(Bid key, int& pos, Bid rootKey, int rootpos, Bid delKey);
-    Bid balanceParmin(Bid key, int& pos, Nodef* parmin, Nodef* minnode);
-    Bid balanceRec(Bid rootKey, int &rootPos, Nodef* node, int &pos);
-    Nodef* balanceAndAttachtoParent(Nodef* parpm, Nodef* pm);
-    */
     Bid insert(Bid rootKey, int& pos, Bid key, string value);
     Nodef* search(Nodef* head, Bid key);
     void batchSearch(Nodef* head, vector<Bid> keys, vector<Nodef*>* results);
     void printTree(Nodef* root, int indent);
     void startOperation(bool batchWrite = false);
     void finishOperation(bool find, Bid& rootKey, int& rootPos);
-    
-    Nodef* parentOf(Bid parentKey, int ppos, Bid childKey, int cpos, Bid key);
+   
+   //deletion related functions 
     void deleteNode(Nodef* nodef);
-    Bid balance(Nodef* node, int &pos);
+    Nodef* parentOf(Bid parentKey, int ppos, Bid childKey, int cpos, Bid key);
     Nodef* minValueNode(Bid rootKey, int pos, Nodef* rootroot);
+    Bid balance(Nodef* node, int &pos);
+    Bid balanceDel(Bid minKey, int& minpos, Nodef* parmin);
     Bid removeMain(Bid rootKey,int& pos, Bid delKey);
     Bid removeDel(Bid rootKey,int& pos,Bid delKey,int delPos,Nodef* paren);
+    Bid removeRoot(Bid rootKey, int& pos);
     Bid realDelete(Nodef* paren,Bid delKey,int delPos);
-    Bid balanceDel(Bid minKey, int& minpos, Nodef* parmin);
 };
 
 #endif /* AVLTREEF_H */

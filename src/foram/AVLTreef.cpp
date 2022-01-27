@@ -306,8 +306,7 @@ Bid AVLTreef::balance(Nodef* node, int &pos)
 {
     Bid key = node->key;
     int balance = getBalance(node);
-    cout <<"balance is:"<<balance<<endl;
-
+    //cout <<"balance is:"<<balance<<endl;
     if (balance > 1 )
     {
 	    Nodef* leftChild = oram->ReadNodef(node->leftID);
@@ -374,19 +373,96 @@ Bid AVLTreef:: removeMain(Bid rootKey,int& pos, Bid delKey)
 			delPos = paren->leftPos;
 		else if(delKey == paren->rightID)
 			delPos = paren->rightPos;
-		
 		rootKey = removeDel(rootKey,pos,delKey,delPos,paren);
 		return rootKey;
 	}
 	else if(rootKey == delKey)
 	{
-		cout<<"LATER (removeMain)"<<endl;
+		cout<<"rootKey == delKey (removeMain)"<<endl;
+		rootKey = removeRoot(rootKey, pos);
 		return rootKey;
 	}
 	else
 	{
 		cout<<"WHY this (removeMain)"<<endl;
 		return rootKey;
+	}
+}
+
+Bid AVLTreef::removeRoot(Bid rootKey, int& pos)
+{
+	Nodef* delnode =oram->ReadNodef(rootKey,pos,pos); 
+	Bid delKey = rootKey;
+Nodef* b=oram->ReadNodef(delnode->rightID,delnode->rightPos,delnode->rightPos);
+	Nodef* minnode;
+	if(b == NULL || b->key == 0)
+	{
+		cout << "the min value node is->"<< delnode->key<<endl;
+		minnode = delnode;
+	}
+	else
+	{
+		Nodef* mn = minValueNode(b->key,b->pos,b);
+		cout << "the min value node is:"<< mn->key<<endl;
+		minnode = oram->ReadNodef(mn->key,mn->pos,mn->pos);
+	}
+	
+	if(delKey == minnode->key)
+	{//no right child of delKey
+		cout <<"FIRST CASE:rootKey == minnode->key"<< endl;
+Nodef* lc = oram->ReadNodef(delnode->leftID,delnode->leftPos,delnode->leftPos);
+		if(lc == NULL || lc->key ==0)
+			lc = newNodef(0,"");
+		pos = lc->pos;
+		deleteNode(delnode);
+		return lc->key;
+	}
+	else
+	{
+
+		Nodef* pm=parentOf(rootKey,pos,rootKey,pos,minnode->key);
+		Nodef* parmin = oram->ReadNodef(pm->key,pm->pos,pm->pos);
+		//cout << "parent of minnode is:"<< parmin->key<<endl;
+		if(delKey == parmin->key)
+		{//no leftchild of minnode //minnode is delKey's right child
+			cout <<"SECOND CASE: rootKey == parmin->key"<< endl;
+	Nodef* lc = oram->ReadNodef(delnode->leftID,delnode->leftPos,delnode->leftPos);
+			if(lc == NULL || lc->key ==0)
+				lc = newNodef(0,"");
+			minnode->leftID = lc->key;
+			minnode->leftPos = lc->pos;
+			minnode->height =  max(height(minnode->leftID,minnode->leftPos), height(minnode->rightID, minnode->rightPos)) + 1;
+			oram->WriteNodef(minnode->key,minnode);
+			int minPos = minnode->pos;
+			Bid minKey = balance(minnode,minnode->pos);
+			minnode = oram->ReadNodef(minKey,minPos,minPos);
+			pos = minnode->pos;
+			deleteNode(delnode);
+			return minnode->key;
+		}
+		else //minnode does not have leftID in general
+		{//in this case minnode is parmin's left child always
+			cout <<"THIRD case"<< endl;	
+	Nodef* rc = oram->ReadNodef(minnode->rightID,minnode->rightPos,minnode->rightPos);
+			if(rc == NULL || rc->key ==0)
+				rc = newNodef(0,"");
+			parmin->leftID = rc->key;
+			parmin->leftPos = rc->pos;
+			parmin->height = max(height(parmin->leftID,parmin->leftPos), height(parmin->rightID, parmin->rightPos)) + 1;
+			oram->WriteNodef(parmin->key,parmin);
+			minnode->leftID = delnode->leftID;
+			minnode->leftPos = delnode->leftPos;
+			minnode->rightID = delnode->rightID;
+			minnode->rightPos = delnode->rightPos;
+			minnode->height = max(height(minnode->leftID,minnode->leftPos), height(minnode->rightID, minnode->rightPos)) + 1;
+			oram->WriteNodef(minnode->key,minnode);
+			int minPos = minnode->pos;
+			Bid minKey = balanceDel(minnode->key,minnode->pos, parmin);
+			minnode = oram->ReadNodef(minKey,minPos,minPos);
+			pos = minnode->pos;
+			deleteNode(delnode);
+			return minnode->key;
+		}	
 	}
 }
 
@@ -498,6 +574,7 @@ Nodef* lc = oram->ReadNodef(delnode->leftID,delnode->leftPos,delnode->leftPos);
 		}
 		paren->height=max(height(paren->leftID,paren->leftPos), height(paren->rightID, paren->rightPos)) + 1;
 		oram->WriteNodef(paren->key,paren);
+		deleteNode(delnode);
 		return paren->key;
 	}
 	else if(delKey == parmin->key)
@@ -525,6 +602,7 @@ Nodef* lc = oram->ReadNodef(delnode->leftID,delnode->leftPos,delnode->leftPos);
 		}
 		paren->height=max(height(paren->leftID,paren->leftPos), height(paren->rightID, paren->rightPos)) + 1;
 		oram->WriteNodef(paren->key,paren);
+		deleteNode(delnode);
 		return paren->key;
 	}
 	else //minnode does not have leftID in general
@@ -558,7 +636,7 @@ Nodef* rc = oram->ReadNodef(minnode->rightID,minnode->rightPos,minnode->rightPos
 		}
 		paren->height=max(height(paren->leftID,paren->leftPos), height(paren->rightID, paren->rightPos)) + 1;
 		oram->WriteNodef(paren->key,paren);
-		//deleteNode(delnode);
+		deleteNode(delnode);
 		return paren->key;
 	}	
 }
@@ -566,7 +644,7 @@ Nodef* rc = oram->ReadNodef(minnode->rightID,minnode->rightPos,minnode->rightPos
 Bid AVLTreef::balanceDel(Bid key, int& pos, Nodef* parmin)
 {
 	Nodef* node = oram->ReadNodef(key,pos,pos);
-	cout <<"IN BALANCEDEL:"<< node->key<<endl;
+	//cout <<"IN BALANCEDEL:"<< node->key<<endl;
 	if(node->key < parmin->key)
 	{
 		node->rightID = balanceDel(node->rightID,node->rightPos,parmin);
@@ -575,13 +653,12 @@ Bid AVLTreef::balanceDel(Bid key, int& pos, Nodef* parmin)
 	{
 		node->leftID = balanceDel(node->leftID,node->leftPos,parmin);
 	}
-	else if(node->key == parmin->key)
-	{
+	//else if(node->key == parmin->key)
+	//{
 
     node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
     int balance = getBalance(node);
-    cout <<"balance is:"<<balance<<endl;
-    Bid key = node->key;
+    //cout <<"balance is:"<<balance<<endl;
     if (balance > 1 )
     {
 	    Nodef* leftChild = oram->ReadNodef(node->leftID);
@@ -627,7 +704,7 @@ Bid AVLTreef::balanceDel(Bid key, int& pos, Nodef* parmin)
 	    }
     }
 
-  }
+  //}
     oram->WriteNodef(node->key, node);
     return node->key;
 }
