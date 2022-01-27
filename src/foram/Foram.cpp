@@ -203,8 +203,8 @@ void Foram::removekw(vector <string> kws, string ind)
 			updt->insert(lastupdKey,delcnt);
 		}
 		//	srch->remove(lastKey);
+		updt->remove(delKey);
 		cout <<"REMOVED||"<<endl;
-		updt->removenaive(delKey);
 		updt->printTree();
 		}
 	}

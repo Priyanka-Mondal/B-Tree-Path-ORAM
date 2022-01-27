@@ -34,34 +34,9 @@ void OMAPf::remove(Bid delKey)
     //cout << "THE rootkey at OMAPf 1:"<< rootKey<< endl;
     treeHandler->startOperation();
     if (rootKey == 0) {
-        rootKey = treeHandler->remove(0, rootPos, delKey);
+        rootKey = treeHandler->removeMain(0, rootPos, delKey);
     } else {
-        rootKey = treeHandler->remove(rootKey, rootPos, delKey);
-    }
-    treeHandler->finishOperation(false, rootKey, rootPos);
-    //cout << "THE rootkey at OMAPf 2:"<< rootKey<< endl;
-}
-void OMAPf::removenew(Bid delKey) 
-{
-    //cout << "THE rootkey at OMAPf 1:"<< rootKey<< endl;
-    treeHandler->startOperation();
-    if (rootKey == 0) {
-        rootKey = treeHandler->callRemove(0, rootPos, rootPos, delKey);
-    } else {
-        rootKey = treeHandler->callRemove(rootKey, rootPos, rootPos, delKey);
-    }
-    treeHandler->finishOperation(false, rootKey, rootPos);
-    //cout << "THE rootkey at OMAPf 2:"<< rootKey<< endl;
-}
-
-void OMAPf::removenaive(Bid delKey) 
-{
-    //cout << "THE rootkey at OMAPf 1:"<< rootKey<< endl;
-    treeHandler->startOperation();
-    if (rootKey == 0) {
-        rootKey = treeHandler->removenaive(0, rootPos, delKey);
-    } else {
-        rootKey = treeHandler->removenaive(rootKey, rootPos, delKey);
+        rootKey = treeHandler->removeMain(rootKey, rootPos, delKey);
     }
     treeHandler->finishOperation(false, rootKey, rootPos);
     //cout << "THE rootkey at OMAPf 2:"<< rootKey<< endl;
