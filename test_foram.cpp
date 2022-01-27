@@ -278,7 +278,7 @@ neg.insert("");
 
 //INSERT keywords and file blocks of Enron
     //insert_dir("enron");
-    insert_dir("tiny");
+    insert_dir("tiny2");
 
 //***NOW TEST search and delete
 

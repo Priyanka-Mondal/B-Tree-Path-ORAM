@@ -54,6 +54,19 @@ void OMAPf::removenew(Bid delKey)
     //cout << "THE rootkey at OMAPf 2:"<< rootKey<< endl;
 }
 
+void OMAPf::removenaive(Bid delKey) 
+{
+    //cout << "THE rootkey at OMAPf 1:"<< rootKey<< endl;
+    treeHandler->startOperation();
+    if (rootKey == 0) {
+        rootKey = treeHandler->removenaive(0, rootPos, delKey);
+    } else {
+        rootKey = treeHandler->removenaive(rootKey, rootPos, delKey);
+    }
+    treeHandler->finishOperation(false, rootKey, rootPos);
+    //cout << "THE rootkey at OMAPf 2:"<< rootKey<< endl;
+}
+
 void OMAPf::insert(Bid key, string value) {
     treeHandler->startOperation();
     if (rootKey == 0) {

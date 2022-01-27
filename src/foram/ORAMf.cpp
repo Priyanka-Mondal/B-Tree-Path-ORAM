@@ -284,7 +284,7 @@ int ORAMf::DeleteNodef(Bid bid, Nodef* node) {
     //}
     if (cache.count(bid) == 0) {
         modified.insert(bid);
-        AccessDelete(bid, node);
+        Access(bid, node);
         return node->pos;
     } else {
         modified.insert(bid);

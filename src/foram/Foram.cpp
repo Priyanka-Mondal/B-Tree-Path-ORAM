@@ -204,7 +204,7 @@ void Foram::removekw(vector <string> kws, string ind)
 		}
 		//	srch->remove(lastKey);
 		cout <<"REMOVED||"<<endl;
-		updt->removenew(delKey);
+		updt->removenaive(delKey);
 		updt->printTree();
 		}
 	}

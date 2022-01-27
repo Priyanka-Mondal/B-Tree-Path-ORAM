@@ -37,6 +37,7 @@ public:
     virtual ~AVLTreef();
     Bid remove(Bid rootKey, int& pos, Bid delKey);
     Bid callRemove(Bid key, int& pos, int rootpos, Bid delKey);
+    Bid removenaive(Bid key, int& pos, Bid delKey);
     Bid removenew(Bid key, int& pos, Bid rootKey, int rootpos, Bid delKey);
     Bid balanceParmin(Bid key, int& pos, Nodef* parmin, Nodef* minnode);
     Nodef* minValueNode(Bid rootKey, int pos, Nodef* rootroot);
@@ -53,6 +54,10 @@ Bid deleteHelper(Bid rootKey,int& pos,Bid delKey,Bid minkey,int posk,string valu
     void printTree(Nodef* root, int indent);
     void startOperation(bool batchWrite = false);
     void finishOperation(bool find, Bid& rootKey, int& rootPos);
+    Bid removeMain(Bid rootKey,int& pos, Bid delKey);
+    Bid removeDel(Bid rootKey,int& pos,Bid delKey,int delPos,Nodef* paren);
+    Bid realDelete(Nodef* paren,Bid delKey,int delPos);
+    Bid balanceDel(Bid minKey, int& minpos, Nodef* parmin);
 };
 
 #endif /* AVLTREEF_H */
