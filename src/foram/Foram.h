@@ -34,6 +34,7 @@ public:
     vector<string> searchkw(string keyword);
     string searchfileblock(string ind, int blk);
     map<string,string> search(string keyword);
+    void print();
 
     Foram(bool useHDD,int maxSize, int updSize);    
     virtual ~Foram();

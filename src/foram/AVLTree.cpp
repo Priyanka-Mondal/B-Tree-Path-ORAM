@@ -315,8 +315,6 @@ void AVLTree::printTree(Node* root, int indent) {
             cout << setw(indent) << " ";
         string value;
         value.assign(root->value.begin(), root->value.end());
-	//cout << "AT print" << endl;
-        //cout << root->key << ":" << value.second.c_str() << ":" << root->pos << ":" << root->leftID << ":" << root->leftPos << ":" << root->rightID << ":" << root->rightPos << endl << endl << endl <<  endl;
 	cout << (root->key) << "::" << value << endl;
         if (root->rightID != 0)
             printTree(oram->ReadNode(root->rightID, root->rightPos, root->rightPos), indent + 4);

@@ -212,6 +212,10 @@ void Foram::removekw(vector <string> kws, string ind)
 	//srch->finalize();
 }
 
+void Foram::print()
+{
+	updt->printTree();
+}
 
 
 map<string,string> Foram::search(string keyword)

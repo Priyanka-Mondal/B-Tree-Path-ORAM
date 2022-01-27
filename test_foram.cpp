@@ -329,6 +329,10 @@ while(1)
 		cin>>fid;
 		deletefile(fid);
 	}
+	else if(c=='p' || c=='P')
+	{
+		foram.print();
+	}
 	else //if(c=='q'||c=='Q')
 	{
 		cout <<"QUITTING..."<<endl<<endl;

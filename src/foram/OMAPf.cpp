@@ -36,7 +36,9 @@ void OMAPf::remove(Bid delKey)
     if (rootKey == 0) {
         rootKey = treeHandler->removeMain(0, rootPos, delKey);
     } else {
+	    cout <<"OMAPf: rootKey != 0"<<rootKey<<endl;
         rootKey = treeHandler->removeMain(rootKey, rootPos, delKey);
+	cout <<"OMAPf: Root is:"<< rootKey<<endl;
     }
     treeHandler->finishOperation(false, rootKey, rootPos);
     //cout << "THE rootkey at OMAPf 2:"<< rootKey<< endl;
