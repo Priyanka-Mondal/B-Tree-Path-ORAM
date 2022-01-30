@@ -51,6 +51,7 @@ private:
     vector<int> readviewmap;
     vector<int> writeviewmap;
     set<Bid> modified;
+    set<Bid> deleted;
     int readCnt = 0;
     bytes<Key> key;
 

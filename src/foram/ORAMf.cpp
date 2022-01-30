@@ -158,11 +158,15 @@ void ORAMf::WritePath(int leaf, int d) {
             block.id = validBlocks[z];
             Nodef* curnode = cache[block.id];
             block.data = convertNodefToBlock(curnode);
+	//    if(block.id == curnode->key)
+	//        cout <<"curnode=block.id"<<curnode->key<<block.id<<endl;
 	    if(curnode->key != block.id)
 	    {
-		    block.id = curnode->key;
-        	    std::fill(curnode->value.begin(), curnode->value.end(), 0);
-            	    block.data = convertNodefToBlock(curnode);
+	          cout <<"curnode!=block.id"<<curnode->key<<block.id<<endl;
+		    block.id = 0; // curnode->key;
+		    block.data.resize(blockSize, 0);
+        	   //std::fill(curnode->value.begin(), curnode->value.end(), 0);
+            	    //block.data = convertNodefToBlock(curnode);
 	    }
             delete curnode;
             cache.erase(block.id);
@@ -194,22 +198,24 @@ Nodef* ORAMf::ReadData(Bid bid) {
 void ORAMf::WriteData(Bid bid, Nodef* node) {
 	if(bid == node->key)
 	{
-    if (store->GetEmptySize() > 0) {
-        cache[bid] = node;
-	cout << "EmptyNodesize in Write:"<< store->GetEmptySize()<<endl;
-        store->ReduceEmptyNumbers();
-    } else {
-	    cout << "can not write anymore - WriteDataf!"<<endl;
-        throw runtime_error("There is no more space in ORAMf");
-    }
+	    if (store->GetEmptySize() > 0) 
+	    {
+	        cache[bid] = node;
+		cout << "EmptyNodesize in Write:"<< store->GetEmptySize()<<endl;
+	        store->ReduceEmptyNumbers();
+	    } 
+	    else 
+	    {
+		    cout << "can not write anymore - WriteDataf!"<<endl;
+	            throw runtime_error("There is no more space in ORAMf");
+            }
 	}
 	else if(bid != node->key)
 	{
-
-        cache[bid]=node; 
-	cout << "EmptyNodesize in delete before:"<< store->GetEmptySize()<<endl;
-        store->IncreaseEmptyNumbers();
-	cout << "EmptyNodesize in delete after:"<< store->GetEmptySize()<<endl;
+        	cache[bid]=node; 
+		cout <<"EmptyNode delete before:"<< store->GetEmptySize()<<endl;
+        	store->IncreaseEmptyNumbers();
+		cout <<"EmptyNode delete after:"<< store->GetEmptySize()<<endl;
 	}
 }
 
@@ -235,16 +241,6 @@ void ORAMf::Access(Bid bid, Nodef*& node) {
         FetchPath(node->pos);
     }
     WriteData(bid, node);
-    if (find(leafList.begin(), leafList.end(), node->pos) == leafList.end()) {
-        leafList.push_back(node->pos);
-    }
-}
-void ORAMf::AccessDelete(Bid bid, Nodef*& node) {
-    if (!batchWrite) {
-        FetchPath(node->pos);
-    }
-    DeleteData(bid, node);
-    cout <<"IN ACCESS DELETE"<<endl;
     if (find(leafList.begin(), leafList.end(), node->pos) == leafList.end()) {
         leafList.push_back(node->pos);
     }
@@ -286,32 +282,36 @@ int ORAMf::WriteNodef(Bid bid, Nodef* node) {
     {
        throw runtime_error("Nodef id is not set in WriteNode");
     }
-    if (cache.count(bid) == 0 || bid != node->key) {
+    if (cache.count(bid) == 0 && (bid == node->key)) 
+    {
+	    cout << "modi modi";
         modified.insert(bid);
         Access(bid, node);
         return node->pos;
-    } else {
-        modified.insert(bid);
-        return node->pos;
-    }
-}
-
-int ORAMf::DeleteNodef(Bid bid, Nodef* node) {
-    if (bid == 0) 
+    } 
+    else if (cache.count(bid) == 0 && (bid != node->key)) 
     {
-       throw runtime_error("Nodef id is not set in DeleteNode");
-    }
-//        modified.insert(bid);
-//        AccessDelete(bid, node);
-//        return node->pos;
-    if (cache.count(bid) == 0) {
+	    cout <<"with Access"<< bid<<endl;
+        deleted.insert(bid);
+	if(modified.count(bid))
+		modified.erase(bid);
+        Access(bid, node);
+        return node->pos;
+    } 
+    else if(bid == node->key)
+    {
         modified.insert(bid);
-        AccessDelete(bid, node);
-        return node->pos;
-    } else {
-        modified.insert(bid); //
         return node->pos;
     }
+    else if(bid != node->key)
+    {
+	    cout <<"without Access"<< bid<<endl;
+        deleted.insert(bid);
+	if(modified.count(bid))
+		modified.erase(bid);
+        return node->pos;
+    }
+
 }
 
 Nodef* ORAMf::convertBlockToNodef(block b) {
@@ -364,6 +364,13 @@ void ORAMf::finilize(bool find, Bid& rootKey, int& rootPos) {
                 if (tmp->rightID != 0 && cache.count(tmp->rightID) > 0) {
                     tmp->rightPos = cache[tmp->rightID]->pos;
                 }
+		if(deleted.count(tmp->key))
+		{
+			cout <<"deleting node:"<<tmp->key<<endl;
+			tmp->pos = RandomPath();
+			tmp->leftPos = 0;
+			tmp->rightPos = 0;
+		}
             }
         }
     }
@@ -377,12 +384,14 @@ void ORAMf::finilize(bool find, Bid& rootKey, int& rootPos) {
             if (cnt % 1000 == 0 && batchWrite) {
                 cout << "OMAP:" << cnt << "/" << (depth+1) * leafList.size() << " inserted" << endl;
             }
+	    //cout <<"CALLING WRITE PATH:"<<leafList[i]<<endl;
             WritePath(leafList[i], d);
         }
     }
 
     leafList.clear();
     modified.clear();
+    deleted.clear();
 }
 
 void ORAMf::start(bool batchWrite) {

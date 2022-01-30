@@ -205,15 +205,13 @@ void Foram::removekw(vector <string> kws, string ind)
 			Bid lastupdKey = createBid(kw,last_id);
 			updt->insert(lastupdKey,delcnt);
 		}
-		cout <<"Removing from srch---------------"<<lastKey<<"::"<<last_id<<endl<<endl;
+		//cout <<"Removing from srch---------------"<<lastKey<<"::"<<last_id<<endl<<endl;
 		srch->remove(lastKey);
 		//srch->printTree();
-		cout <<"Removed from srch---------------"<<lastKey<<"::"<<last_id<<endl<<endl;
+		//cout <<"Removed from srch---------------"<<lastKey<<"::"<<last_id<<endl<<endl;
 		
 		updt->remove(delKey);
-		cout <<"will try"<<endl;
 		string trying = updt->find(delKey);
-		cout <<"trying:"<<trying<<endl;
 
 		if(newfilecnt == 0)
 			updt->remove(fcntKey);

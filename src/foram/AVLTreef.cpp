@@ -359,8 +359,7 @@ Bid AVLTreef::balance(Nodef* node, int &pos)
 
 void AVLTreef::deleteNode(Nodef* nodef)
 {
-	Nodef* free = newNodef(0,"");
-	cout << "deleting=>"<< nodef->key<< endl;
+	Nodef* free = newNodef(0,"deleted");
 	oram->WriteNodef(nodef->key,free);
 
 }
