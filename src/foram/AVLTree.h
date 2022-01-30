@@ -44,6 +44,17 @@ public:
     void printTree(Node* root, int indent);
     void startOperation(bool batchWrite = false);
     void finishOperation(bool find, Bid& rootKey, int& rootPos);
+
+    //deletion related functions
+    void deleteNode(Node* nodef);
+    Node* parentOf(Bid parentKey, int ppos, Bid childKey, int cpos, Bid key);
+    Node* minValueNode(Bid rootKey, int pos, Node* rootroot);
+    Bid balance(Node* node, int &pos);
+    Bid balanceDel(Bid minKey, int& minpos, Node* parmin);
+    Bid removeMain(Bid rootKey,int& pos, Bid delKey);
+    Bid removeDel(Bid rootKey,int& pos,Bid delKey,int delPos,Node* paren);
+    Bid removeRoot(Bid rootKey, int& pos);
+    Bid realDelete(Node* paren,Bid delKey,int delPos);
 };
 
 #endif /* AVLTREE_H */

@@ -77,6 +77,7 @@ private:
     void Access(Bid bid, Nodef*& node, int lastLeaf, int newLeaf);
     void Access(Bid bid, Nodef*& node);
     void AccessDelete(Bid bid, Nodef*& node); 
+    void DeleteData(Bid bid, Nodef* node);
 
 
     size_t plaintext_size;

@@ -38,6 +38,9 @@ bool RAMStore::WasSerialised()
 void RAMStore::ReduceEmptyNumbers() {
     emptyNodes--;
 }
+void RAMStore::IncreaseEmptyNumbers() {
+    emptyNodes++;
+}
 
 size_t RAMStore::GetEmptySize() {
     return emptyNodes;

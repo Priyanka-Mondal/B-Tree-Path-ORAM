@@ -12,7 +12,7 @@ using namespace std;
 
 int fileid = 1;
 bool usehdd = false;
-Foram foram(usehdd, 100, 25);  
+Foram foram(usehdd, 100, 2);  
 set<string> neg;
 string delimiters("|+#*?@,:!\"><; _-./  \n");
 
@@ -94,9 +94,14 @@ string toS(int id)
 string getFileContent(string path)
 {
 	  ifstream file(path);
+	  if(file.good())
+	  {
 	  string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
 	      return content;
+	  }
+	  else
+	      return "";
 }
 
 
@@ -223,10 +228,11 @@ void kwfileblocks(string file)
 	vector<string> kws, kws1, blocks;
 	string cont = getFileContent(file);
 	cout <<"==================================="<< endl;
+	if(cont != "")
+	{
 	string id = toS(fileid);
 	boost::split(kws1, cont, boost::is_any_of(delimiters));
 	kws = getUniquedWords(kws1, id);
-	int pos =0;
 	for(auto it = kws.begin(); it != kws.end(); it++)
 	{
 		if(neg.find(*it)!=neg.end())
@@ -239,6 +245,9 @@ void kwfileblocks(string file)
 	fileid++;
 	foram.insert(kws, blocks, id);
 	cout <<"=================================="<<endl;
+	}
+	else 
+		cout <<endl<<endl<<"NO SUCH FILE TO INSERT "<<file<<endl;
 }
 
 
@@ -278,7 +287,7 @@ neg.insert("");
 
 //INSERT keywords and file blocks of Enron
     //insert_dir("enron");
-    insert_dir("tiny");
+    insert_dir("tiny2");
 
 //***NOW TEST search and delete
 

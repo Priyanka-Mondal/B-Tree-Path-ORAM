@@ -153,7 +153,7 @@ string Foram::removefileblock(string ind)
 	updt->printTree();
 	cout <<"-------------------------------------" << endl;
 	srch->printTree();
-	cout <<"++++++++++++++++++++++++++++++++++++++" << endl;
+	cout <<"-------------------------------------" << endl;
 	string file = "";
 	int blk = 1;
 	Bid del = createBid(ind, blk);
@@ -165,11 +165,14 @@ string Foram::removefileblock(string ind)
 		del = createBid(ind, blk);
 		ret = srch->find(del);
 	}
-	for(int i = 1; i<=blk ; i++)
+	if(file!="")
 	{
-		del= createBid(ind,i);
-		srch->insert(del,"");
-		//srch->remove(del);	
+		for(int i = 1; i<=blk ; i++)
+		{
+			del= createBid(ind,i);
+			cout <<"Removing from srch"<<del<<endl;
+			srch->remove(del);	
+		}
 	}
 	return file;
 }
@@ -198,17 +201,25 @@ void Foram::removekw(vector <string> kws, string ind)
 		{
 			Bid delkwKey = createBid(kw,del_cnt);
 			srch->insert(delkwKey, last_id);
+			cout <<"Replacing"<<delkwKey<< "with"<<last_id<<endl;
 			Bid lastupdKey = createBid(kw,last_id);
 			updt->insert(lastupdKey,delcnt);
 		}
-		//	srch->remove(lastKey);
+		cout <<"Removing from srch---------------"<<lastKey<<"::"<<last_id<<endl<<endl;
+		srch->remove(lastKey);
+		//srch->printTree();
+		cout <<"Removed from srch---------------"<<lastKey<<"::"<<last_id<<endl<<endl;
+		
 		updt->remove(delKey);
+		cout <<"will try"<<endl;
+		string trying = updt->find(delKey);
+		cout <<"trying:"<<trying<<endl;
+
 		if(newfilecnt == 0)
 			updt->remove(fcntKey);
 		else
 			updt->insert(fcntKey,to_string(newfilecnt));
-		cout <<"REMOVED"<<endl;
-		updt->printTree();
+		//updt->printTree();
 		}
 	}
 	//updt->finalize();
@@ -218,6 +229,7 @@ void Foram::removekw(vector <string> kws, string ind)
 void Foram::print()
 {
 	updt->printTree();
+	srch->printTree();
 }
 
 

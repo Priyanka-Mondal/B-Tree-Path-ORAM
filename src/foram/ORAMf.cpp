@@ -150,7 +150,6 @@ void ORAMf::WritePath(int leaf, int d) {
     // Find blocks that can be on this bucket
     int node = GetNodefOnPath(leaf, d);
     if (find(writeviewmap.begin(), writeviewmap.end(), node) == writeviewmap.end()) {
-
         auto validBlocks = GetIntersectingBlocks(leaf, d);
         // Write blocks to tree
         Bucketf bucket;
@@ -159,6 +158,12 @@ void ORAMf::WritePath(int leaf, int d) {
             block.id = validBlocks[z];
             Nodef* curnode = cache[block.id];
             block.data = convertNodefToBlock(curnode);
+	    if(curnode->key != block.id)
+	    {
+		    block.id = curnode->key;
+        	    std::fill(curnode->value.begin(), curnode->value.end(), 0);
+            	    block.data = convertNodefToBlock(curnode);
+	    }
             delete curnode;
             cache.erase(block.id);
         }
@@ -187,12 +192,25 @@ Nodef* ORAMf::ReadData(Bid bid) {
 // Updates the data of a block in the cache
 
 void ORAMf::WriteData(Bid bid, Nodef* node) {
+	if(bid == node->key)
+	{
     if (store->GetEmptySize() > 0) {
         cache[bid] = node;
+	cout << "EmptyNodesize in Write:"<< store->GetEmptySize()<<endl;
         store->ReduceEmptyNumbers();
     } else {
+	    cout << "can not write anymore - WriteDataf!"<<endl;
         throw runtime_error("There is no more space in ORAMf");
     }
+	}
+	else if(bid != node->key)
+	{
+
+        cache[bid]=node; 
+	cout << "EmptyNodesize in delete before:"<< store->GetEmptySize()<<endl;
+        store->IncreaseEmptyNumbers();
+	cout << "EmptyNodesize in delete after:"<< store->GetEmptySize()<<endl;
+	}
 }
 
 // Fetches a block, allowing you to read and write in a block
@@ -225,7 +243,8 @@ void ORAMf::AccessDelete(Bid bid, Nodef*& node) {
     if (!batchWrite) {
         FetchPath(node->pos);
     }
-    WriteData(bid, node);
+    DeleteData(bid, node);
+    cout <<"IN ACCESS DELETE"<<endl;
     if (find(leafList.begin(), leafList.end(), node->pos) == leafList.end()) {
         leafList.push_back(node->pos);
     }
@@ -267,7 +286,7 @@ int ORAMf::WriteNodef(Bid bid, Nodef* node) {
     {
        throw runtime_error("Nodef id is not set in WriteNode");
     }
-    if (cache.count(bid) == 0) {
+    if (cache.count(bid) == 0 || bid != node->key) {
         modified.insert(bid);
         Access(bid, node);
         return node->pos;
@@ -278,16 +297,19 @@ int ORAMf::WriteNodef(Bid bid, Nodef* node) {
 }
 
 int ORAMf::DeleteNodef(Bid bid, Nodef* node) {
-    //if (bid == 0) 
-    //{
-    //   throw runtime_error("Nodef id is not set in WriteNode");
-    //}
+    if (bid == 0) 
+    {
+       throw runtime_error("Nodef id is not set in DeleteNode");
+    }
+//        modified.insert(bid);
+//        AccessDelete(bid, node);
+//        return node->pos;
     if (cache.count(bid) == 0) {
         modified.insert(bid);
-        Access(bid, node);
+        AccessDelete(bid, node);
         return node->pos;
     } else {
-        modified.insert(bid);
+        modified.insert(bid); //
         return node->pos;
     }
 }

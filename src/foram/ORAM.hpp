@@ -98,6 +98,9 @@ public:
     void finilize(bool find, Bid& rootKey, int& rootPos);
     static Node* convertBlockToNode(block b);
     static block convertNodeToBlock(Node* node);
+    void AccessDelete(Bid bid, Node*& node);
+    void DeleteData(Bid bid, Node* node);
+    int DeleteNode(Bid bid, Node* node);
 };
 
 #endif

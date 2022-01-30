@@ -35,11 +35,14 @@ Bid OMAP::remove(Bid delKey)
 {
     treeHandler->startOperation();
     if (rootKey == 0) {
-        rootKey = treeHandler->remove(0, rootPos, delKey, ZKEY, "-1");
+        rootKey = treeHandler->removeMain(0, rootPos, delKey);
     } else {
-        rootKey = treeHandler->remove(rootKey, rootPos, delKey, ZKEY, "-1");
+	//    cout <<"(begin)OMAP: Root is"<<rootKey<<endl;
+        rootKey = treeHandler->removeMain(rootKey, rootPos, delKey);
+	//cout <<"(end)OMAP: Root is:"<< rootKey<<endl;
     }
     treeHandler->finishOperation(false, rootKey, rootPos);
+    treeHandler->startOperation();
 }
 
 
