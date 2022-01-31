@@ -49,12 +49,13 @@ void Foram::insert(vector<string> kws, vector<string> blocks, string ind)
 	    updc = to_Int(uc);
        
         updc = updc+1;
+	cout << "Inserting:"<< key << ":"<<to_string(updc)<<endl;
         updt->insert(key, to_string(updc));
-	cout << "Inserting:"<< key << endl;
 	U.insert(pair<string,int>(kw,updc));
         Bid updKey = createBid(kw, ind);
-        updt->insert(updKey, to_string(updc));//pad,can we store number in updc 
 	cout << "Inserting:"<< updKey <<":"<< to_string(updc)<< endl;
+        updt->insert(updKey, to_string(updc));//pad,can we store number in updc 
+	cout <<"Inserted:"<< updKey<< endl;
      }
      //updt->finalize(x);
      
@@ -63,6 +64,7 @@ void Foram::insert(vector<string> kws, vector<string> blocks, string ind)
         Bid key = createBid(kw, U.at(kw));
         string pr = ind; // pad later
         srch->insert(key, pr);
+	cout << "kw inserted"<< key<<endl;
         inserted++;
      }
      //srch->finalize(x);
@@ -76,6 +78,7 @@ void Foram::insert(vector<string> kws, vector<string> blocks, string ind)
          blk = block;
    	 Bid mk = createBid(ind, i);
    	 srch->insert(mk,blk);
+	cout << "block inserted"<< mk<<endl;
    	 i++;
      }
      blk = "";
@@ -89,7 +92,7 @@ void Foram::insert(vector<string> kws, vector<string> blocks, string ind)
 void Foram::setupInsert(vector <string> kws, vector<string> blocks, string ind) 
 {
      inserted =0;
-//INSERTING KEYWORDS*******************************
+//INSERTING KEYWORDS IN BATCH*******************************
      map<Bid,string> batchUpd1;
      map<Bid,string> batchUpd2;
      cout << "inserting keywords for:"<< ind << endl;
@@ -143,17 +146,17 @@ void Foram::setupInsert(vector <string> kws, vector<string> blocks, string ind)
      srch->batchInsert(batchFileBlocks); 
      //srch->finalize(x);
      cout << "inserted "<<  blocks.size() <<" block(s) of " << ind << endl;
-    updt->printTree();
+    //updt->printTree();
 }
 
 
 
 string Foram::removefileblock(string ind) 
 {
-	updt->printTree();
-	cout <<"-------------------------------------" << endl;
-	srch->printTree();
-	cout <<"-------------------------------------" << endl;
+	//updt->printTree();
+	//cout <<"-------------------------------------" << endl;
+	//srch->printTree();
+	//cout <<"-------------------------------------" << endl;
 	string file = "";
 	int blk = 1;
 	Bid del = createBid(ind, blk);
@@ -185,13 +188,16 @@ void Foram::removekw(vector <string> kws, string ind)
 	{
     		Bid delKey = createBid(kw, ind);
 		cout << "removing delkey:["<< delKey <<"]"<< endl;
+		cout <<"findind delKey cnt"<< delKey<<endl;
     		string delcnt = updt->find(delKey);
 		if(delcnt != "")
 		{
 	    	int del_cnt = to_Int(delcnt);
 	    	
 		Bid fcntKey = createBid(kw,FCNT);
+		cout <<"findind updc cnt"<< delKey<<endl;
 		string fcnt = updt->find(fcntKey);
+		cout <<"updc:"<< fcnt<< endl;
 	    	int updc = to_Int(fcnt);
 		int newfilecnt = updc-1;
 
@@ -201,18 +207,23 @@ void Foram::removekw(vector <string> kws, string ind)
 		{
 			Bid delkwKey = createBid(kw,del_cnt);
 			srch->insert(delkwKey, last_id);
-			cout <<"Replacing"<<delkwKey<< "with"<<last_id<<endl;
+			//cout <<"Replacing"<<delkwKey<< "with"<<last_id<<endl;
 			Bid lastupdKey = createBid(kw,last_id);
+			cout <<"interchanging last and delcnt"<< delKey<<endl;
 			updt->insert(lastupdKey,delcnt);
 		}
 		//cout <<"Removing from srch---------------"<<lastKey<<"::"<<last_id<<endl<<endl;
-		srch->remove(lastKey);
+		//srch->remove(lastKey);
+		//cout <<"srch removed"<<endl;
 		//srch->printTree();
 		//cout <<"Removed from srch---------------"<<lastKey<<"::"<<last_id<<endl<<endl;
 		
+		cout <<"delelting delKey"<< delKey<<endl;
 		updt->remove(delKey);
+		//updt->delKey(delKey);
+		cout << "Now I am inserting"<<endl;
 		string trying = updt->find(delKey);
-
+		cout <<"trying:"<<trying<<endl;
 		if(newfilecnt == 0)
 			updt->remove(fcntKey);
 		else

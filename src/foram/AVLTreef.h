@@ -43,7 +43,7 @@ public:
     void finishOperation(bool find, Bid& rootKey, int& rootPos);
    
    //deletion related functions 
-    void deleteNode(Nodef* nodef);
+    Bid deleteNode(Nodef* nodef);
     Nodef* parentOf(Bid parentKey, int ppos, Bid childKey, int cpos, Bid key);
     Nodef* minValueNode(Bid rootKey, int pos, Nodef* rootroot);
     Bid balance(Nodef* node, int &pos);
@@ -52,6 +52,7 @@ public:
     Bid removeDel(Bid rootKey,int& pos,Bid delKey,int delPos,Nodef* paren);
     Bid removeRoot(Bid rootKey, int& pos);
     Bid realDelete(Nodef* paren,Bid delKey,int delPos);
+    Bid deleteKey(Nodef* node, Bid key);
 };
 
 #endif /* AVLTREEF_H */

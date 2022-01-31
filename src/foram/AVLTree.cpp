@@ -437,7 +437,7 @@ Bid AVLTree::balance(Node* node, int &pos)
 
 void AVLTree::deleteNode(Node* nodef)
 {
-	Node* free = newNode(0,"deleted");
+	Node* free = newNode(0,"");
 	oram->WriteNode(nodef->key,free);
 }
 
@@ -493,7 +493,7 @@ Node* lc = oram->ReadNode(delnode->leftID,delnode->leftPos,delnode->leftPos);
 		if(lc == NULL || lc->key ==0)
 			lc = newNode(0,"");
 		pos = lc->pos;
-		deleteNode(delnode);
+		//deleteNode(delnode);
 		return lc->key;
 	}
 	else
@@ -516,7 +516,7 @@ Node* lc = oram->ReadNode(delnode->leftID,delnode->leftPos,delnode->leftPos);
 			Bid minKey = balance(minnode,minnode->pos);
 			minnode = oram->ReadNode(minKey,minPos,minPos);
 			pos = minnode->pos;
-			deleteNode(delnode);
+			//deleteNode(delnode);
 			return minnode->key;
 		}
 		else //minnode does not have leftID in general
@@ -539,7 +539,7 @@ Node* lc = oram->ReadNode(delnode->leftID,delnode->leftPos,delnode->leftPos);
 			Bid minKey = balanceDel(minnode->key,minnode->pos, parmin);
 			minnode = oram->ReadNode(minKey,minPos,minPos);
 			pos = minnode->pos;
-			deleteNode(delnode);
+			//deleteNode(delnode);
 			return minnode->key;
 		}	
 	}
@@ -652,7 +652,7 @@ Node* lc = oram->ReadNode(delnode->leftID,delnode->leftPos,delnode->leftPos);
 		}
 		paren->height=max(height(paren->leftID,paren->leftPos), height(paren->rightID, paren->rightPos)) + 1;
 		oram->WriteNode(paren->key,paren);
-		deleteNode(delnode);
+		//deleteNode(delnode);
 		return paren->key;
 	}
 	else if(delKey == parmin->key)
@@ -680,7 +680,7 @@ Node* lc = oram->ReadNode(delnode->leftID,delnode->leftPos,delnode->leftPos);
 		}
 		paren->height=max(height(paren->leftID,paren->leftPos), height(paren->rightID, paren->rightPos)) + 1;
 		oram->WriteNode(paren->key,paren);
-		deleteNode(delnode);
+		//deleteNode(delnode);
 		return paren->key;
 	}
 	else //minnode does not have leftID in general
@@ -714,7 +714,7 @@ Node* rc = oram->ReadNode(minnode->rightID,minnode->rightPos,minnode->rightPos);
 		}
 		paren->height=max(height(paren->leftID,paren->leftPos), height(paren->rightID, paren->rightPos)) + 1;
 		oram->WriteNode(paren->key,paren);
-		deleteNode(delnode);
+		//deleteNode(delnode);
 		return paren->key;
 	}	
 }

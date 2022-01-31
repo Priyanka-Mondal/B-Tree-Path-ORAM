@@ -29,6 +29,16 @@ string OMAPf::find(Bid key) {
     return res;
 }
 
+void OMAPf::delKey(Bid key){
+
+    treeHandler->startOperation();
+    Nodef* node = new Nodef();
+    node->key = rootKey;
+    node->pos = rootPos;
+    rootKey = treeHandler->deleteKey(node,key);
+    treeHandler->finishOperation(false, rootKey, rootPos);
+}
+
 void OMAPf::remove(Bid delKey) 
 {
     treeHandler->startOperation();

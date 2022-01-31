@@ -191,14 +191,9 @@ void ORAM::WriteData(Bid bid, Node* node) {
         cache[bid] = node;
         store->ReduceEmptyNumbers();
     } else {
-	    cout << "can not write anymore!"<<endl;
-        throw runtime_error("There is no more space in ORAM");
+	    cout << "can not write anymore in ORAM src!"<<endl;
+        throw runtime_error("There is no more space in ORAM src");
     }
-}
-void ORAM::DeleteData(Bid bid, Node* node) 
-{
-        cache.erase(bid); 
-        store->IncreaseEmptyNumbers();
 }
 
 // Fetches a block, allowing you to read and write in a block
@@ -223,15 +218,6 @@ void ORAM::Access(Bid bid, Node*& node) {
         FetchPath(node->pos);
     }
     WriteData(bid, node);
-    if (find(leafList.begin(), leafList.end(), node->pos) == leafList.end()) {
-        leafList.push_back(node->pos);
-    }
-}
-void ORAM::AccessDelete(Bid bid, Node*& node) {
-    if (!batchWrite) {
-        FetchPath(node->pos);
-    }
-    DeleteData(bid, node);
     if (find(leafList.begin(), leafList.end(), node->pos) == leafList.end()) {
         leafList.push_back(node->pos);
     }
@@ -282,22 +268,6 @@ int ORAM::WriteNode(Bid bid, Node* node) {
     }
 }
 
-int ORAM::DeleteNode(Bid bid, Node* node) {
-    if (bid == 0) {
-        throw runtime_error("Node id is not set in WriteNode");
-    }
-        modified.insert(bid);
-        AccessDelete(bid, node);
-/*
-    if (cache.count(bid) == 0) {
-        modified.insert(bid);
-        Access(bid, node);
-        return node->pos;
-    } else {
-        modified.insert(bid);
-        return node->pos;
-    }*/
-}
 
 Node* ORAM::convertBlockToNode(block b) {
     Node* node = new Node();

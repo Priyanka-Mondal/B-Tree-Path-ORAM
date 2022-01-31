@@ -23,6 +23,7 @@ public:
     void remove(Bid delKey);
     void insert(Bid key, string value);
     string find(Bid key);
+    void delKey(Bid key);
     void printTree();
     void batchInsert(map<Bid, string> cont);
     vector<string> batchSearch(vector<Bid> keys);
