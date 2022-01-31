@@ -42,7 +42,6 @@ Bid OMAP::remove(Bid delKey)
 	//cout <<"(end)OMAP: Root is:"<< rootKey<<endl;
     }
     treeHandler->finishOperation(false, rootKey, rootPos);
-    treeHandler->startOperation();
 }
 
 

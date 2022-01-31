@@ -362,7 +362,6 @@ Bid AVLTreef::deleteNode(Nodef* nodef)
 	cout <<"found------------------------------------"<<nodef->key<<endl;
 	Nodef* free = newNodef(0,"");
 	oram->DeleteNodef(nodef->key,free);
-	cout << "DeleteNodef:"<<endl;
 	return 0;
 
 }

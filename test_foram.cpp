@@ -12,7 +12,7 @@ using namespace std;
 
 int fileid = 1;
 bool usehdd = false;
-Foram foram(usehdd, 100, 2);  
+Foram foram(usehdd, 1000, 1000);  
 set<string> neg;
 string delimiters("|+#*?@,:!\"><; _-./  \n");
 
@@ -159,7 +159,7 @@ static void insert_dir (const char * dir_name)
     		vector<string> blocks;
 		blocks = divideString(file,BLOCK,id);
         	foram.insert(kws, blocks, id);
-		cout << "number of keywords :" << kws.size() <<endl;
+		//cout << "number of keywords :" << kws.size() <<endl;
                 fileid++;
                }
 
@@ -287,7 +287,7 @@ neg.insert("");
 
 //INSERT keywords and file blocks of Enron
     //insert_dir("enron");
-    insert_dir("tiny2");
+    insert_dir("synth");
 
 //***NOW TEST search and delete
 

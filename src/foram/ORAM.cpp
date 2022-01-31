@@ -22,6 +22,7 @@ ORAM::ORAM(int maxSize, bytes<Key> key)
     clen_size = AES::GetCiphertextLength((blockSize) * Z);
     plaintext_size = (blockSize) * Z;
     store = new RAMStore(storeBlockCount, storeBlockSize);
+    cout << "Bucket and block count in ORAM:" << bucketCount<<"|"<<Z<<endl;
     for (size_t i = 0; i < bucketCount; i++) {
         Bucket bucket;
         for (int z = 0; z < Z; z++) {
@@ -157,10 +158,19 @@ void ORAM::WritePath(int leaf, int d) {
         for (int z = 0; z < std::min((int) validBlocks.size(), Z); z++) {
             Block &block = bucket[z];
             block.id = validBlocks[z];
-            Node* curnode = cache[block.id]; /// MAYBE HERE put 0, another cacheto remember deleted nodes
+	    Bid temp = block.id;
+            Node* curnode = cache[block.id];
             block.data = convertNodeToBlock(curnode);
+	    if(curnode->key != block.id)
+	    {
+	          cout <<"curnode!=block.id"<<curnode->key<<block.id<<endl;
+		    block.id = 0; // curnode->key;
+		    block.data.resize(blockSize, 0);
+        	   //std::fill(curnode->value.begin(), curnode->value.end(), 0);
+            	    //block.data = convertNodefToBlock(curnode);
+	    }
             delete curnode;
-            cache.erase(block.id);
+            cache.erase(temp);
         }
         // Fill any empty spaces with dummy blocks
         for (int z = validBlocks.size(); z < Z; z++) {
@@ -186,15 +196,30 @@ Node* ORAM::ReadData(Bid bid) {
 
 // Updates the data of a block in the cache
 
-void ORAM::WriteData(Bid bid, Node* node) {
-    if (store->GetEmptySize() > 0) {
-        cache[bid] = node;
-        store->ReduceEmptyNumbers();
-    } else {
-	    cout << "can not write anymore in ORAM src!"<<endl;
-        throw runtime_error("There is no more space in ORAM src");
-    }
+void ORAM::WriteData(Bid bid, Node* node) 
+{
+	if(bid == node->key)
+	{
+	    if (store->GetEmptySize() > 0) 
+	    {
+	        cache[bid] = node;
+	        store->ReduceEmptyNumbers();
+	cout << "EmptyNode Write ORAM src:"<< store->GetEmptySize()<<endl;
+	    } 
+	    else 
+	    {
+		    cout << "can not write anymore - WriteData src!"<<endl;
+	            throw runtime_error("There is no more space in ORAM src");
+            }
+	}
+	else if(bid != node->key)
+	{
+        	cache[bid]=node; 
+        	store->IncreaseEmptyNumbers();
+	cout <<"EmptyNode delete ORAM src:"<< store->GetEmptySize()<<endl;
+	}
 }
+
 
 // Fetches a block, allowing you to read and write in a block
 
@@ -225,10 +250,10 @@ void ORAM::Access(Bid bid, Node*& node) {
 
 Node* ORAM::ReadNode(Bid bid) {
     if (bid == 0) {
-        throw runtime_error("Node id is not set in ReadNode");
+        throw runtime_error("Node id is not set in ReadNode src");
     }
     if (cache.count(bid) == 0) {
-        throw runtime_error("Node not found in the cache");
+        throw runtime_error("Node not found in the cache src");
     } else {
         Node* node = cache[bid];
         return node;
@@ -268,6 +293,24 @@ int ORAM::WriteNode(Bid bid, Node* node) {
     }
 }
 
+
+int ORAM::DeleteNode(Bid bid, Node* node) {
+    cout <<"In deleteNode:"<<bid<<endl;
+    if (bid == 0) 
+    {
+       throw runtime_error("Nodef id is not set in DeleteNode");
+    }
+    if (cache.count(bid) != 0) 
+    {
+	    cache.erase(bid);
+	    cache[bid] = node;
+    }
+        //modified.insert(bid);
+	//if(modified.count(bid))
+	//	modified.erase(bid);
+    WriteData(bid, node);
+        return node->pos;
+}
 
 Node* ORAM::convertBlockToNode(block b) {
     Node* node = new Node();
@@ -338,6 +381,8 @@ void ORAM::finilize(bool find, Bid& rootKey, int& rootPos) {
 
     leafList.clear();
     modified.clear();
+
+    //Print();
 }
 
 void ORAM::start(bool batchWrite) {
@@ -352,10 +397,18 @@ void ORAM::Print() {
         block ciphertext = store->Read(i);
         block buffer = AES::Decrypt(key, ciphertext, clen_size);
         Bucket bucket = DeserialiseBucket(buffer);
-        Node* node = convertBlockToNode(bucket[0].data);
-        cout << node->key << " ";
+	Node* node;
+	for(int j=0; j<Z; j++)
+	{
+        	node = convertBlockToNode(bucket[j].data);
+        	cout << node->key << "]  ";
+	}cout <<endl;
         delete node;
     }
+        for (auto p : cache)
+	{
+		cout << "| " <<p.second->key << "] |";
+	}cout << endl ;
 }
 
 int ORAM::RandomPath() {

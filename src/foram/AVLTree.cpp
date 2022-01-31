@@ -134,12 +134,14 @@ Bid AVLTree::remove(Bid rootKey, int& pos, Bid delKey, Bid key, string value) {
     // If this node becomes unbalanced, then there are 4 cases
 
     // Left Left Case
+    Node* left = oram->ReadNode(node->leftID,node->leftPos,node->leftPos);
     if (balance > 1 && key < oram->ReadNode(node->leftID)->key) {
         Node* res = rightRotate(node);
         pos = res->pos;
         return res->key;
     }
 
+    Node* right = oram->ReadNode(node->rightID,node->rightPos,node->rightPos);
     // Right Right Case
     if (balance < -1 && key > oram->ReadNode(node->rightID)->key) {
         Node* res = leftRotate(node);
@@ -148,6 +150,7 @@ Bid AVLTree::remove(Bid rootKey, int& pos, Bid delKey, Bid key, string value) {
     }
 
     // Left Right Case
+    //Node* left = oram->ReadNode(node->leftID,node->leftPos,node->leftPos);
     if (balance > 1 && key > oram->ReadNode(node->leftID)->key) {
         Node* res = leftRotate(oram->ReadNode(node->leftID));
         node->leftID = res->key;
@@ -159,6 +162,7 @@ Bid AVLTree::remove(Bid rootKey, int& pos, Bid delKey, Bid key, string value) {
     }
 
     // Right Left Case
+    //Node* right = oram->ReadNode(node->rightID,node->rightPos,node->rightPos);
     if (balance < -1 && key < oram->ReadNode(node->rightID)->key) {
         auto res = rightRotate(oram->ReadNode(node->rightID));
         node->rightID = res->key;
@@ -391,14 +395,14 @@ Bid AVLTree::balance(Node* node, int &pos)
 	    Node* leftChild = oram->ReadNode(node->leftID);
     	    if(getBalance(leftChild)>=0)
 	    {
-	    	cout <<"Left Left Case" <<endl;
+	    	//cout <<"Left Left Case" <<endl;
         	Node* res = rightRotate(node);
         	pos = res->pos;
         	return res->key;
 	    }
 	    if(getBalance(leftChild)<0)
 	    {
-	    	 cout <<"Left Right Case" <<endl;
+	    	 //cout <<"Left Right Case" <<endl;
 		 Node* res = leftRotate(leftChild);
         	 node->leftID = res->key;
         	 node->leftPos = res->pos;
@@ -413,13 +417,14 @@ Bid AVLTree::balance(Node* node, int &pos)
 	    Node* rightChild=oram->ReadNode(node->rightID);
 	    if(getBalance(rightChild)<=0)
 	    {
+	    	//cout <<"Right Right Case" <<endl;
 		Node* res = leftRotate(node);
 		pos = res->pos;
 		return res->key;
 	    }
 	    if(getBalance(rightChild)>0)
 	    {
-	    	    cout <<"Right Left Case" <<endl;
+	    	    //cout <<"Right Left Case" <<endl;
 		    Node* res = rightRotate(rightChild);
 		    node->rightID = res->key;
 		    node->rightPos = res->pos;
@@ -438,7 +443,7 @@ Bid AVLTree::balance(Node* node, int &pos)
 void AVLTree::deleteNode(Node* nodef)
 {
 	Node* free = newNode(0,"");
-	oram->WriteNode(nodef->key,free);
+	oram->DeleteNode(nodef->key,free);
 }
 
 Bid AVLTree:: removeMain(Bid rootKey,int& pos, Bid delKey)
@@ -493,7 +498,7 @@ Node* lc = oram->ReadNode(delnode->leftID,delnode->leftPos,delnode->leftPos);
 		if(lc == NULL || lc->key ==0)
 			lc = newNode(0,"");
 		pos = lc->pos;
-		//deleteNode(delnode);
+		deleteNode(delnode);
 		return lc->key;
 	}
 	else
@@ -516,7 +521,7 @@ Node* lc = oram->ReadNode(delnode->leftID,delnode->leftPos,delnode->leftPos);
 			Bid minKey = balance(minnode,minnode->pos);
 			minnode = oram->ReadNode(minKey,minPos,minPos);
 			pos = minnode->pos;
-			//deleteNode(delnode);
+			deleteNode(delnode);
 			return minnode->key;
 		}
 		else //minnode does not have leftID in general
@@ -539,7 +544,7 @@ Node* lc = oram->ReadNode(delnode->leftID,delnode->leftPos,delnode->leftPos);
 			Bid minKey = balanceDel(minnode->key,minnode->pos, parmin);
 			minnode = oram->ReadNode(minKey,minPos,minPos);
 			pos = minnode->pos;
-			//deleteNode(delnode);
+			deleteNode(delnode);
 			return minnode->key;
 		}	
 	}
@@ -652,7 +657,7 @@ Node* lc = oram->ReadNode(delnode->leftID,delnode->leftPos,delnode->leftPos);
 		}
 		paren->height=max(height(paren->leftID,paren->leftPos), height(paren->rightID, paren->rightPos)) + 1;
 		oram->WriteNode(paren->key,paren);
-		//deleteNode(delnode);
+		deleteNode(delnode);
 		return paren->key;
 	}
 	else if(delKey == parmin->key)
@@ -680,7 +685,7 @@ Node* lc = oram->ReadNode(delnode->leftID,delnode->leftPos,delnode->leftPos);
 		}
 		paren->height=max(height(paren->leftID,paren->leftPos), height(paren->rightID, paren->rightPos)) + 1;
 		oram->WriteNode(paren->key,paren);
-		//deleteNode(delnode);
+		deleteNode(delnode);
 		return paren->key;
 	}
 	else //minnode does not have leftID in general
@@ -714,7 +719,7 @@ Node* rc = oram->ReadNode(minnode->rightID,minnode->rightPos,minnode->rightPos);
 		}
 		paren->height=max(height(paren->leftID,paren->leftPos), height(paren->rightID, paren->rightPos)) + 1;
 		oram->WriteNode(paren->key,paren);
-		//deleteNode(delnode);
+		deleteNode(delnode);
 		return paren->key;
 	}	
 }
