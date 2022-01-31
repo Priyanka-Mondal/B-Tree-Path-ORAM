@@ -204,7 +204,7 @@ void ORAMf::WriteData(Bid bid, Nodef* node) {
 	    {
 	        cache[bid] = node;
 	        store->ReduceEmptyNumbers();
-	cout << "EmptyNode write ORAMf upd:"<< store->GetEmptySize()<<endl;
+	cout << "EmptyNode write ORAMf upd:"<< store->GetEmptySize() <<"(of "<< bucketCount*Z<<")"<<endl;
 	    } 
 	    else 
 	    {
@@ -216,7 +216,7 @@ void ORAMf::WriteData(Bid bid, Nodef* node) {
 	{
         	cache[bid]=node; 
         	store->IncreaseEmptyNumbers();
-	cout <<"EmptyNode delete ORAMf upd:"<< store->GetEmptySize()<<endl;
+	cout <<"EmptyNode delete ORAMf upd:"<< store->GetEmptySize()<<"(of "<<bucketCount*Z<<")"<<endl;
 	}
 }
 

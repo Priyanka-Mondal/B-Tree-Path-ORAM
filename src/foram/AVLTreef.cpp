@@ -309,7 +309,7 @@ Bid AVLTreef::balance(Nodef* node, int &pos)
     //cout <<"balance is:"<<balance<<endl;
     if (balance > 1 )
     {
-	    Nodef* leftChild = oram->ReadNodef(node->leftID);
+	    Nodef* leftChild = oram->ReadNodef(node->leftID,node->leftPos,node->leftPos);
     	    if(getBalance(leftChild)>=0)
 	    {
 	    	//cout <<"Left Left Case" <<endl;
@@ -331,7 +331,7 @@ Bid AVLTreef::balance(Nodef* node, int &pos)
     }
     if(balance < -1)
     {
-	    Nodef* rightChild=oram->ReadNodef(node->rightID);
+	    Nodef* rightChild=oram->ReadNodef(node->rightID,node->rightPos,node->rightPos);
 	    if(getBalance(rightChild)<=0)
 	    {
 	    	//cout <<"right right Case" <<endl;
@@ -514,7 +514,7 @@ Bid AVLTreef::removeDel(Bid rootKey,int& pos,Bid delKey,int delPos,Nodef* paren)
     Bid key = node->key;
     if (balance > 1 )
     {
-	    Nodef* leftChild = oram->ReadNodef(node->leftID);
+	    Nodef* leftChild = oram->ReadNodef(node->leftID,node->leftPos,node->leftPos);
     	    if(getBalance(leftChild)>=0)
 	    {
 	    	//cout <<"Left Left Case" <<endl;
@@ -536,7 +536,7 @@ Bid AVLTreef::removeDel(Bid rootKey,int& pos,Bid delKey,int delPos,Nodef* paren)
     }
     if(balance < -1)
     {
-	    Nodef* rightChild=oram->ReadNodef(node->rightID);
+	    Nodef* rightChild=oram->ReadNodef(node->rightID,node->rightPos,node->rightPos);
 	    if(getBalance(rightChild)<=0)
 	    {
 	    	//cout <<"Right Right Case" <<endl;
@@ -685,7 +685,7 @@ Bid AVLTreef::balanceDel(Bid key, int& pos, Nodef* parmin)
     //cout <<"balance is:"<<balance<<endl;
     if (balance > 1 )
     {
-	    Nodef* leftChild = oram->ReadNodef(node->leftID);
+	    Nodef* leftChild = oram->ReadNodef(node->leftID,node->leftPos,node->leftPos);
     	    if(getBalance(leftChild)>=0)
 	    {
 	    //	cout <<"Left Left Case" <<endl;
@@ -707,7 +707,7 @@ Bid AVLTreef::balanceDel(Bid key, int& pos, Nodef* parmin)
     }
     if(balance < -1)
     {
-	    Nodef* rightChild=oram->ReadNodef(node->rightID);
+	    Nodef* rightChild=oram->ReadNodef(node->rightID,node->rightPos,node->rightPos);
 	    if(getBalance(rightChild)<=0)
 	    {
 	    //cout <<"Right Right Case" <<endl;

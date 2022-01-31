@@ -12,7 +12,7 @@ using namespace std;
 
 int fileid = 1;
 bool usehdd = false;
-Foram foram(usehdd, 1000, 1000);  
+Foram foram(usehdd, 1000, 500);  
 set<string> neg;
 string delimiters("|+#*?@,:!\"><; _-./  \n");
 

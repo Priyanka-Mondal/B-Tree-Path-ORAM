@@ -46,7 +46,7 @@ Node* AVLTree::rightRotate(Node* y) {
     if (x->rightID == 0) {
         T2 = newNode(0, "");
     } else {
-        T2 = oram->ReadNode(x->rightID);
+        T2 = oram->ReadNode(x->rightID,x->rightPos,x->rightPos);
     }
 
     // Perform rotation
@@ -74,7 +74,7 @@ Node* AVLTree::leftRotate(Node* x) {
     if (y->leftID == 0) {
         T2 = newNode(0, "");
     } else {
-        T2 = oram->ReadNode(y->leftID);
+        T2 = oram->ReadNode(y->leftID,y->leftPos,y->leftPos);
     }
 
 
@@ -102,85 +102,8 @@ int AVLTree::getBalance(Node* N) {
 }
 
 
-
-Bid AVLTree::remove(Bid rootKey, int& pos, Bid delKey, Bid key, string value) {
-    /* 1. Perform the normal BST rotation */
-    if (rootKey == delKey) 
-    {
-	//cout <<" I AM AT AVLTREE REMOVE !!!!" << endl<< endl<< endl;
-        Node* nnode = newNode(key, value);
-        pos = oram->WriteNode(delKey, nnode);
-        return nnode->key;
-    }
-    Node* node = oram->ReadNode(rootKey, pos, pos);
-    if (delKey < node->key) {
-        node->leftID = remove(node->leftID, node->leftPos, delKey,key, value);
-    } else if (delKey > node->key) {
-        node->rightID = remove(node->rightID, node->rightPos, delKey, key, value);
-    } else {
-        std::fill(node->value.begin(), node->value.end(), 0);
-        std::copy(value.begin(), value.end(), node->value.begin());
-        oram->WriteNode(rootKey, node);
-        return node->key;
-    }
-
-    /* 2. Update height of this ancestor node */
-    node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
-
-    /* 3. Get the balance factor of this ancestor node to check whether
-       this node became unbalanced */
-    int balance = getBalance(node);
-
-    // If this node becomes unbalanced, then there are 4 cases
-
-    // Left Left Case
-    Node* left = oram->ReadNode(node->leftID,node->leftPos,node->leftPos);
-    if (balance > 1 && key < oram->ReadNode(node->leftID)->key) {
-        Node* res = rightRotate(node);
-        pos = res->pos;
-        return res->key;
-    }
-
-    Node* right = oram->ReadNode(node->rightID,node->rightPos,node->rightPos);
-    // Right Right Case
-    if (balance < -1 && key > oram->ReadNode(node->rightID)->key) {
-        Node* res = leftRotate(node);
-        pos = res->pos;
-        return res->key;
-    }
-
-    // Left Right Case
-    //Node* left = oram->ReadNode(node->leftID,node->leftPos,node->leftPos);
-    if (balance > 1 && key > oram->ReadNode(node->leftID)->key) {
-        Node* res = leftRotate(oram->ReadNode(node->leftID));
-        node->leftID = res->key;
-        node->leftPos = res->pos;
-        oram->WriteNode(node->key, node);
-        Node* res2 = rightRotate(node);
-        pos = res2->pos;
-        return res2->key;
-    }
-
-    // Right Left Case
-    //Node* right = oram->ReadNode(node->rightID,node->rightPos,node->rightPos);
-    if (balance < -1 && key < oram->ReadNode(node->rightID)->key) {
-        auto res = rightRotate(oram->ReadNode(node->rightID));
-        node->rightID = res->key;
-        node->rightPos = res->pos;
-        oram->WriteNode(node->key, node);
-        auto res2 = leftRotate(node);
-        pos = res2->pos;
-        return res2->key;
-    }
-
-    /* return the (unchanged) node pointer */
-    oram->WriteNode(node->key, node);
-    return node->key;
-}
-
-
 Bid AVLTree::insert(Bid rootKey, int& pos, Bid key, string value) {
-    /* 1. Perform the normal BST rotation */
+    
     if (rootKey == 0) {
         Node* nnode = newNode(key, value);
         pos = oram->WriteNode(key, nnode);
@@ -204,8 +127,6 @@ Bid AVLTree::insert(Bid rootKey, int& pos, Bid key, string value) {
     /* 3. Get the balance factor of this ancestor node to check whether
        this node became unbalanced */
     int balance = getBalance(node);
-
-    // If this node becomes unbalanced, then there are 4 cases
 
     // Left Left Case
     if (balance > 1 && key < oram->ReadNode(node->leftID)->key) {
@@ -261,17 +182,6 @@ Node* AVLTree::search(Node* head, Bid key) {
         return search(oram->ReadNode(head->rightID, head->rightPos, head->rightPos), key);
     } else
         return head;
-}
-
-
-Node* AVLTree::minValueNode(Node* head)
-{
-	Node* current = head;
-	//while((current!= NULL || current->key !=0) && current->leftID!=0)
-	while(current->leftID!=0)
-		current = oram->ReadNode(current->leftID);
-         
-	return current;
 }
 
 
@@ -392,7 +302,7 @@ Bid AVLTree::balance(Node* node, int &pos)
     //cout <<"balance is:"<<balance<<endl;
     if (balance > 1 )
     {
-	    Node* leftChild = oram->ReadNode(node->leftID);
+	    Node* leftChild = oram->ReadNode(node->leftID,node->leftPos,node->leftPos);
     	    if(getBalance(leftChild)>=0)
 	    {
 	    	//cout <<"Left Left Case" <<endl;
@@ -414,7 +324,7 @@ Bid AVLTree::balance(Node* node, int &pos)
     }
     if(balance < -1)
     {
-	    Node* rightChild=oram->ReadNode(node->rightID);
+	    Node* rightChild=oram->ReadNode(node->rightID,node->rightPos,node->rightPos);
 	    if(getBalance(rightChild)<=0)
 	    {
 	    	//cout <<"Right Right Case" <<endl;
@@ -443,6 +353,7 @@ Bid AVLTree::balance(Node* node, int &pos)
 void AVLTree::deleteNode(Node* nodef)
 {
 	Node* free = newNode(0,"");
+	cout <<"In deleteNode==============="<<endl;
 	oram->DeleteNode(nodef->key,free);
 }
 
@@ -573,7 +484,7 @@ Bid AVLTree::removeDel(Bid rootKey,int& pos,Bid delKey,int delPos,Node* paren)
     Bid key = node->key;
     if (balance > 1 )
     {
-	    Node* leftChild = oram->ReadNode(node->leftID);
+	    Node* leftChild = oram->ReadNode(node->leftID,node->leftPos,node->leftPos);
     	    if(getBalance(leftChild)>=0)
 	    {
 	    	//cout <<"Left Left Case" <<endl;
@@ -595,7 +506,7 @@ Bid AVLTree::removeDel(Bid rootKey,int& pos,Bid delKey,int delPos,Node* paren)
     }
     if(balance < -1)
     {
-	    Node* rightChild=oram->ReadNode(node->rightID);
+	    Node* rightChild=oram->ReadNode(node->rightID,node->rightPos,node->rightPos);
 	    if(getBalance(rightChild)<=0)
 	    {
 	        //cout <<"Right Right Case" <<endl;
@@ -745,7 +656,7 @@ Bid AVLTree::balanceDel(Bid key, int& pos, Node* parmin)
     //cout <<"balance is:"<<balance<<endl;
     if (balance > 1 )
     {
-	    Node* leftChild = oram->ReadNode(node->leftID);
+	    Node* leftChild = oram->ReadNode(node->leftID,node->leftPos,node->leftPos);
     	    if(getBalance(leftChild)>=0)
 	    {
 	    	//cout <<"Left Left Case" <<endl;
@@ -767,7 +678,7 @@ Bid AVLTree::balanceDel(Bid key, int& pos, Node* parmin)
     }
     if(balance < -1)
     {
-	    Node* rightChild=oram->ReadNode(node->rightID);
+	    Node* rightChild=oram->ReadNode(node->rightID,node->rightPos,node->rightPos);
 	    if(getBalance(rightChild)<=0)
 	    {
 	    	//cout <<"Right Right Case" <<endl;

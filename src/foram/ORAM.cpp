@@ -204,7 +204,7 @@ void ORAM::WriteData(Bid bid, Node* node)
 	    {
 	        cache[bid] = node;
 	        store->ReduceEmptyNumbers();
-	cout << "EmptyNode Write ORAM src:"<< store->GetEmptySize()<<endl;
+	cout << "EmptyNode Write ORAM src:"<< store->GetEmptySize()<<"/"<< bucketCount*Z<<endl;
 	    } 
 	    else 
 	    {
@@ -216,7 +216,7 @@ void ORAM::WriteData(Bid bid, Node* node)
 	{
         	cache[bid]=node; 
         	store->IncreaseEmptyNumbers();
-	cout <<"EmptyNode delete ORAM src:"<< store->GetEmptySize()<<endl;
+	cout <<"EmptyNode delete ORAM src:"<< store->GetEmptySize()<<"/"<< bucketCount*Z<<endl;
 	}
 }
 
