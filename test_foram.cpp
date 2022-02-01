@@ -12,7 +12,7 @@ using namespace std;
 
 int fileid = 1;
 bool usehdd = false;
-Foram foram(usehdd, 60000, 10500);  // change size based in impit file sizes
+Foram foram(usehdd, 64000, 10240);  // change size based in impit file sizes
 set<string> neg;
 string delimiters("|+#*?@,:!\"><; _-./  \n");
 

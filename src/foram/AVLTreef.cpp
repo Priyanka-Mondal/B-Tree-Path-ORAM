@@ -41,9 +41,7 @@ Nodef* AVLTreef::newNodef(Bid key, string value) {
 // See the diagram given above.
 
 Nodef* AVLTreef::rightRotate(Nodef* y) {
-//	cout <<"node->rightID"<<y->key<<endl;
     Nodef* x = oram->ReadNodef(y->leftID,y->leftPos,y->leftPos);
-  //  cout <<"left of node->key"<< x->key<<endl;
     Nodef* T2;
     if (x->rightID == 0) {
         T2 = newNodef(0, "");
@@ -70,8 +68,6 @@ Nodef* AVLTreef::rightRotate(Nodef* y) {
 
 Nodef* AVLTreef::leftRotate(Nodef* x) {
     Nodef* y = oram->ReadNodef(x->rightID,x->rightPos,x->rightPos);
-    //if(y==NULL)
-//	    cout <<"NULL"<< endl;
     Nodef* T2;
     if (y->leftID == 0) {
         T2 = newNodef(0, "");
@@ -108,21 +104,25 @@ int AVLTreef::getBalance(Nodef* N) {
 
 Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, string value) {
     /* 1. Perform the normal BST rotation */
+	cout <<"In insert of OMAPf"<<rootKey<<pos<<key<<endl;
     if (rootKey == 0) {
         Nodef* nnode = newNodef(key, value);
         pos = oram->WriteNodef(key, nnode);
-	    //cout<<"(writing key at root):"<<key << endl;
+	    cout<<"(writing key at root):"<<key << endl;
         return nnode->key;
     }
     Nodef* node = oram->ReadNodef(rootKey, pos, pos);
+	cout <<"Read In insert of OMAPf"<<node->key<<node->pos<<key<<endl;
     if (key < node->key) {
-	    //cout<<"(insert key < cur node):"<<key << node->key<< endl;
+	    cout<<"(insert key < cur node):"<<key << node->key<< endl;
         node->leftID = insert(node->leftID, node->leftPos, key, value);
     } else if (key > node->key) {
-	    //cout<<"(insert key > cur node):"<<key << node->key<< endl;
+	    cout<<"(insert key > cur node):"<<key << node->key<< endl;
+	    cout <<"rightID/pos is :"<<node->rightID<<"/"<<node->rightPos<<endl;
         node->rightID = insert(node->rightID, node->rightPos, key, value);
+	    cout <<"rightID is after:"<<node->rightID<<endl;
     } else { // this one updates exixting value
-	    //cout<<"(insert key == cur node):"<<key << node->key<< endl;
+	    cout<<"(insert key == cur node):"<<key << node->key<< endl;
         std::fill(node->value.begin(), node->value.end(), 0);
         std::copy(value.begin(), value.end(), node->value.begin());
         oram->WriteNodef(rootKey, node);

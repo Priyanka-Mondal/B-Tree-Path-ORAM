@@ -40,18 +40,24 @@ void Foram::insert(vector<string> kws, vector<string> blocks, string ind)
      for(auto kw: kws)
      {
         Bid key = createBid(kw, FCNT);
+	cout <<"findint updt"<<key<<endl;
         auto uc = (updt->find(key));
         int updc; 
     
         if (uc == "") 
+	{
+	     cout <<"updc NULL"<< endl;
              updc=0;
+	}
         else
+	{
+	    cout <<"found updc"<< endl;
 	    updc = to_Int(uc);
-       
+	}
         updc = updc+1;
-	cout <<"inserting:"<<kw<<endl;
+	cout <<"updc after increasing"<<updc<<endl;
         updt->insert(key, to_string(updc));
-	//cout << "Inserted upd:"<< key << ":"<<to_string(updc)<<endl;
+	cout << "Inserted upd:"<< key << ":"<<to_string(updc)<<endl;
 	U.insert(pair<string,int>(kw,updc));
         Bid updKey = createBid(kw, ind);
         updt->insert(updKey, to_string(updc));//pad,can we store number in updc 

@@ -46,9 +46,13 @@ void OMAPf::remove(Bid delKey)
 void OMAPf::insert(Bid key, string value) {
     treeHandler->startOperation();
     if (rootKey == 0) {
+	    cout <<"in insert OMAPf root 0"<<endl;
         rootKey = treeHandler->insert(0, rootPos, key, value);
+	    cout <<"in insert OMAPf root 0 newroot:"<<rootKey<<endl;
     } else {
+	    cout <<"in insert OMAPf root!=0"<<rootKey<<endl;
         rootKey = treeHandler->insert(rootKey, rootPos, key, value);
+	    cout <<"in insert OMAPf root!=0 newroot:"<<rootKey<<endl;
     }
     treeHandler->finishOperation(false, rootKey, rootPos);
 }
