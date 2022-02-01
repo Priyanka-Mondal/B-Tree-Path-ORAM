@@ -145,8 +145,8 @@ sudo ldconfig
 
 9. copy some libraries
 ```shell
-cd usr/lib/aarch64-linux-gnu
-cp libcrypt.a libcrypto.a libcrypt.so libcrypto.so usr/local/lib
+cd /usr/lib/x86_64-linux-gnu
+cp libcrypt.a libcrypto.a libcrypt.so libcrypto.so /usr/local/lib
 ```
 
 

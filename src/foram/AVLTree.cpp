@@ -353,7 +353,7 @@ Bid AVLTree::balance(Node* node, int &pos)
 void AVLTree::deleteNode(Node* nodef)
 {
 	Node* free = newNode(0,"");
-	cout <<"In deleteNode==============="<<endl;
+	//cout <<"In deleteNode==============="<<endl;
 	oram->DeleteNode(nodef->key,free);
 }
 

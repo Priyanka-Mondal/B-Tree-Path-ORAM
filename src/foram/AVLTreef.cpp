@@ -365,26 +365,6 @@ Bid AVLTreef::deleteNode(Nodef* nodef)
 	return 0;
 
 }
-Bid AVLTreef::deleteKey(Nodef* node, Bid key)
-{
-
-	Nodef* delNode = search(node,key);
-	Bid rootKey = node->key;
-	if(delNode != NULL)
-		cout <<"found------------------------------------"<<delNode->key<<endl;
-	else
-		cout <<"not found"<<endl;
-
-	Nodef* free = newNodef(0,"");
-	free->pos = delNode->pos;
-	free->height = delNode->height;
-	free->leftID = delNode->leftID;
-	free->rightID = delNode->rightID;
-	oram->DeleteNodef(delNode->key,free);
-	cout << "DeleteNodef:"<<endl;
-	return rootKey;
-	//oram->WriteNodef(delNode->key,delNode);
-}
 
 Bid AVLTreef:: removeMain(Bid rootKey,int& pos, Bid delKey)
 {

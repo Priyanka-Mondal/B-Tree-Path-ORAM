@@ -12,7 +12,7 @@ using namespace std;
 
 int fileid = 1;
 bool usehdd = false;
-Foram foram(usehdd, 1000, 500);  
+Foram foram(usehdd, 60000, 10500);  // change size based in impit file sizes
 set<string> neg;
 string delimiters("|+#*?@,:!\"><; _-./  \n");
 
@@ -135,6 +135,7 @@ static void insert_dir (const char * dir_name)
             *     following line: */
 
             if (! (entry->d_type & DT_DIR)) {
+	      cout <<"=====================================" << endl;
               printf ("%s/%s\n", dir_name, d_name);
 	      string file = dir_name;
 	      file = file.append("/");
@@ -142,7 +143,6 @@ static void insert_dir (const char * dir_name)
 	      vector<string> kws1, kws;
 	      string id = toS(fileid);
 	      string cont = getFileContent(file);
-	      cout <<"=====================================" << endl;
 
 	      boost::split(kws1, cont, boost::is_any_of(delimiters));
 	      kws =  getUniquedWords(kws1, id);
@@ -200,7 +200,7 @@ static void insert_dir (const char * dir_name)
 void deletefile(string id)
 {
 	string cont = foram.removefileblock(id);
-	cout << cont << endl;
+	//cout << cont << endl;
 	if(cont != "")
 	{
 		cout <<endl;
@@ -287,7 +287,7 @@ neg.insert("");
 
 //INSERT keywords and file blocks of Enron
     //insert_dir("enron");
-    insert_dir("synth");
+    insert_dir("inbox"); //filedir
 
 //***NOW TEST search and delete
 

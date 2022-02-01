@@ -22,7 +22,7 @@ ORAMf::ORAMf(int maxSize, bytes<Key> key)
     clen_size = AES::GetCiphertextLength((blockSize) * Z);
     plaintext_size = (blockSize) * Z;
     store = new RAMStore(storeBlockCount, storeBlockSize);
-    cout << "Bucket and block count in ORAMf:" << bucketCount<<"|"<<Z<<endl;
+    //cout << "Bucket and block count in ORAMf:" << bucketCount<<"|"<<Z<<endl;
     for (size_t i = 0; i < bucketCount; i++) {
         Bucketf bucket;
         for (int z = 0; z < Z; z++) {
@@ -204,7 +204,7 @@ void ORAMf::WriteData(Bid bid, Nodef* node) {
 	    {
 	        cache[bid] = node;
 	        store->ReduceEmptyNumbers();
-	cout << "EmptyNode write ORAMf upd:"<< store->GetEmptySize() <<"(of "<< bucketCount*Z<<")"<<endl;
+	cout << bid<<"EmptyNode write ORAMf upd:"<< store->GetEmptySize() <<"(of "<< bucketCount*Z<<")"<<endl;
 	    } 
 	    else 
 	    {
@@ -216,7 +216,7 @@ void ORAMf::WriteData(Bid bid, Nodef* node) {
 	{
         	cache[bid]=node; 
         	store->IncreaseEmptyNumbers();
-	cout <<"EmptyNode delete ORAMf upd:"<< store->GetEmptySize()<<"(of "<<bucketCount*Z<<")"<<endl;
+	cout <<bid<<"EmptyNode delete ORAMf upd:"<< store->GetEmptySize()<<"(of "<<bucketCount*Z<<")"<<endl;
 	}
 }
 
@@ -250,10 +250,10 @@ void ORAMf::Access(Bid bid, Nodef*& node) {
 
 Nodef* ORAMf::ReadNodef(Bid bid) {
     if (bid == 0) {
-        throw runtime_error("Nodef id is not set in ReadNode");
+        throw runtime_error("Nodef id is not set in ReadNode upd");
     }
     if (cache.count(bid) == 0) {
-        throw runtime_error("Nodef not found in the cache!!");
+        throw runtime_error("Nodef not found in the cache upd!!");
     } else {
         Nodef* node = cache[bid];
         return node;
