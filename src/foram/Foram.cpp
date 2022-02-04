@@ -39,8 +39,11 @@ void Foram::insert(vector<string> kws, vector<string> blocks, string ind)
      map<string,int> U;
      for(auto kw: kws)
      {
+	     int lenn = kw.length();
+	if(lenn <= 60)
+	{
         Bid key = createBid(kw, FCNT);
-	cout <<"findint updt"<<key<<endl;
+	cout <<"findint updt: "<<kw<<endl;
         auto uc = (updt->find(key));
         int updc; 
     
@@ -56,12 +59,20 @@ void Foram::insert(vector<string> kws, vector<string> blocks, string ind)
 	}
         updc = updc+1;
 	cout <<"updc after increasing"<<updc<<endl;
-        updt->insert(key, to_string(updc));
-	cout << "Inserted upd:"<< key << ":"<<to_string(updc)<<endl;
+   //     updt->insert(key, to_string(updc));
+          updt->insert(key,updc);  
+       	Bid updKey = createBid(kw, ind);
+      //updt->insert(updKey, to_string(updc));//pad,can we store number in updc 
+        updt->insert(updKey, updc);//pad,can we store number in updc 
+	cout <<"Inserted upd:"<< updKey<< ":"<<to_string(updc)<<endl;
+	
 	U.insert(pair<string,int>(kw,updc));
-        Bid updKey = createBid(kw, ind);
-        updt->insert(updKey, to_string(updc));//pad,can we store number in updc 
-	//cout <<"Inserted upd:"<< updKey<< ":"<<to_string(updc)<<endl;
+     }
+	else
+	{
+		cout <<"WORD > 64"<< endl;
+		return;
+	}
      }
      //updt->finalize(x);
 cout <<"Inserting "<<U.size()<<" keywords in src"<< endl;     
@@ -92,7 +103,7 @@ cout << "inserted all the keywords in src (total keyword(s):"<<inserted<<")"<<en
      cout << "inserted "<<  blocks.size()+1 <<" block(s) of " << ind <<" in src"<< endl;
 }
 
-
+/*
 string Foram::removefileblock(string ind) 
 {
 	string file = "";
@@ -160,7 +171,7 @@ void Foram::removekw(vector <string> kws, string ind)
 	//updt->finalize();
 	//srch->finalize();
 }
-
+*/
 void Foram::print()
 {
 	updt->printTree();
@@ -267,8 +278,8 @@ void Foram::setupInsert(vector <string> kws, vector<string> blocks, string ind)
 {
      inserted =0;
 //INSERTING KEYWORDS IN BATCH*******************************
-     map<Bid,string> batchUpd1;
-     map<Bid,string> batchUpd2;
+     map<Bid,int> batchUpd1;
+     map<Bid,int> batchUpd2;
      cout << "inserting keywords for:"<< ind << endl;
      map<string,int> U;
      for(auto kw: kws)
@@ -283,9 +294,9 @@ void Foram::setupInsert(vector <string> kws, vector<string> blocks, string ind)
       	     updc = to_Int(uc);
 
         updc = updc+1;
-	batchUpd1.insert(pair<Bid, string>(key,to_string(updc)));
+	batchUpd1.insert(pair<Bid, int>(key,(updc)));
         Bid updKey = createBid(kw, ind);
-        batchUpd2.insert(pair<Bid, string>(updKey, to_string(updc)));//pad 
+        batchUpd2.insert(pair<Bid, int>(updKey, (updc)));//pad 
 	U.insert(pair<string,int>(kw,updc));
      }
      updt->batchInsert(batchUpd1);

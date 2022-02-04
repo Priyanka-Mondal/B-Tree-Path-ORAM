@@ -10,3 +10,5 @@ enron/*
 .sconsign.dblite
 synth/*
 enron_
+inbox/*
+sent/*

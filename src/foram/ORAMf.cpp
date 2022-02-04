@@ -100,7 +100,6 @@ void ORAMf::WriteBucket(int index, Bucketf bucket) {
 // Fetches blocks along a path, adding them to the cache
 
 void ORAMf::FetchPath(int leaf) {
-	cout <<"In fetchPath fetching "<< leaf<<endl;
     readCnt++;
     for (size_t d = 0; d <= depth; d++) {
         int node = GetNodefOnPath(leaf, d);
@@ -133,12 +132,10 @@ void ORAMf::FetchPath(int leaf) {
 std::vector<Bid> ORAMf::GetIntersectingBlocks(int x, int curDepth) {
     std::vector<Bid> validBlocks;
 
-    //cout <<"++++++++++++++++++++++++++++++"<<curDepth<<";"<<x<<endl;
     int node = GetNodefOnPath(x, curDepth);
     for (auto b : cache) {
         Bid bid = b.first;
         if (b.second != NULL && GetNodefOnPath(b.second->pos, curDepth) == node) {
-	//cout <<"Bid inserted in validBlocks:"<< bid<< "at dep:"<<curDepth<<endl;
             validBlocks.push_back(bid);
             if (validBlocks.size() >= Z) {
                 return validBlocks;
@@ -199,8 +196,8 @@ Nodef* ORAMf::ReadData(Bid bid) {
 // Updates the data of a block in the cache
 
 void ORAMf::WriteData(Bid bid, Nodef* node) {
-	if(bid == node->key)
-	{
+	//if(bid == node->key)
+	//{
 	    if (store->GetEmptySize() > 0) 
 	    {
 	        cache[bid] = node;
@@ -212,13 +209,13 @@ void ORAMf::WriteData(Bid bid, Nodef* node) {
 		    cout << "can not write anymore - WriteDataf upd!"<<endl;
 	            throw runtime_error("There is no more space in ORAMf upd");
             }
-	}
-	else if(bid != node->key)
-	{
-        	cache[bid]=node; 
-        	store->IncreaseEmptyNumbers();
-	cout <<bid<<"EmptyNode delete ORAMf upd:"<< store->GetEmptySize()<<"(of "<<bucketCount*Z<<")"<<endl;
-	}
+	//}
+	//else if(bid != node->key)
+	//{
+        //	cache[bid]=node; 
+        //	store->IncreaseEmptyNumbers();
+	//cout <<bid<<"EmptyNode delete ORAMf upd:"<< store->GetEmptySize()<<"(of "<<bucketCount*Z<<")"<<endl;
+	//}
 }
 
 // Fetches a block, allowing you to read and write in a block
@@ -229,7 +226,6 @@ void ORAMf::Access(Bid bid, Nodef*& node, int lastLeaf, int newLeaf) {
     node = ReadData(bid);
     cout <<"back from ReadDatta"<<endl;
     if (node != NULL) {
-	    cout <<"its not NULL"<<endl;
         node->pos = newLeaf;
         if (cache.count(bid) != 0) {
             cache.erase(bid);
@@ -240,7 +236,7 @@ void ORAMf::Access(Bid bid, Nodef*& node, int lastLeaf, int newLeaf) {
         }
     }
     else
-	    cout <<"its NULL"<<endl;
+	    cout <<"its NULL"<<bid<<endl;
 }
 
 void ORAMf::Access(Bid bid, Nodef*& node) {
@@ -267,26 +263,21 @@ Nodef* ORAMf::ReadNodef(Bid bid) {
 }
 
 Nodef* ORAMf::ReadNodef(Bid bid, int lastLeaf, int newLeaf) {
-	cout <<"reading bid:"<< bid<<endl;
     if (bid == 0) {
         return NULL;
     }
     if (cache.count(bid) == 0 || find(leafList.begin(), leafList.end(), lastLeaf) == leafList.end()) {
         Nodef* node;
-	cout <<"cache count reading bid:"<< bid<<endl;
         Access(bid, node, lastLeaf, newLeaf);
         if (node != NULL) {
             modified.insert(bid);
-	    cout <<"ReadNodef node !=NULL"<<endl;
         }
 	else
-		cout <<"node is NULL"<<endl;
+		cout <<"node is NULL"<<bid<<endl;
         return node;
     } else {
-	    cout <<"cache.count(bid)!=0"<<endl;
         modified.insert(bid);
         Nodef* node = cache[bid];
-	    cout <<"ReadNodef node !=NULL"<<node->key<<endl;
         node->pos = newLeaf;
         return node;
     }
@@ -365,7 +356,6 @@ void ORAMf::finilize(bool find, Bid& rootKey, int& rootPos) {
             }
         }
     }
-    cout <<"In Finilize"<<endl;
 
     //updating the binary tree positions
     for (unsigned int i = 0; i <= depth + 2; i++) {

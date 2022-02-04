@@ -14,7 +14,7 @@ int fileid = 1;
 bool usehdd = false;
 Foram foram(usehdd, 64000, 10240);  // change size based in impit file sizes
 set<string> neg;
-string delimiters("|+#*?@,:!\"><; _-./  \n");
+string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
 
 
 vector<string> getUniquedWords(vector<string> kws, string fileid)
@@ -199,7 +199,8 @@ static void insert_dir (const char * dir_name)
 
 void deletefile(string id)
 {
-	string cont = foram.removefileblock(id);
+	//string cont = foram.removefileblock(id);
+	string cont ="";
 	//cout << cont << endl;
 	if(cont != "")
 	{
@@ -215,7 +216,7 @@ void deletefile(string id)
 			      }
 		      }
 		cout << "Deletion of keywords in :"<< id<< endl;
-		foram.removekw(kws,id);
+		//foram.removekw(kws,id);
 	}
 	else
 	{
@@ -284,10 +285,17 @@ neg.insert(">");
 neg.insert("#");
 neg.insert("+");
 neg.insert("");
-
+neg.insert("PST");
+neg.insert("it");
+neg.insert("It");
+neg.insert("http");
+neg.insert("Cc");
+neg.insert("Bcc");
+neg.insert("com");
+//neg.insert(single letters);
 //INSERT keywords and file blocks of Enron
     //insert_dir("enron");
-    insert_dir("inbox"); //filedir
+    insert_dir("sent"); //filedir
 
 //***NOW TEST search and delete
 

@@ -16,7 +16,6 @@ string OMAPf::find(Bid key) {
     }
     treeHandler->startOperation();
     Nodef* node = new Nodef();
-    //cout <<"rootKey in find" << rootKey<< ":"<< rootPos<<endl;
     node->key = rootKey;
     node->pos = rootPos;
     auto resNode = treeHandler->search(node, key);
@@ -43,10 +42,9 @@ void OMAPf::remove(Bid delKey)
     treeHandler->finishOperation(false, rootKey, rootPos);
 }
 
-void OMAPf::insert(Bid key, string value) {
+void OMAPf::insert(Bid key, int value) {
     treeHandler->startOperation();
     if (rootKey == 0) {
-	    cout <<"in insert OMAPf root 0"<<endl;
         rootKey = treeHandler->insert(0, rootPos, key, value);
 	    cout <<"in insert OMAPf root 0 newroot:"<<rootKey<<endl;
     } else {
@@ -71,7 +69,7 @@ void OMAPf::printTree() {
 /**
  * This function is used for batch insert which is used at the end of setup phase.
  */
-void OMAPf::batchInsert(map<Bid, string> pairs) {
+void OMAPf::batchInsert(map<Bid, int> pairs) {
     treeHandler->startOperation(true);
     int cnt = 0;
     for (auto pair : pairs) {

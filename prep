@@ -1,6 +1,6 @@
 #/bin/sh
 
-for f in $(find inbox -type f); 
+for f in $(find sent -type f); 
 do 
  sed '/Message-ID:/d' $f> tmpfile && mv tmpfile $f; 
  sed '/From:/d' $f> tmpfile && mv tmpfile $f; 

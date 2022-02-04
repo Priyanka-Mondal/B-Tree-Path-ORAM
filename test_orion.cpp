@@ -12,7 +12,7 @@ using namespace std;
 
 int fileid = 1;
 bool usehdd = false;
-Orion orion(usehdd, 100000);  
+Orion orion(usehdd, 1000000);  
 set<string> neg;
 int totk = 0;
 vector<string> getUniquedWords(vector<string> kws, string fileid)
@@ -193,8 +193,16 @@ static void list_dir (const char * dir_name)
 		//blocks = divideString(file,BLOCK,id);
 		for(auto k: kws)
 		{
+			int lenn = k.length();
+			if(lenn <= 60)
+			{
 			orion.insert(k, fileid);
 	        	totk++;
+			}
+			else
+			{
+				cout << "GREATER THAN 64"<< endl;
+			}
 		}
                 fileid++;
                }
@@ -266,7 +274,7 @@ neg.insert("\t");
 neg.insert("from");
 
 
-    list_dir("enron");
+    list_dir("sent");
     cout << endl << "FILEID:" << fileid << " totk:"<<totk<< endl;
     cout << "SEARCH size:" << orion.search("you").size() << endl << endl;
     orion.remove("you",7);

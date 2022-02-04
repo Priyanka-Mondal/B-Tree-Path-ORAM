@@ -21,11 +21,11 @@ public:
     OMAPf(int maxSize, bytes<Key> key);
     virtual ~OMAPf();
     void remove(Bid delKey);
-    void insert(Bid key, string value);
+    void insert(Bid key, int value);
     string find(Bid key);
     void delKey(Bid key);
     void printTree();
-    void batchInsert(map<Bid, string> cont);
+    void batchInsert(map<Bid, int> cont);
     vector<string> batchSearch(vector<Bid> keys);
 };
 

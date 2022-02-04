@@ -26,7 +26,7 @@ private:
 
     int height(Bid N, int& leaf);
     int max(int a, int b);
-    Nodef* newNodef(Bid key, string value);
+    Nodef* newNodef(Bid key, int value);
     Nodef* rightRotate(Nodef* y);
     Nodef* leftRotate(Nodef* x);
     int getBalance(Nodef* N);
@@ -35,7 +35,7 @@ private:
 public:
     AVLTreef(int maxSize, bytes<Key> key);
     virtual ~AVLTreef();
-    Bid insert(Bid rootKey, int& pos, Bid key, string value);
+    Bid insert(Bid rootKey, int& pos, Bid key, int value);
     Nodef* search(Nodef* head, Bid key);
     void batchSearch(Nodef* head, vector<Bid> keys, vector<Nodef*>* results);
     void printTree(Nodef* root, int indent);
