@@ -14,6 +14,14 @@ Orion::~Orion() {
     delete updt;
 }
 
+int stoI(string updt_cnt)
+{
+	int updc;
+	stringstream convstoi(updt_cnt);
+	convstoi >> updc;
+	return updc;
+}
+
 /*
 void Orion::insert(string keyword, int ind) {
     Bid mapKey = createBid(keyword, ind);
@@ -36,32 +44,24 @@ void Orion::insert(string keyword, int ind) {
     Bid mapKey = createBid(keyword, ind);
     auto updt_cnt = updt->find(mapKey);
     if (updt_cnt == "") {
-        if (UpdtCnt.count(keyword) == 0) {
-            UpdtCnt[keyword] = 0;
-        }
 	Bid firstKey = createBid(keyword,0);
-	auto filecnt = fcnt->find(firstKey);
+	auto filecnt = updt->find(firstKey);
+	
 	int fc;
-        
 	if(filecnt == "")
 		fc = 0;
 	else fc = stoi(filecnt);
 	
 	fc++;
-	UpdtCnt[keyword]++;
-        //updt->insert(mapKey, to_string(UpdtCnt[keyword]));
-        updt->insert(mapKey, to_string(fc));
-        fcnt->insert(firstKey, to_string(fc));
-        //Bid key = createBid(keyword, UpdtCnt[keyword]);
+        
+	updt->insert(mapKey, to_string(fc));
+        updt->insert(firstKey, to_string(fc));
+	
 	Bid key = createBid(keyword, fc);
         srch->insert(key, to_string(ind));
-        LastIND[keyword] = ind;
     }
 }
 
-/**
- * This function executes an insert in setup mode. Indeed, it is not applied until endSetup()
- */
 void Orion::setupInsert(string keyword, int ind) {
     Bid mapKey = createBid(keyword, ind);
     if (UpdtCnt.count(keyword) == 0) {
@@ -124,14 +124,22 @@ void Orion::setupRemove(string keyword, int ind) {
 }
 
 vector<int> Orion::search(string keyword) {
+    
     vector<int> result;
     vector<Bid> bids;
-    if (UpdtCnt.count(keyword) != 0) {
-        for (int i = 1; i <= UpdtCnt[keyword]; i++) {
+    Bid firstKey = createBid(keyword,0);
+    string filecnt = updt->find(firstKey);
+    int fc;
+
+    if(filecnt == "")
+	 fc = 0;
+    else
+         fc = stoI(filecnt);
+
+        for (int i = 1; i <= fc; i++) {
             Bid bid = createBid(keyword, i);
             bids.push_back(bid);
         }
-    }
     auto tmpRes = srch->batchSearch(bids);
     for(auto item:tmpRes){
         result.push_back(stoi(item));

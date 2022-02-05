@@ -300,6 +300,7 @@ neg.insert("com");
     list_dir("sent");
     cout << endl << "FILEID:" << fileid << " totk:"<<totk<< endl;
     cout << "SEARCH size:" << orion.search("you").size() << endl << endl;
+    /*
     orion.remove("you",7);
     cout << "SEARCH size2:" << orion.search("you").size() << endl << endl;
     orion.remove("you",6);
@@ -312,6 +313,7 @@ neg.insert("com");
     cout << "SEARCH size2:" << orion.search("you").size() << endl << endl;
     orion.remove("you",4);
     cout << "SEARCH size2:" << orion.search("you").size() << endl << endl;
+    */
     //insert a dummy file for fake entries at the end -- maybe not required
     // first searches ids 
     //map<string,string> allfiles = borion.searchWrapper("hell");
