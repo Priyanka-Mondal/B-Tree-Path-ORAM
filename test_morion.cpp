@@ -167,7 +167,7 @@ string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
             *     following line: */
 
             if (! (entry->d_type & DT_DIR)) {
-              printf ("%s/%s\n", dir_name, d_name);
+              //printf ("%s/%s\n", dir_name, d_name);
 	      string file = dir_name;
 	      file = file.append("/");
 	      file = file.append(d_name);
@@ -199,9 +199,9 @@ string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
 	      cout << "============================" << endl;
     		vector<string> blocks;
 		//blocks = divideString(file,BLOCK,id);
-		for(auto k: kws)
+		/*for(auto k: kws)
 		{
-			cout <<"segfault after this ?"<< k<<endl;
+			cout<<fileid<<"segfault after:"<< k<<endl;
 			int lenn = k.length();
 			if(lenn <= 60)
 			{
@@ -212,7 +212,8 @@ string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
 			{
 				cout << "GREATER THAN 64"<< endl;
 			}
-		}
+		}*/
+		orion.insert(kws,fileid);
                 fileid++;
                }
 
@@ -299,7 +300,12 @@ neg.insert("com");
 
     list_dir("sent");
     cout << endl << "FILEID:" << fileid << " totk:"<<totk<< endl;
-    cout << "SEARCH size:" << orion.search("you").size() << endl << endl;
+    cout << "SEARCH:" <<endl;
+    vector<int> ids = orion.search("you");
+    for(auto id:ids)
+    	cout << "["<<id<<"] "<< endl;
+    cout <<endl<<endl;
+
     /*
     orion.remove("you",7);
     cout << "SEARCH size2:" << orion.search("you").size() << endl << endl;

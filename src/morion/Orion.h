@@ -15,7 +15,7 @@ private:
     
 public:
     Bid createBid(string keyword,int number);
-    void insert(string keyword, int ind);
+    void insert(vector<string> kws, int ind);
     void setupInsert(string keyword, int ind);
     void remove(string keyword, int ind);
     void setupRemove(string keyword, int ind);

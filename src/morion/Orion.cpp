@@ -40,26 +40,54 @@ void Orion::insert(string keyword, int ind) {
     }
 }
 */
-void Orion::insert(string keyword, int ind) {
-    Bid mapKey = createBid(keyword, ind);
-    auto updt_cnt = updt->find(mapKey);
-    if (updt_cnt == "") {
-	Bid firstKey = createBid(keyword,0);
-	auto filecnt = updt->find(firstKey);
-	
-	int fc;
-	if(filecnt == "")
-		fc = 0;
-	else fc = stoi(filecnt);
-	
-	fc++;
-        
-	updt->insert(mapKey, to_string(fc));
-        updt->insert(firstKey, to_string(fc));
-	
-	Bid key = createBid(keyword, fc);
-        srch->insert(key, to_string(ind));
+void Orion::insert(vector<string> kws, int ind) {
+    for(auto kw: kws)
+    {
+  	  Bid mapKey = createBid(kw, ind);
+  	  auto updt_cnt = updt->find(mapKey);
+  	  if (updt_cnt == "") 
+	  {
+  	      Bid firstKey = createBid(kw,0);
+  	      auto filecnt = updt->find(firstKey);
+  	      
+  	      int fc;
+  	      if(filecnt == "")
+  	      	fc = 0;
+  	      else fc = stoi(filecnt);
+  	      
+  	      fc++;
+  	      
+  	      updt->insert(mapKey, to_string(fc));
+  	      updt->insert(firstKey, to_string(fc));
+  	      
+  	      Bid key = createBid(kw, fc);
+  	      srch->insert(key, to_string(ind));
+    	}
     }
+}
+
+vector<int> Orion::search(string keyword) {
+    
+    vector<int> result;
+    vector<Bid> bids;
+    Bid firstKey = createBid(keyword,0);
+    string filecnt = updt->find(firstKey);
+    int fc;
+
+    if(filecnt == "")
+	 fc = 0;
+    else
+         fc = stoI(filecnt);
+
+        for (int i = 1; i <= fc; i++) {
+            Bid bid = createBid(keyword, i);
+            bids.push_back(bid);
+        }
+    auto tmpRes = srch->batchSearch(bids);
+    for(auto item:tmpRes){
+        result.push_back(stoi(item));
+    }
+    return result;
 }
 
 void Orion::setupInsert(string keyword, int ind) {
@@ -123,29 +151,6 @@ void Orion::setupRemove(string keyword, int ind) {
     }
 }
 
-vector<int> Orion::search(string keyword) {
-    
-    vector<int> result;
-    vector<Bid> bids;
-    Bid firstKey = createBid(keyword,0);
-    string filecnt = updt->find(firstKey);
-    int fc;
-
-    if(filecnt == "")
-	 fc = 0;
-    else
-         fc = stoI(filecnt);
-
-        for (int i = 1; i <= fc; i++) {
-            Bid bid = createBid(keyword, i);
-            bids.push_back(bid);
-        }
-    auto tmpRes = srch->batchSearch(bids);
-    for(auto item:tmpRes){
-        result.push_back(stoi(item));
-    }
-    return result;
-}
 
 /**
  * This function is used for initial setup of scheme because normal update is time consuming
