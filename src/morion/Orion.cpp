@@ -22,16 +22,15 @@ int stoI(string updt_cnt)
 	return updc;
 }
 
-void Orion::insert(vector<string> kws, int ind) {
+void Orion::insert(vector<string> kws, int ind) 
+{
     for(auto kw: kws)
     {
-	  cout <<"keyword:"<< kw<<"length:"<<kw.length()<<endl;
-  	  Bid mapKey = createBid(kw, ind);
-  	  auto updt_cnt = updt->find(mapKey);
-  	  if (updt_cnt == "") 
-	  {
+  	  //auto updt_cnt = updt->find(mapKey);
+  	  //if (updt_cnt == "") 
+	  //{
   	      Bid firstKey = createBid(kw,0);
-  	      auto filecnt = updt->find(firstKey);
+  	      auto filecnt = fcnt->find(firstKey);
   	      
   	      int fc;
   	      if(filecnt == "")
@@ -40,12 +39,13 @@ void Orion::insert(vector<string> kws, int ind) {
   	      
   	      fc++;
   	      
+  	      Bid mapKey = createBid(kw, ind);
   	      updt->insert(mapKey, to_string(fc));
-  	      updt->insert(firstKey, to_string(fc));
+  	      fcnt->insert(firstKey, to_string(fc));
   	      
   	      Bid key = createBid(kw, fc);
   	      srch->insert(key, to_string(ind));
-    	}
+    	//}
     }
 }
 

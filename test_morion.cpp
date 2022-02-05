@@ -11,7 +11,7 @@ using namespace std;
 
 int fileid = 1;
 bool usehdd = false;
-Orion orion(usehdd, 50000);  
+Orion orion(usehdd, 500000);  
 set<string> neg;
 int totk = 0;
 string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
@@ -33,7 +33,6 @@ vector<string> getUniquedWords(vector<string> kws, string fileid)
 	    {
     		    if ((!mp.count(word)) && (word.size()<=12))
     		    {
-    		        cout <<word<<" -size:"<< word.size() <<endl;
     		        mp.insert(make_pair(word, 1));
     		    }
     		    else 
@@ -164,21 +163,7 @@ static void list_dir (const char * dir_name)
 	      }
 	      cout << endl <<file<< " " << id <<endl << endl;
     		vector<string> blocks;
-		//blocks = divideString(file,BLOCK,id);
-		/*for(auto k: kws)
-		{
-			cout<<fileid<<"segfault after:"<< k<<endl;
-			int lenn = k.length();
-			if(lenn <= 60)
-			{
-			orion.insert(k, fileid);
-	        	totk++;
-			}
-			else
-			{
-				cout << "GREATER THAN 64"<< endl;
-			}
-		}*/
+		blocks = divideString(file,BLOCK,id);
 		orion.insert(kws,fileid);
                 fileid++;
                }
@@ -285,9 +270,9 @@ while(1)
 		cin>> keyword;
     		vector<int> ids = orion.search(keyword);
     		for(auto id:ids)
-    			cout << "["<<id<<"] "<< endl;
+    			cout << "["<<id<<"] ";
     		cout <<endl<<endl;
-		cout << "RESULT size: " << ids.size() << endl;
+		cout << "RESULT size: " << ids.size() << endl<<endl;
 	}
 	else if(c=='d'|| c=='D')
 	{

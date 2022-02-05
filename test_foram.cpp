@@ -25,10 +25,13 @@ vector<string> getUniquedWords(vector<string> kws, string fileid)
     string word;
     for(auto word : kws)
     {
-        if (!mp.count(word))
-            mp.insert(make_pair(word, 1));
-        else
-            mp[word]++;
+	    if(word.length()<=12)
+	    {
+        	if (!mp.count(word))
+            		mp.insert(make_pair(word, 1));
+        	else 
+            		mp[word]++;
+	    }
     }
     mp.erase(fileid);
   
@@ -361,50 +364,6 @@ while(1)
 		break;
 	}
 }
-/*
-cout << "DELETE STARTS***" << endl;
-deletefile("0001");
-files.clear();
-files = foram.search("3");
-cout << "RESULT size2: " << files.size() << endl;
-for (map<string, string> :: iterator p = files.begin();
-		         p != files.end(); p++)
-{
-	cout << "FILE[" << p->first << "]";
-}
-cout << endl;
-deletefile("0002");
-files.clear();
-files = foram.search("3");
-cout << "RESULT size2: " << files.size() << endl;
-for (map<string, string> :: iterator p = files.begin();
-		         p != files.end(); p++)
-{
-	cout << "FILE[" << p->first << "]";
-}
-cout << endl;
-deletefile("0003");
-files.clear();
-files = foram.search("3");
-cout << "RESULT size2: " << files.size() << endl;
-for (map<string, string> :: iterator p = files.begin();
-		         p != files.end(); p++)
-{
-	cout << "FILE[" << p->first << "]";
-}
-cout << endl;
-//gives error
-deletefile("0004");
-files.clear();
-files = foram.search("3");
-cout << "RESULT size2: " << files.size() << endl;
-for (map<string, string> :: iterator p = files.begin();
-		         p != files.end(); p++)
-{
-	cout << "FILE[" << p->first << "]";
-}
-cout << endl;
-*/
-    
-    return 0;
+
+return 0;
 }
