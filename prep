@@ -1,6 +1,6 @@
 #/bin/sh
 
-for f in $(find notes_inbox -type f); 
+for f in $(find allen-p -type f); 
 do 
  sed '/Message-ID:/d' $f> tmpfile && mv tmpfile $f; 
  sed '/From:/d' $f> tmpfile && mv tmpfile $f; 
@@ -22,6 +22,7 @@ do
  sed '/X-Mailer/d' $f> tmpfile && mv tmpfile $f; 
  sed '/Precedence:/d' $f> tmpfile && mv tmpfile $f; 
  sed '/Sender:/d' $f> tmpfile && mv tmpfile $f; 
+ sed '/<</d' $f> tmpfile && mv tmpfile $f; 
  sed 's///' $f > tmpfile && mv tmpfile $f;
  sed 's/\t/ /g' $f > tmpfile && mv tmpfile $f;
  sed 's/ \+/ /g' $f > tmpfile && mv tmpfile $f;

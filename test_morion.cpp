@@ -1,5 +1,4 @@
 #include "morion/Orion.h"
-//#include "utils/Utilities.h"
 #include<string.h>
 #include<utility>
 #include <dirent.h>
@@ -12,9 +11,11 @@ using namespace std;
 
 int fileid = 1;
 bool usehdd = false;
-Orion orion(usehdd, 100000);  
+Orion orion(usehdd, 50000);  
 set<string> neg;
 int totk = 0;
+string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
+
 
 bool BothAreSpaces(char lhs, char rhs) 
 { 
@@ -23,26 +24,24 @@ bool BothAreSpaces(char lhs, char rhs)
 
 vector<string> getUniquedWords(vector<string> kws, string fileid)
 {
-    // Open a file stream
     vector<string> kw;
-    // Create a map to store count of all words
     map<string, int> mp;
-  
-    // Keep reading words while there are words to read
     string word;
     for(auto word : kws)
     {
-        // If this is first occurrence of word
-        if (!mp.count(word))
-            mp.insert(make_pair(word, 1));
-        else
-            mp[word]++;
+	    if(word.size()<=12)
+	    {
+    		    if ((!mp.count(word)) && (word.size()<=12))
+    		    {
+    		        cout <<word<<" -size:"<< word.size() <<endl;
+    		        mp.insert(make_pair(word, 1));
+    		    }
+    		    else 
+    		        mp[word]++;
+	    }
     }
     mp.erase(fileid);
-  
-  
-    // Traverse map and print all words whose count
-    //is 1
+    
     for (map<string, int> :: iterator p = mp.begin();
          p != mp.end(); p++)
     {
@@ -57,34 +56,17 @@ vector<string> divideString(string filename, int sz, string id)
 	 fstream fs(filename); 
          string str((istreambuf_iterator<char>(fs)),
                        (istreambuf_iterator<char>()));
-
-	//boost::regex_replace(str, boost::regex("[' ']{2,}"), " ")
-	//	cout <<str<<endl;
 	cout <<"++++++++++++++++++++++++++++++++"<<endl;
         int str_size = str.length();
 	
 	if (str_size% sz !=0)
 	{
 		int pad = ceil(str_size/sz)+1;
-		//cout << filename<< " pad:" << pad << endl;
 		pad = pad*sz-str_size;
-		//cout << "again pad:" << pad << endl; 
 	        str.insert(str.size(), pad, '#');
-	}/*
-	else if (str_size <= MEDIUM)
-	{
-		cout << "Its a MEDIUM file:" << MEDIUM;
-        str.insert(str.size(), MEDIUM - str.size(), '#');
 	}
-	else 
-	{
-		cout << "Its a LARGE file:" << LARGE;
-        str.insert(str.size(), LARGE - str.size(), '#');
-	} */
          
 	str_size = str.length();
-	//cout << "the new size of the file:" <<str_size << endl;
-	//cout << str << endl << endl ;
   	int i;
         vector<string> result;
         string temp="";
@@ -96,7 +78,6 @@ vector<string> divideString(string filename, int sz, string id)
 		     string ttemp =id;
 		     ttemp.append(temp); 
                      result.push_back(ttemp);    
-		     //cout << "New Node:[" << ttemp << "]\n";
                   }
                   temp="";
             }
@@ -104,11 +85,9 @@ vector<string> divideString(string filename, int sz, string id)
 	}
         string ttemp = id;
 	ttemp.append(temp);	
-	    //cout << "New Node::"<< ttemp << endl; 
 	result.push_back(ttemp); 
-	
 	return result;
-    }
+}
 
 
 string toS(int id)
@@ -137,8 +116,6 @@ string getFileContent(string path)
 
 static void list_dir (const char * dir_name)
 {
-//    string delimiters("|?@,:!\">; -./  \n");
-string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
     DIR * d;
     d = opendir (dir_name);
 
@@ -174,29 +151,18 @@ string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
 	      vector<string> kws1, kws;
 	      string id = toS(fileid);
 	      string cont = getFileContent(file);
-    	      //cout << endl << "FILEID:" << fileid<< endl;
-	      //cout << "["<<file <<"]"<< endl;
-	      //cout << cont << endl << endl;
 	      cout <<"=====================================" << endl;
 
 	      boost::split(kws1, cont, boost::is_any_of(delimiters));
 	      kws =  getUniquedWords(kws1, id);
 	      for (auto it = kws.begin(); it != kws.end(); it++)
 	      {
-		      //cout <<"pos:"<<pos<<"-";
 		      if(neg.find(*it)!=neg.end())
 		      {
-			 //cout << endl <<"Deleted:["<<*it<<"]"<<endl ;
 			 kws.erase(it--);
 		      }
-		      //else
-		      //{
-			//cout <<"["<<*it<<"]" <<"     " ;
-		      //}
-		      //pos++;
 	      }
 	      cout << endl <<file<< " " << id <<endl << endl;
-	      cout << "============================" << endl;
     		vector<string> blocks;
 		//blocks = divideString(file,BLOCK,id);
 		/*for(auto k: kws)
@@ -216,8 +182,6 @@ string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
 		orion.insert(kws,fileid);
                 fileid++;
                }
-
-
 
              if (entry->d_type & DT_DIR) {
 
@@ -251,14 +215,8 @@ string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
 }
 
 
-int main(int, char**) {
-   
-	/*string inputString("One!Two,Three:Four Five--Six ,  Seven,8.9");
-	string delimiters("|,:! -.");
-	vector<string> parts;
-	boost::split(parts, inputString, boost::is_any_of(delimiters));
-	for(auto v : parts)
-		cout << v << endl;*/
+int main(int, char**) 
+{
 neg.insert("and");
 neg.insert("the");
 neg.insert("The");
@@ -298,37 +256,68 @@ neg.insert("Bcc");
 neg.insert("com");
 
 
-    list_dir("sent");
-    cout << endl << "FILEID:" << fileid << " totk:"<<totk<< endl;
-    cout << "SEARCH:" <<endl;
-    vector<int> ids = orion.search("you");
-    for(auto id:ids)
-    	cout << "["<<id<<"] "<< endl;
-    cout <<endl<<endl;
+list_dir("allen-p/deleted_items");
+//list_dir("tiny");
+cout << endl<<" SETUP INSERT DONE!"<< endl;
+cout <<"=================================="<< endl;
+cout <<"READY TO PERFORM QUERIES!" << endl;
 
-    /*
-    orion.remove("you",7);
-    cout << "SEARCH size2:" << orion.search("you").size() << endl << endl;
-    orion.remove("you",6);
-    cout << "SEARCH size2:" << orion.search("you").size() << endl << endl;
-    orion.remove("you",5);
-    cout << "SEARCH size2:" << orion.search("you").size() << endl << endl;
-    orion.remove("you",4);
-    cout << "SEARCH size2:" << orion.search("you").size() << endl << endl;
-    orion.remove("you",4);
-    cout << "SEARCH size2:" << orion.search("you").size() << endl << endl;
-    orion.remove("you",4);
-    cout << "SEARCH size2:" << orion.search("you").size() << endl << endl;
-    */
-    //insert a dummy file for fake entries at the end -- maybe not required
-    // first searches ids 
-    //map<string,string> allfiles = borion.searchWrapper("hell");
-    /*
-    for(auto itr= allfiles.begin(); itr!=allfiles.end();itr++)
-    {
-	   	 cout << " OUTPUT Blocks :[" << itr->first << "]\n";
-		 cout << itr->second << endl << endl;
-    }*/
-    
+
+while(1)
+{
+	char c;
+	cout <<endl<<endl<<endl;
+	cout <<"Enter your choice (s/i/d/p/q): "<<endl;
+	cout <<"s/S: Search"<<endl;
+	cout <<"i/I: Insert"<<endl;
+	cout <<"d/D: Delete"<<endl;
+	cout <<"p/P: Print"<<endl;
+	cout <<"q/Q: Quit"<<endl;
+	cout <<"------------------"<<endl;
+	cout <<"_";
+
+	cin >> c;
+
+	if(c=='s' || c=='S')
+	{
+		cout << "Enter the keyword to be searched: ";
+		string keyword;
+		cin>> keyword;
+    		vector<int> ids = orion.search(keyword);
+    		for(auto id:ids)
+    			cout << "["<<id<<"] "<< endl;
+    		cout <<endl<<endl;
+		cout << "RESULT size: " << ids.size() << endl;
+	}
+	else if(c=='d'|| c=='D')
+	{
+		cout <<"Enter file id to be deleted: ";
+		int fid;
+		cin>>fid;
+		cout <<"Enter keyword to be deleted: ";
+		string key;
+		cin>>key;
+		//deletefile(fid);
+		orion.remove(key,fid);
+	}
+	/*else if(c=='i' || c=='I')
+	{
+		cout << "Enter file name to be inserted:";
+		string file;
+		cin>> file;
+		kwfileblocks(file);
+		cout <<endl;
+	}
+	else if(c=='p' || c=='P')
+	{
+		foram.print();
+	}
+	*/
+	else //if(c=='q'||c=='Q')
+	{
+		cout <<"QUITTING..."<<endl<<endl;
+		break;
+	}
+}    
     return 0;
 }

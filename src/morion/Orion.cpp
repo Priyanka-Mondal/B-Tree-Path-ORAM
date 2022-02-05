@@ -22,27 +22,10 @@ int stoI(string updt_cnt)
 	return updc;
 }
 
-/*
-void Orion::insert(string keyword, int ind) {
-    Bid mapKey = createBid(keyword, ind);
-    cout <<"finding "<<keyword ;
-    auto updt_cnt = updt->find(mapKey);
-    if (updt_cnt == "") {
-        if (UpdtCnt.count(keyword) == 0) {
-            UpdtCnt[keyword] = 0;
-        }
-        UpdtCnt[keyword]++;
-	cout <<"inserting ["<<keyword<<"]:"<<ind <<"  ";
-        updt->insert(mapKey, to_string(UpdtCnt[keyword]));
-        Bid key = createBid(keyword, UpdtCnt[keyword]);
-        srch->insert(key, to_string(ind));
-        LastIND[keyword] = ind;
-    }
-}
-*/
 void Orion::insert(vector<string> kws, int ind) {
     for(auto kw: kws)
     {
+	  cout <<"keyword:"<< kw<<"length:"<<kw.length()<<endl;
   	  Bid mapKey = createBid(kw, ind);
   	  auto updt_cnt = updt->find(mapKey);
   	  if (updt_cnt == "") 
@@ -90,6 +73,48 @@ vector<int> Orion::search(string keyword) {
     return result;
 }
 
+
+
+void Orion::remove(string keyword, int ind) 
+{
+    Bid mapKey = createBid(keyword, ind);
+    string updt_cnt = updt->find(mapKey);
+    int uc;
+    if(updt_cnt =="")
+	uc = 0;
+    else
+	uc = stoi(updt_cnt);
+
+    if (uc > 0) 
+    {
+            updt->insert(mapKey, to_string(-1));
+            Bid firstKey = createBid(keyword,0);
+            string filecnt = updt->find(firstKey);
+            int fc;
+            if(filecnt == "")	
+            	fc = 0;
+            else 
+            	fc = stoi(filecnt);
+            int ufc = fc-1;
+            updt->insert(firstKey, to_string(ufc));
+            if (fc > 0) 
+            {
+                if (fc != uc) 
+                {
+                    Bid lastKey = createBid(keyword,fc);
+            	    int lastID = stoi(srch->find(lastKey));
+                    Bid curKey = createBid(keyword, lastID);
+                    updt->insert(curKey, to_string(uc));
+                    Bid curKey2 = createBid(keyword, uc);
+                    srch->insert(curKey2, to_string(lastID));
+                }
+            } 
+        }
+}
+
+
+
+
 void Orion::setupInsert(string keyword, int ind) {
     Bid mapKey = createBid(keyword, ind);
     if (UpdtCnt.count(keyword) == 0) {
@@ -102,28 +127,6 @@ void Orion::setupInsert(string keyword, int ind) {
     LastIND[keyword] = ind;
 }
 
-void Orion::remove(string keyword, int ind) {
-    Bid mapKey = createBid(keyword, ind);
-    string updt_cnt = updt->find(mapKey);
-    if (stoi(updt_cnt) > 0) {
-        updt->insert(mapKey, to_string(-1));
-        UpdtCnt[keyword]--;
-        if (UpdtCnt[keyword] > 0) {
-            if (UpdtCnt[keyword] + 1 != stoi(updt_cnt)) {
-                Bid curKey = createBid(keyword, LastIND[keyword]);
-                updt->insert(curKey, updt_cnt);
-                Bid curKey2 = createBid(keyword, stoi(updt_cnt));
-                srch->insert(curKey2, to_string(LastIND[keyword]));
-            }
-            Bid key = createBid(keyword, UpdtCnt[keyword]);
-            string idstr = srch->find(key);
-            int lastID = stoi(idstr);
-            LastIND[keyword] = lastID;
-        } else {
-            LastIND.erase(keyword);
-        }
-    }
-}
 
 /**
  * This function executes a remove in setup mode. Indeed, it is not applied until endSetup()
