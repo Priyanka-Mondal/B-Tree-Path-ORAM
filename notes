@@ -1,2 +1,0 @@
-libcrypt.a, libcrypto.a, libcrypt.so, libcrypto.so
-copy from usr/lib to usr/local/lib

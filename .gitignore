@@ -12,4 +12,5 @@ enron/*
 synth/*
 enron_
 inbox/*
+notes_inbox/*
 sent/*
