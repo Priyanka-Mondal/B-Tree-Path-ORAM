@@ -15,7 +15,8 @@ private:
     map<Bid,string> setupPairs1;
     map<Bid,string> setupPairs2;
     OMAP* srch;
-    OMAPf *updt;
+    OMAP* fcnt;
+    OMAP *updt;
     map<string, int> UpdtCnt;
     //map<string, int> LastIND;        
     

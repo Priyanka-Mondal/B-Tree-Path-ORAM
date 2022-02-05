@@ -113,6 +113,10 @@ Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, int value) {
         return nnode->key;
     }
     Nodef* node = oram->ReadNodef(rootKey, pos, pos);
+    if(node == NULL)
+    {
+	    return rootKey;
+    }
     if (key < node->key) {
 	    cout<<"(insert key < cur node):"<<key << node->key<< endl;
         node->leftID = insert(node->leftID, node->leftPos, key, value);

@@ -4,6 +4,7 @@
 #include<utility>
 #include <dirent.h>
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/trim_all.hpp>
 #include<limits.h>
 #include<set>
 
@@ -143,7 +144,9 @@ static void insert_dir (const char * dir_name)
 	      vector<string> kws1, kws;
 	      string id = toS(fileid);
 	      string cont = getFileContent(file);
-
+	      boost::algorithm::trim_all(cont);
+	      cout << cont<< endl;
+	      cout <<"+++++++++++++++++++++++"<<endl;
 	      boost::split(kws1, cont, boost::is_any_of(delimiters));
 	      kws =  getUniquedWords(kws1, id);
 	      int pos = 0;
@@ -228,6 +231,8 @@ void kwfileblocks(string file)
 {
 	vector<string> kws, kws1, blocks;
 	string cont = getFileContent(file);
+	cout <<"++++++++++++++++++++++++++++++++"<<endl;
+        int str_size = cont.length();
 	cout <<"==================================="<< endl;
 	if(cont != "")
 	{

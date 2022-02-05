@@ -23,7 +23,8 @@ Foram::Foram(bool usehdd, int maxSize, int updSize)
     bytes<Key> key1{0};
     bytes<Key> key2{1};
     srch = new OMAP(maxSize*4, key1);
-    updt = new OMAPf(updSize*4, key2);
+    updt = new OMAP(updSize*4, key2);
+    fcnt = new OMAP(updSize*4,key2);
 }
 
 Foram::~Foram() {
@@ -44,7 +45,7 @@ void Foram::insert(vector<string> kws, vector<string> blocks, string ind)
 	{
         Bid key = createBid(kw, FCNT);
 	cout <<"findint updt: "<<kw<<endl;
-        auto uc = (updt->find(key));
+        auto uc = (fcnt->find(key));
         int updc; 
     
         if (uc == "") 
@@ -59,11 +60,12 @@ void Foram::insert(vector<string> kws, vector<string> blocks, string ind)
 	}
         updc = updc+1;
 	cout <<"updc after increasing"<<updc<<endl;
-   //     updt->insert(key, to_string(updc));
-          updt->insert(key,updc);  
-       	Bid updKey = createBid(kw, ind);
-      //updt->insert(updKey, to_string(updc));//pad,can we store number in updc 
-        updt->insert(updKey, updc);//pad,can we store number in updc 
+        fcnt->insert(key, to_string(updc));
+	cout << "fcnt inserted:"<< kw << ind<<endl;
+       	
+	Bid updKey = createBid(kw, ind);
+        fcnt->insert(updKey, to_string(updc));//pad,can we store number in updc 
+	//srch->insert(updKey,to_string(updc));
 	cout <<"Inserted upd:"<< updKey<< ":"<<to_string(updc)<<endl;
 	
 	U.insert(pair<string,int>(kw,updc));
@@ -74,8 +76,9 @@ void Foram::insert(vector<string> kws, vector<string> blocks, string ind)
 		return;
 	}
      }
+     /*
      //updt->finalize(x);
-cout <<"Inserting "<<U.size()<<" keywords in src"<< endl;     
+   cout <<"Inserting "<<U.size()<<" keywords in src"<< endl;     
      for (auto kw: kws) 
      {
         Bid key = createBid(kw, U.at(kw));
@@ -84,9 +87,9 @@ cout <<"Inserting "<<U.size()<<" keywords in src"<< endl;
         inserted++;
      }
      //srch->finalize(x);
-cout << "inserted all the keywords in src (total keyword(s):"<<inserted<<")"<<endl;
-
+cout << "inserted all the keywords in src (total keyword(s):"<<inserted<<")"<<endl;*/
 //INSERTING FILES************************************************
+     /*
      string blk;
      int i =1;
      cout << "inserting "<<  blocks.size()+1 <<" block(s) of " << ind << " in src"<< endl;
@@ -100,7 +103,8 @@ cout << "inserted all the keywords in src (total keyword(s):"<<inserted<<")"<<en
      blk = "";
      Bid mk = createBid(ind, blocks.size()+1);
      //srch->insert(mk,blk);
-     cout << "inserted "<<  blocks.size()+1 <<" block(s) of " << ind <<" in src"<< endl;
+     couAt << "inserted "<<  blocks.size()+1 <<" block(s) of " << ind <<" in src"<< endl;
+*/
 }
 
 /*
@@ -299,8 +303,8 @@ void Foram::setupInsert(vector <string> kws, vector<string> blocks, string ind)
         batchUpd2.insert(pair<Bid, int>(updKey, (updc)));//pad 
 	U.insert(pair<string,int>(kw,updc));
      }
-     updt->batchInsert(batchUpd1);
-     updt->batchInsert(batchUpd2);
+     //updt->batchInsert(batchUpd1);
+     //updt->batchInsert(batchUpd2);
      //UNCOMMENT LATER
      //updt->finalize(x);
 

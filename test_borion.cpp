@@ -325,7 +325,7 @@ neg.insert("");
 
 //INSERT keywords and file blocks of Enron
     //insert_dir("enron");
-    insert_dir("synth");
+    insert_dir("sent");
 
 //***NOW TEST search and delete
 

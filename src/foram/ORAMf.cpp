@@ -221,10 +221,8 @@ void ORAMf::WriteData(Bid bid, Nodef* node) {
 // Fetches a block, allowing you to read and write in a block
 
 void ORAMf::Access(Bid bid, Nodef*& node, int lastLeaf, int newLeaf) {
-	cout <<"Fetching lastLeaf"<<endl;
     FetchPath(lastLeaf);
     node = ReadData(bid);
-    cout <<"back from ReadDatta"<<endl;
     if (node != NULL) {
         node->pos = newLeaf;
         if (cache.count(bid) != 0) {

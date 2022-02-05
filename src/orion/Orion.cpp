@@ -6,13 +6,14 @@ Orion::Orion(bool usehdd, int maxSize) {
     bytes<Key> key2{1};
     srch = new OMAP(maxSize*4, key1);
     updt = new OMAP(maxSize*4, key2);
+    updt = new OMAP(maxSize,key2);
 }
 
 Orion::~Orion() {
     delete srch;
     delete updt;
 }
-/*
+
 int stoi(string updt_cnt)
 {
 	int updc;
@@ -20,7 +21,7 @@ int stoi(string updt_cnt)
 	convstoi >> updc;
 	return updc;
 }
-*/
+
 void Orion::insert(string keyword, int ind) {
     Bid mapKey = createBid(keyword, ind);
     auto updt_cnt = updt->find(mapKey);
@@ -28,10 +29,21 @@ void Orion::insert(string keyword, int ind) {
         if (UpdtCnt.count(keyword) == 0) {
             UpdtCnt[keyword] = 0;
         }
-         //cout << "updatecnt" << UpdtCnt[keyword] <<"\n" ;
-        UpdtCnt[keyword]++;
-        updt->insert(mapKey, to_string(UpdtCnt[keyword]));
-        Bid key = createBid(keyword, UpdtCnt[keyword]);
+	Bid firstKey = createBid(keyword,0);
+	auto filecnt = fcnt->find(firstKey);
+	int fc;
+        
+	if(filecnt == "")
+		fc = 0;
+	else fc = stoi(filecnt);
+	
+	fc++;
+	UpdtCnt[keyword]++;
+        //updt->insert(mapKey, to_string(UpdtCnt[keyword]));
+        updt->insert(mapKey, to_string(fc));
+        fcnt->insert(firstKey, to_string(fc));
+        //Bid key = createBid(keyword, UpdtCnt[keyword]);
+	Bid key = createBid(keyword, fc);
         srch->insert(key, to_string(ind));
         LastIND[keyword] = ind;
     }
