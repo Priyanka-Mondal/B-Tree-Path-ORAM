@@ -21,6 +21,7 @@ public:
     OMAP(int maxSize, bytes<Key> key);
     virtual ~OMAP();
     void insert(Bid key, string value);
+    void remove(Bid delKey);
     string find(Bid key);
     void printTree();
     void batchInsert(map<Bid, string> pairs);

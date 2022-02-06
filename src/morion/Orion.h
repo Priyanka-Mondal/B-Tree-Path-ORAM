@@ -15,11 +15,13 @@ private:
     
 public:
     Bid createBid(string keyword,int number);
-    void insert(vector<string> kws, int ind);
+    void insertWrap(string cont, int fileid);
+    void insert(vector<string> kws, vector<string> blocks, int ind);
     void setupInsert(string keyword, int ind);
-    void remove(string keyword, int ind);
+    void remove(int ind);
+    void removekw(vector <string> kws, int id);
     void setupRemove(string keyword, int ind);
-    vector<int> search(string keyword);
+    map<int,string> search(string keyword);
     Orion(bool useHDD,int maxSize);    
     virtual ~Orion();
     void beginSetup();

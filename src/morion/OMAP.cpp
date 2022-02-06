@@ -38,6 +38,19 @@ void OMAP::insert(Bid key, string value) {
     treeHandler->finishOperation(false, rootKey, rootPos);
 }
 
+
+void OMAP::remove(Bid delKey)
+{
+    treeHandler->startOperation();
+    if (rootKey == 0) {
+        rootKey = treeHandler->removeMain(0, rootPos, delKey);
+    } else {
+        rootKey = treeHandler->removeMain(rootKey, rootPos, delKey);
+    }
+    treeHandler->finishOperation(false, rootKey, rootPos);
+}
+
+
 void OMAP::printTree() {
     treeHandler->startOperation();
     Node* node = new Node();

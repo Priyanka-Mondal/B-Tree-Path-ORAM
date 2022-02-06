@@ -11,25 +11,22 @@ using namespace std;
 
 int fileid = 1;
 bool usehdd = false;
-Orion orion(usehdd, 500000);  
-set<string> neg;
-int totk = 0;
-string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
+Orion orion(usehdd, 600000);  
 
 
 bool BothAreSpaces(char lhs, char rhs) 
 { 
 	return (lhs == rhs) && (lhs == ' '); 
 }
-
-vector<string> getUniquedWords(vector<string> kws, string fileid)
+/*
+vector<string> getUniquedWords(vector<string> kws)
 {
     vector<string> kw;
     map<string, int> mp;
     string word;
     for(auto word : kws)
     {
-	    if(word.size()<=12)
+	    if(word.size()<=12 && neg.find(word)!=neg.end())
 	    {
     		    if ((!mp.count(word)) && (word.size()<=12))
     		    {
@@ -39,7 +36,7 @@ vector<string> getUniquedWords(vector<string> kws, string fileid)
     		        mp[word]++;
 	    }
     }
-    mp.erase(fileid);
+    //mp.erase(fileid);
     
     for (map<string, int> :: iterator p = mp.begin();
          p != mp.end(); p++)
@@ -50,7 +47,7 @@ vector<string> getUniquedWords(vector<string> kws, string fileid)
 return kw;
 }
 
-vector<string> divideString(string filename, int sz, string id)
+vector<string> divideString(string filename, int sz)
     {
 	 fstream fs(filename); 
          string str((istreambuf_iterator<char>(fs)),
@@ -74,7 +71,7 @@ vector<string> divideString(string filename, int sz, string id)
             if (i % sz == 0) {
 		  if(i!=0)
                   {
-		     string ttemp =id;
+		     string ttemp =""; //id
 		     ttemp.append(temp); 
                      result.push_back(ttemp);    
                   }
@@ -82,12 +79,12 @@ vector<string> divideString(string filename, int sz, string id)
             }
 	    temp +=str[i];
 	}
-        string ttemp = id;
+        string ttemp = "";//id;
 	ttemp.append(temp);	
 	result.push_back(ttemp); 
 	return result;
 }
-
+*/
 
 string toS(int id)
 {
@@ -148,12 +145,12 @@ static void list_dir (const char * dir_name)
 	      file = file.append("/");
 	      file = file.append(d_name);
 	      vector<string> kws1, kws;
-	      string id = toS(fileid);
+	      //string id = toS(fileid);
 	      string cont = getFileContent(file);
 	      cout <<"=====================================" << endl;
-
-	      boost::split(kws1, cont, boost::is_any_of(delimiters));
-	      kws =  getUniquedWords(kws1, id);
+              cout << endl <<file<< " " << fileid <<endl << endl;
+	      /*boost::split(kws1, cont, boost::is_any_of(delimiters));
+	      kws =  getUniquedWords(kws1);
 	      for (auto it = kws.begin(); it != kws.end(); it++)
 	      {
 		      if(neg.find(*it)!=neg.end())
@@ -161,10 +158,11 @@ static void list_dir (const char * dir_name)
 			 kws.erase(it--);
 		      }
 	      }
-	      cout << endl <<file<< " " << id <<endl << endl;
+	      cout << endl <<file<< " " << fileid <<endl << endl;
     		vector<string> blocks;
-		blocks = divideString(file,BLOCK,id);
-		orion.insert(kws,fileid);
+		blocks = divideString(file,BLOCK);
+		orion.insert(kws, blocks, fileid);*/
+	        orion.insertWrap(cont,fileid);
                 fileid++;
                }
 
@@ -202,44 +200,6 @@ static void list_dir (const char * dir_name)
 
 int main(int, char**) 
 {
-neg.insert("and");
-neg.insert("the");
-neg.insert("The");
-neg.insert("a");
-neg.insert("A");
-neg.insert("an");
-neg.insert("An");
-neg.insert("to");
-neg.insert("To");
-neg.insert("in");
-neg.insert("of");
-neg.insert("or");
-neg.insert("as");
-neg.insert("for");
-neg.insert("on");
-neg.insert(",");
-neg.insert(" ");
-neg.insert("\n");
-neg.insert("\0");
-neg.insert("?");
-neg.insert("by");
-neg.insert("\t");
-neg.insert("from");
-neg.insert("_");
-neg.insert("*");
-neg.insert("<");
-neg.insert(">");
-neg.insert("#");
-neg.insert("+");
-neg.insert("");
-neg.insert("PST");
-neg.insert("it");
-neg.insert("It");
-neg.insert("http");
-neg.insert("Cc");
-neg.insert("Bcc");
-neg.insert("com");
-
 
 list_dir("allen-p/deleted_items");
 //list_dir("tiny");
@@ -268,22 +228,22 @@ while(1)
 		cout << "Enter the keyword to be searched: ";
 		string keyword;
 		cin>> keyword;
-    		vector<int> ids = orion.search(keyword);
-    		for(auto id:ids)
-    			cout << "["<<id<<"] ";
+    		map<int,string> files = orion.search(keyword);
+    		for(auto file:files)
+		{
+    			cout << "["<<file.first<<"] ";
+			cout << file.second<< endl<<endl;
+		}
     		cout <<endl<<endl;
-		cout << "RESULT size: " << ids.size() << endl<<endl;
+		cout << "RESULT size: " << files.size() << endl<<endl;
 	}
 	else if(c=='d'|| c=='D')
 	{
 		cout <<"Enter file id to be deleted: ";
 		int fid;
 		cin>>fid;
-		cout <<"Enter keyword to be deleted: ";
-		string key;
-		cin>>key;
 		//deletefile(fid);
-		orion.remove(key,fid);
+		orion.remove(fid);
 	}
 	/*else if(c=='i' || c=='I')
 	{
