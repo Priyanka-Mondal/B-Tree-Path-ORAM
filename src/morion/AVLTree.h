@@ -43,7 +43,7 @@ public:
     void finishOperation(bool find, Bid& rootKey, int& rootPos);
     
     //deletion related functions
-    void deleteNode(Node* nodef);
+    int deleteNode(Node* nodef);
     Node* parentOf(Bid parentKey, int ppos, Bid childKey, int cpos, Bid key);
     Node* minValueNode(Bid rootKey, int pos, Node* rootroot);
     Bid balance(Node* node, int &pos);

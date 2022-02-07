@@ -19,5 +19,6 @@ public:
 	size_t GetBlockSize();        
 	bool WasSerialised();
         void ReduceEmptyNumbers();
+	void IncreaseEmptyNumbers();
         size_t GetEmptySize();
 };

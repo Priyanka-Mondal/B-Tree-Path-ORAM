@@ -252,6 +252,8 @@ int AVLTree::RandomPath() {
 }
 
 
+
+//delete functions
 Node* AVLTree::minValueNode(Bid rootKey, int rootPos, Node* rootroot)
 {
 	Node* curNode = oram->ReadNode(rootKey,rootPos,rootPos);
@@ -263,7 +265,6 @@ Node* AVLTree::minValueNode(Bid rootKey, int rootPos, Node* rootroot)
 	{
 		return minValueNode(curNode->leftID,curNode->leftPos, curNode);
 	}
-
 }
 
 
@@ -350,12 +351,11 @@ Bid AVLTree::balance(Node* node, int &pos)
 
 
 
-void AVLTree::deleteNode(Node* nodef)
+int AVLTree::deleteNode(Node* nodef)
 {
 	Node* free = newNode(0,"");
-	//cout <<"In deleteNode==============="<<endl;
-	//oram->DeleteNode(nodef->key,free);
-	oram->WriteNode(nodef->key,free);
+	oram->DeleteNode(nodef->key,free);
+	return 0;
 }
 
 

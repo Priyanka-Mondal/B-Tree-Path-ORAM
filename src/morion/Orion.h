@@ -22,10 +22,11 @@ public:
     void removekw(vector <string> kws, int id);
     void setupRemove(string keyword, int ind);
     map<int,string> search(string keyword);
-    Orion(bool useHDD,int maxSize);    
+    Orion(bool useHDD,int maxSize, int kwSize);    
     virtual ~Orion();
     void beginSetup();
     void endSetup();
+    void print();
 
 };
 

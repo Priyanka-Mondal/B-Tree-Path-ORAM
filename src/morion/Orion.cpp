@@ -2,13 +2,13 @@
 #include <boost/algorithm/string.hpp>
 
 
-Orion::Orion(bool usehdd, int maxSize) {
+Orion::Orion(bool usehdd, int maxSize, int kwSize) {
     this->useHDD = usehdd;
     bytes<Key> key1{0};
     bytes<Key> key2{1};
     srch = new OMAP(maxSize*4, key1);
-    updt = new OMAP(maxSize*4, key2);
-    fcnt = new OMAP(maxSize*4, key2);
+    updt = new OMAP(kwSize*4, key2);
+    fcnt = new OMAP(kwSize*4, key2);
 }
 
 Orion::~Orion() {
@@ -45,8 +45,6 @@ vector<string> getUniquedWords(vector<string> kws)
     		        mp[word]++;
 	    }
     }
-    //mp.erase(fileid);
-    
     for (map<string, int> :: iterator p = mp.begin();
          p != mp.end(); p++)
     {
@@ -58,26 +56,31 @@ return kw;
 
 vector<string> divideString(string str, int sz)
 {
-	 //fstream fs(filename); 
-         //string str((istreambuf_iterator<char>(fs)),
-         //              (istreambuf_iterator<char>()));
-	cout <<"++++++++++++++++++++++++++++++++"<<endl;
         int str_size = str.length();
-	
 	if (str_size% sz !=0)
 	{
 		int pad = ceil(str_size/sz)+1;
 		pad = pad*sz-str_size;
-	        str.insert(str.size(), pad, '#');
+	        str.insert(str.size(), pad, '1');
 	}
-         
-	str_size = str.length();
+	str_size = str.length(); // new length
+	//cout <<"new length:"<< str_size<<endl;
   	int i;
         vector<string> result;
+
         string temp="";
-        
-	for (i = 0; i < str_size; i++) {
-            if (i % sz == 0) {
+	/*int cover = 0;
+	while(cover < str_size)
+	{
+		temp.insert(0,str,cover,BLOCK);
+		cover=cover+BLOCK;
+		result.push_back(temp);
+	        temp="";	
+	}*/
+	for (i = 0; i < str_size; i++) 
+	{
+            if (i % sz == 0) 
+	    {
 		  if(i!=0)
                   {
 		     string ttemp =""; //id
@@ -90,7 +93,7 @@ vector<string> divideString(string str, int sz)
 	}
         string ttemp = "";//id;
 	ttemp.append(temp);	
-	result.push_back(ttemp); 
+	result.push_back(ttemp);
 	return result;
 }
 
@@ -117,24 +120,24 @@ void Orion::insert(vector<string> kws, vector<string> blocks, int ind)
 {
     for(auto kw: kws)
     {
-  	  //auto updt_cnt = updt->find(mapKey);
-  	  //if (updt_cnt == "") 
-	  //{
-  	      Bid firstKey = createBid(kw,0);
+  	      Bid firstKey = createBid(kw,FCNT);
   	      auto filecnt = fcnt->find(firstKey);
-  	      
   	      int fc;
   	      if(filecnt == "")
   	      	fc = 0;
-  	      else fc = stoi(filecnt);
+  	      else 
+		fc = stoI(filecnt);
   	      
   	      fc++;
   	      
   	      Bid mapKey = createBid(kw, ind);
+	      //cout <<"updt " << kw <<" ";
   	      updt->insert(mapKey, to_string(fc));
+	      //cout <<"fcnt "<<kw<<" ";
   	      fcnt->insert(firstKey, to_string(fc));
   	      
   	      Bid key = createBid(kw, fc);
+	      //cout <<"srchk "<<kw<<" ";
   	      srch->insert(key, to_string(ind));
     }
 		
@@ -144,11 +147,13 @@ void Orion::insert(vector<string> kws, vector<string> blocks, int ind)
       for(auto blk: blocks)
       {
 	      Bid fb = createBid(id,block_num);
+	      //cout <<"srchb "<< blk;
 	      srch->insert(fb,blk);
 	      block_num++;
       }
       Bid lastblock = createBid(id,block_num);
-      srch->insert(lastblock,"");
+      //cout <<"srch ";
+      srch->insert(lastblock,"last");
 }
 
 map<int,string> Orion::search(string keyword) {
@@ -156,7 +161,7 @@ map<int,string> Orion::search(string keyword) {
     vector<int> result;
     map<int,string> files;
     vector<Bid> bids;
-    Bid firstKey = createBid(keyword,0);
+    Bid firstKey = createBid(keyword,FCNT);
     string filecnt = fcnt->find(firstKey);
     int fc;
     if (filecnt != "") 
@@ -167,24 +172,23 @@ map<int,string> Orion::search(string keyword) {
     {
 	    return files;
     }
-
-        for (int i = 1; i <= fc; i++) {
+    for (int i = 1; i <= fc; i++) 
+    {
             Bid bid = createBid(keyword, i);
             bids.push_back(bid);
-        }
+    }
     auto tmpRes = srch->batchSearch(bids);
-    for(auto item:tmpRes){
+    for(auto item:tmpRes)
+    {
         result.push_back(stoi(item));
     }
-    
     for(auto id:result)
     {
-	
 	int j = 1;
 	string fileid = to_string(id);
 	Bid block = createBid(fileid,j);
         string cont = (srch->find(block));
-	while(cont != "")
+	while(cont != "last")
 	{
 		if(files.find(id)!=files.end())
 		{
@@ -202,7 +206,6 @@ map<int,string> Orion::search(string keyword) {
 		cont = (srch->find(block));
 	}
     }
-
     return files;
 }
 
@@ -213,7 +216,12 @@ void Orion::remove(int id)
 	int blk = 1;
 	Bid del = createBid(ind, blk);
 	string ret = (srch->find(del));
-	while (ret != "")
+	if(ret=="")
+	{
+		cout <<" File does NOT EXIST!"<<endl;
+		return;
+	}
+	while (ret != "last")
 	{
 		file = file.append(ret);
 		blk++;
@@ -226,7 +234,7 @@ void Orion::remove(int id)
 		{
 			del= createBid(ind,i);
 			srch->remove(del);	
-			cout <<"Removed block "<<blk<<" from srch"<<del<<endl;
+			//cout <<"Removed block "<<i<<" from srch:"<<del<<endl;
 		}
 	}
 	cout <<"Removed "<<blk<<" blocks from srch"<<del<<endl;
@@ -234,7 +242,6 @@ void Orion::remove(int id)
 	vector<string> kws1;
 	boost::split(kws1, file, boost::is_any_of(delimiters));
 	vector<string> kws = getUniquedWords(kws1);
-
 	removekw(kws, id);
 }
 
@@ -246,12 +253,11 @@ void Orion::removekw(vector <string> kws, int id)
 	for(auto kw : kws)
 	{
     		Bid delKey = createBid(kw, id);
-		cout << "removing delkey:["<< delKey <<"]"<< endl;
     		string delcnt = updt->find(delKey);
 		if(delcnt != "")
 		{
 	    		int del_cnt = stoI(delcnt);
-			Bid fcntKey = createBid(kw,0);
+			Bid fcntKey = createBid(kw,FCNT);
 			string filecnt = fcnt->find(fcntKey);
 	    		int fc = stoI(filecnt);
 			int newfilecnt = fc-1;
@@ -265,10 +271,15 @@ void Orion::removekw(vector <string> kws, int id)
 				Bid lastupdKey = createBid(kw,lastid);
 				updt->insert(lastupdKey,delcnt);
 			}
-			srch->remove(lastKey);
+		cout << "removing delkey from updt:["<< delKey <<"]"<< endl;
 			updt->remove(delKey);
+		//cout << "removing lastkey from srch:["<< lastKey <<"]"<< endl;
+			srch->remove(lastKey);
 			if(newfilecnt == 0)
+			{
+				//cout << "remove firstKey from fcnt:"<<fcntKey<<endl;
 				fcnt->remove(fcntKey);
+			}
 			else
 				fcnt->insert(fcntKey,to_string(newfilecnt));
 		}
@@ -338,4 +349,11 @@ Bid Orion::createBid(string keyword, int number) {
     auto arr = to_bytes(number);
     std::copy(arr.begin(), arr.end(), bid.id.end() - 4);
     return bid;
+}
+
+void Orion::print()
+{
+	fcnt->printTree();
+	updt->printTree();
+	srch->printTree();
 }
