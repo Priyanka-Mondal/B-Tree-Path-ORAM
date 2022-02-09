@@ -20,12 +20,12 @@ private:
 public:
     OMAPf(int maxSize, bytes<Key> key);
     virtual ~OMAPf();
-    Bid remove(Bid delKey);
     void insert(Bid key, string value);
     string find(Bid key);
     void printTree();
     void batchInsert(map<Bid, string> pairs);
     vector<string> batchSearch(vector<Bid> keys);
+    void remove(Bid delKey);
 };
 
 #endif /* OMAPf_H */

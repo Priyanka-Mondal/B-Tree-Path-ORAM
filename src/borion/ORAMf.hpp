@@ -68,6 +68,7 @@ private:
 
     Nodef* ReadData(Bid bid);
     void WriteData(Bid bid, Nodef* b);
+    void DeleteData(Bid bid, Nodef* node);
 
     block SerialiseBucket(Bucketf bucket);
     Bucketf DeserialiseBucket(block buffer);
@@ -93,6 +94,7 @@ public:
     Nodef* ReadNodef(Bid bid, int lastLeaf, int newLeaf);
     Nodef* ReadNodef(Bid bid);
     int WriteNodef(Bid bid, Nodef* n);
+    int DeleteNode(Bid bid, Nodef* node);
     void start(bool batchWrite);
     void finilize(bool find, Bid& rootKey, int& rootPos);
     static Nodef* convertBlockToNodef(block b);

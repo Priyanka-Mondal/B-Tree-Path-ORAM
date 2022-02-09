@@ -21,7 +21,7 @@ pair<int,string> OMAP::find(Bid key) {
     node->pos = rootPos;
     auto resNode = treeHandler->search(node, key);
     //string res1 = "";
-    pair <int,string> res;
+    pair <int,string> res = make_pair(0,"");
     if (resNode != NULL) {
 	res.first=resNode->value.first;
         res.second.assign(resNode->value.second.begin(), resNode->value.second.end());
@@ -34,6 +34,9 @@ pair<int,string> OMAP::find(Bid key) {
 
 Bid OMAP::remove(Bid delKey)
 {
+	cout <<"in omap remove"<<endl;
+	return 0;
+	/*
     treeHandler->startOperation();
     if (rootKey == 0) {
         rootKey = treeHandler->remove(0, rootPos, delKey);
@@ -41,6 +44,7 @@ Bid OMAP::remove(Bid delKey)
         rootKey = treeHandler->remove(rootKey, rootPos, delKey);
     }
     treeHandler->finishOperation(false, rootKey, rootPos);
+    */
 }
 
 

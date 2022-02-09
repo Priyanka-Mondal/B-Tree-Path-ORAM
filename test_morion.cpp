@@ -9,8 +9,8 @@
 using namespace std;
 
 int fileid = 1;
-bool usehdd = false;
-Orion orion(usehdd, 600000,200000);  
+bool usehdd = true;
+Orion orion(usehdd, 60000000,20000000);  
 
 string toS(int id)
 {
@@ -97,8 +97,8 @@ static void list_dir (const char * dir_name)
 int main(int, char**) 
 {
 
-	list_dir("allen-p/deleted_items");
-	//list_dir("allen-p");
+	//list_dir("allen-p/deleted_items");
+	list_dir("allen-p");
 	//list_dir("tiny");
 	cout << endl<<" SETUP INSERT DONE!"<< endl;
 	cout <<"=================================="<< endl;

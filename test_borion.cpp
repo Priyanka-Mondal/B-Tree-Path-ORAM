@@ -1,5 +1,4 @@
 #include "borion/BOrion.h"
-//#include "utils/Utilities.h"
 #include<string.h>
 #include<utility>
 #include <dirent.h>
@@ -9,424 +8,167 @@
 
 using namespace std;
 
-
 int fileid = 1;
-bool usehdd = false;
-BOrion borion(usehdd, 10000);  
-set<string> neg;
-string delimiters("|+#*?@,:!\"><; _-./  \n");
-
-
-//string retrieve(string s)
-//{
-//	    size_t end = s.find_last_not_of('#');
-//	        return (end == std::string::npos) ? "" : s.substr(0, end + 1);
-//}
-
-vector<string> getUniquedWords(vector<string> kws, string fileid)
-{
-    // Open a file stream
-    vector<string> kw;
-    // Create a map to store count of all words
-    map<string, int> mp;
-  
-    // Keep reading words while there are words to read
-    string word;
-    for(auto word : kws)
-    {
-        // If this is first occurrence of word
-        if (!mp.count(word))
-            mp.insert(make_pair(word, 1));
-        else
-            mp[word]++;
-    }
-    mp.erase(fileid);
-  
-  
-    // Traverse map and print all words whose count
-    //is 1
-    for (map<string, int> :: iterator p = mp.begin();
-         p != mp.end(); p++)
-    {
-        if (p->second >= 1)
-            kw.push_back(p->first) ;
-    }
-return kw;
-}
-
-vector<string> divideString(string filename, int blk, string id)
-    {
-	 int sz = blk-FID_SIZE; // ID size is 4
-	 fstream fs(filename); 
-         string str((istreambuf_iterator<char>(fs)),
-                       (istreambuf_iterator<char>()));
-
-        int str_size = str.length();
-
-	
-	if (str_size% sz !=0)
-	{
-		int pad = ceil(str_size/sz)+1;
-		//cout << filename<< " pad:" << pad << endl;
-		pad = pad*sz-str_size;
-		//cout << "again pad:" << pad << endl; 
-	        str.insert(str.size(), pad, '#');
-	}
-		cout << "again pad:[" <<str.size() <<"::"<< str << "]" << endl; 
-		cout << "++++++++++++++++++++++++++" << endl;
-         
-  	int i;
-        vector<string> result;
-        string temp="";
-         
-	for (i = 0; i < str.length(); i++) {
-            if (i % sz == 0) {
-		  if(i!=0)
-                  {
-		     string ttemp =id;
-		     ttemp.append(temp); 
-                     result.push_back(ttemp);    
-		     //cout << "New Node:[" << ttemp << "]\n";
-                  }
-                  temp="";
-            }
-	    temp +=str[i];
-	}
-        string ttemp = id;
-	ttemp.append(temp);	
-	    //cout << "New Node::"<< ttemp << endl; 
-	result.push_back(ttemp); 
-	
-	return result;
-    }
-
+bool usehdd = true;
+BOrion borion(usehdd, 6000);  
 
 string toS(int id)
 {
 	string s = to_string(id);
 	string front ="";
 	if (id < 10)
-		front = "000";
+		front = "0000000";
 	else if(id < 100)
-		front = "00";
+		front = "000000";
 	else if(id < 1000)
+		front = "00000";
+	else if(id < 10000)
+		front = "0000";
+	else if(id < 100000)
+		front = "000";
+	else if(id < 1000000)
+		front = "00";
+	else if(id < 10000000)
 		front = "0";
 	s=front.append(s);
-
 	return s;
 }
 
 string getFileContent(string path)
 {
-	  ifstream file(path);
-	  string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-
-	      return content;
+    ifstream file(path);
+    string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    return content;
 }
 
 
-static void insert_dir (const char * dir_name)
+static void list_dir (const char * dir_name)
 {
     DIR * d;
     d = opendir (dir_name);
 
    if (! d) 
    {
-      fprintf (stderr, "Cannot open directory '%s': %s\n",
-         dir_name, strerror (errno));
+       fprintf (stderr, "Cant open '%s': %s\n", dir_name, strerror (errno));
        exit (EXIT_FAILURE);
    }
    while (1) 
    {
       struct dirent * entry;
       const char * d_name;
-
-        /* "Readdir" gets subsequent entries from "d". */
       entry = readdir (d);
       if (! entry) 
       {
             break;
       }
       d_name = entry->d_name;
-           /* Print the name of the file and directory. */
           //printf ("%s/%s\n", dir_name, d_name);
-
-           /* If you don't want to print the directories, use the
-            *     following line: */
-
-            if (! (entry->d_type & DT_DIR)) {
-              printf ("%s/%s\n", dir_name, d_name);
-	      string file = dir_name;
-	      file = file.append("/");
-	      file = file.append(d_name);
-	      vector<string> kws1, kws;
-	      string id = toS(fileid);
-	      string cont = getFileContent(file);
-    	      //cout << endl << "FILEID:" << fileid<< endl;
-	      //cout << "["<<file <<"]"<< endl;
-	      //cout << cont << endl << endl;
-	      cout <<"=====================================" << endl;
-
-	      boost::split(kws1, cont, boost::is_any_of(delimiters));
-	      kws =  getUniquedWords(kws1, id);
-	      int pos = 0;
-	      for (auto it = kws.begin(); it != kws.end(); it++)
-	      {
-		      //cout <<"pos:"<<pos<<"-";
-		      if(neg.find(*it)!=neg.end())
-		      {
-			 //cout << endl <<"Deleted:["<<*it<<"]"<<endl ;
-			 kws.erase(it--);
-		      }
-		      //else
-		      //{
-			//cout <<"["<<*it<<"]" <<"     " ;
-		      //}
-		      //pos++;
-	      }
-	      cout << endl <<file<< " " << id <<endl << endl;
-	      cout << "============================" << endl;
-    		vector<string> blocks;
-		blocks = divideString(file,BLOCK,id);
-        	borion.insertWrapper(kws, blocks, id);
-		cout << "number of keywords :" << kws.size() <<endl;
-		/*for(auto k: kws)
-		{
-			borion.insert(k,id);
-		}*/
-                fileid++;
-               }
-
-
-
-             if (entry->d_type & DT_DIR) {
-
-                /* Check that the directory is not "d" or d's parent. */
-                
-                if (strcmp (d_name, "..") != 0 &&
-                  strcmp (d_name, ".") != 0) {
-			cout <<"HERE 1: " << d_name<< endl ;
-                 int path_length;
-                   char path[PATH_MAX];
-                     
-                     path_length = snprintf (path, PATH_MAX,
-                         "%s/%s", dir_name, d_name);
-                       //printf ("%s\n", path);
-                         if (path_length >= PATH_MAX) {
-				 cout << "Here 2" << endl ;
-                             fprintf (stderr, "Path length has got too long.\n");
-                               exit (EXIT_FAILURE);
-                                 }
-                           /* Recursively call "list_dir" with the new path. */
-                           insert_dir (path);
-                            }
-                }
+            if (! (entry->d_type & DT_DIR)) 
+	    {
+	          string file = dir_name;
+	          file = file.append("/");
+	          file = file.append(d_name);
+	          vector<string> kws1, kws;
+	          string cont = getFileContent(file);
+	          cout <<"=====================================" << endl;
+                  cout << endl <<file<< " " << fileid <<endl << endl;
+	     
+	     	  borion.insertWrap(cont,toS(fileid));
+             
+	     	  fileid++;
              }
-    /* After going through all the entries, close the directory. */
-    if (closedir (d)) {
-       fprintf (stderr, "Could not close '%s': %s\n",
-          dir_name, strerror (errno));
-        exit (EXIT_FAILURE);
-        }
-}
-
-
-void deletefile(string id)
-{
-	string cont ="";
-	string block = (borion.searchfileblocknum(id));
-	if(block.size()>0)
-	{
-	stringstream convstoi(block);
-	int blocks;
-	convstoi >> blocks;
- cout << "number of blocks" << blocks << endl;	
-	for(int blk = 1; blk<= blocks; blk++)
-	{
-		cont.append((borion.removefileblock(id,blk)));
-
-	}
-	cout << "content[" << cont << "]" << endl;
-	//cont = retrieve(cont);
-	cout << "Newcontent[" << cont << "]" << endl;
-	vector<string> kws ,kws1;
-	boost::split(kws1, cont, boost::is_any_of(delimiters));
-	kws =  getUniquedWords(kws1, id);
-	      for (auto it = kws.begin(); it != kws.end(); it++)
-	      {
-		      //cout <<"pos:"<<pos<<"-";
-		      if(neg.find(*it)!=neg.end())
-		      {
-			 //cout << endl <<"Deleted:["<<*it<<"]"<<endl ;
-			 kws.erase(it--);
-		      }
-		      //else
-		      //{
-			//cout <<"["<<*it<<"]" <<"     " ;
-		      //}
-		      //pos++;
-	      }
-
-	for(auto d : kws)
-	{
-		cout << "removing keyword:[" << d <<"]"<< endl;
-		borion.removekw(d,id);
-	}
-	cout << "Total deleted:"<< kws.size() << endl;
-}
-else
-{
-	cout <<"file " << id <<" does not exist!!" << endl;
-}
-}
-
-
-
-
-
-int main(int, char**) {
-   
-	/*string inputString("One!Two,Three:Four Five--Six ,  Seven,8.9");
-	string delimiters("|,:! -.");
-	vector<string> parts;
-	boost::split(parts, inputString, boost::is_any_of(delimiters));
-	for(auto v : parts)
-		cout << v << endl;*/
-neg.insert("and");
-neg.insert("the");
-neg.insert("The");
-neg.insert("a");
-neg.insert("A");
-neg.insert("an");
-neg.insert("An");
-neg.insert("to");
-neg.insert("To");
-neg.insert("in");
-neg.insert("of");
-neg.insert("or");
-neg.insert("as");
-neg.insert("for");
-neg.insert("on");
-neg.insert(",");
-neg.insert(" ");
-neg.insert("\n");
-neg.insert("\0");
-neg.insert("?");
-neg.insert("by");
-neg.insert("\t");
-neg.insert("from");
-neg.insert("_");
-neg.insert("*");
-neg.insert("<");
-neg.insert(">");
-neg.insert("#");
-neg.insert("+");
-neg.insert("");
-
-//INSERT keywords and file blocks of Enron
-    //insert_dir("enron");
-    insert_dir("sent");
-
-//***NOW TEST search and delete
-
-//SEARCH
-map <string,string> files = borion.searchWrapper("you");
-
-
-for (map<string, string> :: iterator p = files.begin();
-		         p != files.end(); p++)
-{
-	cout << "FILE[" << p->first << "]";
-}
-
-
-cout << endl;
-cout << "RESULT size1: " << files.size() << endl;
-cout << "DELETE" << endl;
-deletefile("0007");
-files.clear();
-files = borion.searchWrapper("you");
-cout << "RESULT size2: " << files.size() << endl;
-deletefile("0007");
-deletefile("0002");
-deletefile("0013");
-deletefile("0011");
-deletefile("0011");
-deletefile("0017");
-deletefile("0016");
-deletefile("0011");
-deletefile("0010");
-deletefile("0010");
-deletefile("0015");
-    /*
-for (map<string, string> :: iterator p = files.begin();
-		         p != files.end(); p++)
-{
-	cout << "FILE[" << p->first << "]";
-}
-cout << endl;
-cout << "RESULT size2: " << files.size() << endl;
-
-borion.removekw("you","0006");
-files.clear();
-files = borion.searchWrapper("you");
-for (map<string, string> :: iterator p = files.begin();
-		         p != files.end(); p++)
-{
-	cout << "FILE[" << p->first << "]";
-}
-cout << endl;
-cout << "RESULT size3: " << files.size() << endl;
-borion.removekw("you","0007");
-files.clear();
-files = borion.searchWrapper("you");
-for (map<string, string> :: iterator p = files.begin();
-		         p != files.end(); p++)
-{
-	cout << "FILE[" << p->first << "]";
-}
-cout << endl;
-cout << "RESULT size4: " << files.size() << endl;
-borion.removekw("you","0001");
-files.clear();
-files = borion.searchWrapper("you");
-for (map<string, string> :: iterator p = files.begin();
-		         p != files.end(); p++)
-{
-	cout << "FILE[" << p->first << "]";
-}
-cout << endl;
-cout << "RESULT size5: " << files.size() << endl;
-
-
-borion.removekw("you","0017");
-files.clear();
-files = borion.searchWrapper("you");
-for (map<string, string> :: iterator p = files.begin();
-		         p != files.end(); p++)
-{
-	cout << "FILE[" << p->first << "]";
-}
-cout << endl;
-cout << "RESULT size5: " << files.size() << endl;
-borion.removekw("you","0018");
-files.clear();
-files = borion.searchWrapper("you");
-for (map<string, string> :: iterator p = files.begin();
-		         p != files.end(); p++)
-{
-	cout << "FILE[" << p->first << "]";
-}
-cout << endl;
-cout << "RESULT size5: " << files.size() << endl;
-//
-    // first searches ids 
-    //map<string,string> allfiles = borion.searchWrapper("hell");
-    for(auto itr= allfiles.begin(); itr!=allfiles.end();itr++)
+             if (entry->d_type & DT_DIR) 
+	     {
+                if (strcmp (d_name, "..") != 0 &&   strcmp (d_name, ".") != 0) 
+		{
+			cout <<"HERE root 1: " << d_name<< endl ;
+                        int path_length;
+                        char path[PATH_MAX];
+                  path_length=snprintf(path,PATH_MAX,"%s/%s", dir_name, d_name);
+                         if (path_length >= PATH_MAX) 
+			 {
+                                 fprintf (stderr, "Path length too long.\n");
+                                 exit (EXIT_FAILURE);
+                         }
+                         list_dir (path);
+                 }
+              }
+     }
+    if (closedir (d)) 
     {
-	   	 cout << " OUTPUT Blocks :[" << itr->first << "]\n";
-		 cout << itr->second << endl << endl;
-    }*/
-    
-    return 0;
+    	fprintf (stderr, "Couldnt close '%s': %s\n",dir_name, strerror(errno));
+        exit (EXIT_FAILURE);
+    }
+}
+
+
+int main(int, char**) 
+{
+
+	//list_dir("allen-p/deleted_items");
+	//list_dir("allen-p");
+	list_dir("tiny");
+	cout << endl<<" SETUP INSERT DONE!"<< endl;
+	cout <<"=================================="<< endl;
+	cout <<"READY TO PERFORM QUERIES!" << endl;
+	
+	
+	while(1)
+	{
+		char c;
+		cout <<endl<<endl<<endl;
+		cout <<"Enter your choice (s/i/d/p/q): "<<endl;
+		cout <<"s/S: Search"<<endl;
+		cout <<"i/I: Insert"<<endl;
+		cout <<"d/D: Delete"<<endl;
+		cout <<"p/P: Print"<<endl;
+		cout <<"q/Q: Quit"<<endl;
+		cout <<"------------------"<<endl;
+		cout <<"_";
+	
+		cin >> c;
+	
+		if(c=='s' || c=='S')
+		{
+			cout << "Enter the keyword to be searched: ";
+			string keyword;
+			cin>> keyword;
+	    		map<string,string> files= borion.searchWrapper(keyword);
+			cout <<"--------Search result---------"<<endl;
+	    		for(auto file:files)
+			{
+	    			cout << "["<<file.first<<"] ";
+				//cout << file.second<< endl<<endl;
+			}
+	    		cout <<endl<<endl;
+			cout << "RESULT size: " << files.size() << endl<<endl;
+		}
+		else if(c=='d'|| c=='D')
+		{
+			cout <<"Enter file id to be deleted: ";
+			int fid;
+			cin>>fid;
+			borion.remove(toS(fid));
+		}
+		else if(c=='i' || c=='I')
+		{
+			cout << "Enter file name to be inserted:";
+			string file;
+			cin>> file;
+	          	string cont = getFileContent(file);
+			borion.insertWrap(cont,toS(fileid));
+			fileid++;
+			cout <<endl;
+		}
+		else if(c=='p' || c=='P')
+		{
+			//borion.print();
+		}
+		else //if(c=='q'||c=='Q')
+		{
+			cout <<"QUITTING..."<<endl<<endl;
+			break;
+		}
+	}    
+        return 0;
 }

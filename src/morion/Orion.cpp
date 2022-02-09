@@ -271,7 +271,7 @@ void Orion::removekw(vector <string> kws, int id)
 				Bid lastupdKey = createBid(kw,lastid);
 				updt->insert(lastupdKey,delcnt);
 			}
-		cout << "removing delkey from updt:["<< delKey <<"]"<< endl;
+		//cout << "removing delkey from updt:["<< delKey <<"]"<< endl;
 			updt->remove(delKey);
 		//cout << "removing lastkey from srch:["<< lastKey <<"]"<< endl;
 			srch->remove(lastKey);

@@ -21,6 +21,7 @@ ORAMf::ORAMf(int maxSize, bytes<Key> key)
     size_t storeBlockCount = blockCount;
     clen_size = AES::GetCiphertextLength((blockSize) * Z);
     plaintext_size = (blockSize) * Z;
+    cout << "Bucket and block count in ORAM:" << bucketCount<<"|"<<Z<<"="<<bucketCount*Z<<endl;
     store = new RAMStore(storeBlockCount, storeBlockSize);
     for (size_t i = 0; i < bucketCount; i++) {
         Bucketf bucket;
@@ -157,10 +158,19 @@ void ORAMf::WritePath(int leaf, int d) {
         for (int z = 0; z < std::min((int) validBlocks.size(), Z); z++) {
             Blockf &block = bucket[z];
             block.id = validBlocks[z];
+	    Bid temp = block.id;
             Nodef* curnode = cache[block.id];
             block.data = convertNodefToBlock(curnode);
+	    if(curnode->key != block.id)
+	    {
+	          //cout <<"curnode!=block.id"<<curnode->key<<block.id<<endl;
+		    block.id = 0; // curnode->key;
+		    block.data.resize(blockSize, 0);
+        	   //std::fill(curnode->value.begin(), curnode->value.end(), 0);
+            	    //block.data = convertNodefToBlock(curnode);
+	    }
             delete curnode;
-            cache.erase(block.id);
+            cache.erase(temp);
         }
         // Fill any empty spaces with dummy blocks
         for (int z = validBlocks.size(); z < Z; z++) {
@@ -194,6 +204,18 @@ void ORAMf::WriteData(Bid bid, Nodef* node) {
         throw runtime_error("There is no more space in ORAMf");
     }
 }
+
+void ORAMf::DeleteData(Bid bid, Nodef* node) 
+{
+	if(bid != node->key)
+	{
+        	cache[bid]=node; 
+        	store->IncreaseEmptyNumbers();
+		int ret = store->GetEmptySize();
+		cout <<bid<<"empty nodes:"<< ret <<endl;
+	}
+}
+
 
 // Fetches a block, allowing you to read and write in a block
 
@@ -267,6 +289,22 @@ int ORAMf::WriteNodef(Bid bid, Nodef* node) {
     }
 }
 
+int ORAMf::DeleteNode(Bid bid, Nodef* node) {
+    if (bid == 0) 
+    {
+       throw runtime_error("Nodef id is not set in DeleteNode");
+    }
+    if (cache.count(bid) != 0) 
+    {
+	    cache.erase(bid);
+	    cache[bid] = node;
+    }
+        //modified.insert(bid);
+	//if(modified.count(bid))
+	//	modified.erase(bid);
+    DeleteData(bid, node);
+        return node->pos;
+}
 Nodef* ORAMf::convertBlockToNodef(block b) {
     Nodef* node = new Nodef();
     std::array<byte_t, sizeof (Nodef) > arr;

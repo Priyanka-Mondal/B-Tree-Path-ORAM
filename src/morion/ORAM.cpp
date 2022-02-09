@@ -201,8 +201,6 @@ void ORAM::WriteData(Bid bid, Node* node)
     if (store->GetEmptySize() > 0) {
         cache[bid] = node;
         store->ReduceEmptyNumbers();
-	if(bid == 1111)
-	    cout << "left:"<<store->GetEmptySize()<<endl;
     } else {
         throw runtime_error("There is no more space in ORAM-WriteData");
     }

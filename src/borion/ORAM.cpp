@@ -21,6 +21,7 @@ ORAM::ORAM(int maxSize, bytes<Key> key)
     size_t storeBlockCount = blockCount;
     clen_size = AES::GetCiphertextLength((blockSize) * Z);
     plaintext_size = (blockSize) * Z;
+    cout << "Bucket and block count in ORAM:" << bucketCount<<"|"<<Z<<"="<<bucketCount*Z<<endl;
     store = new RAMStore(storeBlockCount, storeBlockSize);
     for (size_t i = 0; i < bucketCount; i++) {
         Bucket bucket;

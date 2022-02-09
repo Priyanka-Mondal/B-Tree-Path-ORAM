@@ -8,14 +8,14 @@
 
 #define ZKEY 0
 
+#define BLOCK 64 // 128 caused seg_fault
 #define ID_SIZE 64 // it was 16 before
-#define FID_SIZE 4
-#define COM 16
+#define FID_SIZE 8
+#define COM (BLOCK/FID_SIZE)
 // 1kb, 10kb, and 100kb filesize 
 #define SMALL 1024
 #define MEDIUM 10240
 #define LARGE 102400
-#define BLOCK 64 // 128 caused seg_fault
 
 #define LAST -1
 #define KS 0
