@@ -41,7 +41,7 @@ BOrion::BOrion(bool usehdd, int maxSize) {
     bytes<Key> key1{0};
     bytes<Key> key2{1};
     srch = new OMAP(maxSize*4, key1);
-    updt = new OMAPf(maxSize*4, key1); // use key2
+    updt = new OMAPf(maxSize*4, key2); // use key2
 }
 
 BOrion::~BOrion() {
@@ -61,9 +61,9 @@ vector<string> getUniquedWords(vector<string> kws)
     string word;
     for(auto word : kws)
     {
-	    if(word.size()<=12 && (neg.find(word)==neg.end()))
+	    if(word.size()<=8 && (neg.find(word)==neg.end()))
 	    {
-    		    if ((!mp.count(word)) && (word.size()<=12))
+    		    if ((!mp.count(word)) && (word.size()<=8))
     		    {
     		        mp.insert(make_pair(word, 1));
     		    }
@@ -125,9 +125,8 @@ vector<string> divideString(string str, int sz, string id)
 }
 
 
-void BOrion::insertWrap(string cont, string ind)
+void BOrion::insertWrap(string cont, string ind, bool batch)
 {
-
       vector<string> kws1, kws;
       boost::split(kws1, cont, boost::is_any_of(delimiters));
       kws =  getUniquedWords(kws1);
@@ -140,16 +139,22 @@ void BOrion::insertWrap(string cont, string ind)
       }
       vector<string> blocks;
       blocks = divideString(cont,BLOCK,ind);
-      insertWrapper(kws, blocks, ind);
+      if(!batch)
+      	insertWrapper(kws, blocks, ind);
+      else
+      {
+	      cout <<"in setup insert wrapper"<< endl;
+	setupInsertWrapper(kws,blocks,ind);
+      }
 }
 
-void BOrion::insertWrapper(vector<string> kws,vector<string> blocks, string ind)
+void BOrion::insertWrapper(vector<string> kws,vector<string> blocks,string ind)
 { 
      int totk=0;
      cout << "inserting kw for:"<< ind << endl;
      for (auto kw: kws) // cannot batchinsert as updtCount is at server
      {
-    	cout << "[" << kw << "] :" << ind << endl;
+    	//cout << "[" << kw << "] :" << ind << endl;
    	insert(kw,ind); // insert all keywords
 	totk++;
      }
@@ -164,18 +169,16 @@ void BOrion::insert(string keyword, string ind)
 {
     inserted++;
     Bid mapKey = createBid(keyword, 0);
-    auto uc = (srch->find(mapKey));
-    auto updt_cnt = uc.second;
+    auto updt_cnt = (srch->find(mapKey)).second;
     int updc; 
     if (updt_cnt == "") {  
          updc=0;
     }
     else
     {
-        stringstream convstoi(updt_cnt);
-        convstoi >> updc;
+        updc = stoI(updt_cnt);
     }
-    updc = updc+1;
+    updc++;
     srch->insert(mapKey, make_pair(KS,to_string(updc)));
 
     Bid updKey = createBid(keyword, ind);
@@ -190,18 +193,19 @@ void BOrion::insert(string keyword, string ind)
     {
            ind.insert(FID_SIZE, ID_SIZE-FID_SIZE, '#'); // padding happpens
            srch->insert(key, make_pair(KB,ind));
+    }
+    else if (pos_in_block >=2 && pos_in_block <=COM)
+    {
+          string oldblock = (srch->find(key)).second;
+          oldblock.replace((pos_in_block-1)*FID_SIZE,FID_SIZE,ind);
+	  srch->insert(key, make_pair(KB,oldblock));
      }
-     else if (pos_in_block >=2 && pos_in_block <=COM)
+     else
      {
-           string oldblock = (srch->find(key)).second;
-	   oldblock.replace((pos_in_block-1)*FID_SIZE,FID_SIZE,ind);
-	   srch->insert(key, make_pair(KB,oldblock));
-      }
-      else
-      {
-	   cout << endl << "{pos_in_block greater than 16}" << endl;
-      }
+          cout << endl << "{pos_in_block greater than 16}" << endl;
+     }
 }
+
 
 void BOrion::insertFile(string ind, vector<string> blocks)
 {
@@ -227,29 +231,59 @@ void BOrion::insertFile(string ind, vector<string> blocks)
 
 
 
-void BOrion::setupInsert(string keyword, pair<int,string> ind) 
+void BOrion::setupInsertWrapper(vector<string> kws,vector<string> blocks,string ind)
+{ 
+     setupInsertkws(kws,ind);
+     //setupInsertFile(ind,blocks); 
+}
+
+
+void BOrion::setupInsertkws(vector<string> kws, string ind) 
 {
-    //** NEED MODIFICATION
+  map<Bid, string> updmap;
+  map<Bid, pair<int,string>> srchmap;
+  for(auto keyword:kws)
+  {
+    inserted++;
     Bid mapKey = createBid(keyword, 0);
-    auto upd = srch->find(mapKey);
-    string updt_cnt = upd.second;
-    int updc;
-    if (updt_cnt == "") {
+    auto updt_cnt = (srch->find(mapKey)).second;
+    int updc; 
+    if (updt_cnt == "") {  
          updc=0;
     }
     else
     {
-        stringstream convstoi(updt_cnt);
-        convstoi >> updc;
+        updc = stoI(updt_cnt);
     }
-        //cout << "updatecnt " << updt_cnt <<" updc:"  <<updc <<"\n" ;
-        updc=updc+1;
-        //Bid key = createBid(keyword, id);
-        //setupPairs1[key]=to_string(updc);
-        Bid key = createBid(keyword, updc);
-        setupPairs2[key].first= ind.first;
-	setupPairs2[key].second= ind.second;
-    //LastIND[keyword] = ind;
+    updc++;
+    srchmap[mapKey] = make_pair(KS,to_string(updc));
+    Bid updKey = createBid(keyword, ind);
+    updmap[updKey]=to_string(updc);
+
+    int pos_in_block = get_position(updc,COM);
+    int block_num = get_block_num(updc,COM);
+       
+    Bid key = createBid(keyword, block_num);
+    	
+    if(pos_in_block == 1)
+    {
+	   string id = ind;
+           id.insert(FID_SIZE, ID_SIZE-FID_SIZE, '#'); // padding happpens
+	   srchmap[key]=make_pair(KB,id);
+    }
+    else if (pos_in_block >=2 && pos_in_block <=COM)
+    {
+          string oldblock = (srch->find(key)).second;
+          oldblock.replace((pos_in_block-1)*FID_SIZE,FID_SIZE,ind);
+	  srchmap[key]=make_pair(KB,oldblock);
+     }
+     else
+     {
+          cout << endl << "{pos_in_block greater than 16}" << endl;
+     }
+  }
+	srch->batchInsert(srchmap);
+	updt->batchInsert(updmap);
 }
 
 

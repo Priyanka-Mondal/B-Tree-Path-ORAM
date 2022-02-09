@@ -105,6 +105,7 @@ int AVLTree::getBalance(Node* N) {
 Bid AVLTree::insert(Bid rootKey, int& pos, Bid key, pair<int, string> value) {
 	    /* 1. Perform the normal BST rotation */
     if (rootKey == 0) {
+	    cout <<"inserting at AVLTree:"<< key<<endl;
             Node* nnode = newNode(key, value);
             pos = oram->WriteNode(key, nnode);
             return nnode->key;
@@ -115,6 +116,7 @@ Bid AVLTree::insert(Bid rootKey, int& pos, Bid key, pair<int, string> value) {
       } else if (key > node->key) {
      node->rightID = insert(node->rightID, node->rightPos, key, value);
 	    } else {
+	    cout <<"updatingting at AVLTree:"<< key<<endl;
 	    	    node->value.first = value.first;
             std::fill(node->value.second.begin(), node->value.second.end(), 0);
            std::copy(value.second.begin(), value.second.end(), node->value.second.begin());
@@ -214,7 +216,6 @@ void AVLTree::batchSearch(Node* head, vector<Bid> keys, vector<Node*>* results) 
     head = oram->ReadNode(head->key, head->pos, head->pos);
     bool getLeft = false, getRight = false;
     vector<Bid> leftkeys,rightkeys;
-    int count = 1;
     for (Bid bid : keys) {
 	   //cout << bid ;
         if (head->key > bid) {

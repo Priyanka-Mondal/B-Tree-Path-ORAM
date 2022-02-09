@@ -11,6 +11,7 @@ using namespace std;
 int fileid = 1;
 bool usehdd = true;
 BOrion borion(usehdd, 6000);  
+bool batch = true;
 
 string toS(int id)
 {
@@ -73,7 +74,7 @@ static void list_dir (const char * dir_name)
 	          cout <<"=====================================" << endl;
                   cout << endl <<file<< " " << fileid <<endl << endl;
 	     
-	     	  borion.insertWrap(cont,toS(fileid));
+	     	  borion.insertWrap(cont,toS(fileid),batch);
              
 	     	  fileid++;
              }
@@ -107,6 +108,7 @@ int main(int, char**)
 
 	//list_dir("allen-p/deleted_items");
 	//list_dir("allen-p");
+	//list_dir("may-l");
 	list_dir("tiny");
 	cout << endl<<" SETUP INSERT DONE!"<< endl;
 	cout <<"=================================="<< endl;
@@ -156,7 +158,7 @@ int main(int, char**)
 			string file;
 			cin>> file;
 	          	string cont = getFileContent(file);
-			borion.insertWrap(cont,toS(fileid));
+			borion.insertWrap(cont,toS(fileid),batch);
 			fileid++;
 			cout <<endl;
 		}

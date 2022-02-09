@@ -79,6 +79,8 @@ void OMAP::batchInsert(map<Bid, pair<int,string>> pairs) {
     treeHandler->startOperation(true);
     int cnt = 0;
     for (auto pair : pairs) {
+	    Bid key = pair.first;
+	    cout <<"in omap insert:"<< key<< endl;
         cnt++;
         if (cnt % 1000 == 0) {
             cout << cnt << " items inserted in AVL of " << pairs.size() << endl;
