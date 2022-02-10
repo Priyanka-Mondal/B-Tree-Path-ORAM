@@ -12,7 +12,7 @@ using namespace std;
 
 int fileid = 1;
 bool usehdd = false;
-Orion orion(usehdd, 100000);  
+Orion orion(usehdd, 10000);  
 set<string> neg;
 int totk = 0;
 vector<string> getUniquedWords(vector<string> kws, string fileid)
@@ -191,19 +191,21 @@ static void list_dir (const char * dir_name)
 	      cout << "============================" << endl;
     		vector<string> blocks;
 		//blocks = divideString(file,BLOCK,id);
+				orion.beginSetup();
 		for(auto k: kws)
 		{
 			int lenn = k.length();
-			if(lenn <= 60)
+			if(lenn <= 12)
 			{
-			orion.insert(k, fileid);
+			orion.setupInsert(k, fileid);
 	        	totk++;
 			}
 			else
 			{
-				cout << "GREATER THAN 64"<< endl;
+				cout << "GREATER THAN 12"<< endl;
 			}
 		}
+		orion.endSetup();
                 fileid++;
                }
 
@@ -242,13 +244,6 @@ static void list_dir (const char * dir_name)
 
 
 int main(int, char**) {
-   
-	/*string inputString("One!Two,Three:Four Five--Six ,  Seven,8.9");
-	string delimiters("|,:! -.");
-	vector<string> parts;
-	boost::split(parts, inputString, boost::is_any_of(delimiters));
-	for(auto v : parts)
-		cout << v << endl;*/
 neg.insert("and");
 neg.insert("the");
 neg.insert("The");
@@ -274,30 +269,73 @@ neg.insert("\t");
 neg.insert("from");
 
 
-    list_dir("sent");
-    cout << endl << "FILEID:" << fileid << " totk:"<<totk<< endl;
-    cout << "SEARCH size:" << orion.search("you").size() << endl << endl;
-    orion.remove("you",7);
-    cout << "SEARCH size2:" << orion.search("you").size() << endl << endl;
-    orion.remove("you",6);
-    cout << "SEARCH size2:" << orion.search("you").size() << endl << endl;
-    orion.remove("you",5);
-    cout << "SEARCH size2:" << orion.search("you").size() << endl << endl;
-    orion.remove("you",4);
-    cout << "SEARCH size2:" << orion.search("you").size() << endl << endl;
-    orion.remove("you",4);
-    cout << "SEARCH size2:" << orion.search("you").size() << endl << endl;
-    orion.remove("you",4);
-    cout << "SEARCH size2:" << orion.search("you").size() << endl << endl;
-    //insert a dummy file for fake entries at the end -- maybe not required
-    // first searches ids 
-    //map<string,string> allfiles = borion.searchWrapper("hell");
-    /*
-    for(auto itr= allfiles.begin(); itr!=allfiles.end();itr++)
-    {
-	   	 cout << " OUTPUT Blocks :[" << itr->first << "]\n";
-		 cout << itr->second << endl << endl;
-    }*/
-    
-    return 0;
+	//list_dir("allen-p/deleted_items");
+	//list_dir("allen-p");
+	list_dir("tiny");
+	cout << endl<<" SETUP INSERT DONE!"<< endl;
+	cout <<"=================================="<< endl;
+	cout <<"READY TO PERFORM QUERIES!" << endl;
+	
+	
+	while(1)
+	{
+		char c;
+		cout <<endl<<endl<<endl;
+		cout <<"Enter your choice (s/i/d/p/q): "<<endl;
+		cout <<"s/S: Search"<<endl;
+		cout <<"i/I: Insert"<<endl;
+		cout <<"d/D: Delete"<<endl;
+		cout <<"p/P: Print"<<endl;
+		cout <<"q/Q: Quit"<<endl;
+		cout <<"------------------"<<endl;
+		cout <<"_";
+	
+		cin >> c;
+	
+		if(c=='s' || c=='S')
+		{
+			cout << "Enter the keyword to be searched: ";
+			string keyword;
+			cin>> keyword;
+	    		vector<int> files = orion.search(keyword);
+			cout <<"--------Search result---------"<<endl;
+	    		for(auto file:files)
+			{
+	    			cout << "["<<file<<"] ";
+				//cout << file.second<< endl<<endl;
+			}
+	    		cout <<endl<<endl;
+			cout << "RESULT size: " << files.size() << endl<<endl;
+		}
+		else if(c=='d'|| c=='D')
+		{
+			cout <<"Enter file id to be deleted: ";
+			int fid;
+			cin>>fid;
+			//orion.remove(fid);
+		}
+		else if(c=='i' || c=='I')
+		{
+			cout << "Enter keyword to be inserted:";
+			string kw;
+			cin>> kw;
+			cout << "Enter id to be inserted:";
+			int id;
+			cin>> id;
+			orion.beginSetup();
+			orion.setupInsert(kw,id);
+			orion.endSetup();
+			cout <<endl;
+		}
+		else if(c=='p' || c=='P')
+		{
+			//orion.print();
+		}
+		else //if(c=='q'||c=='Q')
+		{
+			cout <<"QUITTING..."<<endl<<endl;
+			break;
+		}
+	}    
+        return 0;
 }

@@ -14,7 +14,7 @@ Orion::~Orion() {
     delete updt;
 }
 
-int stoi(string updt_cnt)
+int stoI(string updt_cnt)
 {
 	int updc;
 	stringstream convstoi(updt_cnt);
@@ -134,7 +134,7 @@ vector<int> Orion::search(string keyword) {
     }
     auto tmpRes = srch->batchSearch(bids);
     for(auto item:tmpRes){
-        result.push_back(stoi(item));
+        result.push_back(stoI(item));
         //result.push_back((item));
     }
     return result;
@@ -152,7 +152,10 @@ void Orion::beginSetup() {
  * This function is used for finishing setup of scheme because normal update is time consuming
  */
 void Orion::endSetup() {
+	cout <<"in the endSetup"<<endl;
+	cout <<"size of updt"<<setupPairs1.size()<<endl;
     updt->batchInsert(setupPairs1);
+	cout <<"size of srch"<<setupPairs2.size()<<endl;
     srch->batchInsert(setupPairs2);
 }
 

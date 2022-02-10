@@ -10,7 +10,7 @@ using namespace std;
 
 int fileid = 1;
 bool usehdd = true;
-BOrion borion(usehdd, 6000);  
+BOrion borion(usehdd, 9000);  
 bool batch = true;
 
 string toS(int id)

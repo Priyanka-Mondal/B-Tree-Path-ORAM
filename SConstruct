@@ -72,26 +72,29 @@ env.Alias('deps', [crypto_lib_target, db_parser_target])
 objects = SConscript('src/build.scons', exports='env', variant_dir='build')
 
 env.Depends(objects["morion"],[crypto_lib_target , db_parser_target])
+env.Depends(objects["orion"],[crypto_lib_target , db_parser_target])
 env.Depends(objects["borion"],[crypto_lib_target , db_parser_target])
 env.Depends(objects["foram"],[crypto_lib_target , db_parser_target])
 env.Depends(objects["orion2"],[crypto_lib_target , db_parser_target])
 
-Clean(objects["morion"]+objects["borion"]+objects["foram"]+objects["orion2"], 'build')
+Clean(objects["morion"]+objects["orion"]+objects["borion"]+objects["foram"]+objects["orion2"], 'build')
 
 outter_env = env.Clone()
 outter_env.Append(CPPPATH = ['build'])
 
 
 
+orion_debug_prog   = outter_env.Program('orion_debug',    ['test_orion.cpp']     + objects["orion"])
 morion_debug_prog   = outter_env.Program('morion_debug',    ['test_morion.cpp']     + objects["morion"])
 borion_debug_prog   = outter_env.Program('borion_debug',    ['test_borion.cpp']     + objects["borion"])
 foram_debug_prog   = outter_env.Program('foram_debug',    ['test_foram.cpp']     + objects["foram"])
 orion2_debug_prog   = outter_env.Program('orion2_debug',    ['test_orion2.cpp']     + objects["orion2"])
 
 
+env.Alias('orion', [orion_debug_prog])
 env.Alias('morion', [morion_debug_prog])
 env.Alias('borion', [borion_debug_prog])
 env.Alias('foram', [foram_debug_prog])
 env.Alias('orion2', [orion2_debug_prog])
 
-env.Default(['morion','borion','foram','orion2'])
+env.Default(['orion','morion','borion','foram','orion2'])

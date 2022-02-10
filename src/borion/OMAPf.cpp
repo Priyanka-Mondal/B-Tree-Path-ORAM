@@ -65,12 +65,8 @@ void OMAPf::printTree() {
  */
 void OMAPf::batchInsert(map<Bid, string> pairs) {
     treeHandler->startOperation(true);
-    int cnt = 0;
     for (auto pair : pairs) {
-        cnt++;
-        if (cnt % 1000 == 0) {
-            cout << cnt << " items inserted in AVL of " << pairs.size() << endl;
-        }
+	    Bid key = pair.first;
         if (rootKey == 0) {
             rootKey = treeHandler->insert(0, rootPos, pair.first, pair.second);
         } else {

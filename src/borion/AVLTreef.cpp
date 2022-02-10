@@ -180,7 +180,6 @@ Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, string value) {
     if (rootKey == 0) {
         Nodef* nnode = newNodef(key, value);
         pos = oram->WriteNodef(key, nnode);
-	    cout <<key<<" AVLTfinsert:"<<value<<endl;
         return nnode->key;
     }
     Nodef* node = oram->ReadNodef(rootKey, pos, pos);
@@ -192,7 +191,7 @@ Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, string value) {
         std::fill(node->value.begin(), node->value.end(), 0);
         std::copy(value.begin(), value.end(), node->value.begin());
         oram->WriteNodef(rootKey, node);
-	    cout <<key<<" AVLTfinsertf:"<<value<<endl;
+	    cout <<key<<" AVLTfinsert:"<<value<<endl;
         return node->key;
     }
 

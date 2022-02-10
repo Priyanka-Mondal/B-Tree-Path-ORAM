@@ -30,7 +30,7 @@ Node* AVLTree::newNode(Bid key, pair<string,string> value) {
     node->key = key;
     auto meta = value.first;//to_bytes(value.first);
     std::fill(node->value.first.begin(), node->value.first.end(), 0);
-    std::copy(meta.begin(),meta.end(), node->value.first.begin());
+    std::copy(value.first.begin(),value.first.end(), node->value.first.begin());
     std::fill(node->value.second.begin(), node->value.second.end(), 0);
   std::copy(value.second.begin(),value.second.end(),node->value.second.begin());
     node->leftID = 0;
@@ -109,7 +109,6 @@ Bid AVLTree::insert(Bid rootKey, int& pos, Bid key, pair<string,string> value) {
     if (rootKey == 0) {
             Node* nnode = newNode(key, value);
             pos = oram->WriteNode(key, nnode);
-	    cout <<key<<" AVLTinsert:"<<value.second<<endl;
             return nnode->key;
       }
      Node* node = oram->ReadNode(rootKey, pos, pos);
@@ -118,13 +117,12 @@ Bid AVLTree::insert(Bid rootKey, int& pos, Bid key, pair<string,string> value) {
       } else if (key > node->key) {
      node->rightID = insert(node->rightID, node->rightPos, key, value);
 	    } else {
-    	   auto meta = value.first;//to_bytes(value.first);
+    	   //auto meta = value.first;//to_bytes(value.first);
            std::fill(node->value.first.begin(), node->value.first.end(), 0);
-           std::copy(meta.begin(), meta.end(), node->value.first.begin());
+           std::copy(value.first.begin(), value.first.end(), node->value.first.begin());
             std::fill(node->value.second.begin(), node->value.second.end(), 0);
            std::copy(value.second.begin(), value.second.end(), node->value.second.begin());
            oram->WriteNode(rootKey, node);
-	    cout <<key<<" AVLTinsert:"<<value.second<<endl;
            return node->key;
        }
 	        /* 2. Update height of this ancestor node */

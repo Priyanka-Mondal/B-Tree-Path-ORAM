@@ -24,7 +24,7 @@ public:
     ~Nodef() {
     }
     Bid key;
-    std::array< byte_t, 64> value; 
+    std::array< byte_t, 16> value; 
     int pos;
     Bid leftID;
     int leftPos;

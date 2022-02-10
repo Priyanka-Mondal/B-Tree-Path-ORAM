@@ -243,10 +243,9 @@ Node* ORAM::ReadNode(Bid bid, int lastLeaf, int newLeaf) {
         Access(bid, node, lastLeaf, newLeaf);
         if (node != NULL) {
             modified.insert(bid);
-		cout <<"node is not NULL"<<bid<<endl;
         }
 	else
-		cout <<"node is NULL"<<bid<<endl;
+		cout <<"node is NULL: "<<bid<<endl;
         return node;
     } else {
         modified.insert(bid);
@@ -257,9 +256,9 @@ Node* ORAM::ReadNode(Bid bid, int lastLeaf, int newLeaf) {
 }
 
 int ORAM::WriteNode(Bid bid, Node* node) {
-    //if (bid == 0) {
-    //   throw runtime_error("Node id is not set in WriteNode");
-    //}
+    if (bid == 0) {
+       throw runtime_error("Node id is not set in WriteNode");
+    }
     if (cache.count(bid) == 0) {
         modified.insert(bid);
         Access(bid, node);

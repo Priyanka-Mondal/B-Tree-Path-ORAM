@@ -14,8 +14,9 @@ private:
     bool useHDD;
     map<Bid,pair<string,string>> srchmap;
     map<Bid,string> updmap;
+    map<Bid,string>fcntmap;
     OMAP* srch;
-    OMAPf *updt;
+    OMAPf *updt , *fcnt;
     
 public:
     Bid createBid(string keyword,int number);

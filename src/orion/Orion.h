@@ -9,7 +9,7 @@ private:
     bool useHDD;
     map<Bid,string > setupPairs1;
     map<Bid,string > setupPairs2;
-    OMAP* srch,*updt *fcnt;
+    OMAP* srch,*updt, *fcnt;
     map<string, int> UpdtCnt;
     map<string, int> LastIND;        
     
