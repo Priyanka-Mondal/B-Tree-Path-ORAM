@@ -11,9 +11,9 @@ OMAP::~OMAP() {
 }
 
 
-pair<int,string> OMAP::find(Bid key) {
+pair<string,string> OMAP::find(Bid key) {
     if (rootKey == 0) {
-        return (make_pair(-1,""));
+        return (make_pair("",""));
     }
     treeHandler->startOperation();
     Node* node = new Node();
@@ -21,9 +21,10 @@ pair<int,string> OMAP::find(Bid key) {
     node->pos = rootPos;
     auto resNode = treeHandler->search(node, key);
     //string res1 = "";
-    pair <int,string> res = make_pair(0,"");
+    pair <string,string> res = make_pair("","");
     if (resNode != NULL) {
-	res.first=resNode->value.first;
+        res.first.assign(resNode->value.first.begin(), resNode->value.first.end());
+        res.first = res.first.c_str();
         res.second.assign(resNode->value.second.begin(), resNode->value.second.end());
         res.second = res.second.c_str();
     }
@@ -48,7 +49,7 @@ Bid OMAP::remove(Bid delKey)
 }
 
 
-void OMAP::insert(Bid key, pair<int,string> value) {
+void OMAP::insert(Bid key, pair<string,string> value) {
 //	cout << "in OMAP insert 6[" << value.second << "]"<< endl;
     treeHandler->startOperation();
     if (rootKey == 0) {
@@ -75,12 +76,12 @@ void OMAP::printTree() {
 /**
  * This function is used for batch insert which is used at the end of setup phase.
  */
-void OMAP::batchInsert(map<Bid, pair<int,string>> pairs) {
+void OMAP::batchInsert(map<Bid, pair<string,string>> pairs) {
     treeHandler->startOperation(true);
     int cnt = 0;
     for (auto pair : pairs) {
 	    Bid key = pair.first;
-	    cout <<"in omap insert:"<< key<< endl;
+	    //cout<<key<<" OMAPinsert:"<<pair.second.second<<endl;
         cnt++;
         if (cnt % 1000 == 0) {
             cout << cnt << " items inserted in AVL of " << pairs.size() << endl;
@@ -97,8 +98,8 @@ void OMAP::batchInsert(map<Bid, pair<int,string>> pairs) {
 /**
  * This function is used for batch search which is used in the real search procedure
  */
-vector<pair<int,string>> OMAP::batchSearch(vector<Bid> keys) {
-    vector<pair<int,string>> result;
+vector<pair<string,string>> OMAP::batchSearch(vector<Bid> keys) {
+    vector<pair<string,string>> result;
     treeHandler->startOperation(false);
     Node* node = new Node();
     node->key = rootKey;
@@ -107,16 +108,18 @@ vector<pair<int,string>> OMAP::batchSearch(vector<Bid> keys) {
     vector<Node*> resNodes;
     treeHandler->batchSearch(node, keys, &resNodes);
     for (Node* n : resNodes) {
-        pair<int,string> res;
+        pair<string,string> res;
 	string res1="";
+	string res2="";
         if (n != NULL) {
-            res.first=n->value.first;
-            res1.assign(n->value.second.begin(), n->value.second.end());
-	    res.second = res1.c_str();
+            res1.assign(n->value.first.begin(), n->value.first.end());
+	    res.first = res1.c_str();
+            res2.assign(n->value.second.begin(), n->value.second.end());
+	    res.second = res2.c_str();
             result.push_back(res);
         } else {
-		cout << "Pushing -1" << endl;
-            result.push_back(make_pair(-1,"")); // not sure if first is -1
+		cout << "Pushing empty" << endl;
+            result.push_back(make_pair("","")); // not sure if first is -1
         }
     }
     treeHandler->finishOperation(true, rootKey, rootPos);

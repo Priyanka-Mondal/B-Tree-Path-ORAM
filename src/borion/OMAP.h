@@ -21,11 +21,11 @@ private:
 public:
     OMAP(int maxSize, bytes<Key> key);
     virtual ~OMAP();
-    void insert(Bid key, pair<int,string> value);
-    pair<int,string> find(Bid key);
+    void insert(Bid key, pair<string,string> value);
+    pair<string,string> find(Bid key);
     void printTree();
-    void batchInsert(map<Bid, pair<int,string>> pairs);
-    vector<pair<int,string>> batchSearch(vector<Bid> keys);
+    void batchInsert(map<Bid, pair<string,string>> pairs);
+    vector<pair<string,string>> batchSearch(vector<Bid> keys);
     Bid remove(Bid key);
 };
 

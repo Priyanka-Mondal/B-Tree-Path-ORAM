@@ -27,7 +27,7 @@ private:
 
     int height(Bid N, int& leaf);
     int max(int a, int b);
-    Node* newNode(Bid key, pair<int,string> value);
+    Node* newNode(Bid key, pair<string,string> value);
     Node* rightRotate(Node* y);
     Node* leftRotate(Node* x);
     int getBalance(Node* N);
@@ -36,7 +36,7 @@ private:
 public:
     AVLTree(int maxSize, bytes<Key> key);
     virtual ~AVLTree();
-    Bid insert(Bid rootKey, int& pos, Bid key, pair<int,string> value);
+    Bid insert(Bid rootKey, int& pos, Bid key, pair<string,string> value);
     Node* minValueNode(Node* head);
     Bid remove(Bid rootKey, int& pos, Bid delKey) ;
     Node* search(Node* head, Bid key);

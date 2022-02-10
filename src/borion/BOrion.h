@@ -12,12 +12,10 @@ using namespace std;
 class BOrion {
 private:
     bool useHDD;
-    map<Bid,pair<int,string>> setupPairs1;
-    map<Bid,pair<int,string>> setupPairs2;
+    map<Bid,pair<string,string>> srchmap;
+    map<Bid,string> updmap;
     OMAP* srch;
     OMAPf *updt;
-    map<string, int> UpdtCnt;
-    //map<string, int> LastIND;        
     
 public:
     Bid createBid(string keyword,int number);
@@ -28,15 +26,16 @@ public:
     void insertdel(string ind);
     void insertFile(string keyword, vector<string> blocks);
     void setupInsert(string keyword, pair<int,string> ind);
-    void remove(string ind); /* LATER*/
+    void remove(string ind); 
     void removekw(vector<string> keyword, string ind); /* LATER*/
     //void setupRemove(string keyword, int ind);
-    vector<pair<int,string>> searchkw(string keyword);
+    vector<pair<string,string>> searchkw(string keyword);
     pair<int,string> searchfileblock(string ind, int blk);
     string searchfileblocknum(string ind);
     map<string,string> searchWrapper(string keyword);
    void setupInsertWrapper(vector<string> kws,vector<string> blocks,string ind);
     void setupInsertkws(vector<string> kws, string ind);
+    void setupInsertFile(string ind, vector<string> blocks);
     void print();
 
     BOrion(bool useHDD,int maxSize);    

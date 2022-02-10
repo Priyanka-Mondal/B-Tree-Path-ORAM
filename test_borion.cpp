@@ -158,7 +158,7 @@ int main(int, char**)
 			string file;
 			cin>> file;
 	          	string cont = getFileContent(file);
-			borion.insertWrap(cont,toS(fileid),batch);
+			borion.insertWrap(cont,toS(fileid),false);
 			fileid++;
 			cout <<endl;
 		}

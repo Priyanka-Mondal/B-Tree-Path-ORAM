@@ -9,7 +9,7 @@
 #define ZKEY 0
 
 #define BLOCK 64 // 128 caused seg_fault
-#define ID_SIZE 64 // it was 16 before
+#define ID_SIZE 16 // it was 16 before
 #define FID_SIZE 8
 #define COM (BLOCK/FID_SIZE)
 // 1kb, 10kb, and 100kb filesize 
@@ -18,10 +18,10 @@
 #define LARGE 102400
 
 #define LAST -1
-#define KS 0
-#define KB 1
-#define FS 2
-#define FB 3 
+#define KS "a"
+#define KB "b"
+#define FS "c"
+#define FB "d" 
 
 // The main type for passing around raw file data
 using byte_t = uint8_t;

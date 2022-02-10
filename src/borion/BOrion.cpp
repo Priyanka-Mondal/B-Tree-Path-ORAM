@@ -84,6 +84,7 @@ return kw;
 vector<string> divideString(string str, int sz, string id)
 {
         int str_size = str.length();
+	sz = sz - FID_SIZE;
 	if (str_size% sz !=0)
 	{
 		int pad = ceil(str_size/sz)+1;
@@ -91,7 +92,7 @@ vector<string> divideString(string str, int sz, string id)
 	        str.insert(str.size(), pad, '1');
 	}
 	str_size = str.length(); // new length
-	//cout <<"new length:"<< str_size<<endl;
+	cout <<"new length:"<< str_size<<endl;
   	int i;
         vector<string> result;
 
@@ -120,6 +121,7 @@ vector<string> divideString(string str, int sz, string id)
 	}
         string ttemp = id;//id;
 	ttemp.append(temp);	
+	cout <<"total length:"<< ttemp.size()<<endl;
 	result.push_back(ttemp);
 	return result;
 }
@@ -143,8 +145,9 @@ void BOrion::insertWrap(string cont, string ind, bool batch)
       	insertWrapper(kws, blocks, ind);
       else
       {
-	      cout <<"in setup insert wrapper"<< endl;
+	beginSetup();
 	setupInsertWrapper(kws,blocks,ind);
+	endSetup();
       }
 }
 
@@ -191,18 +194,21 @@ void BOrion::insert(string keyword, string ind)
     	
     if(pos_in_block == 1)
     {
-           ind.insert(FID_SIZE, ID_SIZE-FID_SIZE, '#'); // padding happpens
-           srch->insert(key, make_pair(KB,ind));
+           string id = ind;
+           id.insert(FID_SIZE, BLOCK-FID_SIZE, '#'); // padding happpens
+           srch->insert(key, make_pair(KB,id));
     }
     else if (pos_in_block >=2 && pos_in_block <=COM)
     {
+	    cout<<"keyword:"<<keyword<<"||"<<pos_in_block<<"||"<<block_num<<endl;
           string oldblock = (srch->find(key)).second;
+	  cout <<"oldblock:"<<oldblock<<endl;
           oldblock.replace((pos_in_block-1)*FID_SIZE,FID_SIZE,ind);
 	  srch->insert(key, make_pair(KB,oldblock));
      }
      else
      {
-          cout << endl << "{pos_in_block greater than 16}" << endl;
+          cout << endl << "{pos_in_block greater than 8}" << endl;
      }
 }
 
@@ -210,38 +216,50 @@ void BOrion::insert(string keyword, string ind)
 void BOrion::insertFile(string ind, vector<string> blocks)
 {
 	Bid mapKey = createBid(ind, 0);
-	map<Bid,pair<int,string>> batch;
 	int sz = blocks.size();
-        string par;
-	par = ind; 
+        string par = ind;
 	par.append(to_string(sz));// pad later to 64 byte
 	srch->insert(mapKey, make_pair(FS,par));
-
 	int i =1;
         for(auto block : blocks)
 	{       
 		Bid mk = createBid(ind, i);
 		srch->insert(mk,make_pair(FB,block));
-		//batch.insert(make_pair(mk,pr)); // gives **ERROR
 		i++;
 	}
-	//srch->batchInsert(batch); // gives **ERROR
 	cout << "inserted "<<  blocks.size() <<" blocks of " << ind << endl;
 }
-
 
 
 void BOrion::setupInsertWrapper(vector<string> kws,vector<string> blocks,string ind)
 { 
      setupInsertkws(kws,ind);
-     //setupInsertFile(ind,blocks); 
+     cout <<"-------Keywords batch inserted---------"<<endl;
+     //setupInsertFile(ind,blocks);
+}
+
+
+void BOrion::setupInsertFile(string ind, vector<string> blocks)
+{
+	Bid numKey = createBid(ind,0);
+	int num_block = blocks.size();
+	string nb = ind;
+	nb.append(to_string(num_block));
+	srchmap[numKey] = make_pair(FS,nb);
+	int i = 1;
+	for(auto block:blocks)
+	{
+		Bid blkKey = createBid(ind,i);
+		srchmap[blkKey]=make_pair(FB,block);
+		cout <<"block "<<i<<" :"<< block<< endl<< endl;
+		i++;
+	}
+	cout <<"end of file batch creation"<<endl;
 }
 
 
 void BOrion::setupInsertkws(vector<string> kws, string ind) 
 {
-  map<Bid, string> updmap;
-  map<Bid, pair<int,string>> srchmap;
   for(auto keyword:kws)
   {
     inserted++;
@@ -268,13 +286,16 @@ void BOrion::setupInsertkws(vector<string> kws, string ind)
     if(pos_in_block == 1)
     {
 	   string id = ind;
-           id.insert(FID_SIZE, ID_SIZE-FID_SIZE, '#'); // padding happpens
+           id.insert(FID_SIZE, BLOCK-FID_SIZE, '#'); // padding happpens
 	   srchmap[key]=make_pair(KB,id);
     }
     else if (pos_in_block >=2 && pos_in_block <=COM)
     {
+	    cout<<"keyword:"<<keyword<<"||"<<pos_in_block<<"||"<<block_num<<endl;
           string oldblock = (srch->find(key)).second;
+	  cout <<"oldblock:"<<oldblock<<endl;
           oldblock.replace((pos_in_block-1)*FID_SIZE,FID_SIZE,ind);
+	  cout <<"newblock:"<<oldblock<<endl;
 	  srchmap[key]=make_pair(KB,oldblock);
      }
      else
@@ -282,8 +303,7 @@ void BOrion::setupInsertkws(vector<string> kws, string ind)
           cout << endl << "{pos_in_block greater than 16}" << endl;
      }
   }
-	srch->batchInsert(srchmap);
-	updt->batchInsert(updmap);
+	cout <<"end of keyword batch creation"<<endl;
 }
 
 
@@ -303,14 +323,14 @@ void BOrion::remove(string ind)
 		block_cnt = block_cnt.substr(FID_SIZE,block_cnt.size());
 		bc = stoI(block_cnt);
 	}
-	srch->insert(blockcnt,make_pair(0,""));//srch->remove(blockcnt)
+	srch->insert(blockcnt,make_pair(FS,""));//srch->remove(blockcnt)
 	Bid blk;
 	for (int i = 1; i <= bc ; i++)
 	{
 		blk = createBid(ind,i);
 		string ret = srch->find(blk).second;
 		file = file.append(ret);
-		srch->insert(blk,make_pair(0,""));//srch->remove(blk);	
+		srch->insert(blk,make_pair(FB,""));//srch->remove(blk);	
 	}
 	cout <<"Removed "<< bc <<" blocks from srch"<<endl;
 	
@@ -353,9 +373,9 @@ void BOrion::removekw(vector<string> kws, string ind)
                 Bid cur = createBid(keyword, block_del);
         	string bl_del = srch->find(cur).second;
     		
-		//cout << "Before[" << block <<"]"<< endl << endl ; 
+		cout << "Before[" << block <<"]"<< endl << endl ; 
     		block.replace((pos-1)*FID_SIZE,FID_SIZE,"########");
-    		//cout << "After[" << block <<"]"<< endl << endl ;
+    		cout << "After[" << block <<"]"<< endl << endl ;
     		
 		srch->insert(lastKey,make_pair(KB,block)); // cur
     	        
@@ -365,22 +385,22 @@ void BOrion::removekw(vector<string> kws, string ind)
     	        else
              	        blsec = bl_del;
     	        
-		//cout << "BEFORE[" << blsec <<"]"<< endl << endl ; 
+		cout << "BEFORE[" << blsec <<"]"<< endl << endl ; 
                 blsec.replace((pos_in_blockdel-1)*FID_SIZE,FID_SIZE,lastid);
-    	        //cout << "AFTER[" << blsec <<"]"<< endl << endl ;
+    	        cout << "AFTER[" << blsec <<"]"<< endl << endl ;
     	        srch->insert(cur,make_pair(KB,blsec));
          }
          else
          {
  	       block.replace((pos-1)*FID_SIZE,FID_SIZE,"########");
- 	       //cout << "LAST after[" << block <<"]"<< endl << endl;
+ 	       cout << "LAST after[" << block <<"]"<< endl << endl;
  	       srch->insert(lastKey,make_pair(KB,block));
          }
        } 
        else 
        {
-        	srch->insert(firstKey,make_pair(0,""));//srch->remove(firstKey);
-                srch->insert(lastKey,make_pair(0,""));//srch->remove(lastKey);
+        	srch->insert(firstKey,make_pair("",""));//srch->remove(firstKey);
+                srch->insert(lastKey,make_pair("",""));//srch->remove(lastKey);
        }
        updt->insert(mapKey,"");//updt->remove(mapKey); // delete in updt
     }
@@ -417,7 +437,7 @@ void BOrion::setupRemove(string keyword, int ind) {
 map<string,string> BOrion::searchWrapper(string keyword)
 {
 	srand(time(NULL));
-	vector<pair<int,string>> result;
+	vector<pair<string,string>> result;
 	map<string,string> files;
         int fetched=0, updc;
         int totOMAPacc = 0;
@@ -428,11 +448,12 @@ map<string,string> BOrion::searchWrapper(string keyword)
     auto updt = srch->find(mapKey); // mandatory first search: #fileids
     string updt_cnt = updt.second;
     if (updt_cnt != "") {
-        stringstream convstoi(updt_cnt);
-        convstoi >> updc;
+	updc = stoI(updt_cnt);
+	cout <<"updt_cnt is "<<updt_cnt<<endl;
     }
     else
     {
+	    cout <<"updt count is 0"<<endl;
 	    return files;
     }
     
@@ -443,7 +464,7 @@ map<string,string> BOrion::searchWrapper(string keyword)
     
     
     auto freq = srch->find(mapKey); //mandatory second search: first 8 fileids
-    
+   cout <<"freq is :"<< freq.second<<endl; 
     
     totOMAPacc++;
     auto fileids1 = freq.second;  // get first <=8 fileids
@@ -451,7 +472,7 @@ map<string,string> BOrion::searchWrapper(string keyword)
     while(fetched < updc && fetched < COM)
     {
 	    string str = freq.second.substr(pos*FID_SIZE,FID_SIZE);
-	    //cout <<"the index:["<<str<<"]"<<endl<<endl;
+	    cout <<"the index:["<<str<<"]"<<endl<<endl;
             Bid bid = createBid(str,0); // for first file block
 	    fileids.push(bid);
 	    pos++;
@@ -515,13 +536,15 @@ map<string,string> BOrion::searchWrapper(string keyword)
 			    firstblocknum.pop();
 		    }
 	    }
+	    cout << "before BATCH SEARCH"<< endl;
 	    result = srch->batchSearch(batch);
+	    cout << "after BATCH SEARCH"<< endl;
 	    //totOMAPacc = totOMAPacc+batch.size();
 	    
 	    for(auto blk : result)
 	    {
 	       //cout << "first:" << blk.first << "second:" <<blk.second <<endl;
-	        if(blk.first==1)
+	        if(blk.first==KB)
 		{
 			int cnt = 0;
 			while(cnt < COM && fetched<updc)
@@ -534,7 +557,7 @@ map<string,string> BOrion::searchWrapper(string keyword)
 			}
 		}
 		
-		if(blk.first==2)
+		if(blk.first==FS)
 		{
 			string id = blk.second.substr(0,FID_SIZE);
 			int sz = blk.second.length(); // change to :until #
@@ -543,7 +566,7 @@ map<string,string> BOrion::searchWrapper(string keyword)
 			firstblocknum.push(bnum);
 			firstblockid.push(id);
 		}
-		if(blk.first==3)
+		if(blk.first==FB)
 		{
 			string id = blk.second.substr(0,FID_SIZE);
 			int sz = blk.second.length();
@@ -572,17 +595,10 @@ return files;
 }
 
 
-pair<int,string> BOrion::searchfileblock(string ind, int blk) 
-{
-    Bid mapKey = createBid(ind, blk);
-    auto result = srch->find(mapKey);
-    return result;
-}
 
-
-vector<pair<int,string>> BOrion::searchkw(string keyword) 
+vector<pair<string,string>> BOrion::searchkw(string keyword) 
 {
-    vector<pair<int,string>> result;
+    vector<pair<string,string>> result;
     vector<Bid> bids;
     Bid mapKey = createBid(keyword, 0);
     auto updt = srch->find(mapKey);
@@ -613,21 +629,18 @@ vector<pair<int,string>> BOrion::searchkw(string keyword)
     return result;
 }
 
-/**
- * This function is used for initial setup of scheme because normal update is time consuming
- */
 void BOrion::beginSetup() 
 {
-    setupPairs1.clear();
-    setupPairs2.clear();
+    srchmap.clear();
+    updmap.clear();
 }
 
-/**
- * This function is used for finishing setup of scheme because normal update is time consuming
- */
 void BOrion::endSetup() {
-    //updt->batchInsert(setupPairs1);
-    srch->batchInsert(setupPairs2);
+	cout <<"in end setup:"<<updmap.size()<<endl;
+    updt->batchInsert(updmap);
+	cout <<"updt batch"<<endl;
+    srch->batchInsert(srchmap);
+	cout <<"srch batch"<<endl;
 }
 
 Bid BOrion::createBid(string keyword, int number) 
