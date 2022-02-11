@@ -9,7 +9,7 @@
 using namespace std;
 
 int fileid = 1;
-bool usehdd = true;
+bool usehdd = false;
 BOrion borion(usehdd, 9000);  
 bool batch = true;
 
