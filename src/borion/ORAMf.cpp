@@ -270,7 +270,10 @@ Nodef* ORAMf::ReadNodef(Bid bid, int lastLeaf, int newLeaf) {
             modified.insert(bid);
         }
 	else 
+	{
 		cout <<"nodef is NULL : "<< bid << endl ;
+		cout <<"free nodes:" << store->GetEmptySize() << endl;
+	}
         return node;
     } else {
         modified.insert(bid);
