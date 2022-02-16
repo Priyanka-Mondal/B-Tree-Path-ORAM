@@ -10,8 +10,8 @@ using namespace std;
 
 int fileid = 1;
 bool usehdd = false;
-BOrion borion(usehdd, 9000);  
-bool batch = false;
+BOrion borion(usehdd, 900);  
+bool batch = false; // true makes the program crash
 
 string toS(int id)
 {
@@ -137,11 +137,11 @@ int main(int, char**)
 			cout << "Enter the keyword to be searched: ";
 			string keyword;
 			cin>> keyword;
-	    		map<string,string> files= borion.searchWrapper(keyword);
+	    		vector<pair<string,string>> files= borion.search(keyword);
 			cout <<"--------Search result---------"<<endl;
 	    		for(auto file:files)
 			{
-	    			cout << "["<<file.first<<"] ";
+	    			cout << "["<<file.second.substr(0,FID_SIZE)<<"] ";
 				//cout << file.second<< endl<<endl;
 			}
 	    		cout <<endl<<endl;

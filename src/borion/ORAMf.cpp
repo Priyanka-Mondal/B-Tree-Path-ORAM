@@ -125,12 +125,11 @@ void ORAMf::FetchPath(int leaf) {
             }
         }
     }
-    cout<<"bids at the end of FetchPath for"<< leaf<<endl;
-    for(auto c: cache)
+    /*for(auto c: cache)
     {
 	    Bid k = c.first;
 	    cout <<k<< endl;
-    }
+    }*/
 }
 
 // Gets a list of blocks on the cache which can be placed at a specific point
@@ -169,11 +168,8 @@ void ORAMf::WritePath(int leaf, int d) {
             block.data = convertNodefToBlock(curnode);
 	    if(curnode->key != block.id)
 	    {
-	          //cout <<"curnode!=block.id"<<curnode->key<<block.id<<endl;
 		    block.id = 0; // curnode->key;
 		    block.data.resize(blockSize, 0);
-        	   //std::fill(curnode->value.begin(), curnode->value.end(), 0);
-            	    //block.data = convertNodefToBlock(curnode);
 	    }
             delete curnode;
             cache.erase(temp);
@@ -226,7 +222,6 @@ void ORAMf::DeleteData(Bid bid, Nodef* node)
 // Fetches a block, allowing you to read and write in a block
 
 void ORAMf::Access(Bid bid, Nodef*& node, int lastLeaf, int newLeaf) {
-	cout <<"FetchPath for"<< lastLeaf<<endl;
     FetchPath(lastLeaf);
     node = ReadData(bid);
     if (node != NULL) {

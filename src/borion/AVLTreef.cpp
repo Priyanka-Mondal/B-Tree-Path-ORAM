@@ -182,7 +182,6 @@ Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, string value) {
         pos = oram->WriteNodef(key, nnode);
         return nnode->key;
     }
-	    cout <<"key==nodef"<<key<<rootKey<<pos<<endl;
     Nodef* node = oram->ReadNodef(rootKey, pos, pos);
     if (key < node->key) {
 	    //cout <<"key<nodef"<<key<<node->key<<node->leftPos<<endl;

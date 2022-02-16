@@ -23,7 +23,7 @@ public:
     Bid createBid(string keyword,string id);
     void insertWrap(string cont, string ind, bool batch);
     void insertWrapper(vector<string> kws, vector<string> blocks, string ind);
-    void insert(string keyword, string ind); // inserts a keyword for ind
+    void insertkw(string keyword, string ind); // inserts a keyword for ind
     void insertdel(string ind);
     void insertFile(string keyword, vector<string> blocks);
     void setupInsert(string keyword, pair<int,string> ind);
@@ -31,9 +31,8 @@ public:
     void removekw(vector<string> keyword, string ind); /* LATER*/
     //void setupRemove(string keyword, int ind);
     vector<pair<string,string>> searchkw(string keyword);
-    pair<int,string> searchfileblock(string ind, int blk);
-    string searchfileblocknum(string ind);
     map<string,string> searchWrapper(string keyword);
+    vector<pair<string,string>> search(string keyword);
    void setupInsertWrapper(vector<string> kws,vector<string> blocks,string ind);
     void setupInsertkws(vector<string> kws, string ind);
     void setupInsertFile(string ind, vector<string> blocks);
