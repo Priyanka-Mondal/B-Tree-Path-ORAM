@@ -35,17 +35,14 @@ pair<string,string> OMAP::find(Bid key) {
 
 Bid OMAP::remove(Bid delKey)
 {
-	cout <<"in omap remove"<<endl;
-	return 0;
-	/*
     treeHandler->startOperation();
     if (rootKey == 0) {
-        rootKey = treeHandler->remove(0, rootPos, delKey);
+        rootKey = treeHandler->removeMain(0, rootPos, delKey);
     } else {
-        rootKey = treeHandler->remove(rootKey, rootPos, delKey);
+        rootKey = treeHandler->removeMain(rootKey, rootPos, delKey);
     }
     treeHandler->finishOperation(false, rootKey, rootPos);
-    */
+    
 }
 
 

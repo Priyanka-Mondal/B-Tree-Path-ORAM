@@ -41,12 +41,12 @@ Nodef* AVLTreef::newNodef(Bid key, string value) {
 // See the diagram given above.
 
 Nodef* AVLTreef::rightRotate(Nodef* y) {
-    Nodef* x = oram->ReadNodef(y->leftID);
+    Nodef* x = oram->ReadNodef(y->leftID,y->leftPos,y->leftPos);
     Nodef* T2;
     if (x->rightID == 0) {
         T2 = newNodef(0, "");
     } else {
-        T2 = oram->ReadNodef(x->rightID);
+        T2 = oram->ReadNodef(x->rightID,x->rightPos,x->rightPos);
     }
 
     // Perform rotation
@@ -69,12 +69,12 @@ Nodef* AVLTreef::rightRotate(Nodef* y) {
 // See the diagram given above.
 
 Nodef* AVLTreef::leftRotate(Nodef* x) {
-    Nodef* y = oram->ReadNodef(x->rightID);
+    Nodef* y = oram->ReadNodef(x->rightID,x->rightPos,x->rightPos);
     Nodef* T2;
     if (y->leftID == 0) {
         T2 = newNodef(0, "");
     } else {
-        T2 = oram->ReadNodef(y->leftID);
+        T2 = oram->ReadNodef(y->leftID,y->leftPos,y->leftPos);
     }
 
 
@@ -427,8 +427,8 @@ Bid AVLTreef::balance(Nodef* node, int &pos)
 int AVLTreef::deleteNode(Nodef* nodef)
 {
 	Nodef* free = newNodef(0,"");
-	//oram->DeleteNode(nodef->key,free);
-	oram->WriteNodef(nodef->key,free);
+	oram->DeleteNode(nodef->key,free);
+	//oram->WriteNodef(nodef->key,free);
 	return 0;
 }
 
@@ -470,19 +470,15 @@ Nodef* b=oram->ReadNodef(delnode->rightID,delnode->rightPos,delnode->rightPos);
 	Nodef* minnode;
 	if(b == NULL || b->key == 0)
 	{
-		//cout << "the min value node is->"<< delnode->key<<endl;
 		minnode = delnode;
 	}
 	else
 	{
 		Nodef* mn = minValueNode(b->key,b->pos,b);
-		//cout << "the min value node is:"<< mn->key<<endl;
 		minnode = oram->ReadNodef(mn->key,mn->pos,mn->pos);
 	}
-	
 	if(delKey == minnode->key)
 	{//no right child of delKey
-		//cout <<"FIRST CASE:rootKey == minnode->key"<< endl;
 Nodef* lc = oram->ReadNodef(delnode->leftID,delnode->leftPos,delnode->leftPos);
 		if(lc == NULL || lc->key ==0)
 			lc = newNodef(0,"");
@@ -515,7 +511,6 @@ Nodef* lc = oram->ReadNodef(delnode->leftID,delnode->leftPos,delnode->leftPos);
 		}
 		else //minnode does not have leftID in general
 		{//in this case minnode is parmin's left child always
-		//	cout <<"THIRD case"<< endl;	
 	Nodef* rc = oram->ReadNodef(minnode->rightID,minnode->rightPos,minnode->rightPos);
 			if(rc == NULL || rc->key ==0)
 				rc = newNodef(0,"");

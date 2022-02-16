@@ -301,7 +301,6 @@ void BOrion::insertFile(string ind, vector<string> blocks)
 void BOrion::remove(string ind) 
 {
 	string file = "";
-	//Bid blockcnt = createBid(ind, 0);
 	Bid blockcnt(ind);
 	string block_cnt = fcnt->find(blockcnt);
 	int bc = 0; 
@@ -315,17 +314,17 @@ void BOrion::remove(string ind)
 		block_cnt = block_cnt.substr(FID_SIZE,block_cnt.size());
 		bc = stoI(block_cnt);
 	}
-	srch->insert(blockcnt,make_pair(FS,""));//srch->remove(blockcnt)
+        fcnt->remove(blockcnt);	
 	Bid blk;
 	for (int i = 1; i <= bc ; i++)
 	{
 		blk = createBid(ind,i);
 		string ret = srch->find(blk).second;
 		file = file.append(ret);
-		srch->insert(blk,make_pair(FB,""));//srch->remove(blk);	
+		//srch->insert(blk,make_pair(FB,""));
+		srch->remove(blk);	
 	}
 	cout <<"Removed "<< bc <<" blocks from srch"<<endl;
-	
 	vector<string> kws1;
 	boost::split(kws1, file, boost::is_any_of(delimiters));
 	vector<string> kws = getUniquedWords(kws1);
@@ -366,9 +365,9 @@ void BOrion::removekw(vector<string> kws, string ind)
                 Bid cur = createBid(keyword, block_del);
         	string bl_del = srch->find(cur).second;
     		
-		cout << "Before[" << block <<"]"<< endl << endl ; 
+		//cout << "Before[" << block <<"]"<< endl << endl ; 
     		block.replace((pos-1)*FID_SIZE,FID_SIZE,"########");
-    		cout << "After[" << block <<"]"<< endl << endl ;
+    		//cout << "After[" << block <<"]"<< endl << endl ;
     		
 		srch->insert(lastKey,make_pair(KB,block)); // cur
     	        
@@ -378,24 +377,27 @@ void BOrion::removekw(vector<string> kws, string ind)
     	        else
              	        blsec = bl_del;
     	        
-		cout << "BEFORE[" << blsec <<"]"<< endl << endl ; 
+		//cout << "BEFORE[" << blsec <<"]"<< endl << endl ; 
                 blsec.replace((pos_in_blockdel-1)*FID_SIZE,FID_SIZE,lastid);
-    	        cout << "AFTER[" << blsec <<"]"<< endl << endl ;
+    	        //cout << "AFTER[" << blsec <<"]"<< endl << endl ;
     	        srch->insert(cur,make_pair(KB,blsec));
          }
          else
          {
  	       block.replace((pos-1)*FID_SIZE,FID_SIZE,"########");
- 	       cout << "LAST after[" << block <<"]"<< endl << endl;
+ 	       //cout << "LAST after[" << block <<"]"<< endl << endl;
  	       srch->insert(lastKey,make_pair(KB,block));
          }
        } 
        else 
        {
-        	fcnt->insert(firstKey,"");//srch->remove(firstKey);
-                srch->insert(lastKey,make_pair("",""));//srch->remove(lastKey);
+        	//fcnt->insert(firstKey,"");
+		fcnt->remove(firstKey);
+                //srch->insert(lastKey,make_pair("",""));
+		srch->remove(lastKey);
        }
-       updt->insert(mapKey,"");//updt->remove(mapKey); // delete in updt
+       //updt->insert(mapKey,"");
+       updt->remove(mapKey); // delete in updt
     }
   }
 }
@@ -408,7 +410,6 @@ vector<pair<string,string>> BOrion::search(string keyword)
     vector <string> counts;
     Bid mapKey(keyword);
     auto updt_cnt = fcnt->find(mapKey); //0. get file count i.e. updc 
-    cout <<"file count :"<< updt_cnt<<endl;
     int updc;    
     if (updt_cnt != "") 
 	updc = stoI(updt_cnt);
@@ -643,39 +644,6 @@ return files;
 }
 
 
-
-vector<pair<string,string>> BOrion::searchkw(string keyword) 
-{
-    vector<pair<string,string>> result;
-    vector<Bid> bids;
-    Bid mapKey = createBid(keyword, 0);
-    auto updt = srch->find(mapKey);
-    string updt_cnt = updt.second;
-    int updc;
-
-    if (updt_cnt != "") 
-    {
-        stringstream convstoi(updt_cnt);
-        convstoi >> updc;
-	int block_num = get_block_num(updc,COM);
-
-        for (int i = 1; i <= block_num; i++) 
-	{   
-            Bid bid = createBid(keyword, i);
-            bids.push_back(bid);
-        }
-    }
-    else
-    {
-	    return result;
-    }
-
-    auto tmpRes = srch->batchSearch(bids);
-    for(auto item:tmpRes){
-        result.push_back(item);
-    }
-    return result;
-}
 
 void BOrion::beginSetup() 
 {

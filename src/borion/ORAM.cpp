@@ -158,10 +158,16 @@ void ORAM::WritePath(int leaf, int d) {
         for (int z = 0; z < std::min((int) validBlocks.size(), Z); z++) {
             Block &block = bucket[z];
             block.id = validBlocks[z];
-            Node* curnode = cache[block.id]; /// MAYBE HERE put 0, another cacheto remember deleted nodes
+	    Bid temp = block.id;
+            Node* curnode = cache[block.id];
             block.data = convertNodeToBlock(curnode);
+	    if(curnode->key != block.id)
+	    {
+		    block.id = 0; // curnode->key;
+		    block.data.resize(blockSize, 0);
+	    }
             delete curnode;
-            cache.erase(block.id);
+            cache.erase(temp);
         }
         // Fill any empty spaces with dummy blocks
         for (int z = validBlocks.size(); z < Z; z++) {
@@ -194,6 +200,17 @@ void ORAM::WriteData(Bid bid, Node* node) {
     } else {
         throw runtime_error("There is no more space in ORAM");
     }
+}
+
+void ORAM::DeleteData(Bid bid, Node* node) 
+{
+	if(bid != node->key)
+	{
+        	cache[bid]=node; 
+        	store->IncreaseEmptyNumbers();
+		int ret = store->GetEmptySize();
+		cout <<bid<<"empty nodes in srch:"<< ret <<endl;
+	}
 }
 
 // Fetches a block, allowing you to read and write in a block
@@ -269,6 +286,24 @@ int ORAM::WriteNode(Bid bid, Node* node) {
         modified.insert(bid);
         return node->pos;
     }
+}
+
+
+int ORAM::DeleteNode(Bid bid, Node* node) {
+    if (bid == 0) 
+    {
+       throw runtime_error("Nodef id is not set in DeleteNode");
+    }
+    if (cache.count(bid) != 0) 
+    {
+	    cache.erase(bid);
+	    cache[bid] = node;
+    }
+        //modified.insert(bid);
+	//if(modified.count(bid))
+	//	modified.erase(bid);
+    DeleteData(bid, node);
+        return node->pos;
 }
 
 Node* ORAM::convertBlockToNode(block b) {

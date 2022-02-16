@@ -214,7 +214,7 @@ void ORAMf::DeleteData(Bid bid, Nodef* node)
         	cache[bid]=node; 
         	store->IncreaseEmptyNumbers();
 		int ret = store->GetEmptySize();
-		cout <<bid<<"empty nodes:"<< ret <<endl;
+		cout <<bid<<"empty nodes in ORAMf:"<< ret <<endl;
 	}
 }
 

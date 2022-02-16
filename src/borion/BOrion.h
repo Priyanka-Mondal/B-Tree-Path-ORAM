@@ -21,21 +21,24 @@ private:
 public:
     Bid createBid(string keyword,int number);
     Bid createBid(string keyword,string id);
+
     void insertWrap(string cont, string ind, bool batch);
     void insertWrapper(vector<string> kws, vector<string> blocks, string ind);
-    void insertkw(string keyword, string ind); // inserts a keyword for ind
+    void insertkw(string keyword, string ind);
     void insertdel(string ind);
     void insertFile(string keyword, vector<string> blocks);
-    void setupInsert(string keyword, pair<int,string> ind);
-    void remove(string ind); 
-    void removekw(vector<string> keyword, string ind); /* LATER*/
-    //void setupRemove(string keyword, int ind);
-    vector<pair<string,string>> searchkw(string keyword);
-    map<string,string> searchWrapper(string keyword);
-    vector<pair<string,string>> search(string keyword);
+    void setupInsert(string keyword, pair<int,string> ind); //crashes
    void setupInsertWrapper(vector<string> kws,vector<string> blocks,string ind);
     void setupInsertkws(vector<string> kws, string ind);
     void setupInsertFile(string ind, vector<string> blocks);
+    
+    void remove(string ind); 
+    void removekw(vector<string> keyword, string ind);
+    //void setupRemove(string keyword, int ind);
+    
+    map<string,string> searchWrapper(string keyword);
+    vector<pair<string,string>> search(string keyword);
+    
     void print();
 
     BOrion(bool useHDD,int maxSize);    

@@ -44,12 +44,12 @@ Node* AVLTree::newNode(Bid key, pair<string,string> value) {
 // See the diagram given above.
 
 Node* AVLTree::rightRotate(Node* y) {
-    Node* x = oram->ReadNode(y->leftID);
+    Node* x = oram->ReadNode(y->leftID,y->leftPos,y->leftPos);
     Node* T2;
     if (x->rightID == 0) {
         T2 = newNode(0, make_pair("",""));
     } else {
-        T2 = oram->ReadNode(x->rightID);
+        T2 = oram->ReadNode(x->rightID,x->rightPos,x->rightPos);
     }
 
     // Perform rotation
@@ -72,12 +72,12 @@ Node* AVLTree::rightRotate(Node* y) {
 // See the diagram given above.
 
 Node* AVLTree::leftRotate(Node* x) {
-    Node* y = oram->ReadNode(x->rightID);
+    Node* y = oram->ReadNode(x->rightID,x->rightPos,x->rightPos);
     Node* T2;
     if (y->leftID == 0) {
         T2 = newNode(0, make_pair("",""));
     } else {
-        T2 = oram->ReadNode(y->leftID);
+        T2 = oram->ReadNode(y->leftID,y->leftPos,y->leftPos);
     }
 
 
@@ -195,18 +195,6 @@ Node* AVLTree::search(Node* head, Bid key) {
 }
 
 
-Node* AVLTree::minValueNode(Node* head)
-{
-	Node* current = head;
-	//while((current!= NULL || current->key !=0) && current->leftID!=0)
-	while(current->leftID!=0)
-		current = oram->ReadNode(current->leftID);
-         
-	return current;
-}
-
-
-
 /**
  * a recursive search function which traverse binary tree to find the target node
  */
@@ -276,4 +264,455 @@ void AVLTree::finishOperation(bool find, Bid& rootKey, int& rootPos) {
 int AVLTree::RandomPath() {
     int val = dis(mt);
     return val;
+}
+
+Node* AVLTree::minValueNode(Bid rootKey, int rootPos, Node* rootroot)
+{
+	Node* curNode = oram->ReadNode(rootKey,rootPos,rootPos);
+	if(curNode == NULL || curNode->key ==0)
+	{
+		return rootroot;
+	}
+	else
+	{
+		return minValueNode(curNode->leftID,curNode->leftPos, curNode);
+	}
+}
+
+
+
+Node* AVLTree::parentOf(Bid parentKey, int ppos, Bid childKey, int cpos, Bid key)
+{
+	Node* parNode = oram->ReadNode(parentKey,ppos,ppos);
+	//cout <<"parent key of child key is"<<parNode->key<<childKey<<endl;
+	if(key == parNode->key)
+		return NULL;
+	else
+	{
+		Node* cNode = oram->ReadNode(childKey,cpos,cpos);
+		if(key == cNode->key)
+		{
+			return parNode;
+		}
+		else if(key<cNode->key)
+		{
+		return parentOf(cNode->key,cNode->pos,cNode->leftID,cNode->leftPos,key);
+		}
+		else if(key>cNode->key)
+		{
+		return parentOf(cNode->key,cNode->pos,cNode->rightID,cNode->rightPos,key);
+		}
+	}
+}
+
+
+
+Bid AVLTree::balance(Node* node, int &pos)
+{
+    Bid key = node->key;
+    int balance = getBalance(node);
+    //cout <<"balance is:"<<balance<<endl;
+    if (balance > 1 )
+    {
+	    Node* leftChild = oram->ReadNode(node->leftID,node->leftPos,node->leftPos);
+    	    if(getBalance(leftChild)>=0)
+	    {
+	    	//cout <<"Left Left Case" <<endl;
+        	Node* res = rightRotate(node);
+        	pos = res->pos;
+        	return res->key;
+	    }
+	    if(getBalance(leftChild)<0)
+	    {
+	    	 //cout <<"Left Right Case" <<endl;
+		 Node* res = leftRotate(leftChild);
+        	 node->leftID = res->key;
+        	 node->leftPos = res->pos;
+        	 oram->WriteNode(node->key, node);
+		 Node* res2 = rightRotate(node);
+		 pos = res2->pos;
+		 return res2->key;
+	    }
+    }
+    if(balance < -1)
+    {
+	    Node* rightChild=oram->ReadNode(node->rightID,node->rightPos,node->rightPos);
+	    if(getBalance(rightChild)<=0)
+	    {
+	    	//cout <<"Right Right Case" <<endl;
+		Node* res = leftRotate(node);
+		pos = res->pos;
+		return res->key;
+	    }
+	    if(getBalance(rightChild)>0)
+	    {
+	    	    //cout <<"Right Left Case" <<endl;
+		    Node* res = rightRotate(rightChild);
+		    node->rightID = res->key;
+		    node->rightPos = res->pos;
+		    oram->WriteNode(node->key,node);
+		    Node* res2 = leftRotate(node);
+		    pos = res2->pos;
+		    return res2->key;
+	    }
+    }
+    //oram->WriteNode(node->key, node);
+    return node->key;
+}
+
+
+int AVLTree::deleteNode(Node* nodef)
+{
+	Node* free = newNode(0,make_pair("",""));
+	oram->DeleteNode(nodef->key,free);
+	//oram->WriteNode(nodef->key,free);
+	return 0;
+}
+
+
+Bid AVLTree:: removeMain(Bid rootKey,int& pos, Bid delKey)
+{
+	if(rootKey != delKey || rootKey <delKey || rootKey > delKey)
+	{// it does not work without these 3 checks ??
+		//cout<<"rootKey != delKey(removeMain)"<<endl;
+		Node* paren = parentOf(rootKey,pos,rootKey,pos,delKey);
+		int delPos;
+		if(delKey == paren->leftID)
+			delPos = paren->leftPos;
+		else if(delKey == paren->rightID)
+			delPos = paren->rightPos;
+		rootKey = removeDel(rootKey,pos,delKey,delPos,paren);
+		return rootKey;
+	}
+	else if(rootKey == delKey)
+	{
+		//cout<<"rootKey == delKey (removeMain)"<<endl;
+		rootKey = removeRoot(rootKey, pos);
+		return rootKey;
+	}
+	else
+	{
+		cout<<"WHY this (removeMain)"<<endl;
+		return rootKey;
+	}
+}
+
+
+
+Bid AVLTree::removeRoot(Bid rootKey, int& pos)
+{
+	Node* delnode =oram->ReadNode(rootKey,pos,pos); 
+	Bid delKey = rootKey;
+Node* b=oram->ReadNode(delnode->rightID,delnode->rightPos,delnode->rightPos);
+	Node* minnode;
+	if(b == NULL || b->key == 0)
+	{
+		minnode = delnode;
+	}
+	else
+	{
+		Node* mn = minValueNode(b->key,b->pos,b);
+		minnode = oram->ReadNode(mn->key,mn->pos,mn->pos);
+	}
+	if(delKey == minnode->key)
+	{//no right child of delKey
+Node* lc = oram->ReadNode(delnode->leftID,delnode->leftPos,delnode->leftPos);
+		if(lc == NULL || lc->key ==0)
+			lc = newNode(0,make_pair("",""));
+		pos = lc->pos;
+		deleteNode(delnode);
+		return lc->key;
+	}
+	else
+	{
+
+		Node* pm=parentOf(rootKey,pos,rootKey,pos,minnode->key);
+		Node* parmin = oram->ReadNode(pm->key,pm->pos,pm->pos);
+		//cout << "parent of minnode is:"<< parmin->key<<endl;
+		if(delKey == parmin->key)
+		{//no leftchild of minnode //minnode is delKey's right child
+		//	cout <<"SECOND CASE: rootKey == parmin->key"<< endl;
+	Node* lc = oram->ReadNode(delnode->leftID,delnode->leftPos,delnode->leftPos);
+			if(lc == NULL || lc->key ==0)
+				lc = newNode(0,make_pair("",""));
+			minnode->leftID = lc->key;
+			minnode->leftPos = lc->pos;
+			minnode->height =  max(height(minnode->leftID,minnode->leftPos), height(minnode->rightID, minnode->rightPos)) + 1;
+			oram->WriteNode(minnode->key,minnode);
+			int minPos = minnode->pos;
+			Bid minKey = balance(minnode,minnode->pos);
+			minnode = oram->ReadNode(minKey,minPos,minPos);
+			pos = minnode->pos;
+			deleteNode(delnode);
+			return minnode->key;
+		}
+		else //minnode does not have leftID in general
+		{//in this case minnode is parmin's left child always
+	Node* rc = oram->ReadNode(minnode->rightID,minnode->rightPos,minnode->rightPos);
+			if(rc == NULL || rc->key ==0)
+				rc = newNode(0,make_pair("",""));
+			parmin->leftID = rc->key;
+			parmin->leftPos = rc->pos;
+			parmin->height = max(height(parmin->leftID,parmin->leftPos), height(parmin->rightID, parmin->rightPos)) + 1;
+			oram->WriteNode(parmin->key,parmin);
+			minnode->leftID = delnode->leftID;
+			minnode->leftPos = delnode->leftPos;
+			minnode->rightID = delnode->rightID;
+			minnode->rightPos = delnode->rightPos;
+			minnode->height = max(height(minnode->leftID,minnode->leftPos), height(minnode->rightID, minnode->rightPos)) + 1;
+			oram->WriteNode(minnode->key,minnode);
+			int minPos = minnode->pos;
+			Bid minKey = balanceDel(minnode->key,minnode->pos, parmin);
+			minnode = oram->ReadNode(minKey,minPos,minPos);
+			pos = minnode->pos;
+			deleteNode(delnode);
+			return minnode->key;
+		}	
+	}
+}
+
+
+Bid AVLTree::removeDel(Bid rootKey,int& pos,Bid delKey,int delPos,Node* paren)
+{
+	Node* node = oram->ReadNode(rootKey, pos, pos);
+	if(node->key > paren->key)
+	{
+		node->leftID=removeDel(node->leftID,node->leftPos,delKey,delPos,paren);
+	}
+	else if(node->key < paren->key)
+	{
+	     node->rightID=removeDel(node->rightID,node->rightPos,delKey,delPos,paren);
+	}
+	else if(node->key == paren->key)
+	{
+		node->key = realDelete(node,delKey,delPos);// int& node->pos
+		//paren->key
+	}
+//BALANCE:
+    node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
+    int balance = getBalance(node);
+    //cout << "Balance is:"<<balance<<endl;
+    Bid key = node->key;
+    if (balance > 1 )
+    {
+	    Node* leftChild = oram->ReadNode(node->leftID,node->leftPos,node->leftPos);
+    	    if(getBalance(leftChild)>=0)
+	    {
+	    	//cout <<"Left Left Case" <<endl;
+        	Node* res = rightRotate(node);
+        	pos = res->pos;
+        	return res->key;
+	    }
+	    if(getBalance(leftChild)<0)
+	    {
+	    	 //cout <<"Left Right Case" <<endl;
+		 Node* res = leftRotate(leftChild);
+        	 node->leftID = res->key;
+        	 node->leftPos = res->pos;
+        	 oram->WriteNode(node->key, node);
+		 Node* res2 = rightRotate(node);
+		 pos = res2->pos;
+		 return res2->key;
+	    }
+    }
+    if(balance < -1)
+    {
+	    Node* rightChild=oram->ReadNode(node->rightID,node->rightPos,node->rightPos);
+	    if(getBalance(rightChild)<=0)
+	    {
+	        //cout <<"Right Right Case" <<endl;
+		Node* res = leftRotate(node);
+		pos = res->pos;
+		return res->key;
+	    }
+	    if(getBalance(rightChild)>0)
+	    {
+	            //cout <<"Right Left Case" <<endl;
+		    Node* res = rightRotate(rightChild);
+		    node->rightID = res->key;
+		    node->rightPos = res->pos;
+		    oram->WriteNode(node->key,node);
+		    Node* res2 = leftRotate(node);
+		    pos = res2->pos;
+		    return res2->key;
+	    }
+    }
+
+    oram->WriteNode(node->key, node);
+    return node->key;
+}
+
+
+
+Bid AVLTree::realDelete(Node* paren,Bid delKey,int delPos)
+{
+	Node* delnode =oram->ReadNode(delKey,delPos,delPos); 
+Node* b=oram->ReadNode(delnode->rightID,delnode->rightPos,delnode->rightPos);
+	Node* minnode;
+	if(b == NULL || b->key == 0)
+	{
+		//cout << "the min value node is->"<< delnode->key<<endl;
+	minnode = oram->ReadNode(delnode->key,delnode->pos,delnode->pos);
+	}
+	else
+	{
+		Node* mn = minValueNode(b->key,b->pos,b);
+		//cout << "the min value node is:"<< mn->key<<endl;
+		minnode = oram->ReadNode(mn->key,mn->pos,mn->pos);
+	}
+Node* pm=parentOf(paren->key,paren->pos,paren->key,paren->pos,minnode->key);
+	Node* parmin = oram->ReadNode(pm->key,pm->pos,pm->pos);
+	//cout << "parent of minnode is:"<< parmin->key<<endl;
+	if(delKey == minnode->key)//paren->key == parmin->key
+	{//no right child of delKey
+	//	cout <<"FIRST CASE:delKey == minnode->key"<< endl;
+Node* lc = oram->ReadNode(delnode->leftID,delnode->leftPos,delnode->leftPos);
+		if(lc == NULL || lc->key ==0)
+			lc = newNode(0,make_pair("",""));
+		if(paren->leftID == minnode->key)
+		{
+			paren->leftID = lc->key;
+			paren->leftPos = lc->pos;
+		}
+		else if(paren->rightID == minnode->key)
+		{
+			paren->rightID = lc->key;
+			paren->rightPos = lc->pos;
+		}
+		paren->height=max(height(paren->leftID,paren->leftPos), height(paren->rightID, paren->rightPos)) + 1;
+		oram->WriteNode(paren->key,paren);
+		deleteNode(delnode);
+		return paren->key;
+	}
+	else if(delKey == parmin->key)
+	{//no leftchild of minnode //minnode is delKey right child
+	//	cout <<"SECOND CASE: delKey == parmin->key"<< endl;
+Node* lc = oram->ReadNode(delnode->leftID,delnode->leftPos,delnode->leftPos);
+		if(lc == NULL || lc->key ==0)
+			lc = newNode(0,make_pair("",""));
+		minnode->leftID = lc->key;
+		minnode->leftPos = lc->pos;
+		minnode->height =  max(height(minnode->leftID,minnode->leftPos), height(minnode->rightID, minnode->rightPos)) + 1;
+		oram->WriteNode(minnode->key,minnode);
+		int minPos = minnode->pos;
+		Bid minKey = balance(minnode,minnode->pos);
+		minnode = oram->ReadNode(minKey,minPos,minPos);
+		if(paren->leftID == delKey)
+		{
+			paren->leftID = minnode->key;
+			paren->leftPos = minnode->pos;
+		}
+		else if(paren->rightID == delKey)
+		{
+			paren->rightID = minnode->key;
+			paren->rightPos = minnode->pos;
+		}
+		paren->height=max(height(paren->leftID,paren->leftPos), height(paren->rightID, paren->rightPos)) + 1;
+		oram->WriteNode(paren->key,paren);
+		deleteNode(delnode);
+		return paren->key;
+	}
+	else //minnode does not have leftID in general
+	{//in this case minnode is parmin's left child always
+		//cout <<"THIRD case"<< endl;	
+Node* rc = oram->ReadNode(minnode->rightID,minnode->rightPos,minnode->rightPos);
+		if(rc == NULL || rc->key ==0)
+			rc = newNode(0,make_pair("",""));
+		parmin->leftID = rc->key;
+		parmin->leftPos = rc->pos;
+		parmin->height = max(height(parmin->leftID,parmin->leftPos), height(parmin->rightID, parmin->rightPos)) + 1;
+		oram->WriteNode(parmin->key,parmin);
+		minnode->leftID = delnode->leftID;
+		minnode->leftPos = delnode->leftPos;
+		minnode->rightID = delnode->rightID;
+		minnode->rightPos = delnode->rightPos;
+		minnode->height = max(height(minnode->leftID,minnode->leftPos), height(minnode->rightID, minnode->rightPos)) + 1;
+		oram->WriteNode(minnode->key,minnode);
+		int minPos = minnode->pos;
+		Bid minKey = balanceDel(minnode->key,minnode->pos, parmin);
+		minnode = oram->ReadNode(minKey,minPos,minPos);
+		if(paren->leftID == delKey)
+		{
+			paren->leftID = minnode->key;
+			paren->leftPos = minnode->pos;
+		}
+		else if(paren->rightID == delKey)
+		{
+			paren->rightID = minnode->key;
+			paren->rightPos = minnode->pos;
+		}
+		paren->height=max(height(paren->leftID,paren->leftPos), height(paren->rightID, paren->rightPos)) + 1;
+		oram->WriteNode(paren->key,paren);
+		deleteNode(delnode);
+		return paren->key;
+	}	
+}
+
+
+Bid AVLTree::balanceDel(Bid key, int& pos, Node* parmin)
+{
+	Node* node = oram->ReadNode(key,pos,pos);
+	//cout <<"IN BALANCEDEL:"<< node->key<<endl;
+	if(node->key < parmin->key)
+	{
+		node->rightID = balanceDel(node->rightID,node->rightPos,parmin);
+	}
+	else if(node->key > parmin->key)
+	{
+		node->leftID = balanceDel(node->leftID,node->leftPos,parmin);
+	}
+	//else if(node->key == parmin->key)
+	//{
+
+    node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
+    int balance = getBalance(node);
+    //cout <<"balance is:"<<balance<<endl;
+    if (balance > 1 )
+    {
+	    Node* leftChild = oram->ReadNode(node->leftID,node->leftPos,node->leftPos);
+    	    if(getBalance(leftChild)>=0)
+	    {
+	    	//cout <<"Left Left Case" <<endl;
+        	Node* res = rightRotate(node);
+        	pos = res->pos;
+        	return res->key;
+	    }
+	    if(getBalance(leftChild)<0)
+	    {
+	    	 //cout <<"Left Right Case" <<endl;
+		 Node* res = leftRotate(leftChild);
+        	 node->leftID = res->key;
+        	 node->leftPos = res->pos;
+        	 oram->WriteNode(node->key, node);
+		 Node* res2 = rightRotate(node);
+		 pos = res2->pos;
+		 return res2->key;
+	    }
+    }
+    if(balance < -1)
+    {
+	    Node* rightChild=oram->ReadNode(node->rightID,node->rightPos,node->rightPos);
+	    if(getBalance(rightChild)<=0)
+	    {
+	    	//cout <<"Right Right Case" <<endl;
+		Node* res = leftRotate(node);
+		pos = res->pos;
+		return res->key;
+	    }
+	    if(getBalance(rightChild)>0)
+	    {
+	    	    //cout <<"Right Left Case" <<endl;
+		    Node* res = rightRotate(rightChild);
+		    node->rightID = res->key;
+		    node->rightPos = res->pos;
+		    oram->WriteNode(node->key,node);
+		    Node* res2 = leftRotate(node);
+		    pos = res2->pos;
+		    return res2->key;
+	    }
+    }
+
+  //}
+    oram->WriteNode(node->key, node);
+    return node->key;
 }
