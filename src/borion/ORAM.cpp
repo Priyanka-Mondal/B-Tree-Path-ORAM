@@ -245,6 +245,8 @@ Node* ORAM::ReadNode(Bid bid, int lastLeaf, int newLeaf) {
         if (node != NULL) {
             modified.insert(bid);
         }
+	else 
+		cout <<"node is NULL : "<< bid << endl ;
         return node;
     } else {
         modified.insert(bid);

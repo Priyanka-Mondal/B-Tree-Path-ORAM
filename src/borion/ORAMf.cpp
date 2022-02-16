@@ -125,6 +125,12 @@ void ORAMf::FetchPath(int leaf) {
             }
         }
     }
+    cout<<"bids at the end of FetchPath for"<< leaf<<endl;
+    for(auto c: cache)
+    {
+	    Bid k = c.first;
+	    cout <<k<< endl;
+    }
 }
 
 // Gets a list of blocks on the cache which can be placed at a specific point
@@ -220,6 +226,7 @@ void ORAMf::DeleteData(Bid bid, Nodef* node)
 // Fetches a block, allowing you to read and write in a block
 
 void ORAMf::Access(Bid bid, Nodef*& node, int lastLeaf, int newLeaf) {
+	cout <<"FetchPath for"<< lastLeaf<<endl;
     FetchPath(lastLeaf);
     node = ReadData(bid);
     if (node != NULL) {
@@ -228,9 +235,10 @@ void ORAMf::Access(Bid bid, Nodef*& node, int lastLeaf, int newLeaf) {
             cache.erase(bid);
         }
         cache[bid] = node;
-        if (find(leafList.begin(), leafList.end(), lastLeaf) == leafList.end()) {
+       if (find(leafList.begin(), leafList.end(), lastLeaf) == leafList.end()) 
+       {
             leafList.push_back(lastLeaf);
-        }
+       }
     }
 }
 
@@ -266,6 +274,8 @@ Nodef* ORAMf::ReadNodef(Bid bid, int lastLeaf, int newLeaf) {
         if (node != NULL) {
             modified.insert(bid);
         }
+	else 
+		cout <<"nodef is NULL : "<< bid << endl ;
         return node;
     } else {
         modified.insert(bid);
@@ -361,13 +371,8 @@ void ORAMf::finilize(bool find, Bid& rootKey, int& rootPos) {
     if (cache[rootKey] != NULL)
         rootPos = cache[rootKey]->pos;
 
-    int cnt = 0;
     for (int d = depth; d >= 0; d--) {
         for (unsigned int i = 0; i < leafList.size(); i++) {
-            cnt++;
-            if (cnt % 1000 == 0 && batchWrite) {
-                cout << "OMAP:" << cnt << "/" << (depth+1) * leafList.size() << " inserted" << endl;
-            }
             WritePath(leafList[i], d);
         }
     }

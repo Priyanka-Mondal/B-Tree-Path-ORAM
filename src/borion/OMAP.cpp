@@ -50,17 +50,13 @@ Bid OMAP::remove(Bid delKey)
 
 
 void OMAP::insert(Bid key, pair<string,string> value) {
-//	cout << "in OMAP insert 6[" << value.second << "]"<< endl;
     treeHandler->startOperation();
     if (rootKey == 0) {
-//	cout << "in OMAP inserted as root 7.1[" << value.second << "]"<< endl;
         rootKey = treeHandler->insert(0, rootPos, key, value);
     } else {
-  //     cout << "in OMAP inserted as NONroot 7.2[" << value.second << "]"<< endl;
         rootKey = treeHandler->insert(rootKey, rootPos, key, value);
     }
     treeHandler->finishOperation(false, rootKey, rootPos);
-    //cout << "in OMAP inserted fake access 8[" << value.second << "]"<< endl;
 }
 
 void OMAP::printTree() {
@@ -77,16 +73,20 @@ void OMAP::printTree() {
  * This function is used for batch insert which is used at the end of setup phase.
  */
 void OMAP::batchInsert(map<Bid, pair<string,string>> pairs) {
-    treeHandler->startOperation(true);
-    for (auto pair : pairs) {
-	    Bid key = pair.first;
-        if (rootKey == 0) {
+    //treeHandler->startOperation(true);
+    for (auto pair : pairs) 
+    {
+    	treeHandler->startOperation();
+        if (rootKey == 0) 
+	{
             rootKey = treeHandler->insert(0, rootPos, pair.first, pair.second);
-        } else {
+        } else 
+	{
             rootKey = treeHandler->insert(rootKey, rootPos, pair.first, pair.second);
         }
+        treeHandler->finishOperation(false, rootKey, rootPos);
     }
-    treeHandler->finishOperation(false, rootKey, rootPos);
+    //treeHandler->finishOperation(false, rootKey, rootPos);
 }
 
 /**

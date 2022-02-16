@@ -11,7 +11,7 @@ using namespace std;
 int fileid = 1;
 bool usehdd = false;
 BOrion borion(usehdd, 9000);  
-bool batch = true;
+bool batch = false;
 
 string toS(int id)
 {
@@ -38,7 +38,8 @@ string toS(int id)
 string getFileContent(string path)
 {
     ifstream file(path);
-    string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    string content((std::istreambuf_iterator<char>(file)), 
+		                             std::istreambuf_iterator<char>());
     return content;
 }
 
@@ -85,7 +86,8 @@ static void list_dir (const char * dir_name)
 			cout <<"HERE root 1: " << d_name<< endl ;
                         int path_length;
                         char path[PATH_MAX];
-                  path_length=snprintf(path,PATH_MAX,"%s/%s", dir_name, d_name);
+                  	path_length=snprintf(path,PATH_MAX,"%s/%s", 
+					                   dir_name, d_name);
                          if (path_length >= PATH_MAX) 
 			 {
                                  fprintf (stderr, "Path length too long.\n");
