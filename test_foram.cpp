@@ -60,8 +60,8 @@ vector<string> divideString(string filename, int blk, string id)
   	int i;
         vector<string> result;
         string temp="";
-         
-	for (i = 0; i < str.length(); i++) {
+        int strlength = str.length(); 
+	for (i = 0; i < strlength; i++) {
             if (i % sz == 0) {
 		  if(i!=0)
                   {
@@ -152,7 +152,6 @@ static void insert_dir (const char * dir_name)
 	      cout <<"+++++++++++++++++++++++"<<endl;
 	      boost::split(kws1, cont, boost::is_any_of(delimiters));
 	      kws =  getUniquedWords(kws1, id);
-	      int pos = 0;
 	      for (auto it = kws.begin(); it != kws.end(); it++)
 	      {
 		      if(neg.find(*it)!=neg.end())
@@ -235,7 +234,6 @@ void kwfileblocks(string file)
 	vector<string> kws, kws1, blocks;
 	string cont = getFileContent(file);
 	cout <<"++++++++++++++++++++++++++++++++"<<endl;
-        int str_size = cont.length();
 	cout <<"==================================="<< endl;
 	if(cont != "")
 	{

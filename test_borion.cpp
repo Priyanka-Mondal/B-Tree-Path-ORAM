@@ -10,7 +10,7 @@ using namespace std;
 
 int fileid = 1;
 bool usehdd = false;
-BOrion borion(usehdd, 900);  
+BOrion borion(usehdd, 900000);  
 bool batch = false; // true makes the program crash
 
 string toS(int id)
@@ -108,10 +108,10 @@ static void list_dir (const char * dir_name)
 int main(int, char**) 
 {
 
-	//list_dir("allen-p/deleted_items");
+	list_dir("allen-p/deleted_items");
 	//list_dir("allen-p");
 	//list_dir("may-l");
-	list_dir("tiny");
+	//list_dir("tiny");
 	cout << endl<<" SETUP INSERT DONE!"<< endl;
 	cout <<"=================================="<< endl;
 	cout <<"READY TO PERFORM QUERIES!" << endl;
@@ -137,13 +137,30 @@ int main(int, char**)
 			cout << "Enter the keyword to be searched: ";
 			string keyword;
 			cin>> keyword;
-	    		vector<pair<string,string>> files= borion.search(keyword);
-			cout <<"--------Search result---------"<<endl;
-	    		for(auto file:files)
+			map<string,string> files;
+	    	vector<pair<string,string>> results= borion.search(keyword);
+		cout <<"--------Search result---------"<<endl;
+		for(auto file:results)
+		{
+			string id = file.second.substr(0,FID_SIZE);
+			int sz = file.second.size();
+			string cont = file.second.substr(FID_SIZE,sz);
+			if(files.find(id)!=files.end())
 			{
-	    			cout << "["<<file.second.substr(0,FID_SIZE)<<"] ";
-				//cout << file.second<< endl<<endl;
+				string con = files.at(id);
+				con.append(cont);
+				files.erase(id);
+				files.insert(pair<string,string>(id,con));
 			}
+			else
+			{
+				files.insert(pair<string,string>(id,cont));
+			}
+		}
+		for(auto file : files)
+		{
+			cout <<"["<<file.first<<"]";
+		}
 	    		cout <<endl<<endl;
 			cout << "RESULT size: " << files.size() << endl<<endl;
 		}

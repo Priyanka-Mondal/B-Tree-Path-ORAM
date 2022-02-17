@@ -9,7 +9,7 @@
 #include <vector>
 #include "utils/Utilities.h"
 
-Server::Server(bool useHDD, bool deleteFiles) : edb_("mitra") {
+Server::Server(bool useHDD, bool deleteFiles) : edb_("MitraEDB") {
     this->useRocksDB = useHDD;
     this->deleteFiles = deleteFiles;
     this->useRocksDB = false;
