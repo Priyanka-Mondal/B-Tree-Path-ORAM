@@ -282,7 +282,6 @@ void BOrion::insertkw(string keyword, string ind)
 
 void BOrion::insertFile(string ind, vector<string> blocks)
 {
-	//Bid mapKey = createBid(ind, 0);
 	Bid mapKey(ind);
 	int sz = blocks.size();
         string par = ind;
@@ -321,7 +320,6 @@ void BOrion::remove(string ind)
 		blk = createBid(ind,i);
 		string ret = srch->find(blk).second;
 		file = file.append(ret);
-		//srch->insert(blk,make_pair(FB,""));
 		srch->remove(blk);	
 	}
 	cout <<"Removed "<< bc <<" blocks from srch"<<endl;
@@ -341,7 +339,6 @@ void BOrion::removekw(vector<string> kws, string ind)
       if (delcnt!="")
       {
         int del_cnt = stoI(delcnt);
-        //Bid firstKey = createBid(keyword,0);
 	Bid firstKey(keyword);
         string filecnt = fcnt->find(firstKey);
 	if(filecnt=="")
@@ -365,10 +362,7 @@ void BOrion::removekw(vector<string> kws, string ind)
                 Bid cur = createBid(keyword, block_del);
         	string bl_del = srch->find(cur).second;
     		
-		//cout << "Before[" << block <<"]"<< endl << endl ; 
     		block.replace((pos-1)*FID_SIZE,FID_SIZE,"########");
-    		//cout << "After[" << block <<"]"<< endl << endl ;
-    		
 		srch->insert(lastKey,make_pair(KB,block)); // cur
     	        
 		string blsec;
@@ -377,26 +371,20 @@ void BOrion::removekw(vector<string> kws, string ind)
     	        else
              	        blsec = bl_del;
     	        
-		//cout << "BEFORE[" << blsec <<"]"<< endl << endl ; 
                 blsec.replace((pos_in_blockdel-1)*FID_SIZE,FID_SIZE,lastid);
-    	        //cout << "AFTER[" << blsec <<"]"<< endl << endl ;
     	        srch->insert(cur,make_pair(KB,blsec));
          }
          else
          {
  	       block.replace((pos-1)*FID_SIZE,FID_SIZE,"########");
- 	       //cout << "LAST after[" << block <<"]"<< endl << endl;
  	       srch->insert(lastKey,make_pair(KB,block));
          }
        } 
        else 
        {
-        	//fcnt->insert(firstKey,"");
 		fcnt->remove(firstKey);
-                //srch->insert(lastKey,make_pair("",""));
 		srch->remove(lastKey);
        }
-       //updt->insert(mapKey,"");
        updt->remove(mapKey); // delete in updt
     }
   }

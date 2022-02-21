@@ -4,13 +4,27 @@
 #include <openssl/err.h>
 #include <string.h>
 #include <sse/crypto/prg.hpp>
+#include<ctime>
 
 using namespace std;
 using namespace boost::algorithm;
 
+int addascii(string k)
+{
+	int len = k.size();
+	int a = 0;
+	for(int i = 0; i< len; i++)
+	{
+		a = a+ int(k[i]);
+	}
+return a;
+}
+
+
 Client::Client(Server* server, bool deleteFiles, int keyworsSize, int filecnt) {
     this->server = server;
     this->deleteFiles = deleteFiles;
+    //this->fakefileids = fakefileids;
     bytes<Key> key{0};
     if (!localStorage) {
         omapw = new OMAP(keyworsSize, key);
@@ -20,6 +34,7 @@ Client::Client(Server* server, bool deleteFiles, int keyworsSize, int filecnt) {
 
 Client::Client(bool deleteFiles, int keyworsSize, int filecnt) {
     this->deleteFiles = deleteFiles;
+    //this->fakefileids = fakefileids;
     bytes<Key> key{0};
     if (!localStorage) {
         omapw = new OMAP(keyworsSize, key);
@@ -31,6 +46,11 @@ Client::~Client() {
 }
 
 
+void Client::addfakefileid(int fileid)
+{
+	fakefileids.push_back(fileid);
+}
+
 
 void Client::updateFile(OP op, int ind, string content, bool setup) 
 {
@@ -39,8 +59,8 @@ void Client::updateFile(OP op, int ind, string content, bool setup)
         omapw->treeHandler->oram->totalWrite = 0;
     }
     totalUpdateCommSize = 0;
-    prf_type file;
-    memset(file.data(), 0, AES_KEY_SIZE);
+    prf_type file; //
+    memset(file.data(), 0, AES_KEY_SIZE); //
     string id = to_string(ind);
     copy(id.begin(), id.end(), file.data());
     int accsCnt = 0;;
@@ -77,22 +97,25 @@ void Client::updateFile(OP op, int ind, string content, bool setup)
         }
     }
 
-    prf_type addr, rnd;
+    prf_type addr;
     getAESRandomValue(file.data(), 0, accsCnt, accsCnt, addr.data());
-    getAESRandomValue(file.data(), 1, accsCnt, accsCnt, rnd.data());
+//    getAESRandomValue(file.data(), 1, accsCnt, accsCnt, rnd.data());
 //    prf_type val = bitwiseXOR(content, op, rnd);
-    prf_type val;
+    file_type val;
      copy(content.begin(), content.end(), val.data());
     if (!localStorage) {
         totalUpdateCommSize = (sizeof (prf_type) * 2) + (omapf->treeHandler->oram->totalRead + omapf->treeHandler->oram->totalWrite)*(sizeof (prf_type) + sizeof (int));
     }
-    server->update(addr, val);
+    //cout << endl <<"val is"<< endl<< content<< endl<< endl;
+    server->updateFile(addr, val);
 }
 
 
 void Client::update(OP op, string keyword, int ind, bool setup) 
 {
-    if (!localStorage) {
+    cout << "inserting keyword:"<<keyword<<endl;
+    if (!localStorage) 
+    {
         omapw->treeHandler->oram->totalRead = 0;
         omapw->treeHandler->oram->totalWrite = 0;
     }
@@ -100,148 +123,337 @@ void Client::update(OP op, string keyword, int ind, bool setup)
     prf_type k_w;
     memset(k_w.data(), 0, AES_KEY_SIZE);
     copy(keyword.begin(), keyword.end(), k_w.data());
-    int fileCnt = 0, srcCnt = 0;
 
-    if (localStorage) {
-        if (FileCnt.find(k_w) == FileCnt.end()) {
+    int k = addascii(keyword);
+    srand(k);
+    int r = rand()%5; // make it 10 or something LATER
+    int bucket = pow(2,r);
+    if(BktCnt.find(k_w) ==  BktCnt.end())
+	    BktCnt[k_w] = bucket;
+    else
+	   bucket = BktCnt[k_w]; 
+    cout <<"bucket size is:"<< bucket<<endl;  
+    int fileCnt = 0, srcCnt = 0;
+    if (localStorage) 
+    {
+        if (FileCnt.find(k_w) == FileCnt.end()) 
+	{
             FileCnt[k_w] = 1;
             fileCnt = 1;
-        } else {
+        } 
+	else 
+	{
             FileCnt[k_w]++;
             fileCnt = FileCnt[k_w];
         }
-        if (deleteFiles) {
-            if (SrcCnt.find(k_w) == SrcCnt.end()) {
+        if (deleteFiles) 
+	{
+            if (SrcCnt.find(k_w) == SrcCnt.end()) 
+	    {
                 SrcCnt[k_w] = 0;
                 srcCnt = 0;
-            } else {
+            } 
+	    else 
                 srcCnt = SrcCnt[k_w];
-            }
         }
-    } else {
+    } 
+    else 
+    {
         Bid mapKey = getBid(keyword);
-        string fileCntStr = setup ? setupOMAP[mapKey] : omapw->incrementFileCnt(mapKey);
-        if (fileCntStr != "") {
+        string fileCntStr = setup ? 
+		            setupOMAP[mapKey] : omapw->incrementFileCnt(mapKey);
+        if (fileCntStr != "") 
+	{
             auto parts = Utilities::splitData(fileCntStr, "-");
             fileCnt = stoi(parts[0]);
             srcCnt = stoi(parts[1]);
         }
         fileCnt++;
-        if (setup) {
+        if (setup) 
+	{
             setupOMAP[mapKey] = to_string(fileCnt) + "-" + to_string(srcCnt);
         }
     }
+/*****got our bucket count fileCnt and SrcCnt for keyword k_w*****/
+prf_type t_k = k_w;
 
+
+  
+  if(fileCnt == 1) // first time inserting keyword // need to fill bucket
+  {
     prf_type addr, rnd;
+    k_w = t_k;
     getAESRandomValue(k_w.data(), 0, srcCnt, fileCnt, addr.data());
     getAESRandomValue(k_w.data(), 1, srcCnt, fileCnt, rnd.data());
     prf_type val = bitwiseXOR(ind, op, rnd);
-    if (!localStorage) {
+    if (!localStorage) 
+    {
         totalUpdateCommSize = (sizeof (prf_type) * 2) + (omapw->treeHandler->oram->totalRead + omapw->treeHandler->oram->totalWrite)*(sizeof (prf_type) + sizeof (int));
     }
-    server->update(addr, val);
-}
-
-
-vector<int> Client::search(int ind) 
-{
-   string id = to_string(ind);    
-    if (!localStorage) {
-        omapf->treeHandler->oram->totalRead = 0;
-        omapf->treeHandler->oram->totalWrite = 0;
-    }
-    totalSearchCommSize = 0;
-    string finalRes = "";
-    prf_type file;
-    memset(file.data(), 0, AES_KEY_SIZE);
-    copy(id.begin(), id.end(), file.data());
-    Bid mapKey = getBid(id);
-    int accsCnt = 0;
-    if (localStorage) {
-        if (AccsCnt.find(file) == AccsCnt.end()) {
-            return finalRes;
-        }
-        //fileCnt = FileCnt[k_w];
-        //if (deleteFiles) {
-        //    srcCnt = SrcCnt[k_w];
-        //}
-    } else {
-
-        string accsCntStr = omapf->find(mapKey);
-        if (accsCntStr != "") {
-            accsCnt = stoi(accsCntStr);
-        } else {
-            return finalRes;
-        }
-    }
-
-        prf_type rnd;
-        getAESRandomValue(k_w.data(), 0, srcCnt, i, rnd.data());
-    //    KList.emplace_back(rnd);
-    //    till here
-    vector<prf_type> encIndexes = server->search(KList);
+    server->update(addr, val, "real");
+    cout <<"apple inserted!"<<endl;
+     vector<int> temp = fakefileids;
+     for(int i = 2; i<= bucket; i++)
+     {
+         prf_type addr, rnd;
+	 k_w = t_k;
+         getAESRandomValue(k_w.data(), 0, srcCnt, i, addr.data());
+         getAESRandomValue(k_w.data(), 1, srcCnt, i, rnd.data());
+         int sz = temp.size();
+         int r = rand()% sz;
+         int id = temp[r];
+	 temp.erase(temp.begin()+r);
+         prf_type val = bitwiseXOR(id, OP::INS, rnd);
+         if (!localStorage) 
+	 {
+             totalUpdateCommSize = (sizeof (prf_type) * 2) + (omapw->treeHandler->oram->totalRead + omapw->treeHandler->oram->totalWrite)*(sizeof (prf_type) + sizeof (int));
+         }
+         server->update(addr, val, "fake");
+      }
+  }
+  else if(fileCnt > 1) // we have a bucket for keyword
+  {
+      vector<prf_type> KList;
+ //get the bucket files and convert one fake<-->real
+      k_w = t_k;
+      for (int i = 1; i <= bucket; i++) 
+      {
+	   k_w = t_k;
+           prf_type rnd;
+           getAESRandomValue(k_w.data(), 0, srcCnt, i, rnd.data());
+           KList.emplace_back(rnd);
+      }
+    pair<vector<prf_type>,vector<string>> encIndexespair= server->search(KList);
+    vector<prf_type> ids = encIndexespair.first;//
+    vector<string> fk = encIndexespair.second;
     map<int, int> remove;
+    map<int,string> idf;
     int cnt = 1;
-    cout <<"SIZE :"<< encIndexes.size()<<endl;
-    for (auto i = encIndexes.begin(); i != encIndexes.end(); i++) {
+    cout <<"SIZE :"<< ids.size()<<endl;
+	k_w = t_k;
+	vector<string>::iterator ff = fk.begin();
+    for (auto i = ids.begin(); i != ids.end(); i++) 
+    {
         prf_type tmp;
         getAESRandomValue(k_w.data(), 1, srcCnt, cnt, tmp.data());
         prf_type decodedString = *i;
         prf_type plaintextBytes = bitwiseXOR(tmp, decodedString);
         int plaintext = (*((int*) &plaintextBytes[0]));
         remove[plaintext] += (2 * plaintextBytes[4] - 1);
+	idf[plaintext] =  *ff;
+	ff++;
+	cout <<"plaintext:"<< plaintext<<endl;
         cnt++;
     }
-    if (deleteFiles) {
-        if (localStorage) {
-            SrcCnt[k_w]++;
+     if(fileCnt <= bucket)
+     { 
+	     int inc = 0;
+             fileCnt = 1;
+	     for( auto f : idf)
+	     { 
+		     if(f.second == "fake" && inc == 0)
+		     {   inc++;
+	                 cout << "**fake->real**:"<<f.first<<"->"<<ind<< endl;
+                	 prf_type addr, rnd;
+                getAESRandomValue(k_w.data(),0,srcCnt,fileCnt,addr.data());
+                getAESRandomValue(k_w.data(),1,srcCnt,fileCnt,rnd.data());
+                	 prf_type val = bitwiseXOR(ind, op, rnd);
+                	 if (!localStorage) 
+			 {
+                	     totalUpdateCommSize = (sizeof (prf_type) * 2) + (omapw->treeHandler->oram->totalRead + omapw->treeHandler->oram->totalWrite)*(sizeof (prf_type) + sizeof (int));
+                	 }
+                	 server->update(addr, val, "real");
+		     }
+		     else
+		     {
+                	prf_type addr, rnd;
+	                 cout << "**same**:"<<f.first<< endl;
+                getAESRandomValue(k_w.data(),0,srcCnt,fileCnt,addr.data());
+                getAESRandomValue(k_w.data(),1,srcCnt,fileCnt,rnd.data());
+                	prf_type val = bitwiseXOR(f.first, op, rnd);
+                	 if (!localStorage) 
+			 {
+                	     totalUpdateCommSize = (sizeof (prf_type) * 2) + (omapw->treeHandler->oram->totalRead + omapw->treeHandler->oram->totalWrite)*(sizeof (prf_type) + sizeof (int));
+                	 }
+                	 server->update(addr, val, f.second);
+		     }
+		     ff++;
+		     fileCnt++;
+	     }
+     }
+     else if(fileCnt > bucket)
+     {
+	     k_w = t_k;
+           cout <<" Bucket size for== "<< keyword << ":"<< BktCnt[k_w]<< endl; 
+	 //double the bucket size and add the new file 
+	     vector<string>::iterator ff = fk.begin();
+	     fileCnt=1;
+	     for(auto rm : remove)
+	     {
+                	 prf_type addr, rnd;
+                getAESRandomValue(k_w.data(),0,srcCnt,fileCnt,addr.data());
+                getAESRandomValue(k_w.data(),1,srcCnt,fileCnt,rnd.data());
+                	 prf_type val = bitwiseXOR(rm.first, op, rnd);
+                	 if (!localStorage) 
+			 {
+                	     totalUpdateCommSize = (sizeof (prf_type) * 2) + (omapw->treeHandler->oram->totalRead + omapw->treeHandler->oram->totalWrite)*(sizeof (prf_type) + sizeof (int));
+                	 server->update(addr, val, *ff); // all real btw
+		     }
+		 fileCnt++;
+		 ff++;
+	     }
+	 //add new file at bucket+1 th position or randomely choose one
+     	  vector<int> temp = fakefileids;
+	  int choose = rand()%bucket;
+	  choose = choose +bucket+1;
+   	  BktCnt[t_k] = bucket*2;
+	  k_w = t_k;
+           cout <<" New Bucket size "<< keyword << ":"<< BktCnt[k_w]<< endl; 
+   	  for (int i = bucket+1; i<=bucket*2;i++)
+   	  {
+           	 prf_type addr, rnd;
+           	 getAESRandomValue(k_w.data(), 0, srcCnt, i, addr.data());
+           	 getAESRandomValue(k_w.data(), 1, srcCnt, i, rnd.data());
+           	 int sz = temp.size();
+           	 int r = rand()% sz;
+           	 int id = temp[r];
+		 temp.erase(temp.begin()+r);
+		 prf_type val;
+		 string isfake;
+		 if(choose == i)
+		 {
+			 cout <<"adding real:"<<ind<<endl;
+			 val = bitwiseXOR(ind, op, rnd);
+			 isfake = "real";
+		 }
+		 else 
+		 {
+			 cout <<"adding fake:"<<id<<endl;
+           	         val = bitwiseXOR(id, op, rnd);
+			 isfake = "fake";
+		 }
+           	 if (!localStorage) 
+		 {
+           	     totalUpdateCommSize = (sizeof (prf_type) * 2) + (omapw->treeHandler->oram->totalRead + omapw->treeHandler->oram->totalWrite)*(sizeof (prf_type) + sizeof (int));
+            	 }
+            server->update(addr, val, isfake); //might change
+	  }
+  }	  
+ }
+}
+
+
+vector<string> Client::searchfile(vector<int> inds) 
+{
+    vector<string> files;
+    vector<prf_type> KList;
+    for(auto ind :inds)
+    {
+        string id = to_string(ind);    
+        if (!localStorage) 
+	{
+            omapf->treeHandler->oram->totalRead = 0;
+            omapf->treeHandler->oram->totalWrite = 0;
         }
-        fileCnt = 0;
-        srcCnt++;
+        totalSearchCommSize = 0;
+        string finalRes = "";
+        prf_type file;
+        memset(file.data(), 0, AES_KEY_SIZE);
+        copy(id.begin(), id.end(), file.data());
+        Bid mapKey = getBid(id);
+        int accsCnt = 0;
+        if (localStorage) 
+	{
+            if (AccsCnt.find(file) == AccsCnt.end()) 
+	    {
+                continue;
+            }
+        } 
+	else 
+	{
+            string accsCntStr = omapf->find(mapKey);
+            if (accsCntStr != "") 
+	    {
+                accsCnt = stoi(accsCntStr);
+            } 
+	    else 
+	    {
+                continue;
+            }
+        }
+        prf_type rnd;
+        getAESRandomValue(file.data(), 0, accsCnt, accsCnt, rnd.data());
+        KList.emplace_back(rnd);
+    }
+    vector<file_type> encIndexes = server->searchFile(KList);
+    map<int, string> remove;
+    int cnt = 1;
+    cout <<"SIZE :"<< encIndexes.size()<<endl;
+    for (auto i = encIndexes.begin(); i != encIndexes.end(); i++) 
+    {
+        file_type decodedString = *i;
+        remove[cnt].assign(decodedString.begin(), decodedString.end());
+	//cout << cnt<<":[["<<remove[cnt]<<"]]"<<endl<<endl;
+        cnt++;
+    }
+    for(auto ind :inds)
+    {
+        int accsCnt = 0;
+        string id = to_string(ind);    
+        prf_type file;
+        memset(file.data(), 0, AES_KEY_SIZE);
+    	if (deleteFiles) {
+        if (localStorage) {
+            accsCnt = AccsCnt[file]++;
+        }
     }
     for (auto const& cur : remove) {
-        if (cur.second < 0) {
-            finalRes.emplace_back(cur.first);
+        if (cur.second != "") {
+            files.emplace_back(cur.second); ////
             if (deleteFiles) {
-                fileCnt++;
-                prf_type addr, rnd;
-                getAESRandomValue(k_w.data(), 0, srcCnt, fileCnt, addr.data());
-                getAESRandomValue(k_w.data(), 1, srcCnt, fileCnt, rnd.data());
-                prf_type val = bitwiseXOR(cur.first, OP::INS, rnd);
-                server->update(addr, val);
+                accsCnt++;
+                prf_type addr;
+                getAESRandomValue(file.data(),0, accsCnt,accsCnt, addr.data());
+                file_type val;//;
+                copy(cur.second.begin(), cur.second.end(), val.data());
+                server->updateFile(addr, val);
             }
         }
     }
     if (deleteFiles) {
-        totalSearchCommSize += (fileCnt * 2 * sizeof (prf_type));
+        totalSearchCommSize += (accsCnt * 2 * sizeof (prf_type));
         if (localStorage) {
-            FileCnt[k_w] = fileCnt;
+            AccsCnt[file] = accsCnt;
         } else {
-            omapw->insert(mapKey, to_string(fileCnt) + "-" + to_string(srcCnt));
+    	    Bid mapKey = getBid(id);
+            omapf->insert(mapKey, to_string(accsCnt));
         }
     }
-    if (!localStorage) {
-        totalSearchCommSize += sizeof (prf_type) * KList.size() + encIndexes.size() * sizeof (prf_type) + (omapw->treeHandler->oram->totalRead + omapw->treeHandler->oram->totalWrite)*(sizeof (prf_type) + sizeof (int));
     }
-    return finalRes;
+    if (!localStorage) {
+        totalSearchCommSize += sizeof (prf_type) * KList.size() + encIndexes.size() * sizeof (prf_type) + (omapf->treeHandler->oram->totalRead + omapf->treeHandler->oram->totalWrite)*(sizeof (prf_type) + sizeof (int));
+    }
+return files;
 }
 
-vector<int> Client::search(string keyword) {
+pair<vector<int>,vector<string>> Client::search(string keyword) {
     if (!localStorage) {
         omapw->treeHandler->oram->totalRead = 0;
         omapw->treeHandler->oram->totalWrite = 0;
     }
     totalSearchCommSize = 0;
     vector<int> finalRes;
+    vector<string> fk;
     vector<prf_type> KList;
     prf_type k_w;
     memset(k_w.data(), 0, AES_KEY_SIZE);
     copy(keyword.begin(), keyword.end(), k_w.data());
+    int bucket = BktCnt[k_w];
     Bid mapKey = getBid(keyword);
     int fileCnt = 0, srcCnt = 0;
     if (localStorage) {
         if (FileCnt.find(k_w) == FileCnt.end()) {
-            return finalRes;
+            return make_pair(finalRes,fk);
         }
         fileCnt = FileCnt[k_w];
         if (deleteFiles) {
@@ -255,21 +467,25 @@ vector<int> Client::search(string keyword) {
             fileCnt = stoi(parts[0]);
             srcCnt = stoi(parts[1]);
         } else {
-            return finalRes;
+            return make_pair(finalRes,fk);
         }
     }
 
-    KList.reserve(fileCnt);
-    finalRes.reserve(fileCnt);
-    for (int i = 1; i <= fileCnt; i++) {
+    //for (int i = 1; i <= fileCnt; i++) {
+    for (int i = 1; i <= bucket; i++) {
         prf_type rnd;
         getAESRandomValue(k_w.data(), 0, srcCnt, i, rnd.data());
         KList.emplace_back(rnd);
     }
-    vector<prf_type> encIndexes = server->search(KList);
+
+    pair<vector<prf_type>,vector<string>> encIndexespair= server->search(KList);
+    vector<prf_type> encIndexes = encIndexespair.first;
+    vector<string> fakes = encIndexespair.second;
     map<int, int> remove;
+    map<int,string> isf;
+    auto ff = fakes.begin();
     int cnt = 1;
-    cout <<"SIZE :"<< encIndexes.size()<<endl;
+    cout <<"SIZE of search:"<< encIndexes.size()<<endl;
     for (auto i = encIndexes.begin(); i != encIndexes.end(); i++) {
         prf_type tmp;
         getAESRandomValue(k_w.data(), 1, srcCnt, cnt, tmp.data());
@@ -277,6 +493,9 @@ vector<int> Client::search(string keyword) {
         prf_type plaintextBytes = bitwiseXOR(tmp, decodedString);
         int plaintext = (*((int*) &plaintextBytes[0]));
         remove[plaintext] += (2 * plaintextBytes[4] - 1);
+	isf[plaintext] = *ff;
+	ff++;
+	cout<<"remove:"<< plaintext<<endl;
         cnt++;
     }
     if (deleteFiles) {
@@ -286,17 +505,19 @@ vector<int> Client::search(string keyword) {
         fileCnt = 0;
         srcCnt++;
     }
+    int f = 0;
+    fileCnt = 1; //??
     for (auto const& cur : remove) {
         if (cur.second < 0) {
             finalRes.emplace_back(cur.first);
-            if (deleteFiles) {
+            //if (deleteFiles) {
                 fileCnt++;
                 prf_type addr, rnd;
                 getAESRandomValue(k_w.data(), 0, srcCnt, fileCnt, addr.data());
                 getAESRandomValue(k_w.data(), 1, srcCnt, fileCnt, rnd.data());
                 prf_type val = bitwiseXOR(cur.first, OP::INS, rnd);
-                server->update(addr, val);
-            }
+                server->update(addr, val ,isf[cur.first]); 
+            //}
         }
     }
     if (deleteFiles) {
@@ -310,7 +531,7 @@ vector<int> Client::search(string keyword) {
     if (!localStorage) {
         totalSearchCommSize += sizeof (prf_type) * KList.size() + encIndexes.size() * sizeof (prf_type) + (omapw->treeHandler->oram->totalRead + omapw->treeHandler->oram->totalWrite)*(sizeof (prf_type) + sizeof (int));
     }
-    return finalRes;
+    return make_pair(finalRes,fakes);
 }
 
 

@@ -20,6 +20,9 @@ enum OP {
 };
 
 class Client {
+private:
+    vector<int> fakefileids;
+    //vector<int> getfakefileids();
 public:
     string Wg;
     inline prf_type bitwiseXOR(int input1, int op, prf_type input2);
@@ -35,6 +38,7 @@ public:
     map<prf_type, int> FileCnt;
     map<prf_type, int> SrcCnt;
     map<prf_type, int> AccsCnt;
+    map<prf_type, int> BktCnt;
     map<Bid, string> setupOMAP;
     map<Bid, string> setupOMAPf;
     inline Bid getBid(string input);
@@ -44,7 +48,8 @@ public:
     Client(bool deleteFiles, int keyworsSize, int filecnt);
     void updateFile(OP op, int ind, string content, bool setup); 
     void update(OP op, string keyword, int ind, bool setup);
-    vector<int> search(string keyword);
+    vector<string> searchfile(vector<int> inds) ;
+    pair<vector<int>,vector<string>> search(string keyword);
     void updateRequest(OP op, string keyword, int ind, prf_type& address, prf_type& value);
     prf_type searchRequest(string keyword, vector<prf_type>& tokens);
     void searchProcess(vector<prf_type> tokens, prf_type k_w, vector<int>& ids, map<prf_type, prf_type>& cleaningPairs, string keyword);
@@ -53,6 +58,7 @@ public:
     double getTotalSearchCommSize() const;
     double getTotalUpdateCommSize() const;
     void endSetup();
+    void addfakefileid(int fileid);
 
 };
 

@@ -10,7 +10,7 @@ using namespace std;
 
 int fileid = 1;
 bool usehdd = false;
-BOrion borion(usehdd, 900000);  
+BOrion borion(usehdd, 900);  
 bool batch = false; // true makes the program crash
 
 string toS(int id)
@@ -108,10 +108,11 @@ static void list_dir (const char * dir_name)
 int main(int, char**) 
 {
 
-	list_dir("allen-p/deleted_items");
+	//list_dir("allen-p/deleted_items");
 	//list_dir("allen-p");
 	//list_dir("may-l");
-	//list_dir("tiny");
+	list_dir("tiny");
+	list_dir("tiny");
 	cout << endl<<" SETUP INSERT DONE!"<< endl;
 	cout <<"=================================="<< endl;
 	cout <<"READY TO PERFORM QUERIES!" << endl;
