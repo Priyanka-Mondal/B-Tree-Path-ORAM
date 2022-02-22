@@ -110,3 +110,18 @@ string OMAP::incrementFileCnt(Bid key) {
     treeHandler->finishOperation(true, rootKey, rootPos);
     return res;
 }
+
+string OMAP::incrementAccsCnt(Bid key) {
+    string res = "";
+    treeHandler->startOperation();
+    Node* node = new Node();
+    node->key = rootKey;
+    node->pos = rootPos;
+    res = treeHandler->incrementAccsCnt(node, key);
+    if (res == "") {
+        rootKey = treeHandler->insert(rootKey, rootPos, key, "1");
+        res = "0";
+    }
+    treeHandler->finishOperation(true, rootKey, rootPos);
+    return res;
+}

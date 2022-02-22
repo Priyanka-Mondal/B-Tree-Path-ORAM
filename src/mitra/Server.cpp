@@ -18,48 +18,48 @@ Server::Server(bool useHDD, bool deleteFiles) : edb_("MitraEDB"), edbfake_("Fake
 Server::~Server() {
 }
 
-void Server::updateFile(prf_type addr, file_type val) {
-    if (useRocksDB) {
-        edb_.put(addr, val);
-    } else {
+void Server::updateFile(prf_type addr, FileNode* val) {
+//    if (useRocksDB) {
+//        edb_.put(addr, val);
+//    } else {
         DictF[addr] = val;
-    }
+//    }
 }
 void Server::update(prf_type addr, prf_type val, string fake) {
-    if (useRocksDB) {
-        edb_.put(addr, val);
-	edbfake_.put(addr,fake);
-    } else {
+//    if (useRocksDB) {
+//        edb_.put(addr, val);
+//	edbfake_.put(addr,fake);
+//    } else {
         DictW[addr] = val;
 	DictFake[addr] = fake;
-    }
+//    }
 }
-vector<file_type> Server::searchFile(vector<prf_type> KList) {
-    vector<file_type> result;
+vector<FileNode*> Server::searchFile(vector<prf_type> KList) {
+    vector<FileNode*> result;
     result.reserve(KList.size());
     file_type notfound;
     memset(notfound.data(), 0, FILE_SIZE);
     for (unsigned int i = 0; i < KList.size(); i++) {
-        file_type val;
-        if (useRocksDB) {
-		//cout <<"KList[i]"<< KList[i]<<endl;
-            bool found = edb_.get(KList[i], val);
-            if (found) {
-                result.push_back(val);
-                if (deleteFiles) {
-                    edb_.remove(KList[i]);
-                }
-            }
-	    else
-	    {
-		cout <<"will send fake file"<< endl;
-	    }
-        } else {
+        FileNode* val;
+//        if (useRocksDB) {
+//		//cout <<"KList[i]"<< KList[i]<<endl;
+//            bool found = edb_.get(KList[i], val);
+//            if (found) {
+//                result.push_back(val);
+//                if (deleteFiles) {
+//                    edb_.remove(KList[i]);
+//                }
+//            }
+//	    else
+//	    {
+//		cout <<"will send fake file"<< endl;
+//	    }
+//        } else {
             val = DictF[KList[i]];
-            if (val != notfound) {
+            if (val != NULL) {
                 result.emplace_back(val);
             }
-        }
+//        }
     }
     return result;
 }
@@ -71,6 +71,7 @@ pair<vector<prf_type>,vector<string>> Server::search(vector<prf_type> KList) {
     resfake.reserve(KList.size());
     prf_type notfound;
     memset(notfound.data(), 0, AES_KEY_SIZE);
+    //cout <<"KList size at server:"<< KList.size()<<endl;
     for (unsigned int i = 0; i < KList.size(); i++) {
         prf_type val;
         string fake;

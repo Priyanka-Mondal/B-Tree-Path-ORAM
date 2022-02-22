@@ -46,10 +46,11 @@ public:
 public:
     Client(Server* server, bool deleteFiles, int keyworsSize, int filecnt);
     Client(bool deleteFiles, int keyworsSize, int filecnt);
-    void updateFile(OP op, int ind, string content, bool setup); 
-    void update(OP op, string keyword, int ind, bool setup);
-    vector<string> searchfile(vector<int> inds) ;
-    pair<vector<int>,vector<string>> search(string keyword);
+    void insertFile(OP op, int ind, string content, bool setup); 
+    void insert(string keyword, int ind, bool setup);
+    void remove(string keyword, int ind, bool setup);
+    map<int,string> searchfile(vector<int> inds) ;
+    map<int, string> search(string keyword);
     void updateRequest(OP op, string keyword, int ind, prf_type& address, prf_type& value);
     prf_type searchRequest(string keyword, vector<prf_type>& tokens);
     void searchProcess(vector<prf_type> tokens, prf_type k_w, vector<int>& ids, map<prf_type, prf_type>& cleaningPairs, string keyword);
