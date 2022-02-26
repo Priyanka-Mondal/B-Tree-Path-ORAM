@@ -7,6 +7,7 @@
 #include <boost/algorithm/string.hpp>
 
 int inserted = 0;
+int uniquekw = 0;
 
 int stoI(string updt_cnt)
 {
@@ -49,9 +50,9 @@ vector<string> getUniquedWords(vector<string> kws)
     string word;
     for(auto word : kws)
     {
-	    if(word.size()<=8 && (neg.find(word)==neg.end()))
+	    if(word.size()<=12 && (neg.find(word)==neg.end()))
 	    {
-    		    if ((!mp.count(word)) && (word.size()<=8))
+    		    if ((!mp.count(word)) && (word.size()<=12))
     		        mp.insert(make_pair(word, 1));
     		    else 
     		        mp[word]++;
@@ -186,7 +187,9 @@ void BOrion::setupInsertkws(vector<string> kws, string ind)
     Bid mapKey(keyword);
     auto updt_cnt = (fcnt->find(mapKey));
     int updc; 
-    if (updt_cnt == "") {  
+    if (updt_cnt == "") 
+    {  
+         uniquekw++;
          updc=0;
     }
     else
@@ -236,6 +239,8 @@ void BOrion::insertWrapper(vector<string> kws,vector<string> blocks,string ind)
      }
      cout << "inserted all the kw (total keywords: " <<totk <<")"<< endl;
      insertFile(ind,blocks); // insert all file blocks
+     cout << endl<<"--TOTAL keywords inserted so far: "<<inserted<<endl;
+     cout <<"--TOTAL unique keywords inserted so far: "<<uniquekw<<endl;
 }
 
 void BOrion::insertkw(string keyword, string ind) 
@@ -244,7 +249,9 @@ void BOrion::insertkw(string keyword, string ind)
     Bid mapKey(keyword);
     auto updt_cnt = (fcnt->find(mapKey));
     int updc; 
-    if (updt_cnt == "") {  
+    if (updt_cnt == "") 
+    {
+	 uniquekw++;  
          updc=0;
     }
     else
@@ -500,7 +507,7 @@ map<string,string> BOrion::searchWrapper(string keyword)
     while(fetched < updc && fetched < COM)
     {
 	    string str = freq.second.substr(pos*FID_SIZE,FID_SIZE);
-	    //cout <<"the index:["<<str<<"]"<<endl<<endl;
+	    cout <<"the index:["<<str<<"]"<<endl<<endl;
             Bid bid = createBid(str,0); // for first file block
 	    fileids.push(bid);
 	    pos++;
@@ -518,7 +525,7 @@ map<string,string> BOrion::searchWrapper(string keyword)
 	    {
 		int idblksleft = ceil((updc-fetched)/COM);
 		if ((updc-fetched)%COM != 0) idblksleft++;
-		//cout << "idblksleft:["<<idblksleft<<"]"<<endl;
+		cout << "idblksleft:["<<idblksleft<<"]"<<endl;
 		
 		ran = rand()%idblksleft+1;
 		int cnt = 0;
@@ -562,10 +569,10 @@ map<string,string> BOrion::searchWrapper(string keyword)
 			    firstblocknum.pop();
 		    }
 	    }
-	    cout << "before BATCH SEARCH"<< endl;
+	    //cout << "before BATCH SEARCH"<< endl;
 	    result = srch->batchSearch(batch);
 	    firstresult = fcnt->batchSearch(firstbatch);
-	    cout << "after BATCH SEARCH"<< endl;
+	    //cout << "after BATCH SEARCH"<< endl;
 	   
 	    for(auto first : firstresult)
 	    {

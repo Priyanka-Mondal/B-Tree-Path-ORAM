@@ -3,6 +3,8 @@
 
 using namespace std;
 
+    bool usehdd = false;
+    Orion2 orion2(usehdd, 50000, 102400);  // This 4*max-size does not have effect, was able to insert a lot more elements
 
 
 vector<string> getUniquedWords(string filename)
@@ -82,8 +84,6 @@ vector<string> divideString(string filename, int sz)
     }
 
 int main(int, char**) {
-    bool usehdd = false;
-    Orion2 orion2(usehdd, 500000, 1024000);  // This 4*max-size does not have effect, was able to insert a lot more elements
     vector<string> kw;
     vector<string> blocks;
     

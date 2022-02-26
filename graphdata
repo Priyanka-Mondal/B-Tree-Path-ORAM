@@ -1,0 +1,3 @@
+#!/bin/bash
+PROG=test_borion.cpp
+./borion_debug 900 tiny | tee -a data
