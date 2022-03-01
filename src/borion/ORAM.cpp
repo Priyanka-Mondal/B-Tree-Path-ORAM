@@ -240,6 +240,28 @@ void ORAM::Access(Bid bid, Node*& node) {
     }
 }
 
+Node* ORAM::setupReadN(Bid bid,int leaf)
+{
+    Node* n;
+    for (size_t d = 0; d <= depth; d++) 
+    {
+        int node = GetNodeOnPath(leaf, d);
+        Bucket bucket = ReadBucket(node);
+
+        for (int z = 0; z < Z; z++) 
+	{
+            Block &block = bucket[z];
+            if (block.id == bid) 
+	    {    
+                n = convertBlockToNode(block.data);
+		return n;
+            }
+        }
+     }
+    return n;
+}
+
+
 Node* ORAM::ReadNode(Bid bid) {
     if (bid == 0) {
         throw runtime_error("Node id is not set in ReadNode");

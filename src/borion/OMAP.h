@@ -27,6 +27,9 @@ public:
     void batchInsert(map<Bid, pair<string,string>> pairs);
     vector<pair<string,string>> batchSearch(vector<Bid> keys);
     Bid remove(Bid key);
+
+
+    pair<string,string> setupfind(Bid key);
 };
 
 #endif /* OMAP_H */

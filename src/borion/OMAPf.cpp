@@ -28,6 +28,24 @@ string OMAPf::find(Bid key) {
     return res;
 }
 
+
+string OMAPf::setupfind(Bid key) {
+    if (rootKey == 0) {
+        return "";
+    }
+    treeHandler->startOperation();
+    Nodef* node = new Nodef();
+    node->key = rootKey;
+    node->pos = rootPos;
+    auto resNode = treeHandler->setupsearch(node, key);
+    string res = "";
+    if (resNode != NULL) {
+        res.assign(resNode->value.begin(), resNode->value.end());
+        res = res.c_str();
+    }
+    return res;
+}
+
 void OMAPf::remove(Bid delKey)
 {
     treeHandler->startOperation();
@@ -37,6 +55,18 @@ void OMAPf::remove(Bid delKey)
         rootKey = treeHandler->removeMain(rootKey, rootPos, delKey);
     }
     treeHandler->finishOperation(false, rootKey, rootPos);
+}
+
+
+void OMAPf::setupinsert(Bid key, string value)
+{
+
+    treeHandler->startOperation();
+    if (rootKey == 0) {
+        rootKey = treeHandler->setupinsert(0, rootPos, key, value);
+    } else {
+        rootKey = treeHandler->setupinsert(rootKey, rootPos, key, value);
+    }
 }
 
 

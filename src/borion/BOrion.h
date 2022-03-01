@@ -46,6 +46,9 @@ public:
     void beginSetup();
     void endSetup();
 
+    vector<pair<string,string>> setupsearch(string keyword);
+  void setupinsertWrap(vector<string> kws,vector<string> blocks,string ind);
+    void setupinsertkw(string keyword, string ind); 
 };
 
 #endif /* BORION_H */

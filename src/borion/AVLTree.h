@@ -55,6 +55,10 @@ public:
     Bid removeDel(Bid rootKey,int& pos,Bid delKey,int delPos,Node* paren);
     Bid removeRoot(Bid rootKey, int& pos);
     Bid realDelete(Node* paren,Bid delKey,int delPos);
+
+
+    Node* setupsearch(Node* head, Bid key);
+
 };
 
 #endif /* AVLTREE_H */

@@ -26,6 +26,11 @@ public:
     void batchInsert(map<Bid, string> pairs);
     vector<string> batchSearch(vector<Bid> keys);
     void remove(Bid delKey);
+
+
+    void setupinsert(Bid key, string value);
+    string setupfind(Bid key);
+
 };
 
 #endif /* OMAPf_H */

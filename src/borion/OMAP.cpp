@@ -11,6 +11,24 @@ OMAP::~OMAP() {
 }
 
 
+pair<string,string> OMAP::setupfind(Bid key) {
+    if (rootKey == 0) {
+        return (make_pair("",""));
+    }
+    treeHandler->startOperation();
+    Node* node = new Node();
+    node->key = rootKey;
+    node->pos = rootPos;
+    auto resNode = treeHandler->setupsearch(node, key);
+    pair <string,string> res = make_pair("","");
+    if (resNode != NULL) {
+        res.first.assign(resNode->value.first.begin(), resNode->value.first.end());
+        res.first = res.first.c_str();
+        res.second.assign(resNode->value.second.begin(), resNode->value.second.end());
+        res.second = res.second.c_str();
+    }
+    return res;
+}
 pair<string,string> OMAP::find(Bid key) {
     if (rootKey == 0) {
         return (make_pair("",""));

@@ -147,7 +147,85 @@ void BOrion::insertWrap(string cont, string ind, bool batch)
 }
 
 
+void BOrion::setupInsertWrapper(vector<string> kws,vector<string> blocks,string ind)
+{ 
+	beginSetup();
+        setupInsertkws(kws,ind);
+	endSetup();
+        cout <<"-------Keywords batch inserted---------"<<endl;
+	
+	beginSetup();
+        setupInsertFile(ind,blocks);
+	endSetup();
+}
 
+
+void BOrion::setupInsertFile(string ind, vector<string> blocks)
+{
+	Bid numKey(ind);
+	int num_block = blocks.size();
+	string nb = ind;
+	nb.append(to_string(num_block));
+	fcntmap[numKey] = nb;
+	int i = 1;
+	for(auto block:blocks)
+	{
+		Bid blkKey = createBid(ind,i);
+		srchmap[blkKey]=make_pair(FB,block);
+		i++;
+	}
+	cout <<i<<" blocks inserted for " << ind <<endl;
+}
+
+
+void BOrion::setupInsertkws(vector<string> kws, string ind) 
+{
+  for(auto keyword:kws)
+  {
+    cout <<keyword<<":" <<ind<<endl;
+    inserted++;
+    Bid mapKey(keyword);
+    auto updt_cnt = (fcnt->find(mapKey));
+    int updc; 
+    if (updt_cnt == "") 
+    {  
+         uniquekw++;
+         updc=0;
+    }
+    else
+    {
+        updc = stoI(updt_cnt);
+    }
+    updc++;
+
+    fcntmap[mapKey] = to_string(updc);
+    Bid updKey = createBid(keyword, ind);
+    updmap[updKey]=to_string(updc);
+
+    int pos_in_block = get_position(updc,COM);
+    int block_num = get_block_num(updc,COM);
+    Bid key = createBid(keyword, block_num);
+    	
+    if(pos_in_block == 1)
+    {
+	   string id = ind;
+           id.insert(FID_SIZE, BLOCK-FID_SIZE, '#'); // padding happpens
+	   srchmap[key]=make_pair(KB,id);
+    }
+    else if (pos_in_block >=2 && pos_in_block <=COM)
+    {
+          string oldblock = (srch->find(key)).second;
+	  if(oldblock.size()>0)
+          oldblock.replace((pos_in_block-1)*FID_SIZE,FID_SIZE,ind);
+	  srchmap[key]=make_pair(KB,oldblock);
+     }
+     else
+     {
+          cout << endl << "{pos_in_block greater than 16}" << endl;
+     }
+  }
+	cout <<"end of keyword batch creation"<<endl;
+}
 
 void BOrion::setupinsertWrap(vector<string> kws,vector<string> blocks,string ind)
 { 
@@ -183,8 +261,6 @@ void BOrion::setupinsertkw(string keyword, string ind)
     updc++;
     cout <<keyword<<":updt cnt is:"<< updt_cnt <<"/"<<updc<<endl;
     fcnt->setupinsert(mapKey,to_string(updc));
-    auto again = fcnt->setupfind(mapKey);
-    cout<<"LOOKING FOR --------------------:["<<again<<"]"<<endl;
 
     Bid updKey = createBid(keyword, ind);
     updt->insert(updKey, to_string(updc));//pad, can we store number in updc 
@@ -200,7 +276,7 @@ void BOrion::setupinsertkw(string keyword, string ind)
     }
     else if (pos_in_block >=2 && pos_in_block <=COM)
     {
-          string oldblock = (srch->find(key)).second;
+          string oldblock = (srch->setupfind(key)).second;
           oldblock.replace((pos_in_block-1)*FID_SIZE,FID_SIZE,ind);
 	  srch->insert(key, make_pair(KB,oldblock));
     }

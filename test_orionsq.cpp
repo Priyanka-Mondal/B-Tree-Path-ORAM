@@ -12,7 +12,6 @@ using namespace std::chrono;
 
 int fileid = 1;
 bool usehdd = true;
-Orion orion(usehdd, 60000,200000);  
 
 string toS(int id)
 {
@@ -36,7 +35,7 @@ string getFileContent(string path)
 }
 
 
-static void list_dir (const char * dir_name)
+static void list_dir (const char * dir_name, Orion& orion)
 {
     DIR * d;
     d = opendir (dir_name);
@@ -84,7 +83,7 @@ static void list_dir (const char * dir_name)
                                  fprintf (stderr, "Path length too long.\n");
                                  exit (EXIT_FAILURE);
                          }
-                         list_dir (path);
+                         list_dir (path, orion);
                  }
               }
      }
@@ -99,20 +98,57 @@ static void list_dir (const char * dir_name)
 int main(int, char**) 
 {
 
-	auto start = high_resolution_clock::now();
-	list_dir("allen-p/deleted_items");
 	//list_dir("allen-p");
 	//list_dir("tiny");
-	auto stop = high_resolution_clock::now();
+	Orion orion(usehdd, 100000,600000);  
+        
+	ofstream sres;
+	sres.open("vardbsearchorionsq.txt",ios::app);	
+	
+	list_dir("allen-p/deleted_items",orion);
+        auto start = high_resolution_clock::now();
+	auto s = orion.search("borion");
+        auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
+	sres <<(fileid-1)<<" "<< duration.count()<<" "<< s.size()<<endl;
+	
+	list_dir("allen-p/small_deleted_items",orion);
+        start = high_resolution_clock::now();
+	s = orion.search("borion");
+        stop = high_resolution_clock::now();
+	duration = duration_cast<microseconds>(stop-start);
+	sres <<(fileid-1)<<" "<<duration.count() <<" "<< s.size()<<endl;
+
+	list_dir("allen-p/sent",orion);
+        start = high_resolution_clock::now();
+	s = orion.search("borion");
+        stop = high_resolution_clock::now();
+	duration = duration_cast<microseconds>(stop-start);
+	sres <<(fileid-1)<<" "<<duration.count()<<" "<< s.size()<<endl;
+
+	list_dir("allen-p/all_documents",orion);
+        start = high_resolution_clock::now();
+	s = orion.search("borion");
+        stop = high_resolution_clock::now();
+	duration = duration_cast<microseconds>(stop-start);
+	sres <<(fileid-1)<<" "<<duration.count()<<" "<< s.size()<<endl;
+
+	list_dir("allen-p/discussion_threads",orion);
+        start = high_resolution_clock::now();
+	s = orion.search("borion");
+        stop = high_resolution_clock::now();
+	duration = duration_cast<microseconds>(stop-start);
+	sres <<(fileid-1)<<" "<<duration.count()<<" "<< s.size()<<endl;
+
+	return 0;
+
+	duration = duration_cast<microseconds>(stop-start);
 	cout <<"== TOTAL files inserted :"<<fileid-1<<" =="<<endl;
 	cout <<"Time taken for setup(orionsq):"<<duration.count()<<endl;
 	cout << endl<<" SETUP INSERT DONE!"<< endl;
 	cout <<"=================================="<< endl;
 	cout <<"READY TO PERFORM QUERIES!" << endl;
 	
-        ofstream sres;
-	sres.open("searchresultorionsq.txt",ios::app);	
 	
 	while(1)
 	{
@@ -147,7 +183,7 @@ int main(int, char**)
 	    		cout <<endl<<endl;
 			cout << "RESULT size: " << files.size() << endl<<endl;
 			cout << "Search time: "<< duration.count()<<endl;  
-			sres<<duration.count()<<" "<< files.size();
+			sres<<duration.count()<<" "<< files.size()<<endl;
 		}
 		else if(c=='d'|| c=='D')
 		{

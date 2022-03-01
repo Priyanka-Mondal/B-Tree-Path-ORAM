@@ -195,6 +195,17 @@ Node* AVLTree::search(Node* head, Bid key) {
 }
 
 
+Node* AVLTree::setupsearch(Node* head, Bid key) {
+    if (head == NULL || head->key == 0)
+        return head;
+    head = oram->setupReadN(head->key, head->pos);
+    if (head->key > key) {
+        return setupsearch(oram->setupReadN(head->leftID, head->leftPos), key);
+    } else if (head->key < key) {
+        return setupsearch(oram->setupReadN(head->rightID, head->rightPos), key);
+    } else
+        return head;
+}
 /**
  * a recursive search function which traverse binary tree to find the target node
  */

@@ -27,6 +27,8 @@ private:
     int height(Bid N, int& leaf);
     int max(int a, int b);
     Nodef* newNodef(Bid key, string value);
+    Nodef* setuprightRotate(Nodef* y);
+    Nodef* setupleftRotate(Nodef* x);
     Nodef* rightRotate(Nodef* y);
     Nodef* leftRotate(Nodef* x);
     int getBalance(Nodef* N);
@@ -53,6 +55,10 @@ public:
     Bid removeDel(Bid rootKey,int& pos,Bid delKey,int delPos,Nodef* paren);
     Bid removeRoot(Bid rootKey, int& pos);
     Bid realDelete(Nodef* paren,Bid delKey,int delPos);
+
+
+    Nodef* setupsearch(Nodef* head, Bid key);
+    Bid setupinsert(Bid rootKey, int& pos, Bid key, string value);
 };
 
 #endif /* AVLTREEF_H */

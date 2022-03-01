@@ -100,6 +100,10 @@ public:
     void finilize(bool find, Bid& rootKey, int& rootPos);
     static Node* convertBlockToNode(block b);
     static block convertNodeToBlock(Node* node);
+
+
+    Node* setupReadN(Bid bid, int leaf);
+    int setupWriteN(Bid bid, Node* n);
 };
 
 #endif

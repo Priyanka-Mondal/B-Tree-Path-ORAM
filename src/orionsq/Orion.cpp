@@ -8,7 +8,7 @@ Orion::Orion(bool usehdd, int maxSize, int kwSize) {
     bytes<Key> key2{1};
     srch = new OMAPf(kwSize*4, key1);
     updt = new OMAPf(kwSize*4, key1);
-    fcnt = new OMAPf(kwSize*4, key1);
+    fcnt = new OMAPf(kwSize, key1);
     file = new OMAP(maxSize*4,key2);
 }
 

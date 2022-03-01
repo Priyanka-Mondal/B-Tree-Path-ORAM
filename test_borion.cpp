@@ -12,7 +12,7 @@ using namespace std::chrono;
 
 int fileid = 1;
 bool usehdd = false;
-bool batch = false; // true makes the program crash
+bool batch = true; // true makes the program crash
 
 int stoint(string updt_cnt)
 {
@@ -117,22 +117,61 @@ int main(int argc, char**argv)
 {
 	int size = stoint(argv[1]);
 	BOrion borion(usehdd, size);  
-        auto start = high_resolution_clock::now();
+        ofstream sres;
+	sres.open("vardbsearchborion.txt",ios::app);	
 	//list_dir("may-l");
 	//list_dir("allen-p");
-	//list_dir("allen-p/deleted_items");
-	//list_dir("allen-p/small_deleted_items");
+        auto start = high_resolution_clock::now();
 	list_dir(argv[2],borion);
-	auto stop = high_resolution_clock::now();
+        auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
-	//cout <<"== TOTAL files inserted :"<<fileid-1<<" =="<<endl;
-	//cout <<"Time taken for setup(borion):"<<duration.count()<<endl;
-	//cout << endl<<" SETUP INSERT DONE!"<< endl;
-	//cout <<"=================================="<< endl;
-	//cout <<"READY TO PERFORM QUERIES!" << endl;
-        ofstream sres;
-	sres.open("searchresultborion.txt",ios::app);	
-	//sres<<"TIME "<<"SIZE"<<endl;
+
+/*
+
+	list_dir("allen-p/deleted_items",borion);
+        auto start = high_resolution_clock::now();
+	auto s = borion.search("borion");
+        auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<microseconds>(stop-start);
+	sres <<(fileid-1)<<","<< s.size()<<endl;
+	
+	list_dir("allen-p/small_deleted_items",borion);
+        start = high_resolution_clock::now();
+	s = borion.search("borion");
+        stop = high_resolution_clock::now();
+	duration = duration_cast<microseconds>(stop-start);
+	sres <<(fileid-1)<<","<< s.size()<<endl;
+
+	list_dir("allen-p/sent",borion);
+        start = high_resolution_clock::now();
+	s = borion.search("borion");
+        stop = high_resolution_clock::now();
+	duration = duration_cast<microseconds>(stop-start);
+	sres <<(fileid-1)<<","<< s.size()<<endl;
+
+	list_dir("allen-p/all_documents",borion);
+        start = high_resolution_clock::now();
+	s = borion.search("borion");
+        stop = high_resolution_clock::now();
+	duration = duration_cast<microseconds>(stop-start);
+	sres <<(fileid-1)<<","<< s.size()<<endl;
+
+	list_dir("allen-p/discussion_threads",borion);
+        start = high_resolution_clock::now();
+	s = borion.search("borion");
+        stop = high_resolution_clock::now();
+	duration = duration_cast<microseconds>(stop-start);
+	sres <<(fileid-1)<<","<< s.size()<<endl;
+
+	return 0;
+*/
+
+	
+	cout <<"== TOTAL files inserted :"<<fileid-1<<" =="<<endl;
+	cout <<"Time taken for setup(borion):"<<duration.count()<<endl;
+	cout << endl<<" SETUP INSERT DONE!"<< endl;
+	cout <<"=================================="<< endl;
+	cout <<"READY TO PERFORM QUERIES!" << endl;
 	
 	while(1)
 	{
@@ -156,9 +195,15 @@ int main(int argc, char**argv)
 			cin>> keyword;
 			map<string,string> files;
 			start = high_resolution_clock::now();
-	    	vector<pair<string,string>> results= borion.search(keyword);
+	    	vector<pair<string,string>> results=borion.setupsearch(keyword);
 			stop = high_resolution_clock::now();
 			duration = duration_cast<microseconds>(stop-start);
+			cout << "setupsearch time: "<< duration.count()<<endl;  
+			start = high_resolution_clock::now();
+	    	vector<pair<string,string>> res2=borion.search(keyword);
+			stop = high_resolution_clock::now();
+			duration = duration_cast<microseconds>(stop-start);
+			cout << "search time: "<< duration.count()<<endl;  
 		cout <<"--------Search result---------"<<endl;
 		for(auto file:results)
 		{
@@ -182,8 +227,8 @@ int main(int argc, char**argv)
 			cout <<"["<<file.first<<"]";
 		}
 	    		cout <<endl<<endl;
-			cout << "RESULT size: " << files.size() << endl<<endl;
-			cout << "Search time: "<< duration.count()<<endl;  
+			cout << "RESULT size1: " << files.size() << endl<<endl;
+			cout << "RESULT size2: " << res2.size() << endl<<endl;
 			sres<< duration.count() <<" "<<files.size()<<endl;
 		}
 		else if(c=='d'|| c=='D')
