@@ -103,8 +103,8 @@ public:
 
 
     Nodef* setupReadNf(Bid bid, int leaf);
-    int setupWriteNf(Bid bid, Nodef* n);
-    void setupWriteBucket(Bid bid, Nodef* n);
+    int setupWriteNf(Bid bid, Nodef* n, Bid rootkey, int& rootPos);
+    void setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos);
 };
 
 #endif

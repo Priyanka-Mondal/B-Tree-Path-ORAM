@@ -37,7 +37,7 @@ Nodef* AVLTreef::newNodef(Bid key, string value) {
     return node;
 }
 
-Nodef* AVLTreef::setuprightRotate(Nodef* y) {
+Nodef* AVLTreef::setuprightRotate(Nodef* y, Bid rootKey, int& pos) {
     Nodef* x = oram->setupReadNf(y->leftID,y->leftPos);
     Nodef* T2;
     if (x->rightID == 0) {
@@ -52,14 +52,14 @@ Nodef* AVLTreef::setuprightRotate(Nodef* y) {
     y->leftPos = T2->pos;
 
     y->height = max(height(y->leftID, y->leftPos), height(y->rightID, y->rightPos)) + 1;
-    oram->setupWriteNf(y->key, y);
+    oram->setupWriteNf(y->key, y, rootKey,pos);
     x->height = max(height(x->leftID, x->leftPos), height(x->rightID, x->rightPos)) + 1;
-    oram->setupWriteNf(x->key, x);
+    oram->setupWriteNf(x->key, x, rootKey,  pos);
 
     return x;
 }
 
-Nodef* AVLTreef::setupleftRotate(Nodef* x) {
+Nodef* AVLTreef::setupleftRotate(Nodef* x, Bid rootKey, int& pos) {
     Nodef* y = oram->setupReadNf(x->rightID,x->rightPos);
     Nodef* T2;
     if (y->leftID == 0) {
@@ -74,9 +74,9 @@ Nodef* AVLTreef::setupleftRotate(Nodef* x) {
     x->rightPos = T2->pos;
 
     x->height = max(height(x->leftID, x->leftPos), height(x->rightID, x->rightPos)) + 1;
-    oram->setupWriteNf(x->key, x);
+    oram->setupWriteNf(x->key, x, rootKey, pos);
     y->height = max(height(y->leftID, y->leftPos), height(y->rightID, y->rightPos)) + 1;
-    oram->setupWriteNf(y->key, y);
+    oram->setupWriteNf(y->key, y, rootKey, pos);
     return y;
 }
 
@@ -132,78 +132,70 @@ int AVLTreef::getBalance(Nodef* N) {
     return height(N->leftID, N->leftPos) - height(N->rightID, N->rightPos);
 }
 
-Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, string value) {
-    /* 1. Perform the normal BST rotation */
-	cout <<"in setup insert for:"<<key<<endl;
-	cout <<"in setup insert root is:"<<rootKey<<endl;
+Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, string value) 
+{
     if (rootKey == 0) {
         Nodef* nnode = newNodef(key, value);
-        cout <<"inserting at setup rootkey is:"<< nnode->key<<":"<<nnode->pos<<endl;
-        pos = oram->setupWriteNf(key, nnode);
+        pos = oram->setupWriteNf(key, nnode,key,pos);
+	cout <<"RETURNING root IS----------------"<<nnode->key<< endl;
         return nnode->key;
     }
     Nodef* node = oram->setupReadNf(rootKey, pos);
-    cout <<rootKey<<"nodef rootkey is:"<< node->key<<":"<<pos<<endl;
     if (key < node->key) {
-	    cout <<"key<nodef"<<key<<node->key<<node->leftPos<<endl;
+	    //cout <<"key<nodef"<<key<<node->key<<node->leftPos<<endl;
         node->leftID = setupinsert(node->leftID, node->leftPos, key, value);
     } else if (key > node->key) {
-	    cout <<"key>nodef"<<key<<node->key<<node->rightPos<<endl;
+	    //cout <<"key>nodef"<<key<<node->key<<node->rightPos<<endl;
         node->rightID = setupinsert(node->rightID, node->rightPos, key, value);
     } else {
         std::fill(node->value.begin(), node->value.end(), 0);
         std::copy(value.begin(), value.end(), node->value.begin());
-        oram->setupWriteNf(rootKey, node);
+        oram->setupWriteNf(rootKey, node,rootKey, pos);
         return node->key;
     }
 
-    /* 2. Update height of this ancestor node */
     node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
 
-    /* 3. Get the balance factor of this ancestor node to check whether
-       this node became unbalanced */
     int balance = getBalance(node);
-
-    // If this node becomes unbalanced, then there are 4 cases
 
     // Left Left Case
     if (balance > 1 && key < oram->setupReadNf(node->leftID,node->leftPos)->key) {
-        Nodef* res = setuprightRotate(node);
+        Nodef* res = setuprightRotate(node, rootKey, pos);
         pos = res->pos;
         return res->key;
     }
 
     // Right Right Case
     if (balance < -1 && key > oram->setupReadNf(node->rightID,node->rightPos)->key) {
-        Nodef* res = setupleftRotate(node);
+        Nodef* res = setupleftRotate(node, rootKey, pos);
         pos = res->pos;
         return res->key;
     }
 
     // Left Right Case
     if (balance > 1 && key > oram->setupReadNf(node->leftID,node->leftPos)->key) {
-        Nodef* res = setupleftRotate(oram->setupReadNf(node->leftID,node->leftPos));
+        Nodef* res = setupleftRotate(oram->setupReadNf(node->leftID,node->leftPos),rootKey, pos);
         node->leftID = res->key;
         node->leftPos = res->pos;
-        oram->setupWriteNf(node->key, node);
-        Nodef* res2 = setuprightRotate(node);
+        oram->setupWriteNf(node->key, node, rootKey,pos);
+        Nodef* res2 = setuprightRotate(node, rootKey, pos);
         pos = res2->pos;
         return res2->key;
     }
 
     // Right Left Case
     if (balance < -1 && key < oram->setupReadNf(node->rightID,node->rightPos)->key) {
-        auto res = setuprightRotate(oram->setupReadNf(node->rightID,node->rightPos));
+        auto res = setuprightRotate(oram->setupReadNf(node->rightID,node->rightPos), rootKey, pos);
         node->rightID = res->key;
         node->rightPos = res->pos;
-        oram->setupWriteNf(node->key, node);
-        auto res2 = setupleftRotate(node);
+        oram->setupWriteNf(node->key, node, rootKey,pos);
+        auto res2 = setupleftRotate(node, rootKey, pos);
         pos = res2->pos;
         return res2->key;
     }
 
     /* return the (unchanged) node pointer */
-    oram->setupWriteNf(node->key, node);
+    oram->setupWriteNf(node->key, node, rootKey,pos);
     return node->key;
 }
 
@@ -300,10 +292,10 @@ Nodef* AVLTreef::setupsearch(Nodef* head, Bid key) {
     cout <<"setupsearch reading :"<< head->key<<endl;
     head = oram->setupReadNf(head->key, head->pos);
     if (head->key > key) {
-    cout <<"setupsearch reading headkey > key:"<< head->key<<endl;
+    cout <<head->key<<"setupsearch reading headkey > key:"<< key<<endl;
         return setupsearch(oram->setupReadNf(head->leftID, head->leftPos), key);
     } else if (head->key < key) {
-    cout <<"setupsearch reading headkey < key:"<< head->key<<endl;
+    cout <<head->key<<"setupsearch reading headkey < key:"<< key<<endl;
         return setupsearch(oram->setupReadNf(head->rightID, head->rightPos), key);
     } else
         return head;

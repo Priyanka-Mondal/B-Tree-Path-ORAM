@@ -27,8 +27,8 @@ private:
     int height(Bid N, int& leaf);
     int max(int a, int b);
     Nodef* newNodef(Bid key, string value);
-    Nodef* setuprightRotate(Nodef* y);
-    Nodef* setupleftRotate(Nodef* x);
+    Nodef* setuprightRotate(Nodef* y, Bid rootKey, int& pos);
+    Nodef* setupleftRotate(Nodef* x, Bid rootKey, int& pos);
     Nodef* rightRotate(Nodef* y);
     Nodef* leftRotate(Nodef* x);
     int getBalance(Nodef* N);

@@ -250,7 +250,7 @@ void ORAMf::Access(Bid bid, Nodef*& node) {
 
 Nodef* ORAMf::setupReadNf(Bid bid,int leaf)
 {
-	    cout <<"in setupReadNf :"<<leaf<<endl;
+	    cout <<bid<<"in setupReadNf leaf is:"<<leaf<<endl;
     if (bid == 0) {
 	    cout <<"Heyyyy setupReadNf is 0"<<endl;
         return NULL;
@@ -313,58 +313,70 @@ Nodef* ORAMf::ReadNodef(Bid bid, int lastLeaf, int newLeaf) {
     }
 }
 
-void ORAMf::setupWriteBucket(Bid bid, Nodef* n)
+void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
 {
     int flag = 0;
     for (size_t d = 0; d <= depth; d++) 
     {
-	cout <<"n->pos:"<<n->pos<<" depth:"<<d<<endl;
         int node = GetNodefOnPath(n->pos, d);
         Bucketf bucket = ReadBucket(node);
         Bucketf newbucket;
         for (int z = 0; z < Z; z++) 
 	{
-            Blockf &block = bucket[z];
+            Blockf &newblock = newbucket[z];
+	    Blockf &block = bucket[z];
+	    int pos ;
             if (flag==0 && (block.id == bid || block.id == 0)) 
 	    {    
             	Nodef* curnode = n;
-		cout <<"setupWriting:"<<n->key<<endl;
-		block.id = bid;
-                block.data = convertNodefToBlock(curnode);
+		newblock.id = bid;
+		cout <<n->key<<"CURNODE key IS:--------"<< block.id<<endl;
+                newblock.data = convertNodefToBlock(curnode);
 		flag = 1;
 		store->ReduceEmptyNumbers();
-		delete curnode;
+		pos = curnode->pos;
+		//delete curnode;
             }
-	    /*else if(block.id == 0)
+	    else if(block.id == 0)
 	    {
-            	block.id = 0;
-		cout <<"null blocks setupWriting:"<<block.id<<endl;
-            	block.data.resize(blockSize, 0);
+            	newblock.id = 0;
+            	newblock.data.resize(blockSize, 0);
 	    }
 	    else
 	    {
                 Nodef* curnode = convertBlockToNodef(block.data);
-		block.id = curnode->key;
+		newblock.id = curnode->key;
 		cout <<"full blocks setupWriting:"<<block.id<<endl;
-		block.data = convertNodefToBlock(curnode);
-	    }*/
+		newblock.data = convertNodefToBlock(curnode);
+		pos = curnode->pos;
+		//delete curnode;
+	    }
+	    if(rootKey == newblock.id)
+	    {
+		    rootPos = pos;
+		    cout <<"At ROOT :"<< rootPos<< endl;
+	    }
+		
         }
 
-        WriteBucket(node, bucket);
+        WriteBucket(node, newbucket);
 	if(flag == 1)
 		break;
      }
+    //if(fla==0)
+    //	    call this function with different leaf
 }
 
-int ORAMf::setupWriteNf(Bid bid, Nodef* node) {
+int ORAMf::setupWriteNf(Bid bid, Nodef* node, Bid rootKey, int& rootPos) {
     if (bid == 0) {
         throw runtime_error("Nodef id is not set in WriteNode");
     }
     else
     {
-	    setupWriteBucket(bid,node);
+	    setupWriteBucket(bid,node,rootKey,rootPos);
     }
-    return node->pos;
+    cout <<"returning rootPOs ------"<< node->key << endl;
+    return rootPos;
 }
 int ORAMf::WriteNodef(Bid bid, Nodef* node) {
     if (bid == 0) {

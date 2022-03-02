@@ -166,9 +166,9 @@ void BOrion::setupinsertWrap(vector<string> kws,vector<string> blocks,string ind
 
 void BOrion::setupinsertkw(string keyword, string ind) 
 {
+	cout <<"------------------Inserting----------"<<keyword<<endl;
     inserted++;
     Bid mapKey(keyword);
-    cout <<"setup finding"<<mapKey<<endl;
     auto updt_cnt = (fcnt->setupfind(mapKey));
     int updc; 
     if (updt_cnt == "") 
@@ -181,7 +181,6 @@ void BOrion::setupinsertkw(string keyword, string ind)
         updc = stoI(updt_cnt);
     }
     updc++;
-    cout <<keyword<<":updt cnt is:"<< updt_cnt <<"/"<<updc<<endl;
     fcnt->setupinsert(mapKey,to_string(updc));
     auto again = fcnt->setupfind(mapKey);
     cout<<"LOOKING FOR --------------------:["<<again<<"]"<<endl;

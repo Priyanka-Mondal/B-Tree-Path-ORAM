@@ -43,6 +43,8 @@ string OMAPf::setupfind(Bid key) {
         res.assign(resNode->value.begin(), resNode->value.end());
         res = res.c_str();
     }
+    else if(resNode == NULL)
+	    cout <<"Null recieved in OMAPf for"<< key<< endl;
     return res;
 }
 
