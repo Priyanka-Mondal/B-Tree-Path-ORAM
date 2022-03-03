@@ -242,12 +242,15 @@ void ORAM::Access(Bid bid, Node*& node) {
 
 Node* ORAM::setupReadN(Bid bid,int leaf)
 {
+    if (bid == 0) {
+	    //cout <<"Hey setupReadN is 0"<<endl;
+        return NULL;
+    }
     Node* n;
     for (size_t d = 0; d <= depth; d++) 
     {
         int node = GetNodeOnPath(leaf, d);
         Bucket bucket = ReadBucket(node);
-
         for (int z = 0; z < Z; z++) 
 	{
             Block &block = bucket[z];
@@ -257,7 +260,15 @@ Node* ORAM::setupReadN(Bid bid,int leaf)
 		return n;
             }
         }
+
      }
+    if(n==cache[bid])
+    {
+    	cout <<"found "<<bid<<" in cache "<<endl;
+    	n=cache[bid];
+    }
+    else
+	    cout<<bid<<"NOT FOUND at ALL in setupRead"<<endl;
     return n;
 }
 
@@ -314,7 +325,7 @@ int ORAM::WriteNode(Bid bid, Node* node) {
 int ORAM::DeleteNode(Bid bid, Node* node) {
     if (bid == 0) 
     {
-       throw runtime_error("Nodef id is not set in DeleteNode");
+       throw runtime_error("Node id is not set in DeleteNode");
     }
     if (cache.count(bid) != 0) 
     {
@@ -327,6 +338,73 @@ int ORAM::DeleteNode(Bid bid, Node* node) {
     DeleteData(bid, node);
         return node->pos;
 }
+
+
+void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
+{
+    int flag = 0;
+    for (size_t d = 0; d <= depth; d++) 
+    {
+        int node = GetNodeOnPath(n->pos, d);
+        Bucket bucket = ReadBucket(node);
+        Bucket newbucket;
+        for (int z = 0; z < Z; z++) 
+	{
+            Block &newblock = newbucket[z];
+	    Block &block = bucket[z];
+	    int pos ;
+            if (flag==0 && (block.id == bid || block.id == 0)) 
+	    {    
+            	Node* curnode = n;
+		newblock.id = bid;
+		//cout <<n->key<<"CURNODE key IS:--------"<< block.id<<endl;
+                newblock.data = convertNodeToBlock(curnode);
+		flag = 1;
+		store->ReduceEmptyNumbers();
+		pos = curnode->pos;
+		//delete curnode;
+            }
+	    else if(block.id == 0)
+	    {
+            	newblock.id = 0;
+            	newblock.data.resize(blockSize, 0);
+	    }
+	    else
+	    {
+                Node* curnode = convertBlockToNode(block.data);
+		newblock.id = curnode->key;
+		//cout <<"full blocks setupWriting:"<<block.id<<endl;
+		newblock.data = convertNodeToBlock(curnode);
+		pos = curnode->pos;
+		//delete curnode;
+	    }
+	    if(rootKey == newblock.id)
+	    {
+		    rootPos = pos;
+		    //cout <<"At ROOT :"<< rootPos<< endl;
+	    }
+		
+        }
+
+        WriteBucket(node, newbucket);
+	if(flag == 1)
+		break;
+     }
+}
+
+
+int ORAM::setupWriteN(Bid bid, Node* node, Bid rootKey, int& rootPos) {
+    if (bid == 0) {
+        throw runtime_error("Node id is not set in WriteNode");
+    }
+    else
+    {
+	    setupWriteBucket(bid,node,rootKey,rootPos);
+    }
+    //cout <<"returning rootPOs ------"<< node->key << endl;
+    return rootPos;
+}
+
 
 Node* ORAM::convertBlockToNode(block b) {
     Node* node = new Node();

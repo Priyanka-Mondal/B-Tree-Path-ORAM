@@ -250,9 +250,8 @@ void ORAMf::Access(Bid bid, Nodef*& node) {
 
 Nodef* ORAMf::setupReadNf(Bid bid,int leaf)
 {
-	    cout <<bid<<"in setupReadNf leaf is:"<<leaf<<endl;
     if (bid == 0) {
-	    cout <<"Heyyyy setupReadNf is 0"<<endl;
+	    //cout <<"Heyyyy setupReadNf is 0"<<endl;
         return NULL;
     }
     Nodef* n;
@@ -265,15 +264,19 @@ Nodef* ORAMf::setupReadNf(Bid bid,int leaf)
             Blockf &block = bucket[z];
             if (block.id == bid) 
 	    {    
-		cout<<"at setupReadNf block.id = bid:"<< block.id<<endl; 
                 n = convertBlockToNodef(block.data);
 		return n;
             }
         }
 
      }
-    cout <<"found "<<bid<<" in cache"<<endl;
-    n=cache[bid];
+    if(n==cache[bid])
+    {
+    	cout <<"found "<<bid<<" in cache "<<endl;
+    	n=cache[bid];
+    }
+    else
+	    cout<<bid<<"NOT FOUND at ALL in setupReadNf"<<endl;
     return n;
 }
 
@@ -330,7 +333,7 @@ void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
 	    {    
             	Nodef* curnode = n;
 		newblock.id = bid;
-		cout <<n->key<<"CURNODE key IS:--------"<< block.id<<endl;
+		//cout <<n->key<<"CURNODE key IS:--------"<< block.id<<endl;
                 newblock.data = convertNodefToBlock(curnode);
 		flag = 1;
 		store->ReduceEmptyNumbers();
@@ -346,7 +349,7 @@ void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
 	    {
                 Nodef* curnode = convertBlockToNodef(block.data);
 		newblock.id = curnode->key;
-		cout <<"full blocks setupWriting:"<<block.id<<endl;
+		//cout <<"full blocks setupWriting:"<<block.id<<endl;
 		newblock.data = convertNodefToBlock(curnode);
 		pos = curnode->pos;
 		//delete curnode;
@@ -354,7 +357,7 @@ void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
 	    if(rootKey == newblock.id)
 	    {
 		    rootPos = pos;
-		    cout <<"At ROOT :"<< rootPos<< endl;
+		    //cout <<"At ROOT :"<< rootPos<< endl;
 	    }
 		
         }
@@ -375,7 +378,7 @@ int ORAMf::setupWriteNf(Bid bid, Nodef* node, Bid rootKey, int& rootPos) {
     {
 	    setupWriteBucket(bid,node,rootKey,rootPos);
     }
-    cout <<"returning rootPOs ------"<< node->key << endl;
+    //cout <<"returning rootPOs ------"<< node->key << endl;
     return rootPos;
 }
 int ORAMf::WriteNodef(Bid bid, Nodef* node) {

@@ -19,6 +19,7 @@ pair<string,string> OMAP::setupfind(Bid key) {
     Node* node = new Node();
     node->key = rootKey;
     node->pos = rootPos;
+    //cout <<"root is:"<< rootKey<<endl;
     auto resNode = treeHandler->setupsearch(node, key);
     pair <string,string> res = make_pair("","");
     if (resNode != NULL) {
@@ -64,6 +65,18 @@ Bid OMAP::remove(Bid delKey)
 }
 
 
+void OMAP::setupinsert(Bid key, pair<string,string> value)
+{
+
+    treeHandler->startOperation();
+    if (rootKey == 0) {
+        rootKey = treeHandler->setupinsert(0, rootPos, key, value);
+//	cout <<rootPos<<"root at OMAP is :"<< rootKey<<endl;
+    } else {
+        rootKey = treeHandler->setupinsert(rootKey, rootPos, key, value);
+//	cout <<rootPos<<"root at OMAP is :"<< rootKey<<endl;
+    }
+}
 void OMAP::insert(Bid key, pair<string,string> value) {
     treeHandler->startOperation();
     if (rootKey == 0) {

@@ -26,8 +26,12 @@ private:
     std::uniform_int_distribution<int> dis;
 
     int height(Bid N, int& leaf);
+    int setupheight(Bid N, int& leaf);
     int max(int a, int b);
     Node* newNode(Bid key, pair<string,string> value);
+    Node* setuprightRotate(Node* y, Bid rootKey, int& pos);
+    Node* setupleftRotate(Node* x, Bid rootKey, int& pos);
+    int setupgetBalance(Node* N);
     Node* rightRotate(Node* y);
     Node* leftRotate(Node* x);
     int getBalance(Node* N);
@@ -58,7 +62,7 @@ public:
 
 
     Node* setupsearch(Node* head, Bid key);
-
+    Bid setupinsert(Bid rootKey, int& pos, Bid key, pair<string,string> value);
 };
 
 #endif /* AVLTREE_H */

@@ -25,6 +25,7 @@ private:
     std::uniform_int_distribution<int> dis;
 
     int height(Bid N, int& leaf);
+    int setupheight(Bid key, int& leaf);
     int max(int a, int b);
     Nodef* newNodef(Bid key, string value);
     Nodef* setuprightRotate(Nodef* y, Bid rootKey, int& pos);
@@ -32,6 +33,7 @@ private:
     Nodef* rightRotate(Nodef* y);
     Nodef* leftRotate(Nodef* x);
     int getBalance(Nodef* N);
+    int setupgetBalance(Nodef* N);
     int RandomPath();
 
 public:

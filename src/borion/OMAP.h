@@ -30,6 +30,7 @@ public:
 
 
     pair<string,string> setupfind(Bid key);
+    void setupinsert(Bid key, pair<string,string> value);
 };
 
 #endif /* OMAP_H */

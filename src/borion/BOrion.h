@@ -17,6 +17,8 @@ private:
     map<Bid,string>fcntmap;
     OMAP* srch;
     OMAPf *updt , *fcnt;
+    map<string,int> idvol;
+    map<string,int> tvol;
     
 public:
     Bid createBid(string keyword,int number);
@@ -27,6 +29,7 @@ public:
     void insertkw(string keyword, string ind);
     void insertdel(string ind);
     void insertFile(string keyword, vector<string> blocks);
+    void setupinsertFile(string keyword, vector<string> blocks);
     void setupInsert(string keyword, pair<int,string> ind); //crashes
    void setupInsertWrapper(vector<string> kws,vector<string> blocks,string ind);
     void setupInsertkws(vector<string> kws, string ind);

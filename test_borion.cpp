@@ -121,50 +121,49 @@ int main(int argc, char**argv)
 	sres.open("vardbsearchborion.txt",ios::app);	
 	//list_dir("may-l");
 	//list_dir("allen-p");
-        auto start = high_resolution_clock::now();
-	list_dir(argv[2],borion);
-        auto stop = high_resolution_clock::now();
-	auto duration = duration_cast<microseconds>(stop-start);
+        //auto start = high_resolution_clock::now();
+	//list_dir(argv[2],borion);
+        //auto stop = high_resolution_clock::now();
+	//auto duration = duration_cast<microseconds>(stop-start);
 
-/*
+
 
 	list_dir("allen-p/deleted_items",borion);
         auto start = high_resolution_clock::now();
 	auto s = borion.search("borion");
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
-	sres <<(fileid-1)<<","<< s.size()<<endl;
+	sres <<(fileid-1)<<" "<< duration.count()<<" "<<s.size()<<endl;
 	
 	list_dir("allen-p/small_deleted_items",borion);
         start = high_resolution_clock::now();
 	s = borion.search("borion");
         stop = high_resolution_clock::now();
 	duration = duration_cast<microseconds>(stop-start);
-	sres <<(fileid-1)<<","<< s.size()<<endl;
+	sres <<(fileid-1)<<" "<< duration.count()<< " "<<s.size()<<endl;
 
 	list_dir("allen-p/sent",borion);
         start = high_resolution_clock::now();
 	s = borion.search("borion");
         stop = high_resolution_clock::now();
 	duration = duration_cast<microseconds>(stop-start);
-	sres <<(fileid-1)<<","<< s.size()<<endl;
+	sres <<(fileid-1)<<" "<< duration.count()<< " " <<s.size()<<endl;
 
 	list_dir("allen-p/all_documents",borion);
         start = high_resolution_clock::now();
 	s = borion.search("borion");
         stop = high_resolution_clock::now();
 	duration = duration_cast<microseconds>(stop-start);
-	sres <<(fileid-1)<<","<< s.size()<<endl;
+	sres <<(fileid-1)<<" "<< duration.count()<< " "<<s.size()<<endl;
 
 	list_dir("allen-p/discussion_threads",borion);
         start = high_resolution_clock::now();
 	s = borion.search("borion");
         stop = high_resolution_clock::now();
 	duration = duration_cast<microseconds>(stop-start);
-	sres <<(fileid-1)<<","<< s.size()<<endl;
+	sres <<(fileid-1)<<" "<< duration.count()<< " "<<s.size()<<endl;
 
 	return 0;
-*/
 
 	
 	cout <<"== TOTAL files inserted :"<<fileid-1<<" =="<<endl;
@@ -193,18 +192,18 @@ int main(int argc, char**argv)
 			cout << "Enter the keyword to be searched: ";
 			string keyword;
 			cin>> keyword;
-			map<string,string> files;
+			map<string,string> files, files2;
+		cout <<"---------------Search result----------------"<<endl;
 			start = high_resolution_clock::now();
 	    	vector<pair<string,string>> results=borion.setupsearch(keyword);
 			stop = high_resolution_clock::now();
 			duration = duration_cast<microseconds>(stop-start);
-			cout << "setupsearch time: "<< duration.count()<<endl;  
+			cout << "setupsearch TIME: "<< duration.count()<<endl;  
 			start = high_resolution_clock::now();
 	    	vector<pair<string,string>> res2=borion.search(keyword);
 			stop = high_resolution_clock::now();
 			duration = duration_cast<microseconds>(stop-start);
-			cout << "search time: "<< duration.count()<<endl;  
-		cout <<"--------Search result---------"<<endl;
+			cout << "search TIME: "<< duration.count()<<endl;  
 		for(auto file:results)
 		{
 			string id = file.second.substr(0,FID_SIZE);
@@ -226,9 +225,27 @@ int main(int argc, char**argv)
 		{
 			cout <<"["<<file.first<<"]";
 		}
+
+		for(auto file:res2)
+		{
+			string id = file.second.substr(0,FID_SIZE);
+			int sz = file.second.size();
+			string cont = file.second.substr(FID_SIZE,sz);
+			if(files2.find(id)!=files2.end())
+			{
+				string con = files2.at(id);
+				con.append(cont);
+				files2.erase(id);
+				files2.insert(pair<string,string>(id,con));
+			}
+			else
+			{
+				files2.insert(pair<string,string>(id,cont));
+			}
+		}
 	    		cout <<endl<<endl;
-			cout << "RESULT size1: " << files.size() << endl<<endl;
-			cout << "RESULT size2: " << res2.size() << endl<<endl;
+			cout << "RESULT SetupsearchSIZE: " << files.size() << endl<<endl;
+			cout << "RESULT srchSIZE: " << files2.size() << endl<<endl;
 			sres<< duration.count() <<" "<<files.size()<<endl;
 		}
 		else if(c=='d'|| c=='D')
