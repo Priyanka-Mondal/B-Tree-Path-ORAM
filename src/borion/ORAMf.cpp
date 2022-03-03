@@ -21,7 +21,7 @@ ORAMf::ORAMf(int maxSize, bytes<Key> key)
     size_t storeBlockCount = blockCount;
     clen_size = AES::GetCiphertextLength((blockSize) * Z);
     plaintext_size = (blockSize) * Z;
-    cout << "Bucket and block count in ORAM:" << bucketCount<<"|"<<Z<<"="<<bucketCount*Z<<endl;
+    cout << "Bucket and block count in ORAMf:" << bucketCount<<"|"<<Z<<"="<<bucketCount*Z<<endl;
     store = new RAMStore(storeBlockCount, storeBlockSize);
     for (size_t i = 0; i < bucketCount; i++) {
         Bucketf bucket;
@@ -268,15 +268,14 @@ Nodef* ORAMf::setupReadNf(Bid bid,int leaf)
 		return n;
             }
         }
-
      }
-    if(n==cache[bid])
+    if(cache.count(bid)>0)
     {
-    	cout <<"found "<<bid<<" in cache "<<endl;
+    	cout <<"found "<<bid<<" in CACHE , leaf:"<<cache[bid]->pos<<" free node:"<<store->GetEmptySize()<<endl;
     	n=cache[bid];
     }
     else
-	    cout<<bid<<"NOT FOUND at ALL in setupReadNf"<<endl;
+	    cout<<"leaf:"<<leaf<<"/"<<bid<<"NOT FOUND at ALL in setupReadNf"<<store->GetEmptySize()<<endl;
     return n;
 }
 
@@ -318,6 +317,8 @@ Nodef* ORAMf::ReadNodef(Bid bid, int lastLeaf, int newLeaf) {
 
 void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
 {
+  if (store->GetEmptySize() > 0) 
+  {
     int flag = 0;
     for (size_t d = 0; d <= depth; d++) 
     {
@@ -329,14 +330,26 @@ void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
             Blockf &newblock = newbucket[z];
 	    Blockf &block = bucket[z];
 	    int pos ;
-            if (flag==0 && (block.id == bid || block.id == 0)) 
+            if (flag==0 && block.id == 0) 
 	    {    
             	Nodef* curnode = n;
 		newblock.id = bid;
-		//cout <<n->key<<"CURNODE key IS:--------"<< block.id<<endl;
                 newblock.data = convertNodefToBlock(curnode);
 		flag = 1;
 		store->ReduceEmptyNumbers();
+		cout<<n->key<<" inserted "<<newblock.id<<"at leaf:"<<n->pos<<endl;
+		cout <<"Empty nodes:"<<store->GetEmptySize()<<endl<<endl;
+		pos = curnode->pos;
+		//delete curnode;
+            }
+	    else if(flag ==0 && block.id == bid)
+	    {    
+            	Nodef* curnode = n;
+		newblock.id = bid;
+                newblock.data = convertNodefToBlock(curnode);
+		flag = 1;
+		//cout <<n->key<<" inserted "<< block.id<<endl;
+		//cout <<"Empty nodes remain same:"<<store->GetEmptySize()<<endl<<endl;
 		pos = curnode->pos;
 		//delete curnode;
             }
@@ -366,8 +379,19 @@ void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
 	if(flag == 1)
 		break;
      }
-    //if(fla==0)
-    //	    call this function with different leaf
+    if(flag==0)
+    {
+	    cache[bid] = n;
+	    cout <<"WRITING INCACHE============>"<<bid<<"  leaf:"<<n->pos<<endl;
+    }
+    //{
+//	    n->pos = (n->pos)+1;
+	  //  setupWriteBucket(bid, n, rootKey, rootPos);
+  //  }
+  }
+  else {
+        throw runtime_error("NO more space in ORAMf");
+    }
 }
 
 int ORAMf::setupWriteNf(Bid bid, Nodef* node, Bid rootKey, int& rootPos) {
@@ -379,7 +403,8 @@ int ORAMf::setupWriteNf(Bid bid, Nodef* node, Bid rootKey, int& rootPos) {
 	    setupWriteBucket(bid,node,rootKey,rootPos);
     }
     //cout <<"returning rootPOs ------"<< node->key << endl;
-    return rootPos;
+    //return rootPos;
+    return node->pos;
 }
 int ORAMf::WriteNodef(Bid bid, Nodef* node) {
     if (bid == 0) {

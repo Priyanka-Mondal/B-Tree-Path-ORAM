@@ -118,16 +118,15 @@ int main(int argc, char**argv)
 	int size = stoint(argv[1]);
 	BOrion borion(usehdd, size);  
         ofstream sres;
-	sres.open("vardbsearchborion.txt",ios::app);	
-	//list_dir("may-l");
-	//list_dir("allen-p");
-        //auto start = high_resolution_clock::now();
-	//list_dir(argv[2],borion);
-        //auto stop = high_resolution_clock::now();
-	//auto duration = duration_cast<microseconds>(stop-start);
+	sres.open("vardbsearchborion.txt");//,ios::app);	
+//	/*
+        auto start = high_resolution_clock::now();
+	list_dir(argv[2],borion);
+        auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<microseconds>(stop-start);
+//*/
 
-
-
+/*
 	list_dir("allen-p/deleted_items",borion);
         auto start = high_resolution_clock::now();
 	auto s = borion.search("borion");
@@ -164,7 +163,7 @@ int main(int argc, char**argv)
 	sres <<(fileid-1)<<" "<< duration.count()<< " "<<s.size()<<endl;
 
 	return 0;
-
+*/
 	
 	cout <<"== TOTAL files inserted :"<<fileid-1<<" =="<<endl;
 	cout <<"Time taken for setup(borion):"<<duration.count()<<endl;
@@ -266,7 +265,7 @@ int main(int argc, char**argv)
 			cin>> file;
 	          	string cont = getFileContent(file);
 			start = high_resolution_clock::now();
-			borion.insertWrap(cont,toS(fileid),false);
+			borion.insertWrap(cont,toS(fileid),true);
 			stop = high_resolution_clock::now();
 			duration = duration_cast<microseconds>(stop-start);
 			cout << "Insertion time: "<< duration.count()<<endl;  

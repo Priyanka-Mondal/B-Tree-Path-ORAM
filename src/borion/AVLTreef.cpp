@@ -154,6 +154,7 @@ Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, string value)
         return nnode->key;
     }
     Nodef* node = oram->setupReadNf(rootKey, pos);
+    if(node ==NULL ) cout<<rootKey<<"rootKey/"<<pos<<":rootPos /got NULL while inserting"<<key<<endl;
     if (key < node->key) {
 	    //cout <<"key<nodef"<<key<<node->key<<node->leftPos<<endl;
         node->leftID = setupinsert(node->leftID, node->leftPos, key, value);
@@ -171,9 +172,9 @@ Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, string value)
     node->height = max(setupheight(node->leftID, node->leftPos), setupheight(node->rightID, node->rightPos)) + 1;
 
     int balance = setupgetBalance(node);
-//cout <<node->key <<" BALANCEof >>>>>>>>>>>>>>>:"<< balance<<endl;
+    
     if (balance > 1 && key < oram->setupReadNf(node->leftID,node->leftPos)->key) {
-//    cout <<" Left Left Case-----------------------------------"<<endl;
+    //cout <<" Left Left Case-----------------------------------"<<endl;
         Nodef* res = setuprightRotate(node, rootKey, pos);
         pos = res->pos;
         return res->key;
@@ -181,7 +182,7 @@ Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, string value)
 
     // Right Right Case
     if (balance < -1 && key > oram->setupReadNf(node->rightID,node->rightPos)->key) {
-//    cout <<" Right Right Case-----------------------------------"<<endl;
+    cout <<" Right Right Case-----------------------------------"<<endl;
         Nodef* res = setupleftRotate(node, rootKey, pos);
         pos = res->pos;
         return res->key;
@@ -306,16 +307,20 @@ Nodef* AVLTreef::search(Nodef* head, Bid key) {
 Nodef* AVLTreef::setupsearch(Nodef* head, Bid key) {
     if (head == NULL || head->key == 0)
         return head;
-    //cout <<head->pos <<":headpos setupsearch reading headkey:"<< head->key<<endl;
+    cout <<head->pos <<":headpos setupsearch reading headkey:"<< head->key<<endl;
     head = oram->setupReadNf(head->key, head->pos);
     if (head->key > key) {
-    //cout <<head->key<<"setupsearch reading headkey > key:"<< key<<endl;
+    cout <<head->key<<"setupsearch reading headkey > key:"<< key<<endl;
         return setupsearch(oram->setupReadNf(head->leftID, head->leftPos), key);
     } else if (head->key < key) {
-    //cout <<head->key<<"setupsearch reading headkey < key:"<< key<<endl;
+    cout <<head->key<<"setupsearch reading headkey < key:"<< key<<endl;
         return setupsearch(oram->setupReadNf(head->rightID, head->rightPos), key);
-    } else
+    } else if(head->key == key)
         return head;
+    else{
+	    cout <<"NOT FOUND"<< key<<endl;
+	    return head;
+    }
 }
 /**
  * a recursive search function which traverse binary tree to find the target node

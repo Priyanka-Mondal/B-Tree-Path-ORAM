@@ -35,7 +35,7 @@ string OMAPf::setupfind(Bid key) {
         return "";
     }
 	//cout <<rootPos<<"root at OMAP FIND is :"<< rootKey<<endl;
-    treeHandler->startOperation();
+//    treeHandler->startOperation();
     Nodef* node = new Nodef();
     node->key = rootKey;
     node->pos = rootPos;
@@ -45,7 +45,7 @@ string OMAPf::setupfind(Bid key) {
         res.assign(resNode->value.begin(), resNode->value.end());
         res = res.c_str();
     }
-//    else if(resNode == NULL)
+    //else if(resNode == NULL)
 //	    cout <<"Null recieved in OMAPf for"<< key<< endl;
     return res;
 }
@@ -65,7 +65,7 @@ void OMAPf::remove(Bid delKey)
 void OMAPf::setupinsert(Bid key, string value)
 {
 
-    treeHandler->startOperation();
+    //treeHandler->startOperation();
     if (rootKey == 0) {
         rootKey = treeHandler->setupinsert(0, rootPos, key, value);
 //	cout <<rootPos<<"root at OMAP is :"<< rootKey<<endl;

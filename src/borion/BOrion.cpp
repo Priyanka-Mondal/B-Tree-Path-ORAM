@@ -114,14 +114,18 @@ BOrion::BOrion(bool usehdd, int maxSize) {
     this->useHDD = usehdd;
     bytes<Key> key1{0};
     bytes<Key> key2{1};
-    srch = new OMAP(maxSize*16, key1);
-    updt = new OMAPf(maxSize, key2); // use key2
+    srch = new OMAP(maxSize*20, key1);
+    updt = new OMAPf(maxSize*4, key2); // use key2
     fcnt = new OMAPf(maxSize,key2);
+    //srch = new OMAP(maxSize*4, key1);
+    //updt = new OMAPf(maxSize*2, key2); // use key2
+    //fcnt = new OMAPf(maxSize,key2);
 }
 
 BOrion::~BOrion() {
     delete srch;
     delete updt;
+    delete fcnt;
 }
 
 void BOrion::insertWrap(string cont, string ind, bool batch)
@@ -160,7 +164,7 @@ void BOrion::setupinsertWrap(vector<string> kws,vector<string> blocks,string ind
    	setupinsertkw(kw,ind); // insert all keywords
 	totk++;
 	tvol[kw]=tvol[kw]+blocks.size();
-	float al = idvol[kw]/tvol[kw];
+	float al = float(idvol[kw]/tvol[kw]);
 	alpha<< kw <<" "<< idvol[kw] <<" "<< tvol[kw]<<" "<<al<<endl;
      }
      cout << "inserted all the kw (total keywords: " <<totk <<")"<< endl;
@@ -175,7 +179,9 @@ void BOrion::setupinsertkw(string keyword, string ind)
 	//cout <<"------------------Inserting----------"<<keyword<<endl;
     inserted++;
     Bid mapKey(keyword);
+    cout <<"fcnt FINDING:"<<mapKey<<endl;
     auto updt_cnt = (fcnt->setupfind(mapKey));
+    cout <<"fcnt FOUND:"<<mapKey<<endl;
     int updc; 
     if (updt_cnt == "") 
     {
@@ -187,7 +193,10 @@ void BOrion::setupinsertkw(string keyword, string ind)
         updc = stoI(updt_cnt);
     }
     updc++;
+    cout <<"fcnt insertING:"<<mapKey<<endl;
     fcnt->setupinsert(mapKey,to_string(updc));
+    cout <<"fcnt insertED:"<<mapKey<<endl;
+
     //auto again = fcnt->setupfind(mapKey);
     //cout<<"LOOKING FOR --------------------:["<<again<<"]"<<endl;
 

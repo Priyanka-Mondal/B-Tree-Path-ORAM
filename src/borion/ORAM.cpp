@@ -342,6 +342,7 @@ int ORAM::DeleteNode(Bid bid, Node* node) {
 
 void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
 {
+	 if (store->GetEmptySize() > 0) {
     int flag = 0;
     for (size_t d = 0; d <= depth; d++) 
     {
@@ -390,6 +391,11 @@ void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
 	if(flag == 1)
 		break;
      }
+    if(flag == 0)
+	    cache[bid] = n;
+	 }
+	 else
+		 throw runtime_error("No more spare in ORAM");
 }
 
 
