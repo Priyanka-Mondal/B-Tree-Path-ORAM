@@ -275,7 +275,7 @@ Nodef* ORAMf::setupReadNf(Bid bid,int leaf)
     	n=cache[bid];
     }
     else
-	    cout<<"leaf:"<<leaf<<"/"<<bid<<"NOT FOUND at ALL in setupReadNf"<<store->GetEmptySize()<<endl;
+	    cout<<"leaf:"<<leaf<<"/"<<bid<<"NOT FOUND at ALL in setupReadNf "<<store->GetEmptySize()<<endl;
     return n;
 }
 
@@ -317,9 +317,9 @@ Nodef* ORAMf::ReadNodef(Bid bid, int lastLeaf, int newLeaf) {
 
 void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
 {
+    int flag = 0;
   if (store->GetEmptySize() > 0) 
   {
-    int flag = 0;
     for (size_t d = 0; d <= depth; d++) 
     {
         int node = GetNodefOnPath(n->pos, d);

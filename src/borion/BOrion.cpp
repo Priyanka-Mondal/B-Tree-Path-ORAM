@@ -164,11 +164,11 @@ void BOrion::setupinsertWrap(vector<string> kws,vector<string> blocks,string ind
    	setupinsertkw(kw,ind); // insert all keywords
 	totk++;
 	tvol[kw]=tvol[kw]+blocks.size();
-	float al = float(idvol[kw]/tvol[kw]);
+	float al = (float(idvol[kw]))/(float(tvol[kw]));
 	alpha<< kw <<" "<< idvol[kw] <<" "<< tvol[kw]<<" "<<al<<endl;
      }
      cout << "inserted all the kw (total keywords: " <<totk <<")"<< endl;
-     insertFile(ind,blocks); // insert all file blocks
+     setupinsertFile(ind,blocks); // insert all file blocks
      cout << endl<<"--TOTAL keywords inserted so far: "<<inserted<<endl;
      cout <<"--TOTAL unique keywords inserted so far: "<<uniquekw<<endl;
 
@@ -176,7 +176,7 @@ void BOrion::setupinsertWrap(vector<string> kws,vector<string> blocks,string ind
 
 void BOrion::setupinsertkw(string keyword, string ind) 
 {
-	//cout <<"------------------Inserting----------"<<keyword<<endl;
+	cout <<"------------------Inserting["<<keyword<<endl;
     inserted++;
     Bid mapKey(keyword);
     cout <<"fcnt FINDING:"<<mapKey<<endl;

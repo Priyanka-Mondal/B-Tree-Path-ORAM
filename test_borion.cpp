@@ -119,12 +119,12 @@ int main(int argc, char**argv)
 	BOrion borion(usehdd, size);  
         ofstream sres;
 	sres.open("vardbsearchborion.txt");//,ios::app);	
-//	/*
+
         auto start = high_resolution_clock::now();
 	list_dir(argv[2],borion);
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
-//*/
+
 
 /*
 	list_dir("allen-p/deleted_items",borion);
