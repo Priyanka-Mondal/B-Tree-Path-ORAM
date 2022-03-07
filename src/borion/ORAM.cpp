@@ -342,7 +342,9 @@ int ORAM::DeleteNode(Bid bid, Node* node) {
 
 void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
 {
-	 if (store->GetEmptySize() > 0) {
+	int sz = store->GetEmptySize();
+	 if (sz>0) {
+//		 cout<<"Empty Nodes in ORAM:"<<sz<<endl;
     int flag = 0;
     for (size_t d = 0; d <= depth; d++) 
     {
@@ -358,7 +360,6 @@ void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
 	    {    
             	Node* curnode = n;
 		newblock.id = bid;
-		//cout <<n->key<<"CURNODE key IS:--------"<< block.id<<endl;
                 newblock.data = convertNodeToBlock(curnode);
 		flag = 1;
 		store->ReduceEmptyNumbers();

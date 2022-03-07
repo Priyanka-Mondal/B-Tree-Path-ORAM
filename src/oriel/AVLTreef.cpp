@@ -31,11 +31,12 @@ int AVLTreef::max(int a, int b) {
 
 /* Helper function that allocates a new node with the given key and
    NULL left and right pointers. */
-Nodef* AVLTreef::newNodef(Bid key, string value) {
+Nodef* AVLTreef::newNodef(Bid key, int value) {
     Nodef* node = new Nodef();
     node->key = key;
+    auto val = to_string(value);
     std::fill(node->value.begin(), node->value.end(), 0);
-    std::copy(value.begin(), value.end(), node->value.begin());
+    std::copy(val.begin(), val.end(), node->value.begin());
     node->leftID = 0;
     node->rightID = 0;
     node->pos = RandomPath();
@@ -47,7 +48,7 @@ Nodef* AVLTreef::setuprightRotate(Nodef* y, Bid rootKey, int& pos) {
     Nodef* x = oram->setupReadNf(y->leftID,y->leftPos);
     Nodef* T2;
     if (x->rightID == 0) {
-        T2 = newNodef(0, "");
+        T2 = newNodef(0, 0);
     } else {
         T2 = oram->setupReadNf(x->rightID,x->rightPos);
     }
@@ -69,7 +70,7 @@ Nodef* AVLTreef::setupleftRotate(Nodef* x, Bid rootKey, int& pos) {
     Nodef* y = oram->setupReadNf(x->rightID,x->rightPos);
     Nodef* T2;
     if (y->leftID == 0) {
-        T2 = newNodef(0, "");
+        T2 = newNodef(0, 0);
     } else {
         T2 = oram->setupReadNf(y->leftID,y->leftPos);
     }
@@ -90,7 +91,7 @@ Nodef* AVLTreef::rightRotate(Nodef* y) {
     Nodef* x = oram->ReadNodef(y->leftID,y->leftPos,y->leftPos);
     Nodef* T2;
     if (x->rightID == 0) {
-        T2 = newNodef(0, "");
+        T2 = newNodef(0, 0);
     } else {
         T2 = oram->ReadNodef(x->rightID,x->rightPos,x->rightPos);
     }
@@ -113,7 +114,7 @@ Nodef* AVLTreef::leftRotate(Nodef* x) {
     Nodef* y = oram->ReadNodef(x->rightID,x->rightPos,x->rightPos);
     Nodef* T2;
     if (y->leftID == 0) {
-        T2 = newNodef(0, "");
+        T2 = newNodef(0, 0);
     } else {
         T2 = oram->ReadNodef(y->leftID,y->leftPos,y->leftPos);
     }
@@ -145,7 +146,7 @@ int AVLTreef::setupgetBalance(Nodef* N) {
 }
 
 
-Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, string value) 
+Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, int value) 
 {
     if (rootKey == 0) {
         Nodef* nnode = newNodef(key, value);
@@ -164,7 +165,9 @@ Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, string value)
 //	cout <<node->rightPos<<"the RIGHT ID IS -----"<< node->rightID<<endl;
     } else {
         std::fill(node->value.begin(), node->value.end(), 0);
-        std::copy(value.begin(), value.end(), node->value.begin());
+        auto val = to_string(value);
+        std::fill(node->value.begin(), node->value.end(), 0);
+        std::copy(val.begin(), val.end(), node->value.begin());
         oram->setupWriteNf(rootKey, node,rootKey, pos);
         return node->key;
     }
@@ -218,7 +221,7 @@ Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, string value)
 }
 
 
-Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, string value) {
+Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, int value) {
     /* 1. Perform the normal BST rotation */
     if (rootKey == 0) {
         Nodef* nnode = newNodef(key, value);
@@ -234,7 +237,9 @@ Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, string value) {
         node->rightID = insert(node->rightID, node->rightPos, key, value);
     } else {
         std::fill(node->value.begin(), node->value.end(), 0);
-        std::copy(value.begin(), value.end(), node->value.begin());
+	auto val = to_string(value);
+        std::fill(node->value.begin(), node->value.end(), 0);
+        std::copy(val.begin(), val.end(), node->value.begin());
         oram->WriteNodef(rootKey, node);
         return node->key;
     }
@@ -487,7 +492,7 @@ Bid AVLTreef::balance(Nodef* node, int &pos)
 
 int AVLTreef::deleteNode(Nodef* nodef)
 {
-	Nodef* free = newNodef(0,"");
+	Nodef* free = newNodef(0,0);
 	oram->DeleteNode(nodef->key,free);
 	//oram->WriteNodef(nodef->key,free);
 	return 0;
@@ -542,7 +547,7 @@ Nodef* b=oram->ReadNodef(delnode->rightID,delnode->rightPos,delnode->rightPos);
 	{//no right child of delKey
 Nodef* lc = oram->ReadNodef(delnode->leftID,delnode->leftPos,delnode->leftPos);
 		if(lc == NULL || lc->key ==0)
-			lc = newNodef(0,"");
+			lc = newNodef(0,0);
 		pos = lc->pos;
 		deleteNode(delnode);
 		return lc->key;
@@ -558,7 +563,7 @@ Nodef* lc = oram->ReadNodef(delnode->leftID,delnode->leftPos,delnode->leftPos);
 		//	cout <<"SECOND CASE: rootKey == parmin->key"<< endl;
 	Nodef* lc = oram->ReadNodef(delnode->leftID,delnode->leftPos,delnode->leftPos);
 			if(lc == NULL || lc->key ==0)
-				lc = newNodef(0,"");
+				lc = newNodef(0,0);
 			minnode->leftID = lc->key;
 			minnode->leftPos = lc->pos;
 			minnode->height =  max(height(minnode->leftID,minnode->leftPos), height(minnode->rightID, minnode->rightPos)) + 1;
@@ -574,7 +579,7 @@ Nodef* lc = oram->ReadNodef(delnode->leftID,delnode->leftPos,delnode->leftPos);
 		{//in this case minnode is parmin's left child always
 	Nodef* rc = oram->ReadNodef(minnode->rightID,minnode->rightPos,minnode->rightPos);
 			if(rc == NULL || rc->key ==0)
-				rc = newNodef(0,"");
+				rc = newNodef(0,0);
 			parmin->leftID = rc->key;
 			parmin->leftPos = rc->pos;
 			parmin->height = max(height(parmin->leftID,parmin->leftPos), height(parmin->rightID, parmin->rightPos)) + 1;
@@ -693,7 +698,7 @@ Nodef* pm=parentOf(paren->key,paren->pos,paren->key,paren->pos,minnode->key);
 	//	cout <<"FIRST CASE:delKey == minnode->key"<< endl;
 Nodef* lc = oram->ReadNodef(delnode->leftID,delnode->leftPos,delnode->leftPos);
 		if(lc == NULL || lc->key ==0)
-			lc = newNodef(0,"");
+			lc = newNodef(0,0);
 		if(paren->leftID == minnode->key)
 		{
 			paren->leftID = lc->key;
@@ -714,7 +719,7 @@ Nodef* lc = oram->ReadNodef(delnode->leftID,delnode->leftPos,delnode->leftPos);
 	//	cout <<"SECOND CASE: delKey == parmin->key"<< endl;
 Nodef* lc = oram->ReadNodef(delnode->leftID,delnode->leftPos,delnode->leftPos);
 		if(lc == NULL || lc->key ==0)
-			lc = newNodef(0,"");
+			lc = newNodef(0,0);
 		minnode->leftID = lc->key;
 		minnode->leftPos = lc->pos;
 		minnode->height =  max(height(minnode->leftID,minnode->leftPos), height(minnode->rightID, minnode->rightPos)) + 1;
@@ -742,7 +747,7 @@ Nodef* lc = oram->ReadNodef(delnode->leftID,delnode->leftPos,delnode->leftPos);
 		//cout <<"THIRD case"<< endl;	
 Nodef* rc = oram->ReadNodef(minnode->rightID,minnode->rightPos,minnode->rightPos);
 		if(rc == NULL || rc->key ==0)
-			rc = newNodef(0,"");
+			rc = newNodef(0,0);
 		parmin->leftID = rc->key;
 		parmin->leftPos = rc->pos;
 		parmin->height = max(height(parmin->leftID,parmin->leftPos), height(parmin->rightID, parmin->rightPos)) + 1;
