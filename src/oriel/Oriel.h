@@ -12,6 +12,14 @@
 #include <cryptopp/aes.h>
 #include <vector>
 #include "utils/Utilities.h"
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <sse/crypto/hash.hpp>
+#include <boost/algorithm/string.hpp>
+#include <openssl/conf.h>
+#include <openssl/evp.h>
+#include <openssl/err.h>
+#include <sse/crypto/prg.hpp>
 
 typedef uint64_t index_type;
 
@@ -22,7 +30,7 @@ using namespace std;
 #define FILE_SIZE 1024
 typedef array<uint8_t, AES_KEY_SIZE> prf_type;
 typedef array<uint8_t, 1024> file_type;
-typedef array<uint8_t, 64> fblock;
+typedef array<uint8_t, 128> fblock;
 #endif
 
 class FileNode
@@ -38,12 +46,7 @@ class FileNode
 class Oriel {
 private:
     bool useHDD;
-    map<Bid,pair<string,string>> Imap;
-    map<Bid,string> updmap;
-    map<Bid,string> acmap;
     OMAPf *ac , *I, *del;
-    map<string,int> idvol;
-    map<string,int> tvol;
     map<prf_type, FileNode*> DictF;
     
 public:
@@ -51,29 +54,22 @@ public:
     Bid createBid(string keyword,string id);
 
     void insertWrap(string cont, int ind, bool batch);
-    void insertWrapper(vector<string> kws, vector<string> blocks, int ind);
+    void insertWrapper(vector<string> kws, string cont, int ind, bool batch);
     void insertkw(string keyword, int ind);
-    void insertFile(string keyword, vector<string> blocks);
-   
-    void setupinsertWrap(vector<string> kws,vector<string> blocks,int ind);
-    void setupinsertFile(string keyword, vector<string> blocks);
     void setupinsertkw(string keyword, int ind); 
-    vector<int> setupsearch(string keyword);
+    void insertFile(int ind, string content);
     
-    void remove(string ind); 
-    void removekw(vector<string> keyword, string ind);
+    void remove(int ind); 
+    void removekw(vector<string> keyword, int ind);
     
-    vector<int> search(string keyword);
+    map<int,string> search(string keyword);
     
     void print();
 
     Oriel(bool useHDD,int maxSize);    
     virtual ~Oriel();
-    void beginSetup();
-    void endSetup();
 
-    void updateFile(prf_type addr, FileNode* val);
-    vector<FileNode*> searchFile(vector<prf_type> KList);
+    void getAESRandomValue(unsigned char* keyword, int op, int srcCnt, int fileCnt, unsigned char* result);
 };
 
 #endif /* ORIEL_H */

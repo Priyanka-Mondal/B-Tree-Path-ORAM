@@ -247,7 +247,7 @@ Node* ORAM::setupReadN(Bid bid,int leaf)
         return NULL;
     }
     Node* n;
-    for (size_t d = 0; d <= depth; d++) 
+    for (size_t d = depth; d >= 0; d--) 
     {
         int node = GetNodeOnPath(leaf, d);
         Bucket bucket = ReadBucket(node);
@@ -264,7 +264,7 @@ Node* ORAM::setupReadN(Bid bid,int leaf)
      }
     if(n==cache[bid])
     {
-    	cout <<"found "<<bid<<" in cache "<<endl;
+    	cout <<"found "<<bid<<" in cache ORAM"<<endl;
     	n=cache[bid];
     }
     else
@@ -346,7 +346,7 @@ void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
 	 if (sz>0) {
 //		 cout<<"Empty Nodes in ORAM:"<<sz<<endl;
     int flag = 0;
-    for (size_t d = 0; d <= depth; d++) 
+    for (size_t d = depth; d >= 0; d--) 
     {
         int node = GetNodeOnPath(n->pos, d);
         Bucket bucket = ReadBucket(node);
@@ -393,7 +393,10 @@ void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
 		break;
      }
     if(flag == 0)
+    {
 	    cache[bid] = n;
+	    cout <<"Writing in CACHE!!!!!!"<<endl;
+    }
 	 }
 	 else
 		 throw runtime_error("No more spare in ORAM");

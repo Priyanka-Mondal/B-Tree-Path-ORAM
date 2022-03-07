@@ -33,7 +33,7 @@ int OMAPf::find(Bid key) {
         res2.assign(resNode->value.begin(), resNode->value.begin()+4);
         res2 = res2.c_str();
 	res = stoint(res2);
-	cout <<"res at OMAP is:"<< res2<<endl;
+	//cout <<"res at OMAP is:"<< res2<<endl;
     }
     treeHandler->finishOperation(true, rootKey, rootPos);
     return res;
