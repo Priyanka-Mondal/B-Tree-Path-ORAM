@@ -86,6 +86,7 @@ string getFileContent(string path)
 	      return content;
 }
 
+/*
 static void list_dir (const char * dir_name, Client& client, bool real)
 {
     string delimiters("|?@,:!\">; -./  \n");
@@ -180,7 +181,6 @@ static void list_dir (const char * dir_name, Client& client, bool real)
     //return client;
 }
 
-
 void insertSingleFile(Client &client,string file)
 {
 
@@ -245,14 +245,32 @@ void deleteSinglefile(Client &client, int fileid)
         	 }
 	 }
 }
-
+*/
 int main(int argc, char** argv) 
 {
+    bool usehdd = false, cleaningMode = false;
+
+    Server server(usehdd, cleaningMode);
+    Client client(&server, cleaningMode, 100);
+
+    client.update(OP::INS, "test", 5, false);
+    client.update(OP::INS, "test", 6, false);
+    client.update(OP::INS, "test", 7, false);
+    client.update(OP::DEL, "test", 6, false);
+    client.update(OP::INS, "test1", 27, false);
+    vector<int> res = client.search("test1");
+    //client.endSetup();    
+    for (auto item : res) {
+        cout << item << endl;
+    }
+
+    return 0;
+/*
     bool usehdd = false, deletFiles = false;
     Server server(usehdd, deletFiles);
     Client client(&server, deletFiles, 10000, 8000);
     //client.endSetup();    
-	list_dir("tiny",client, FAKE);
+    list_dir("tiny",client, FAKE);
 	cout <<"==================fake files added=================="<<endl;
 	list_dir("allen-p/deleted_items",client, REAL);
 	cout << endl<<" SETUP INSERT DONE!"<< endl;
@@ -340,4 +358,5 @@ int main(int argc, char** argv)
 		}
 	}    
     return 0;
+*/
 }

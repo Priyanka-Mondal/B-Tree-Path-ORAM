@@ -112,24 +112,25 @@ void Oriel::insertWrap(string cont, int ind, bool batch)
 
 void Oriel::insertWrapper(vector<string> kws, string content,int ind,bool batch)
 { 
-     int totk=0;
-     for (auto kw: kws) 
+     if(batch)
      {
-	if(batch)
+     	for(auto kw: kws) 
 	    setupinsertkw(kw,ind);
-	else
-   	    insertkw(kw,ind); 
-	totk++;
      }
-     cout << "inserted keywords (total:" <<totk <<")for id:"<<ind<< endl;
+     else
+     {
+	 for(auto kw: kws)
+   	    insertkw(kw,ind); 
+     } 
+     cout << "inserted keywords (total:" <<kws.size() <<")for id:"<<ind<< endl;
      insertFile(ind,content); 
+     inserted=inserted+kws.size();
      cout << endl<<"--TOTAL keywords inserted so far: "<<inserted<<endl;
      cout <<"--TOTAL unique keywords inserted so far: "<<uniquekw<<endl;
 }
 
 void Oriel::insertkw(string keyword, int ind) 
 {
-    inserted++;
     Bid mapKey(keyword);
     int updc = (I->find(mapKey));
     if (updc == 0) 
@@ -144,7 +145,6 @@ void Oriel::insertkw(string keyword, int ind)
     
 void Oriel::setupinsertkw(string keyword, int ind) 
 {
-    inserted++;
     Bid mapKey(keyword);
     int updc = (I->setupfind(mapKey));
     if (updc == 0) 
@@ -167,17 +167,16 @@ void Oriel::insertFile(int ind, string content)
     ac->insert(mapKey,1);
     prf_type addr;
     getAESRandomValue(file.data(), 0, 1, 1, addr.data());
-    int sz = content.size();// always multiple of 64
+    int sz = content.size();
     sz = sz < sizeof(fblock)? sizeof(fblock):nextPowerOf2(sz);
     if(content.size()<sz) 
     {
 	  content.insert(content.size(),sz-content.size(),'#');
     }
-    int len = 0;
     FileNode *head = NULL;
+    int len = 0;
     while(len < content.size())
     {
-	    //cout <<"len:"<< len<< endl;
 	    string part = content.substr(len,sizeof(fblock));
 	    fblock val;
 	    copy(part.begin(), part.end(), val.data());
@@ -192,19 +191,21 @@ map<int,string> Oriel::search(string keyword)
     map<int,string> files;
     Bid mapKey(keyword);
     int updc = I->find(mapKey); 
+    cout <<"UPDC:"<< updc<< endl;
     if (updc == 0)
         return files;
     int pos = 1;
-    vector<Bid> bids;
+    //vector<Bid> bids;
     while(pos <= updc)
     {
     	mapKey =createBid(keyword,pos);
 	pos++;
-	bids.push_back(mapKey);
-    }
-    vector<int> ids = I->batchSearch(bids); // add y^m - updc fake accesses
-    for(int ind : ids)
-    {
+	//bids.push_back(mapKey);
+    //}
+    //vector<int> ids = I->batchSearch(bids); // add y^m - updc fake accesses
+    //for(int ind : ids)
+    //{
+        int ind = I->find(mapKey);
 	string id = to_string(ind);
 	Bid acKey(id);
         int accsCnt = ac->find(acKey);
@@ -212,9 +213,9 @@ map<int,string> Oriel::search(string keyword)
         memset(file.data(), 0, AES_KEY_SIZE);
         copy(id.begin(), id.end(), file.data());
         Bid mapKey(id);
-        prf_type rnd;
-        getAESRandomValue(file.data(), 0, accsCnt, accsCnt, rnd.data());
-        FileNode* head = DictF[rnd];
+        prf_type addr;
+        getAESRandomValue(file.data(), 0, accsCnt, accsCnt, addr.data());
+        FileNode* head = DictF[addr];
 	FileNode* newhead = NULL;
         while(head!=NULL)
         {
@@ -230,10 +231,10 @@ map<int,string> Oriel::search(string keyword)
 	    append(&newhead,val);
         }
 	ac->insert(acKey,(++accsCnt));
-        prf_type addr;
-        getAESRandomValue(file.data(), 0, accsCnt, accsCnt, addr.data());
-	DictF.erase(rnd);
-        DictF[addr]=newhead;
+        prf_type newaddr;
+        getAESRandomValue(file.data(), 0, accsCnt, accsCnt, newaddr.data());
+	DictF.erase(addr);
+        DictF[newaddr]=newhead;
     }
     return files;
 }
@@ -255,7 +256,6 @@ void Oriel::remove(int ind)
         copy(id.begin(), id.end(), fileid.data());
         prf_type addr;
         getAESRandomValue(fileid.data(), 0, accsCnt, accsCnt, addr.data());
-        
         FileNode* head = DictF[addr];
 	string file="";
         while(head!=NULL)

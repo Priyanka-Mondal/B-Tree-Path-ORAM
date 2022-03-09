@@ -294,9 +294,6 @@ Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, int value) {
     return node->key;
 }
 
-/**
- * a recursive search function which traverse binary tree to find the target node
- */
 Nodef* AVLTreef::search(Nodef* head, Bid key) {
     if (head == NULL || head->key == 0)
         return head;
@@ -322,10 +319,6 @@ Nodef* AVLTreef::setupsearch(Nodef* head, Bid key) {
         return setupsearch(oram->setupReadNf(head->rightID, head->rightPos), key);
     } else if(head->key == key)
         return head;
-    else{
-	    cout <<"NOT FOUND"<< key<<endl;
-	    return head;
-    }
 }
 /**
  * a recursive search function which traverse binary tree to find the target node

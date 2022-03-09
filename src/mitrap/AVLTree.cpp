@@ -315,3 +315,23 @@ string AVLTree::incrementFileCnt(Node* head, Bid key) {
         return res;
     }
 }
+
+
+string AVLTree::incrementAccsCnt(Node* head, Bid key) {
+    if (head == NULL || head->key == 0)
+        return "";
+    head = oram->ReadNode(head->key, head->pos, head->pos);
+    if (head->key > key) {
+        return incrementFileCnt(oram->ReadNode(head->leftID, head->leftPos, head->leftPos), key);
+    } else if (head->key < key) {
+        return incrementFileCnt(oram->ReadNode(head->rightID, head->rightPos, head->rightPos), key);
+    } else {
+        string res(head->value.begin(), head->value.end());
+        int AccsCnt = stoi(res);
+        string newval = to_string(AccsCnt + 1) ;
+        std::fill(head->value.begin(), head->value.end(), 0);
+        std::copy(newval.begin(), newval.end(), head->value.begin());
+        oram->WriteNode(key, head);
+        return res;
+    }
+}

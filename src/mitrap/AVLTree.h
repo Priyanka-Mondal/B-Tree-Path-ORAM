@@ -32,6 +32,7 @@ private:
 public:
     ORAM *oram;
     string incrementFileCnt(Node* head, Bid key);
+    string incrementAccsCnt(Node* head, Bid key);
     AVLTree(int maxSize, bytes<Key> key);
     virtual ~AVLTree();
     Bid insert(Bid rootKey, int& pos, Bid key, string value);

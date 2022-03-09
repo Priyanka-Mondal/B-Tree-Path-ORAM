@@ -99,29 +99,27 @@ void ORAMf::WriteBucket(int index, Bucketf bucket) {
 
 // Fetches blocks along a path, adding them to the cache
 
-void ORAMf::FetchPath(int leaf) {
+void ORAMf::FetchPath(int leaf) 
+{
     readCnt++;
-    for (size_t d = 0; d <= depth; d++) {
+    for (size_t d = 0; d <= depth; d++) 
+    {
         int node = GetNodefOnPath(leaf, d);
-
-        if (find(readviewmap.begin(), readviewmap.end(), node) != readviewmap.end()) {
+        if(find(readviewmap.begin(),readviewmap.end(),node)!=readviewmap.end())
             continue;
-        } else {
+	else 
             readviewmap.push_back(node);
-        }
-
         Bucketf bucket = ReadBucket(node);
-
-        for (int z = 0; z < Z; z++) {
+        for (int z = 0; z < Z; z++) 
+	{
             Blockf &block = bucket[z];
-
-            if (block.id != 0) { // It isn't a dummy block   
+            if (block.id != 0) 
+	    {    
                 Nodef* n = convertBlockToNodef(block.data);
-                if (cache.count(block.id) == 0) {
+                if (cache.count(block.id) == 0) 
                     cache.insert(make_pair(block.id, n));
-                } else {
+                else 
                     delete n;
-                }
             }
         }
     }
@@ -313,6 +311,7 @@ Nodef* ORAMf::ReadNodef(Bid bid, int lastLeaf, int newLeaf) {
 	{
 		cout <<"nodef is NULL : "<< bid << endl ;
 		cout <<"free nodefs:" << store->GetEmptySize() << endl;
+		cout <<"CACHE size:"<< cache.size()<< endl;
 	}
         return node;
     } else {

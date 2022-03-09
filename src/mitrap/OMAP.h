@@ -21,6 +21,7 @@ public:
     virtual ~OMAP();
     void insert(Bid key, string value);
     string incrementFileCnt(Bid key);
+    string incrementAccsCnt(Bid key);
     string find(Bid key);
     void printTree();
     void batchInsert(map<Bid, string> pairs);

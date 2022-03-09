@@ -157,7 +157,7 @@ void BOrion::setupinsertWrap(vector<string> kws,vector<string> blocks,string ind
 { 
      int totk=0;
      ofstream alpha;
-     alpha.open("alpha.txt",ios::app);	
+     alpha.open("alpha.txt");//,ios::app);	
      //cout << "inserting kw for:"<< ind << endl;
      for (auto kw: kws) 
      {

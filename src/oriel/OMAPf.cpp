@@ -26,14 +26,13 @@ int OMAPf::find(Bid key) {
     node->key = rootKey;
     node->pos = rootPos;
     auto resNode = treeHandler->search(node, key);
-    //cout <<"root is Nodef:"<<rootKey<<endl;
-    int res;// = "";
-    if (resNode != NULL) {
-	    string res2="";
+    int res;
+    if (resNode != NULL) 
+    {
+	string res2="";
         res2.assign(resNode->value.begin(), resNode->value.begin()+4);
         res2 = res2.c_str();
 	res = stoint(res2);
-	//cout <<"res at OMAP is:"<< res2<<endl;
     }
     treeHandler->finishOperation(true, rootKey, rootPos);
     return res;
@@ -44,15 +43,15 @@ int OMAPf::setupfind(Bid key) {
     if (rootKey == 0) {
         return 0;
     }
-	//cout <<rootPos<<"root at OMAP FIND is :"<< rootKey<<endl;
 //    treeHandler->startOperation();
     Nodef* node = new Nodef();
     node->key = rootKey;
     node->pos = rootPos;
     auto resNode = treeHandler->setupsearch(node, key);
-    int res ; //= "";
-    if (resNode != NULL) {
-	    string res2;
+    int res ; 
+    if (resNode != NULL) 
+    {
+        string res2;
         res2.assign(resNode->value.begin(), resNode->value.end());
         res2 = res2.c_str();
 	res = stoint(res2);
@@ -65,9 +64,12 @@ int OMAPf::setupfind(Bid key) {
 void OMAPf::remove(Bid delKey)
 {
     treeHandler->startOperation();
-    if (rootKey == 0) {
+    if (rootKey == 0) 
+    {
         rootKey = treeHandler->removeMain(0, rootPos, delKey);
-    } else {
+    } 
+    else 
+    {
         rootKey = treeHandler->removeMain(rootKey, rootPos, delKey);
     }
     treeHandler->finishOperation(false, rootKey, rootPos);
@@ -77,10 +79,13 @@ void OMAPf::remove(Bid delKey)
 void OMAPf::setupinsert(Bid key, int value)
 {
     //treeHandler->startOperation();
-    if (rootKey == 0) {
+    if (rootKey == 0) 
+    {
         rootKey = treeHandler->setupinsert(0, rootPos, key, value);
 	//cout <<rootPos<<"root at OMAP is :"<< rootKey<<endl;
-    } else {
+    } 
+    else 
+    {
         rootKey = treeHandler->setupinsert(rootKey, rootPos, key, value);
 	//cout <<rootPos<<"root at OMAP is :"<< rootKey<<endl;
     }

@@ -1,0 +1,5 @@
+#/bin/sh
+for f in find deleted_items -type f 
+do 
+ cat b >> f
+done
