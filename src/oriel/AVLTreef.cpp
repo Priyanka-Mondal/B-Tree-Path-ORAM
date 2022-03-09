@@ -40,6 +40,7 @@ Nodef* AVLTreef::newNodef(Bid key, int value) {
     node->leftID = 0;
     node->rightID = 0;
     node->pos = RandomPath();
+    cout <<"RANDOMPATH:"<< node->pos<<endl;
     node->height = 1; // new node is initially added at leaf
     return node;
 }

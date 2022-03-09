@@ -1,4 +1,4 @@
-#include "morion/Orion.h"
+#include "orionsq/Orion.h"
 #include<string.h>
 #include<utility>
 #include <dirent.h>
@@ -12,7 +12,7 @@ using namespace std::chrono;
 
 int fileid = 1;
 bool usehdd = true;
-
+bool batch = true;
 string toS(int id)
 {
 	string s = to_string(id);
@@ -66,7 +66,7 @@ static void list_dir (const char * dir_name, Orion& orion)
 	          cout <<"=====================================" << endl;
                   cout << endl <<file<< " " << fileid <<endl ;
 	     
-	     	  orion.insertWrap(cont,fileid);
+	     	  orion.insertWrap(cont,fileid, batch);
              
 	     	  fileid++;
              }
@@ -111,7 +111,7 @@ int main(int, char**)
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
 	sres <<(fileid-1)<<" "<< duration.count()<<" "<< s.size()<<endl;
-	
+return 0;	
 	list_dir("allen-p/small_deleted_items",orion);
         start = high_resolution_clock::now();
 	s = orion.search("borion");
@@ -203,7 +203,7 @@ int main(int, char**)
 			cin>> file;
 	          	string cont = getFileContent(file);
 			start = high_resolution_clock::now();
-			orion.insertWrap(cont,fileid);
+			orion.insertWrap(cont,fileid, false);
 			stop = high_resolution_clock::now();
 			duration = duration_cast<microseconds>(stop-start);
 		cout <<"--TOTAL files inserted so far:"<<fileid<<endl;

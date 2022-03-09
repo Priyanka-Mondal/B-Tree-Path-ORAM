@@ -17,17 +17,20 @@ private:
     
 public:
     Bid createBid(string keyword,int number);
-    void insertWrap(string cont, int fileid);
+    
+    void insertWrap(string cont, int fileid, bool batch);
     void insert(vector<string> kws, vector<string> blocks, int ind);
-    void setupInsert(string keyword, int ind);
+    void setupinsert(vector<string> kws, vector<string> blocks, int ind);
+    
     void remove(int ind);
     void removekw(vector <string> kws, int id);
-    void setupRemove(string keyword, int ind);
+    
     map<int,string> search(string keyword);
+    
     Orion(bool useHDD,int maxSize, int kwSize);    
+    
     virtual ~Orion();
-    void beginSetup();
-    void endSetup();
+    
     void print();
 
 };

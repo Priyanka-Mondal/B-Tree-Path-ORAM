@@ -10,6 +10,24 @@ OMAP::~OMAP() {
 
 }
 
+string OMAP::setupfind(Bid key) {
+    if (rootKey == 0) {
+        return "";
+    }
+//    treeHandler->startOperation();
+    Node* node = new Node();
+    node->key = rootKey;
+    node->pos = rootPos;
+    auto resNode = treeHandler->setupsearch(node, key);
+    string res = "";
+    if (resNode != NULL) {
+        res.assign(resNode->value.begin(), resNode->value.end());
+        res = res.c_str();
+    }
+    //else if(resNode == NULL)
+//	    cout <<"Null recieved in OMAPf for"<< key<< endl;
+    return res;
+}
 string OMAP::find(Bid key) {
     if (rootKey == 0) {
         return "";
@@ -28,6 +46,17 @@ string OMAP::find(Bid key) {
     return res;
 }
 
+void OMAP::setupinsert(Bid key, string value)
+{
+    //treeHandler->startOperation();
+    if (rootKey == 0) {
+        rootKey = treeHandler->setupinsert(0, rootPos, key, value);
+	//cout <<rootPos<<"root at OMAP is :"<< rootKey<<endl;
+    } else {
+        rootKey = treeHandler->setupinsert(rootKey, rootPos, key, value);
+	//cout <<rootPos<<"root at OMAP is :"<< rootKey<<endl;
+    }
+}
 void OMAP::insert(Bid key, string value) {
     treeHandler->startOperation();
     if (rootKey == 0) {

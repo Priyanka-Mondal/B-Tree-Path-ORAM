@@ -27,6 +27,10 @@ public:
     void printTree();
     void batchInsert(map<Bid, string> cont);
     vector<string> batchSearch(vector<Bid> keys);
+
+
+    void setupinsert(Bid key, string value);
+    string setupfind(Bid key);
 };
 
 #endif /* OMAPf_H */

@@ -244,6 +244,37 @@ void ORAM::Access(Bid bid, Node*& node) {
     }
 }
 
+Node* ORAM::setupReadN(Bid bid,int leaf)
+{
+    if (bid == 0) {
+	    //cout <<"Hey setupReadN is 0"<<endl;
+        return NULL;
+    }
+    Node* n;
+    for (size_t d = 0; d <= depth; d++) 
+    {
+        int node = GetNodeOnPath(leaf, d);
+        Bucket bucket = ReadBucket(node);
+        for (int z = 0; z < Z; z++) 
+	{
+            Block &block = bucket[z];
+            if (block.id == bid) 
+	    {    
+                n = convertBlockToNode(block.data);
+		return n;
+            }
+        }
+
+     }
+    if(n==cache[bid])
+    {
+    	cout <<"found "<<bid<<" in cache ORAM"<<endl;
+    	n=cache[bid];
+    }
+    else
+	    cout<<bid<<"NOT FOUND at ALL in setupRead"<<endl;
+    return n;
+}
 Node* ORAM::ReadNode(Bid bid) {
     if (bid == 0) {
         throw runtime_error("Node id is not set ReadNode");
@@ -275,6 +306,80 @@ Node* ORAM::ReadNode(Bid bid, int lastLeaf, int newLeaf) {
     }
 }
 
+void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
+{
+	int sz = store->GetEmptySize();
+	 if (sz>0) {
+//		 cout<<"Empty Nodes in ORAM:"<<sz<<endl;
+    int flag = 0;
+    for (size_t d = 0; d <= depth; d++) 
+    {
+        int node = GetNodeOnPath(n->pos, d);
+        Bucket bucket = ReadBucket(node);
+        Bucket newbucket;
+        for (int z = 0; z < Z; z++) 
+	{
+            Block &newblock = newbucket[z];
+	    Block &block = bucket[z];
+	    int pos ;
+            if (flag==0 && (block.id == bid || block.id == 0)) 
+	    {    
+            	Node* curnode = n;
+		newblock.id = bid;
+                newblock.data = convertNodeToBlock(curnode);
+		flag = 1;
+		store->ReduceEmptyNumbers();
+		pos = curnode->pos;
+		//delete curnode;
+            }
+	    else if(block.id == 0)
+	    {
+            	newblock.id = 0;
+            	newblock.data.resize(blockSize, 0);
+	    }
+	    else
+	    {
+                Node* curnode = convertBlockToNode(block.data);
+		newblock.id = curnode->key;
+		//cout <<"full blocks setupWriting:"<<block.id<<endl;
+		newblock.data = convertNodeToBlock(curnode);
+		pos = curnode->pos;
+		//delete curnode;
+	    }
+	    if(rootKey == newblock.id)
+	    {
+		    rootPos = pos;
+		    //cout <<"At ROOT :"<< rootPos<< endl;
+	    }
+		
+        }
+
+        WriteBucket(node, newbucket);
+	if(flag == 1)
+		break;
+     }
+    if(flag == 0)
+    {
+	    cache[bid] = n;
+	    cout <<"Writing in CACHE!!!!!!"<<endl;
+    }
+	 }
+	 else
+		 throw runtime_error("No more spare in ORAM");
+}
+
+
+int ORAM::setupWriteN(Bid bid, Node* node, Bid rootKey, int& rootPos) {
+    if (bid == 0) {
+        throw runtime_error("Node id is not set in WriteNode");
+    }
+    else
+    {
+	    setupWriteBucket(bid,node,rootKey,rootPos);
+    }
+    //cout <<"returning rootPOs ------"<< node->key << endl;
+    return rootPos;
+}
 int ORAM::WriteNode(Bid bid, Node* node) {
     
     if (bid == 0) 

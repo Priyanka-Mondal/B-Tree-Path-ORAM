@@ -99,6 +99,12 @@ public:
     void finilize(bool find, Bid& rootKey, int& rootPos);
     static Node* convertBlockToNode(block b);
     static block convertNodeToBlock(Node* node);
+
+
+
+    Node* setupReadN(Bid bid, int leaf);
+    int setupWriteN(Bid bid, Node* n, Bid rootkey, int& rootPos);
+    void setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos);
 };
 
 #endif

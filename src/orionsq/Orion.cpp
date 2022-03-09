@@ -100,7 +100,7 @@ vector<string> divideString(string str, int sz)
 	return result;
 }
 
-void Orion::insertWrap(string cont, int fileid)
+void Orion::insertWrap(string cont, int fileid, bool batch)
 {
       vector<string> kws1, kws;
       boost::split(kws1, cont, boost::is_any_of(delimiters));
@@ -114,17 +114,61 @@ void Orion::insertWrap(string cont, int fileid)
       }
       vector<string> blocks;
       blocks = divideString(cont,BLOCK);
-      insert(kws, blocks, fileid);
+      if(batch)
+	  setupinsert(kws,blocks,fileid);
+      else
+          insert(kws, blocks, fileid);
 }
 
 
+void Orion::setupinsert(vector<string> kws, vector<string> blocks, int ind) 
+{
+    for(auto kw: kws)
+    {		
+  	      Bid firstKey = createBid(kw,FCNT);
+  	      auto filecnt = fcnt->setupfind(firstKey);
+  	      int fc;
+  	      if(filecnt == "")
+	      {
+  	      	fc = 0;
+		uniquekw++;
+	      }
+  	      else 
+		fc = stoI(filecnt);
+  	      
+  	      fc++;
+  	      
+  	      Bid mapKey = createBid(kw, ind);
+  	      updt->setupinsert(mapKey, to_string(fc));
+  	      fcnt->setupinsert(firstKey, to_string(fc));
+  	      
+  	      Bid key = createBid(kw, fc);
+  	      srch->setupinsert(key, to_string(ind));
+    }
+
+      cout << "inserted all the kw (total keywords: " <<kws.size() <<")"<< endl;
+      //insert blocks
+      int block_num = 1;
+      string id = to_string(ind);
+      for(auto blk: blocks)
+      {
+	      Bid fb = createBid(id,block_num);
+	      file->setupinsert(fb,blk);
+	      block_num++;
+      }
+      Bid lastblock = createBid(id,block_num);
+      file->setupinsert(lastblock,"last");
+      cout <<"inserted "<<block_num-1<<"blocks of " << id<<endl;
+      inserted = inserted+kws.size();
+      cout << endl<<"--TOTAL keywords inserted so far: "<<inserted<<endl;
+      cout <<"--TOTAL unique keywords inserted so far: "<<uniquekw<<endl;
+
+}
 
 void Orion::insert(vector<string> kws, vector<string> blocks, int ind) 
 {
-    cout <<"insering keywords for: "<< ind<<endl;
     for(auto kw: kws)
     {		
-	      inserted++;
   	      Bid firstKey = createBid(kw,FCNT);
   	      auto filecnt = fcnt->find(firstKey);
   	      int fc;
@@ -160,6 +204,7 @@ void Orion::insert(vector<string> kws, vector<string> blocks, int ind)
       Bid lastblock = createBid(id,block_num);
       file->insert(lastblock,"last");
       cout <<"inserted "<<block_num-1<<"blocks of " << id<<endl;
+      inserted = inserted+kws.size();
       cout << endl<<"--TOTAL keywords inserted so far: "<<inserted<<endl;
       cout <<"--TOTAL unique keywords inserted so far: "<<uniquekw<<endl;
 
@@ -287,63 +332,6 @@ void Orion::removekw(vector <string> kws, int id)
 	}
 }
 
-
-
-void Orion::setupInsert(string keyword, int ind) {
-    Bid mapKey = createBid(keyword, ind);
-    if (UpdtCnt.count(keyword) == 0) {
-        UpdtCnt[keyword] = 0;
-    }
-    UpdtCnt[keyword]++;
-    setupPairs1[mapKey]=to_string(UpdtCnt[keyword]);
-    Bid key = createBid(keyword, UpdtCnt[keyword]);
-    setupPairs2[key]= to_string(ind);
-    LastIND[keyword] = ind;
-}
-
-
-/**
- * This function executes a remove in setup mode. Indeed, it is not applied until endSetup()
-  */
-void Orion::setupRemove(string keyword, int ind) {
- Bid mapKey = createBid(keyword, ind);
-    string updt_cnt = setupPairs1[mapKey];
-    if (stoi(updt_cnt) > 0) {
-        setupPairs1[mapKey]= to_string(-1);
-        UpdtCnt[keyword]--;
-        if (UpdtCnt[keyword] > 0) {
-            if (UpdtCnt[keyword] + 1 != stoi(updt_cnt)) {
-                Bid curKey = createBid(keyword, LastIND[keyword]);
-                setupPairs1[curKey]= updt_cnt;
-                Bid curKey2 = createBid(keyword, stoi(updt_cnt));
-                setupPairs2[curKey2]= to_string(LastIND[keyword]);
-            }
-            Bid key = createBid(keyword, UpdtCnt[keyword]);
-            string idstr = setupPairs2[key];
-            int lastID = stoi(idstr);
-            LastIND[keyword] = lastID;
-        } else {
-            LastIND.erase(keyword);
-        }
-    }
-}
-
-
-/**
- * This function is used for initial setup of scheme because normal update is time consuming
- */
-void Orion::beginSetup() {
-    setupPairs1.clear();
-    setupPairs2.clear();
-}
-
-/**
- * This function is used for finishing setup of scheme because normal update is time consuming
- */
-void Orion::endSetup() {
-    updt->batchInsert(setupPairs1);
-    srch->batchInsert(setupPairs2);
-}
 
 Bid Orion::createBid(string keyword, int number) {
     Bid bid(keyword);

@@ -299,6 +299,8 @@ void Oriel::removekw(vector<string> kws, int ind)
                         I->insert(delKeyI,lastid);
                     } 
                 }
+		else
+		    I->remove(firstKey);
            }
       }
 }

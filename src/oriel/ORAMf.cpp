@@ -253,7 +253,7 @@ Nodef* ORAMf::setupReadNf(Bid bid,int leaf)
         return NULL;
     }
     Nodef* n;
-    for (size_t d = 0; d <= depth; d++) 
+    for (size_t d = depth; d >= 0; d--) 
     {
         int node = GetNodefOnPath(leaf, d);
         Bucketf bucket = ReadBucket(node);
@@ -312,6 +312,7 @@ Nodef* ORAMf::ReadNodef(Bid bid, int lastLeaf, int newLeaf) {
 		cout <<"nodef is NULL : "<< bid << endl ;
 		cout <<"free nodefs:" << store->GetEmptySize() << endl;
 		cout <<"CACHE size:"<< cache.size()<< endl;
+		cout <<"depth:"<< depth<< endl;
 	}
         return node;
     } else {
@@ -329,7 +330,7 @@ void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
   if (sz > 0) 
   {
 		//cout <<"Empty nodes in ORAMf:"<<sz<<endl<<endl;
-    for (size_t d = 0; d <= depth; d++) 
+    for (size_t d = depth; d >= 0; d--) 
     {
         int node = GetNodefOnPath(n->pos, d);
         Bucketf bucket = ReadBucket(node);

@@ -244,6 +244,44 @@ void ORAMf::Access(Bid bid, Nodef*& node) {
     }
 }
 
+Nodef* ORAMf::setupReadNf(Bid bid,int leaf)
+{
+    if (bid == 0) {
+	    //cout <<"Heyyyy setupReadNf is 0"<<endl;
+        return NULL;
+    }
+    Nodef* n;
+    for (size_t d =0; d <= depth; d++) 
+    {
+        int node = GetNodefOnPath(leaf, d);
+        Bucketf bucket = ReadBucketf(node);
+        for (int z = 0; z < Z; z++) 
+	{
+            Blockf &block = bucket[z];
+            if (block.id == bid) 
+	    {    
+                n = convertBlockfToNodef(block.data);
+		return n;
+            }
+        }
+     }
+    cout <<"PRINTING CACHE:"<<cache.size()<<endl;
+   // for(auto c: cache)
+   // {
+   //         Bid k = c.first;
+   //         cout <<k<< endl;
+   // }
+   // cout <<"PRINTED CACHE"<<endl;
+
+    if(cache.count(bid)>0)
+    {
+    	cout <<"found "<<bid<<" in CACHE , leaf:"<<cache[bid]->pos<<" free node:"<<store->GetEmptySize()<<endl;
+    	n=cache[bid];
+    }
+    else
+	    cout<<"leaf:"<<leaf<<"/"<<bid<<"NOT FOUND at ALL in setupReadNf "<<store->GetEmptySize()<<endl;
+    return n;
+}
 Nodef* ORAMf::ReadNodef(Bid bid) {
     if (bid == 0) {
         throw runtime_error("Nodef id is not set ReadNodef");
@@ -275,6 +313,99 @@ Nodef* ORAMf::ReadNodef(Bid bid, int lastLeaf, int newLeaf) {
     }
 }
 
+void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
+{
+    int flag = 0;
+    int sz= store->GetEmptySize();
+  if (sz > 0) 
+  {
+		//cout <<"Empty nodes in ORAMf:"<<sz<<endl<<endl;
+    for (size_t d = 0; d <= depth; d++) 
+    {
+        int node = GetNodefOnPath(n->pos, d);
+        Bucketf bucket = ReadBucketf(node);
+        Bucketf newbucket;
+        for (int z = 0; z < Z; z++) 
+	{
+            Blockf &newblock = newbucket[z];
+	    Blockf &block = bucket[z];
+	    int pos ;
+            if (flag==0 && block.id == 0) 
+	    {    
+            	Nodef* curnode = n;
+		newblock.id = bid;
+                newblock.data = convertNodefToBlockf(curnode);
+		flag = 1;
+		store->ReduceEmptyNumbers();
+		//cout<<n->key<<" inserted "<<newblock.id<<"at leaf:"<<n->pos<<endl;
+		pos = curnode->pos;
+		//delete curnode;
+            }
+	    else if(flag ==0 && block.id == bid)
+	    {    
+            	Nodef* curnode = n;
+		newblock.id = bid;
+                newblock.data = convertNodefToBlockf(curnode);
+		flag = 1;
+		//store->ReduceEmptyNumbers();
+		//cout <<n->key<<" inserted "<< block.id<<endl;
+		//cout <<"Empty nodes remain same:"<<store->GetEmptySize()<<endl<<endl;
+		pos = curnode->pos;
+		//delete curnode;
+            }
+	    else if(block.id == 0)
+	    {
+            	newblock.id = 0;
+            	newblock.data.resize(blockSize, 0);
+	    }
+	    else
+	    {
+                Nodef* curnode = convertBlockfToNodef(block.data);
+		newblock.id = curnode->key;
+		//cout <<"full blocks setupWriting:"<<block.id<<endl;
+		newblock.data = convertNodefToBlockf(curnode);
+		pos = curnode->pos;
+		//delete curnode;
+	    }
+	    if(rootKey == newblock.id)
+	    {
+		    rootPos = pos;
+		    //cout <<"At ROOT :"<< rootPos<< endl;
+	    }
+		
+        }
+
+        WriteBucketf(node, newbucket);
+	if(flag == 1)
+		break;
+     }
+    if(flag==0)
+    {
+	    cache[bid] = n;
+	    cout <<"WRITING INCACHEf===========>"<<bid<<"  leaf:"<<n->pos<<endl;
+    }
+    //{
+//	    n->pos = (n->pos)+1;
+	  //  setupWriteBucket(bid, n, rootKey, rootPos);
+  //  }
+  }
+  else {
+        throw runtime_error("NO more space in ORAMf");
+    }
+}
+
+int ORAMf::setupWriteNf(Bid bid, Nodef* node, Bid rootKey, int& rootPos) {
+    if (bid == 0) {
+        throw runtime_error("Nodef id is not set in WriteNode");
+    }
+    else
+    {
+	    setupWriteBucket(bid,node,rootKey,rootPos);
+    }
+    //cout <<"returning rootPOs ------"<< node->key << endl;
+    //return rootPos;
+    return node->pos;
+}
 int ORAMf::WriteNodef(Bid bid, Nodef* node) {
     
     if (bid == 0) 

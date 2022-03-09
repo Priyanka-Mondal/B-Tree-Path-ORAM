@@ -34,7 +34,6 @@ string OMAPf::setupfind(Bid key) {
     if (rootKey == 0) {
         return "";
     }
-	//cout <<rootPos<<"root at OMAP FIND is :"<< rootKey<<endl;
 //    treeHandler->startOperation();
     Nodef* node = new Nodef();
     node->key = rootKey;

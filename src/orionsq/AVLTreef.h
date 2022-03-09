@@ -31,6 +31,10 @@ private:
     Nodef* leftRotate(Nodef* x);
     int getBalance(Nodef* N);
     int RandomPath();
+    int setupheight(Bid key, int& leaf);
+    Nodef* setuprightRotate(Nodef* y, Bid rootKey, int& pos);
+    Nodef* setupleftRotate(Nodef* x, Bid rootKey, int& pos);
+    int setupgetBalance(Nodef* N);
 
 public:
     AVLTreef(int maxSize, bytes<Key> key);
@@ -53,6 +57,10 @@ public:
     Bid removeRoot(Bid rootKey, int& pos);
     Bid realDelete(Nodef* paren,Bid delKey,int delPos);
     Bid deleteKey(Nodef* node, Bid key);
+
+
+    Nodef* setupsearch(Nodef* head, Bid key);
+    Bid setupinsert(Bid rootKey, int& pos, Bid key, string value);
 };
 
 #endif /* AVLTREEF_H */

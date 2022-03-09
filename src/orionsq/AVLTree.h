@@ -30,6 +30,10 @@ private:
     Node* leftRotate(Node* x);
     int getBalance(Node* N);
     int RandomPath();
+    int setupheight(Bid N, int& leaf);
+    Node* setuprightRotate(Node* y, Bid rootKey, int& pos);
+    Node* setupleftRotate(Node* x, Bid rootKey, int& pos);
+    int setupgetBalance(Node* N);
 
 public:
     AVLTree(int maxSize, bytes<Key> key);
@@ -51,6 +55,10 @@ public:
     Bid removeDel(Bid rootKey,int& pos,Bid delKey,int delPos,Node* paren);
     Bid removeRoot(Bid rootKey, int& pos);
     Bid realDelete(Node* paren,Bid delKey,int delPos);
+
+
+    Node* setupsearch(Node* head, Bid key);
+    Bid setupinsert(Bid rootKey, int& pos, Bid key, string value);
 };
 
 #endif /* AVLTREE_H */
