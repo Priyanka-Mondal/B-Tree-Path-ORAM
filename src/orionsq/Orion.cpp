@@ -2,14 +2,14 @@
 #include <boost/algorithm/string.hpp>
 
 
-Orion::Orion(bool usehdd, int maxSize, int kwSize) {
+Orion::Orion(bool usehdd, int maxSize ) {
     this->useHDD = usehdd;
     bytes<Key> key1{0};
     bytes<Key> key2{1};
-    srch = new OMAPf(kwSize*4, key1);
-    updt = new OMAPf(kwSize*4, key1);
-    fcnt = new OMAPf(kwSize, key1);
-    file = new OMAP(maxSize*4,key2);
+    srch = new OMAPf(maxSize*16, key1);
+    updt = new OMAPf(maxSize*16, key1);
+    fcnt = new OMAPf(maxSize, key1);
+    file = new OMAP(maxSize*8,key2);
 }
 
 Orion::~Orion() {
@@ -146,7 +146,7 @@ void Orion::setupinsert(vector<string> kws, vector<string> blocks, int ind)
   	      srch->setupinsert(key, to_string(ind));
     }
 
-      cout << "inserted all the kw (total keywords: " <<kws.size() <<")"<< endl;
+      cout << "batch inserted all the keywords(total:"<<kws.size() <<")"<< endl;
       //insert blocks
       int block_num = 1;
       string id = to_string(ind);
@@ -158,7 +158,7 @@ void Orion::setupinsert(vector<string> kws, vector<string> blocks, int ind)
       }
       Bid lastblock = createBid(id,block_num);
       file->setupinsert(lastblock,"last");
-      cout <<"inserted "<<block_num-1<<"blocks of " << id<<endl;
+      cout <<"inserted "<<block_num-1<<" blocks of " << id<<endl;
       inserted = inserted+kws.size();
       cout << endl<<"--TOTAL keywords inserted so far: "<<inserted<<endl;
       cout <<"--TOTAL unique keywords inserted so far: "<<uniquekw<<endl;

@@ -27,7 +27,7 @@ public:
     
     map<int,string> search(string keyword);
     
-    Orion(bool useHDD,int maxSize, int kwSize);    
+    Orion(bool useHDD,int maxSize);    
     
     virtual ~Orion();
     

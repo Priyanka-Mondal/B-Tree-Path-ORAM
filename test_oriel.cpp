@@ -21,27 +21,6 @@ int to_int(string updt_cnt)
         convstoi >> updc;
         return updc;
 }
-string toS(int id)
-{
-	string s = to_string(id);
-	string front ="";
-	if (id < 10)
-		front = "0000000";
-	else if(id < 100)
-		front = "000000";
-	else if(id < 1000)
-		front = "00000";
-	else if(id < 10000)
-		front = "0000";
-	else if(id < 100000)
-		front = "000";
-	else if(id < 1000000)
-		front = "00";
-	else if(id < 10000000)
-		front = "0";
-	s=front.append(s);
-	return s;
-}
 
 string getFileContent(string path)
 {

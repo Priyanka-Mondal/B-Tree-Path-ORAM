@@ -365,7 +365,7 @@ void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
     }
 	 }
 	 else
-		 throw runtime_error("No more spare in ORAM");
+		 throw runtime_error("No more spaCe in ORAM");
 }
 
 

@@ -13,20 +13,14 @@ using namespace std::chrono;
 int fileid = 1;
 bool usehdd = true;
 bool batch = true;
-string toS(int id)
-{
-	string s = to_string(id);
-	string front ="";
-	if (id < 10)
-		front = "000";
-	else if(id < 100)
-		front = "00";
-	else if(id < 1000)
-		front = "0";
-	s=front.append(s);
-	return s;
-}
 
+int to_int(string updt_cnt)
+{
+        int updc;
+        stringstream convstoi(updt_cnt);
+        convstoi >> updc;
+        return updc;
+}
 string getFileContent(string path)
 {
     ifstream file(path);
@@ -74,7 +68,6 @@ static void list_dir (const char * dir_name, Orion& orion)
 	     {
                 if (strcmp (d_name, "..") != 0 &&   strcmp (d_name, ".") != 0) 
 		{
-			cout <<"HERE root 1: " << d_name<< endl ;
                         int path_length;
                         char path[PATH_MAX];
                   path_length=snprintf(path,PATH_MAX,"%s/%s", dir_name, d_name);
@@ -95,15 +88,20 @@ static void list_dir (const char * dir_name, Orion& orion)
 }
 
 
-int main(int, char**) 
+int main(int argc, char**argv) 
 {
 
-	//list_dir("allen-p");
-	//list_dir("tiny");
-	Orion orion(usehdd, 100000,600000);  
-        
-	ofstream sres;
-	sres.open("vardbsearchorionsq.txt",ios::app);	
+	int size = to_int(argv[1]);
+	Orion orion(usehdd, size);  
+        ofstream sres;
+	sres.open("orionsq.txt");//,ios::app);	
+/*
+        auto start = high_resolution_clock::now();
+	list_dir(argv[2],orion);
+        auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<microseconds>(stop-start);
+*/	
+
 	
 	list_dir("allen-p/deleted_items",orion);
         auto start = high_resolution_clock::now();
@@ -142,7 +140,6 @@ return 0;
 
 	return 0;
 
-	duration = duration_cast<microseconds>(stop-start);
 	cout <<"== TOTAL files inserted :"<<fileid-1<<" =="<<endl;
 	cout <<"Time taken for setup(orionsq):"<<duration.count()<<endl;
 	cout << endl<<" SETUP INSERT DONE!"<< endl;

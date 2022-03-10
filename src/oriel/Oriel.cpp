@@ -10,6 +10,16 @@
 int inserted = 0;
 int uniquekw = 0;
 
+Oriel::Oriel(bool usehdd, int maxSize) 
+{
+    this->useHDD = usehdd;
+    bytes<Key> key1{0};
+    bytes<Key> key2{1};
+    I = new OMAPf(maxSize*16, key1);
+    del = new OMAPf(maxSize*8,key2);
+    ac = new OMAPf(maxSize, key2); 
+}
+
 int stoI(string del_cnt)
 {
         int updc;
@@ -77,15 +87,6 @@ int nextPowerOf2(int n)
          return 1 << count;
 }
 
-Oriel::Oriel(bool usehdd, int maxSize) 
-{
-    this->useHDD = usehdd;
-    bytes<Key> key1{0};
-    bytes<Key> key2{1};
-    I = new OMAPf(maxSize*16, key1);
-    del = new OMAPf(maxSize*8,key2);
-    ac = new OMAPf(maxSize, key2); 
-}
 
 Oriel::~Oriel() 
 {
