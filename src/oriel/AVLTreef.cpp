@@ -40,7 +40,6 @@ Nodef* AVLTreef::newNodef(Bid key, int value) {
     node->leftID = 0;
     node->rightID = 0;
     node->pos = RandomPath();
-    cout <<"RANDOMPATH:"<< node->pos<<endl;
     node->height = 1; // new node is initially added at leaf
     return node;
 }
@@ -165,7 +164,6 @@ Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, int value)
         node->rightID = setupinsert(node->rightID, node->rightPos, key, value);
 //	cout <<node->rightPos<<"the RIGHT ID IS -----"<< node->rightID<<endl;
     } else {
-        std::fill(node->value.begin(), node->value.end(), 0);
         auto val = to_string(value);
         std::fill(node->value.begin(), node->value.end(), 0);
         std::copy(val.begin(), val.end(), node->value.begin());
@@ -236,8 +234,9 @@ Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, int value) {
     } else if (key > node->key) {
 	    //cout <<"key>nodef"<<key<<node->key<<node->rightPos<<endl;
         node->rightID = insert(node->rightID, node->rightPos, key, value);
-    } else {
-        std::fill(node->value.begin(), node->value.end(), 0);
+    } 
+    else 
+    {
 	auto val = to_string(value);
         std::fill(node->value.begin(), node->value.end(), 0);
         std::copy(val.begin(), val.end(), node->value.begin());

@@ -98,21 +98,23 @@ int main(int argc, char**argv)
 	Oriel oriel(usehdd, size);  
         ofstream sres;
 	sres.open("oriel.txt");//,ios::app);	
-
+/*
         auto start = high_resolution_clock::now();
 	list_dir(argv[2],oriel);
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
 
+*/
 
-/*
 	list_dir("allen-p/deleted_items",oriel);
         auto start = high_resolution_clock::now();
 	auto s = oriel.search("borion");
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
 	sres <<(fileid-1)<<" "<< duration.count()<<" "<<s.size()<<endl;
-	
+
+	return 0;
+
 	list_dir("allen-p/small_deleted_items",oriel);
         start = high_resolution_clock::now();
 	s = oriel.search("borion");
@@ -144,7 +146,7 @@ int main(int argc, char**argv)
 
 	return 0;
 
-*/
+
 	
 	cout <<"== TOTAL files inserted :"<<fileid-1<<" =="<<endl;
 	cout <<"Time taken for setup(oriel):"<<duration.count()<<endl;

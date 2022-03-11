@@ -25,7 +25,7 @@ public:
     ~Node() {
     }
     Bid key;
-    pair <std::array<byte_t,4>, std::array< byte_t, 64> > value; // 16 before 
+    pair <std::array<byte_t,4>, std::array< byte_t, 64> > value; //why 4? should be 8 ?
     int pos;
     Bid leftID;
     int leftPos;

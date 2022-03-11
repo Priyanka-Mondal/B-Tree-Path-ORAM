@@ -30,10 +30,6 @@ public:
     void insertdel(string ind);
     void insertFile(string keyword, vector<string> blocks);
     void setupinsertFile(string keyword, vector<string> blocks);
-    void setupInsert(string keyword, pair<int,string> ind); //crashes
-   void setupInsertWrapper(vector<string> kws,vector<string> blocks,string ind);
-    void setupInsertkws(vector<string> kws, string ind);
-    void setupInsertFile(string ind, vector<string> blocks);
     
     void remove(string ind); 
     void removekw(vector<string> keyword, string ind);
@@ -50,7 +46,7 @@ public:
     void endSetup();
 
     vector<pair<string,string>> setupsearch(string keyword);
-  void setupinsertWrap(vector<string> kws,vector<string> blocks,string ind);
+  void setupinsertWrapper(vector<string> kws,vector<string> blocks,string ind);
     void setupinsertkw(string keyword, string ind); 
 };
 

@@ -198,6 +198,7 @@ Node* ORAM::ReadData(Bid bid) {
 
 void ORAM::WriteData(Bid bid, Node* node) 
 {
+	cout <<"WHY AM I HERE WriteData ORAM"<<endl;
     if (store->GetEmptySize() > 0) {
         cache[bid] = node;
         store->ReduceEmptyNumbers();
@@ -308,9 +309,9 @@ Node* ORAM::ReadNode(Bid bid, int lastLeaf, int newLeaf) {
 
 void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
 {
-	int sz = store->GetEmptySize();
-	 if (sz>0) {
-//		 cout<<"Empty Nodes in ORAM:"<<sz<<endl;
+	int oramsz = store->GetEmptySize();
+	 if (oramsz>0) {
+		 //cout<<"Empty Nodes in ORAM:"<<oramsz<<endl;
     int flag = 0;
     for (size_t d = 0; d <= depth; d++) 
     {
@@ -322,13 +323,23 @@ void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
             Block &newblock = newbucket[z];
 	    Block &block = bucket[z];
 	    int pos ;
-            if (flag==0 && (block.id == bid || block.id == 0)) 
+            if (flag==0 &&  block.id == 0) 
 	    {    
             	Node* curnode = n;
 		newblock.id = bid;
                 newblock.data = convertNodeToBlock(curnode);
 		flag = 1;
 		store->ReduceEmptyNumbers();
+		pos = curnode->pos;
+		//delete curnode;
+            }
+	    else if (flag==0 && block.id == bid ) 
+	    {    
+            	Node* curnode = n;
+		newblock.id = bid;
+                newblock.data = convertNodeToBlock(curnode);
+		flag = 1;
+		//store->ReduceEmptyNumbers();
 		pos = curnode->pos;
 		//delete curnode;
             }

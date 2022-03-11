@@ -103,13 +103,13 @@ int main(int argc, char**argv)
 */	
 
 	
-	list_dir("allen-p/deleted_items",orion);
+	list_dir("allen-p/del",orion);
         auto start = high_resolution_clock::now();
 	auto s = orion.search("borion");
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
 	sres <<(fileid-1)<<" "<< duration.count()<<" "<< s.size()<<endl;
-return 0;	
+
 	list_dir("allen-p/small_deleted_items",orion);
         start = high_resolution_clock::now();
 	s = orion.search("borion");

@@ -164,7 +164,6 @@ Bid AVLTree::setupinsert(Bid rootKey, int& pos, Bid key, string value)
         return nnode->key;
     }
     Node* node = oram->setupReadN(rootKey, pos);
-    if(node ==NULL ) cout<<rootKey<<"rootKey/"<<pos<<":rootPos /got NULL while inserting"<<key<<endl;
     if (key < node->key) {
 	    //cout <<"key<nodef"<<key<<node->key<<node->leftPos<<endl;
         node->leftID = setupinsert(node->leftID, node->leftPos, key, value);

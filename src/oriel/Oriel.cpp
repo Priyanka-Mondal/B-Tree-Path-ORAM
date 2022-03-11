@@ -124,7 +124,7 @@ void Oriel::insertWrapper(vector<string> kws, string content,int ind,bool batch)
    	    insertkw(kw,ind); 
      } 
      cout << "inserted keywords (total:" <<kws.size() <<")for id:"<<ind<< endl;
-     insertFile(ind,content); 
+     //insertFile(ind,content); 
      inserted=inserted+kws.size();
      cout << endl<<"--TOTAL keywords inserted so far: "<<inserted<<endl;
      cout <<"--TOTAL unique keywords inserted so far: "<<uniquekw<<endl;

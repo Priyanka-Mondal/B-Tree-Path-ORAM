@@ -24,7 +24,7 @@ public:
     ~Nodef() {
     }
     Bid key;
-    std::array< byte_t, 4> value; 
+    std::array< byte_t, 16> value;  // not right basically I am storing string
     int pos;
     Bid leftID;
     int leftPos;

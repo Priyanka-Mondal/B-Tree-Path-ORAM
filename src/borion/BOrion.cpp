@@ -9,6 +9,17 @@
 int inserted = 0;
 int uniquekw = 0;
 
+BOrion::BOrion(bool usehdd, int maxSize) {
+    this->useHDD = usehdd;
+    bytes<Key> key1{0};
+    bytes<Key> key2{1};
+    srch = new OMAP(maxSize*20, key1);
+    updt = new OMAPf(maxSize*4, key2); // use key2
+    fcnt = new OMAPf(maxSize,key2);
+    //srch = new OMAP(maxSize*4, key1);
+    //updt = new OMAPf(maxSize*2, key2); // use key2
+    //fcnt = new OMAPf(maxSize,key2);
+}
 int stoI(string updt_cnt)
 {
         int updc;
@@ -110,17 +121,6 @@ vector<string> divideString(string str, int sz, string id)
 	return result;
 }
 
-BOrion::BOrion(bool usehdd, int maxSize) {
-    this->useHDD = usehdd;
-    bytes<Key> key1{0};
-    bytes<Key> key2{1};
-    srch = new OMAP(maxSize*20, key1);
-    updt = new OMAPf(maxSize*4, key2); // use key2
-    fcnt = new OMAPf(maxSize,key2);
-    //srch = new OMAP(maxSize*4, key1);
-    //updt = new OMAPf(maxSize*2, key2); // use key2
-    //fcnt = new OMAPf(maxSize,key2);
-}
 
 BOrion::~BOrion() {
     delete srch;
@@ -145,63 +145,43 @@ void BOrion::insertWrap(string cont, string ind, bool batch)
       if(!batch)
       	insertWrapper(kws, blocks, ind);
       else
-      {
-	setupinsertWrap(kws,blocks,ind);
-      }
+	setupinsertWrapper(kws,blocks,ind);
 }
 
 
 
 
-void BOrion::setupinsertWrap(vector<string> kws,vector<string> blocks,string ind)
+void BOrion::setupinsertWrapper(vector<string>kws,vector<string>blocks,string ind)
 { 
-     int totk=0;
      ofstream alpha;
      alpha.open("alpha.txt");//,ios::app);	
-     //cout << "inserting kw for:"<< ind << endl;
      for (auto kw: kws) 
      {
-   	setupinsertkw(kw,ind); // insert all keywords
-	totk++;
+   	setupinsertkw(kw,ind); 
 	tvol[kw]=tvol[kw]+blocks.size();
 	float al = (float(idvol[kw]))/(float(tvol[kw]));
 	alpha<< kw <<" "<< idvol[kw] <<" "<< tvol[kw]<<" "<<al<<endl;
      }
-     //cout << "inserted all the kw (total keywords: " <<totk <<")"<< endl;
-     setupinsertFile(ind,blocks); // insert all file blocks
-     //cout << endl<<"--TOTAL keywords inserted so far: "<<inserted<<endl;
-     //cout <<"--TOTAL unique keywords inserted so far: "<<uniquekw<<endl;
+     cout << "inserted all the keywords (totali: " <<kws.size()<<")"<< endl;
+     setupinsertFile(ind,blocks); 
+     inserted= inserted+kws.size();
+     cout << endl<<"--TOTAL keywords inserted so far: "<<inserted<<endl;
+     cout <<"--TOTAL unique keywords inserted so far: "<<uniquekw<<endl;
 
 }
 
-void BOrion::setupinsertkw(string keyword, string ind) 
+void BOrion::setupinsertkw(string keyword, int ind) 
 {
-	//cout <<"------------------Inserting["<<keyword<<endl;
-    inserted++;
     Bid mapKey(keyword);
-    //cout <<"fcnt FINDING:"<<mapKey<<endl;
-    auto updt_cnt = (fcnt->setupfind(mapKey));
-    //cout <<"fcnt FOUND:"<<mapKey<<endl;
-    int updc; 
-    if (updt_cnt == "") 
-    {
+    int updc = fcnt->setupfind(mapKey);
+    if (updt == 0) 
 	 uniquekw++;  
-         updc=0;
-    }
-    else
-    {
-        updc = stoI(updt_cnt);
-    }
     updc++;
-    //cout <<"fcnt insertING:"<<mapKey<<endl;
-    fcnt->setupinsert(mapKey,to_string(updc));
-    //cout <<"fcnt insertED:"<<mapKey<<endl;
-
-    //auto again = fcnt->setupfind(mapKey);
-    //cout<<"LOOKING FOR --------------------:["<<again<<"]"<<endl;
+    fcnt->setupinsert(mapKey,updc);
 
     Bid updKey = createBid(keyword, ind);
-    updt->setupinsert(updKey, to_string(updc));//pad, can we store number in updc 
+    updt->setupinsert(updKey, updc);//pad
+
     int pos_in_block = get_position(updc,COM);
     int block_num = get_block_num(updc,COM);
     idvol[keyword] = block_num; 
@@ -218,15 +198,12 @@ void BOrion::setupinsertkw(string keyword, string ind)
           oldblock.replace((pos_in_block-1)*FID_SIZE,FID_SIZE,ind);
 	  srch->setupinsert(key, make_pair(KB,oldblock));
     }
-    else
-    {
-         cout << endl << "{pos_in_block greater than 8}" << endl;
-    }
 }
 
 
-void BOrion::setupinsertFile(string ind, vector<string> blocks)
+void BOrion::setupinsertFile(int id, vector<string> blocks)
 {
+	string ind = to_string(id);
 	Bid mapKey(ind);
 	int sz = blocks.size();
         string par = ind;
@@ -239,28 +216,24 @@ void BOrion::setupinsertFile(string ind, vector<string> blocks)
 		srch->setupinsert(mk,make_pair(FB,block));
 		i++;
 	}
-	//cout << "inserted "<<  blocks.size() <<" blocks of " << ind << endl;
+	cout << "inserted "<<  blocks.size() <<" blocks of " << ind << endl;
 }
 
 
 void BOrion::insertWrapper(vector<string> kws,vector<string> blocks,string ind)
 { 
-     int totk=0;
      cout << "inserting kw for:"<< ind << endl;
      for (auto kw: kws) 
-     {
    	insertkw(kw,ind); // insert all keywords
-	totk++;
-     }
-     cout << "inserted all the kw (total keywords: " <<totk <<")"<< endl;
+     cout << "inserted all the kw (total keywords: " <<kws.size() <<")"<< endl;
      insertFile(ind,blocks); // insert all file blocks
+     inserted= inserted+kws.size();
      cout << endl<<"--TOTAL keywords inserted so far: "<<inserted<<endl;
      cout <<"--TOTAL unique keywords inserted so far: "<<uniquekw<<endl;
 }
 
 void BOrion::insertkw(string keyword, string ind) 
 {
-    inserted++;
     Bid mapKey(keyword);
     auto updt_cnt = (fcnt->find(mapKey));
     int updc; 
@@ -270,9 +243,7 @@ void BOrion::insertkw(string keyword, string ind)
          updc=0;
     }
     else
-    {
         updc = stoI(updt_cnt);
-    }
     updc++;
     fcnt->insert(mapKey,to_string(updc));
 
