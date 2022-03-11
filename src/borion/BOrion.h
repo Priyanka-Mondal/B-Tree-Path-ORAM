@@ -24,19 +24,21 @@ public:
     Bid createBid(string keyword,int number);
     Bid createBid(string keyword,string id);
 
-    void insertWrap(string cont, string ind, bool batch);
-    void insertWrapper(vector<string> kws, vector<string> blocks, string ind);
-    void insertkw(string keyword, string ind);
-    void insertdel(string ind);
-    void insertFile(string keyword, vector<string> blocks);
-    void setupinsertFile(string keyword, vector<string> blocks);
+    void insertWrap(string cont, int ind, bool batch);
+    void insertWrapper(vector<string> kws, vector<string> blocks, int ind);
+    void insertkw(string keyword, int ind);
+    void insertFile(int id, vector<string> blocks);
     
-    void remove(string ind); 
-    void removekw(vector<string> keyword, string ind);
-    //void setupRemove(string keyword, int ind);
+  void setupinsertWrapper(vector<string> kws,vector<string> blocks,int ind);
+    void setupinsertkw(string keyword, int ind); 
+    void setupinsertFile(int id, vector<string> blocks);
     
-    map<string,string> searchWrapper(string keyword);
+    void remove(int ind); 
+    void removekw(vector<string> keyword, int ind);
+    
+    //map<string,string> searchWrapper(string keyword);
     vector<pair<string,string>> search(string keyword);
+    vector<pair<string,string>> setupsearch(string keyword);
     
     void print();
 
@@ -45,9 +47,6 @@ public:
     void beginSetup();
     void endSetup();
 
-    vector<pair<string,string>> setupsearch(string keyword);
-  void setupinsertWrapper(vector<string> kws,vector<string> blocks,string ind);
-    void setupinsertkw(string keyword, string ind); 
 };
 
 #endif /* BORION_H */

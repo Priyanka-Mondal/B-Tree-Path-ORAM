@@ -10,9 +10,16 @@ OMAPf::~OMAPf() {
 
 }
 
-string OMAPf::find(Bid key) {
+int stoint(string del_cnt)
+{
+        int updc;
+        stringstream convstoi(del_cnt);
+        convstoi >> updc;
+        return updc;
+}
+int OMAPf::find(Bid key) {
     if (rootKey == 0) {
-        return "";
+        return 0;
     }
     treeHandler->startOperation();
     Nodef* node = new Nodef();
@@ -20,29 +27,35 @@ string OMAPf::find(Bid key) {
     node->pos = rootPos;
     auto resNode = treeHandler->search(node, key);
     //cout <<"root is Nodef:"<<rootKey<<endl;
-    string res = "";
-    if (resNode != NULL) {
-        res.assign(resNode->value.begin(), resNode->value.end());
-        res = res.c_str();
+    int res ;
+    if (resNode != NULL) 
+    {
+	string res2;
+        res2.assign(resNode->value.begin(), resNode->value.end());
+        res2 = res2.c_str();
+	res = stoint(res2);
     }
     treeHandler->finishOperation(true, rootKey, rootPos);
     return res;
 }
 
 
-string OMAPf::setupfind(Bid key) {
+int OMAPf::setupfind(Bid key) {
     if (rootKey == 0) {
-        return "";
+        return 0;
     }
 //    treeHandler->startOperation();
     Nodef* node = new Nodef();
     node->key = rootKey;
     node->pos = rootPos;
     auto resNode = treeHandler->setupsearch(node, key);
-    string res = "";
-    if (resNode != NULL) {
-        res.assign(resNode->value.begin(), resNode->value.end());
-        res = res.c_str();
+    int res ;
+    if (resNode != NULL) 
+    {
+	string res2;
+        res2.assign(resNode->value.begin(), resNode->value.end());
+        res2 = res2.c_str();
+	res = stoint(res2);
     }
     //else if(resNode == NULL)
 //	    cout <<"Null recieved in OMAPf for"<< key<< endl;
@@ -61,7 +74,7 @@ void OMAPf::remove(Bid delKey)
 }
 
 
-void OMAPf::setupinsert(Bid key, string value)
+void OMAPf::setupinsert(Bid key, int value)
 {
     //treeHandler->startOperation();
     if (rootKey == 0) {
@@ -74,7 +87,7 @@ void OMAPf::setupinsert(Bid key, string value)
 }
 
 
-void OMAPf::insert(Bid key, string value) {
+void OMAPf::insert(Bid key, int value) {
     treeHandler->startOperation();
     if (rootKey == 0) {
         rootKey = treeHandler->insert(0, rootPos, key, value);
@@ -97,6 +110,7 @@ void OMAPf::printTree() {
 /**
  * This function is used for batch insert which is used at the end of setup phase.
  */
+/*
 void OMAPf::batchInsert(map<Bid, string> pairs) {
     treeHandler->startOperation(true);
     for (auto pair : pairs) {
@@ -109,12 +123,12 @@ void OMAPf::batchInsert(map<Bid, string> pairs) {
     }
     treeHandler->finishOperation(false, rootKey, rootPos);
 }
-
+*/
 /**
  * This function is used for batch search which is used in the real search procedure
  */
-vector<string> OMAPf::batchSearch(vector<Bid> keys) {
-    vector<string> result;
+vector<int> OMAPf::batchSearch(vector<Bid> keys) {
+    vector<int> result;
     treeHandler->startOperation(false);
     Nodef* node = new Nodef();
     node->key = rootKey;
@@ -123,12 +137,15 @@ vector<string> OMAPf::batchSearch(vector<Bid> keys) {
     vector<Nodef*> resNodes;
     treeHandler->batchSearch(node, keys, &resNodes);
     for (Nodef* n : resNodes) {
-        string res;
-        if (n != NULL) {
-            res.assign(n->value.begin(), n->value.end());
+        int res;
+        if (n != NULL) 
+	{
+	    string res2;
+            res2.assign(n->value.begin(), n->value.end());
+	    res = stoint(res2);
             result.push_back(res);
         } else {
-            result.push_back("");
+            result.push_back(0);
         }
     }
     treeHandler->finishOperation(true, rootKey, rootPos);

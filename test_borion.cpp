@@ -14,33 +14,12 @@ int fileid = 1;
 bool usehdd = false;
 bool batch = true; // true makes the program crash
 
-int stoint(string updt_cnt)
+int to_int(string updt_cnt)
 {
         int updc;
         stringstream convstoi(updt_cnt);
         convstoi >> updc;
         return updc;
-}
-string toS(int id)
-{
-	string s = to_string(id);
-	string front ="";
-	if (id < 10)
-		front = "0000000";
-	else if(id < 100)
-		front = "000000";
-	else if(id < 1000)
-		front = "00000";
-	else if(id < 10000)
-		front = "0000";
-	else if(id < 100000)
-		front = "000";
-	else if(id < 1000000)
-		front = "00";
-	else if(id < 10000000)
-		front = "0";
-	s=front.append(s);
-	return s;
 }
 
 string getFileContent(string path)
@@ -83,7 +62,7 @@ static void list_dir ( const char * dir_name, BOrion& borion)
 	          cout <<endl<<"=====================================" << endl;
                   cout <<file<< " " << fileid <<endl;
 	     
-	     	  borion.insertWrap(cont,toS(fileid),batch);
+	     	  borion.insertWrap(cont,fileid,batch);
              
 	     	  fileid++;
              }
@@ -115,7 +94,7 @@ static void list_dir ( const char * dir_name, BOrion& borion)
 
 int main(int argc, char**argv) 
 {
-	int size = stoint(argv[1]);
+	int size = to_int(argv[1]);
 	BOrion borion(usehdd, size);  
         ofstream sres;
 	sres.open("vardbsearchborion.txt");//,ios::app);	
@@ -223,7 +202,7 @@ int main(int argc, char**argv)
 
 			map<string,string>  files2;
 			start = high_resolution_clock::now();
-	    	vector<pair<string,string>> res2=borion.setupsearch(keyword);
+	    	vector<pair<string,string>> res2=borion.search(keyword);
 			stop = high_resolution_clock::now();
 			duration = duration_cast<microseconds>(stop-start);
 			cout << "search TIME: "<< duration.count()<<endl;  
@@ -253,7 +232,7 @@ int main(int argc, char**argv)
 			int fid;
 			cin>>fid;
 			start = high_resolution_clock::now();
-			borion.remove(toS(fid));
+			borion.remove(fid);
 			stop = high_resolution_clock::now();
 			duration = duration_cast<microseconds>(stop-start);
 			cout << "Deletion time: "<< duration.count()<<endl;  
@@ -265,7 +244,7 @@ int main(int argc, char**argv)
 			cin>> file;
 	          	string cont = getFileContent(file);
 			start = high_resolution_clock::now();
-			borion.insertWrap(cont,toS(fileid),false);
+			borion.insertWrap(cont,fileid,false);
 			stop = high_resolution_clock::now();
 			duration = duration_cast<microseconds>(stop-start);
 			cout << "Insertion time: "<< duration.count()<<endl;  

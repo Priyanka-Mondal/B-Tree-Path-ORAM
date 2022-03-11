@@ -345,7 +345,7 @@ void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
   int oramsz = store->GetEmptySize();
   if (oramsz>0) 
   {
-    cout<<"Empty Nodes in ORAM:"<<oramsz<<endl;
+    //cout<<"Empty Nodes in ORAM:"<<oramsz<<endl;
     int flag = 0;
     for (size_t d = 0; d <= depth; d++) 
     {
