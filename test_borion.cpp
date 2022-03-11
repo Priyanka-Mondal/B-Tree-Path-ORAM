@@ -171,11 +171,11 @@ int main(int argc, char**argv)
 			string keyword;
 			cin>> keyword;
 			map<string,string> files;
-		cout <<"---------------Search result----------------"<<endl;
 			start = high_resolution_clock::now();
-	    	vector<pair<string,string>> results=borion.setupsearch(keyword);
+	    	vector<pair<string,string>> results=borion.search(keyword);
 			stop = high_resolution_clock::now();
 			duration = duration_cast<microseconds>(stop-start);
+		cout <<"---------------Search result----------------"<<endl;
 			cout <<endl<< "setupsearch TIME: "<< duration.count()<<endl;  
 		for(auto file:results)
 		{

@@ -176,8 +176,12 @@ void BOrion::setupinsertWrapper(vector<string>kws,vector<string>blocks,int ind)
 { 
      ofstream alpha;
      alpha.open("alpha.txt");//,ios::app);	
+     cout <<"size of kws:"<<kws.size()<<endl;
+     int i=0;
      for (auto kw: kws) 
      {
+	cout <<i<<"["<<kw<<"]"<<endl;
+	i++;
    	setupinsertkw(kw,ind); 
 	tvol[kw]=tvol[kw]+blocks.size();
 	float al = (float(idvol[kw]))/(float(tvol[kw]));
@@ -195,7 +199,7 @@ void BOrion::setupinsertkw(string keyword, int ind)
 {
     Bid mapKey(keyword);
     int updc = fcnt->setupfind(mapKey);
-    if (updt == 0) 
+    if (updc == 0) 
 	 uniquekw++;  
     updc++;
     fcnt->setupinsert(mapKey,updc);
@@ -224,8 +228,8 @@ void BOrion::setupinsertkw(string keyword, int ind)
 
 void BOrion::setupinsertFile(int id, vector<string> blocks)
 {
-	string ind = to_string(id);
-	Bid mapKey(ind);
+	string ind = toS(id);
+	Bid mapKey(id);
 	int sz = blocks.size();
         string par = ind;
 	par.append(to_string(sz));// pad later to 64 byte
@@ -233,7 +237,7 @@ void BOrion::setupinsertFile(int id, vector<string> blocks)
 	int i =1;
         for(auto block : blocks)
 	{       
-		Bid mk = createBid(ind, i);
+		Bid mk = createBid(to_string(id), i);
 		srch->setupinsert(mk,make_pair(FB,block));
 		i++;
 	}
@@ -244,8 +248,11 @@ void BOrion::setupinsertFile(int id, vector<string> blocks)
 void BOrion::insertWrapper(vector<string> kws,vector<string> blocks,int ind)
 { 
      cout << "inserting kw for:"<< ind << endl;
+     int i=0;
      for (auto kw: kws) 
+     {
    	insertkw(kw,ind); // insert all keywords
+     }
      cout << "inserted all the kw (total keywords: " <<kws.size() <<")"<< endl;
      insertFile(ind,blocks); // insert all file blocks
      inserted= inserted+kws.size();
@@ -289,8 +296,8 @@ void BOrion::insertkw(string keyword, int ind)
 
 void BOrion::insertFile(int id, vector<string> blocks)
 {
-	string ind = to_string(id);
-	Bid mapKey(ind);
+	string ind = toS(id);
+	Bid mapKey(id);
 	int sz = blocks.size();
         string par = ind;
 	par.append(to_string(sz));// pad later to 64 byte
@@ -298,7 +305,7 @@ void BOrion::insertFile(int id, vector<string> blocks)
 	int i =1;
         for(auto block : blocks)
 	{       
-		Bid mk = createBid(ind, i);
+		Bid mk = createBid(to_string(id), i);
 		srch->insert(mk,make_pair(FB,block));
 		i++;
 	}
@@ -308,8 +315,7 @@ void BOrion::insertFile(int id, vector<string> blocks)
 void BOrion::remove(int id) 
 {
 	string file = "";
-	string ind = to_string(id);
-	Bid blockcnt(ind);
+	Bid blockcnt(id);
 	string bcnt = srch->find(blockcnt).second;
 	int bc = 0; 
 	if(bcnt=="")
@@ -326,16 +332,25 @@ void BOrion::remove(int id)
 	Bid blk;
 	for (int i = 1; i <= bc ; i++)
 	{
-		blk = createBid(ind,i);
+		blk = createBid(to_string(id),i);
 		string ret = srch->find(blk).second;
+		ret=ret.substr(FID_SIZE,ret.size());
 		file = file.append(ret);
 		srch->remove(blk);	
 	}
-	cout <<"Removed "<< bc <<" blocks from srch"<<endl;
+	cout <<"Removed "<< bc <<" blocks from file:"<<id<<endl;
 	vector<string> kws1;
+	cout <<file<<endl;
 	boost::split(kws1, file, boost::is_any_of(delimiters));
 	vector<string> kws = getUniquedWords(kws1);
+	int i=0;
+	for(auto kw : kws)
+	{
+		cout <<i<<"["<<kw<<"]"<<endl;
+		i++;
+	}
 	removekw(kws, id);
+	cout <<"kws.size:"<<kws.size()<<endl;
 }
 
 
@@ -349,6 +364,7 @@ void BOrion::removekw(vector<string> kws, int ind)
       {
 	Bid firstKey(keyword);
         int updc = fcnt->find(firstKey);
+	cout <<keyword<<":UPDC IN DELETE:"<< updc<<endl;
 	if(updc==0)
 		return;
 	int bn = get_block_num(updc,COM);
@@ -484,32 +500,35 @@ vector<pair<string,string>> BOrion::search(string keyword)
     int pos = 1;
     mapKey = createBid(keyword,pos);
     pair<string,string> freq = srch->find(mapKey); //1. first COM fileids
+    cout <<"freq.second:"<<freq.second<<endl;
     int fetched = 0;
     vector<Bid> fileids; // fileids
     vector<Bid> fileblocks; // fileids
     int point = 0;
     while(fetched < updc && point < COM)
     {
-	    string str = freq.second.substr(point*FID_SIZE,FID_SIZE);
-            Bid bid = createBid(str,0); 
-	    fileids.push_back(bid);
+	    string fid = freq.second.substr(point*FID_SIZE,FID_SIZE);
+	    int fID = stoI(fid);
+            Bid bid(fID); 
+	    //fileids.push_back(bid);
 	    fetched++;
 	    point++;
-    }
-    pos++;
-    counts = srch->batchSearch(fileids); //2. block-size of first COM fileids
-    for(auto id1 : counts)
-    {
+    //}
+    //counts = srch->batchSearch(fileids); //2. block-size of first COM fileids
+    	    pair<string,string> id1 = srch->find(bid);
+    //for(auto id1 : counts)
+    //{
         string id = id1.second;
-	string idd = id.substr(0,FID_SIZE);
+	//string idd = id.substr(0,FID_SIZE);
 	string size = id.substr(FID_SIZE,id.size());
 	int sz = stoI(size);
 	for(int i = 1;i<=sz;i++)
 	{
-		Bid fb = createBid(idd,i);
+		Bid fb = createBid(to_string(fID),i);
 		fileblocks.push_back(fb);
 	}
     }
+    pos++;
     fileids.clear();
     while(fetched < updc) // get rest of ids
     {
@@ -519,197 +538,32 @@ vector<pair<string,string>> BOrion::search(string keyword)
 	    while(fetched < updc && point < COM)
 	    {
 	    	string str = freq.second.substr(point*FID_SIZE,FID_SIZE);
-            	Bid bid(str); // for first file block
-	    	fileids.push_back(bid);
+            	Bid bid(stoI(str)); // for first file block
+	    	//fileids.push_back(bid);
 	    	point++;
 	    	fetched++;
-	    }
-	    pos++;
-    }
-    counts.clear();
-    counts = srch->batchSearch(fileids);//3. block-size of rest of the files
-    for(auto id1 : counts)
-    {
+    //}
+        auto id1 = srch->find(bid);//3. block-size of rest of the files
+    //for(auto id1 : counts)
+    //{
         string id = id1.second;
 	string idd = id.substr(0,FID_SIZE);
 	string size = id.substr(FID_SIZE,id.size());
 	int sz = stoI(size);
 	for(int i = 1;i<=sz;i++)
 	{
-		Bid fb = createBid(idd,i);
+		int fID = stoI(idd);
+		Bid fb = createBid(to_string(fID),i);
 		fileblocks.push_back(fb);
 	}
+        }
+	    pos++;
     }
-    result.clear();
-    result = srch->batchSearch(fileblocks); // 4. all file blocks
+    for(fbid:fileblocks)
+    	result.push_back(srch->find(fbid)); // 4. all file blocks
     // the client should identify the blocks of same files
     return result;
 }
-/*
-map<string,string> BOrion::searchWrapper(string keyword)
-{
-	srand(time(NULL));
-	vector<pair<string,string>> result;
-	vector<string> firstresult;
-	map<string,string> files;
-        int fetched=0;
-    	vector<Bid> bids;
-    	//Bid mapKey = createBid(keyword, 0);
-	Bid mapKey(keyword);
-    
-    int updc = fcnt->find(mapKey); // mandatory first search: #fileids
-    if (updc == 0) 
-	    return files;
-    
-    queue<Bid> fileids; // fileids
-    queue<string> firstblockid; //ids of files
-    queue<string> firstblocknum;//#blocks of files
-    mapKey = createBid(keyword,1);
-    
-    auto freq = srch->find(mapKey); //mandatory second search: first 8 fileids
-    
-    auto fileids1 = freq.second;  // get first <=8 fileids
-    int pos = 0;
-    while(fetched < updc && fetched < COM)
-    {
-	    string str = freq.second.substr(pos*FID_SIZE,FID_SIZE);
-	    cout <<"the index:["<<str<<"]"<<endl<<endl;
-            Bid bid = createBid(str,0); // for first file block
-	    fileids.push(bid);
-	    pos++;
-	    fetched++;
-    }
-    int ran; // random number
-    int idblock = 2; // next index block to be fetched is block 2
-    
-    //randomize next OMAP accesses 
-    while(fetched < updc || fileids.size()>0 || firstblockid.size()>0)
-    {
-	    vector<Bid> batch;
-	    vector<Bid> firstbatch;
-	    if(fetched < updc)
-	    {
-		int idblksleft = ceil((updc-fetched)/COM);
-		if ((updc-fetched)%COM != 0) idblksleft++;
-		cout << "idblksleft:["<<idblksleft<<"]"<<endl;
-		
-		ran = rand()%idblksleft+1;
-		int cnt = 0;
-		while(cnt<ran)
-		{
-			Bid bid = createBid(keyword,idblock+cnt);
-			batch.push_back(bid);
-			cnt++;
-			idblock++;
-		}
-	    }
-	    if(fileids.size() > 0)
-	    {
-		ran = rand()%fileids.size()+1;
-		int cnt = 0;
-		while(cnt<ran)
-		{
-			firstbatch.push_back(fileids.front());
-			fileids.pop();
-			cnt++;
-		}
-	    }
-	    if(firstblockid.size() > 0)
-	    {
-		    ran = rand()%firstblockid.size()+1;
-		    int cnt = 1;
-		    while(cnt<=ran)
-		    {
-			    string str = firstblockid.front();
-			    string numb = firstblocknum.front();
-			    int num = stoI(numb);
-			    int bnums = 1;
-			    while(bnums<=num) // all blocks of file fetched
-			    {
-			        Bid bid = createBid(str,bnums);
-				bnums++;
-			        batch.push_back(bid);
-			    }
-			    cnt++;
-			    firstblockid.pop();
-			    firstblocknum.pop();
-		    }
-	    }
-	    //cout << "before BATCH SEARCH"<< endl;
-	    result = srch->batchSearch(batch);
-	    firstresult = fcnt->batchSearch(firstbatch);
-	    //cout << "after BATCH SEARCH"<< endl;
-	   
-	    for(auto first : firstresult)
-	    {
-		string id = first.substr(0,FID_SIZE);
-		int sz = first.length(); // change to :until #
-		string bnum = first.substr(FID_SIZE,sz);
-		//cout << "SIZE of File: "<< id << " IS:"<< bnum << endl;
-		firstblocknum.push(bnum);
-		firstblockid.push(id);
-	    }
-
-	    for(auto blk : result)
-	    {
-	       //cout << "first:" << blk.first << "second:" <<blk.second <<endl;
-	        if(blk.first==KB)
-		{
-			int cnt = 0;
-			while(cnt < COM && fetched<updc)
-			{
-			string str = blk.second.substr(cnt*FID_SIZE,FID_SIZE);
-				Bid bid = createBid(str,0);
-				fileids.push(bid);
-				fetched++;
-				cnt++;
-			}
-		}
-		//if(blk.first==FS)
-		//{
-		//	string id = blk.second.substr(0,FID_SIZE);
-		//	int sz = blk.second.length(); // change to :until #
-		//	string bnum = blk.second.substr(FID_SIZE,sz);
-		////cout << "SIZE of File: "<< id << " IS:"<< bnum << endl;
-		//	firstblocknum.push(bnum);
-		//	firstblockid.push(id);
-		//}
-		if(blk.first==FB)
-		{
-			string id = blk.second.substr(0,FID_SIZE);
-			int sz = blk.second.length();
-			string bcontent = blk.second.substr(FID_SIZE,sz);
-			if(files.find(id)!=files.end())
-			{
-				string con = files.at(id);
-				con.append(bcontent);
-				files.erase(id);
-				files.insert(pair<string,string>(id,con));
-			}
-			else
-				files.insert(pair<string,string>(id,bcontent));
-		}
-	    }
-    }
-return files;
-}
-*/
-
-/*
-void BOrion::beginSetup() 
-{
-    srchmap.clear();
-    updmap.clear();
-    fcntmap.clear();
-}
-
-void BOrion::endSetup() 
-{
-    fcnt->batchInsert(fcntmap);
-    updt->batchInsert(updmap);
-    srch->batchInsert(srchmap);
-}
-*/
 Bid BOrion::createBid(string keyword, int number) 
 {
     Bid bid(keyword);
