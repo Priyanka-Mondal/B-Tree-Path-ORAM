@@ -14,6 +14,7 @@ ORAMf::ORAMf(int maxSize, bytes<Key> key)
 : key(key), rd(), mt(rd()), dis(0, (pow(2, floor(log2(maxSize / Z))) - 1) / 2) {
     AES::Setup();
     depth = floor(log2(maxSize / Z));
+    cout <<"depth of tree ORAMf is:"<< depth<<endl;
     bucketCount = pow(2, depth + 1) - 1;
     blockSize = sizeof (Nodef); // B
     size_t blockCount = Z * (pow(2, depth + 1) - 1);
@@ -21,7 +22,7 @@ ORAMf::ORAMf(int maxSize, bytes<Key> key)
     size_t storeBlockCount = blockCount;
     clen_size = AES::GetCiphertextLength((blockSize) * Z);
     plaintext_size = (blockSize) * Z;
-    cout << "Bucket and block count in ORAMf:" << bucketCount<<"|"<<Z<<"="<<bucketCount*Z<<endl;
+    cout << "Buckets:"<<bucketCount<<" block count in ORAMf:"<<blockCount<<endl;
     store = new RAMStore(storeBlockCount, storeBlockSize);
     for (size_t i = 0; i < bucketCount; i++) {
         Bucketf bucket;
@@ -347,7 +348,7 @@ void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
                 newblock.data = convertNodefToBlock(curnode);
 		flag = 1;
 		store->ReduceEmptyNumbers();
-		//cout<<n->key<<" inserted "<<newblock.id<<"at leaf:"<<n->pos<<endl;
+                //cout<<"Empty Nodes in ORAMf:"<<sz<<":"<<bid<<endl;
 		pos = curnode->pos;
 		//delete curnode;
             }
@@ -358,8 +359,6 @@ void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
                 newblock.data = convertNodefToBlock(curnode);
 		flag = 1;
 		//store->ReduceEmptyNumbers();
-		//cout <<n->key<<" inserted "<< block.id<<endl;
-		//cout <<"Empty nodes remain same:"<<store->GetEmptySize()<<endl<<endl;
 		pos = curnode->pos;
 		//delete curnode;
             }

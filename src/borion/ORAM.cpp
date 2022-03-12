@@ -11,10 +11,11 @@
 #include <stdexcept>
 
 ORAM::ORAM(int maxSize, bytes<Key> key)
-: key(key), rd(), mt(rd()), dis(0, (pow(2, floor(log2(maxSize / Z))) - 1) / 2) // it should not be /2
+: key(key), rd(), mt(rd()), dis(0, (pow(2, floor(log2(maxSize / Z))) - 1) / 2) 
 {
     AES::Setup();
     depth = floor(log2(maxSize / Z));
+    cout <<"depth of tree ORAM:"<< depth<<endl;
     bucketCount = pow(2, depth + 1) - 1;
     blockSize = sizeof (Node); // B
     size_t blockCount = Z * (pow(2, depth + 1) - 1);
@@ -22,7 +23,7 @@ ORAM::ORAM(int maxSize, bytes<Key> key)
     size_t storeBlockCount = blockCount;
     clen_size = AES::GetCiphertextLength((blockSize) * Z);
     plaintext_size = (blockSize) * Z;
-    cout << "Bucket and block count in ORAM:" << bucketCount<<"|"<<Z<<"="<<bucketCount*Z<<endl;
+    cout << "Buckets:"<<bucketCount<<" block count in ORAM:" <<blockCount<<endl;
     store = new RAMStore(storeBlockCount, storeBlockSize);
     for (size_t i = 0; i < bucketCount; i++) {
         Bucket bucket;
@@ -348,7 +349,6 @@ void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
   int oramsz = store->GetEmptySize();
   if (oramsz>0) 
   {
-    //cout<<"Empty Nodes in ORAM:"<<oramsz<<endl;
     int flag = 0;
     for (size_t d = 0; d <= depth; d++) 
     {
@@ -368,6 +368,7 @@ void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
 		flag = 1;
 		store->ReduceEmptyNumbers();
 		pos = curnode->pos;
+                //cout<<"Empty Nodes in ORAM:"<<oramsz<<":"<<bid<<endl;
 		//delete curnode;
             }
 	    else if (flag==0 &&  block.id == bid) 

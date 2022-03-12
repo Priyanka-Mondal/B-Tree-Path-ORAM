@@ -59,7 +59,7 @@ static void list_dir ( const char * dir_name, BOrion& borion)
 	          file = file.append(d_name);
 	          vector<string> kws1, kws;
 	          string cont = getFileContent(file);
-	          cout <<endl<<"=====================================" << endl;
+	    cout <<endl<<"============================================" << endl;
                   cout <<file<< " " << fileid <<endl;
 	     
 	     	  borion.insertWrap(cont,fileid,batch);
@@ -170,12 +170,12 @@ int main(int argc, char**argv)
 			cout << "Enter the keyword to be searched: ";
 			string keyword;
 			cin>> keyword;
-			map<string,string> files;
+		cout <<"---------------Search result----------------"<<endl;
+		/*	map<string,string> files;
 			start = high_resolution_clock::now();
 	    	vector<pair<string,string>> results=borion.search(keyword);
 			stop = high_resolution_clock::now();
 			duration = duration_cast<microseconds>(stop-start);
-		cout <<"---------------Search result----------------"<<endl;
 			cout <<endl<< "setupsearch TIME: "<< duration.count()<<endl;  
 		for(auto file:results)
 		{
@@ -199,7 +199,8 @@ int main(int argc, char**argv)
 			cout <<"["<<file.first<<"]";
 		}
 		cout<<endl<<"RESULT stupsrchSIZE: "<<files.size()<<endl<<endl;
-
+			sres<< duration.count() <<" "<<files.size()<<endl;
+*/
 			map<string,string>  files2;
 			start = high_resolution_clock::now();
 	    	vector<pair<string,string>> res2=borion.search(keyword);
@@ -224,7 +225,7 @@ int main(int argc, char**argv)
 			}
 		}
 			cout <<endl<< "RESULT srchSIZE: " << files2.size() << endl;
-			sres<< duration.count() <<" "<<files.size()<<endl;
+			sres<< duration.count() <<" "<<files2.size()<<endl;
 		}
 		else if(c=='d'|| c=='D')
 		{
@@ -244,7 +245,7 @@ int main(int argc, char**argv)
 			cin>> file;
 	          	string cont = getFileContent(file);
 			start = high_resolution_clock::now();
-			borion.insertWrap(cont,fileid,false);
+			borion.insertWrap(cont,fileid,true);
 			stop = high_resolution_clock::now();
 			duration = duration_cast<microseconds>(stop-start);
 			cout << "Insertion time: "<< duration.count()<<endl;  
