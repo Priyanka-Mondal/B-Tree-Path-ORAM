@@ -68,7 +68,6 @@ Bid OMAP::remove(Bid delKey)
 void OMAP::setupinsert(Bid key, pair<string,string> value)
 {
 
-    treeHandler->startOperation();
     if (rootKey == 0) {
         rootKey = treeHandler->setupinsert(0, rootPos, key, value);
 //	cout <<rootPos<<"root at OMAP is :"<< rootKey<<endl;
@@ -80,8 +79,10 @@ void OMAP::setupinsert(Bid key, pair<string,string> value)
 void OMAP::insert(Bid key, pair<string,string> value) {
     treeHandler->startOperation();
     if (rootKey == 0) {
+	    cout <<"root is 0"<< endl;
         rootKey = treeHandler->insert(0, rootPos, key, value);
     } else {
+	    cout <<"root is :"<<rootKey<< endl;
         rootKey = treeHandler->insert(rootKey, rootPos, key, value);
     }
     treeHandler->finishOperation(false, rootKey, rootPos);

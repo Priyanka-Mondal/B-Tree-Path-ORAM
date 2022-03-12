@@ -245,7 +245,7 @@ int main(int argc, char**argv)
 			cin>> file;
 	          	string cont = getFileContent(file);
 			start = high_resolution_clock::now();
-			borion.insertWrap(cont,fileid,true);
+			borion.insertWrap(cont,fileid,false);
 			stop = high_resolution_clock::now();
 			duration = duration_cast<microseconds>(stop-start);
 			cout << "Insertion time: "<< duration.count()<<endl;  
@@ -255,7 +255,18 @@ int main(int argc, char**argv)
 		}
 		else if(c=='p' || c=='P')
 		{
-			//borion.print();
+			cout << "Enter file name to be inserted:";
+			string file;
+			cin>> file;
+	          	string cont = getFileContent(file);
+			start = high_resolution_clock::now();
+			borion.insertWrap(cont,fileid,true);
+			stop = high_resolution_clock::now();
+			duration = duration_cast<microseconds>(stop-start);
+			cout << "Insertion time: "<< duration.count()<<endl;  
+		cout <<"--TOTAL files inserted so far:"<<fileid<<endl;
+			fileid++;
+			cout <<endl;
 		}
 		else if(c=='q'||c=='Q')
 		{
