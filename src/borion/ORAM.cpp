@@ -11,7 +11,8 @@
 #include <stdexcept>
 
 ORAM::ORAM(int maxSize, bytes<Key> key)
-: key(key), rd(), mt(rd()), dis(0, (pow(2, floor(log2(maxSize / Z))) - 1) / 2) {
+: key(key), rd(), mt(rd()), dis(0, (pow(2, floor(log2(maxSize / Z))) - 1) / 2) // it should not be /2
+{
     AES::Setup();
     depth = floor(log2(maxSize / Z));
     bucketCount = pow(2, depth + 1) - 1;
@@ -84,14 +85,16 @@ Bucket ORAM::DeserialiseBucket(block buffer) {
     return bucket;
 }
 
-Bucket ORAM::ReadBucket(int index) {
+Bucket ORAM::ReadBucket(int index) 
+{
     block ciphertext = store->Read(index);
     block buffer = AES::Decrypt(key, ciphertext, clen_size);
     Bucket bucket = DeserialiseBucket(buffer);
     return bucket;
 }
 
-void ORAM::WriteBucket(int index, Bucket bucket) {
+void ORAM::WriteBucket(int index, Bucket bucket) 
+{
     block b = SerialiseBucket(bucket);
     block ciphertext = AES::Encrypt(key, b, clen_size, plaintext_size);
     store->Write(index, ciphertext);
@@ -516,6 +519,7 @@ void ORAM::Print() {
 }
 
 int ORAM::RandomPath() {
-    int val = dis(mt);
+    int val = dis(mt); // mt produces randon m=numbers in range[0,2^32], dis converts its range [0,x] say
+    //mt(rd()) mt needs a seed, which is randomly generated with rd() function
     return val;
 }
