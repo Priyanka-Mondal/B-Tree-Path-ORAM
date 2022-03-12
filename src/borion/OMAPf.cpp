@@ -90,13 +90,10 @@ void OMAPf::setupinsert(Bid key, int value)
 void OMAPf::insert(Bid key, int value) {
     treeHandler->startOperation();
     if (rootKey == 0) {
-	    cout <<"rootF is 0"<< endl;
         rootKey = treeHandler->insert(0, rootPos, key, value);
     } else {
-	    cout <<"rootF is:"<<rootKey<< endl;
         rootKey = treeHandler->insert(rootKey, rootPos, key, value);
     }
-    cout <<"WILL START FINISH OPERATION"<<endl;
     treeHandler->finishOperation(false, rootKey, rootPos);
 }
 
