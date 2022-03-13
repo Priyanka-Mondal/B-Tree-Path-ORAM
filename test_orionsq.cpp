@@ -100,8 +100,8 @@ int main(int argc, char**argv)
 	list_dir(argv[2],orion);
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
-/*	
 	list_dir("allen-p/deleted_items",orion);
+/*	
         auto start = high_resolution_clock::now();
 	auto s = orion.search("borion");
         auto stop = high_resolution_clock::now();

@@ -97,14 +97,13 @@ int main(int argc, char**argv)
 	int size = to_int(argv[1]);
 	BOrion borion(usehdd, size);  
         ofstream sres;
-	sres.open("borion.txt");//,ios::app);	
-
+	sres.open("borion.txt",ios::app);	
+/*
         auto start = high_resolution_clock::now();
 	list_dir(argv[2],borion);
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
-
-/*
+*/
 
 	list_dir("allen-p/deleted_items",borion);
         auto start = high_resolution_clock::now();
@@ -127,6 +126,7 @@ int main(int argc, char**argv)
 	duration = duration_cast<microseconds>(stop-start);
 	sres <<(fileid-1)<<" "<< duration.count()<< " " <<s.size()<<endl;
 
+/*
 	list_dir("allen-p/all_documents",borion);
         start = high_resolution_clock::now();
 	s = borion.setupsearch("borion");

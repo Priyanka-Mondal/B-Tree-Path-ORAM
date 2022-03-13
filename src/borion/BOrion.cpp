@@ -510,7 +510,7 @@ vector<pair<string,string>> BOrion::search(string keyword)
     vector<Bid> fileids; // fileids
     vector<Bid> fileblocks; // fileids
     int point = 0;
-    while(fetched < updc && point < COM)
+    /*while(fetched < updc && point < COM)
     {
 	    string fid = freq.substr(point*FID_SIZE,FID_SIZE);
 	    string fID = to_string(stoI(fid));
@@ -531,7 +531,7 @@ vector<pair<string,string>> BOrion::search(string keyword)
 	}
     }
     pos++;
-    fileids.clear();
+    fileids.clear();*/
     while(fetched < updc) // get rest of ids
     {
     	    mapKey = createBid(keyword,pos);

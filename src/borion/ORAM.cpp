@@ -251,7 +251,7 @@ Node* ORAM::setupReadN(Bid bid,int leaf)
         return NULL;
     }
     Node* n;
-    for (size_t d = 0; d <= depth; d++) 
+    for (size_t d = depth; d >= 0; d--) 
     {
         int node = GetNodeOnPath(leaf, d);
         Bucket bucket = ReadBucket(node);
@@ -300,7 +300,7 @@ Node* ORAM::ReadNode(Bid bid, int lastLeaf, int newLeaf) {
             modified.insert(bid);
         }
 	else 
-		cout <<"node is NULL : "<< bid << endl ;
+		cout <<"node is NULL : "<< bid <<"leaf:"<<lastLeaf<< endl ;
         return node;
     } else {
         modified.insert(bid);
@@ -350,7 +350,7 @@ void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
   if (oramsz>0) 
   {
     int flag = 0;
-    for (size_t d = 0; d <= depth; d++) 
+    for (size_t d = depth; d >= 0; d--) 
     {
         int node = GetNodeOnPath(n->pos, d);
         Bucket bucket = ReadBucket(node);
