@@ -72,8 +72,9 @@ env.Alias('deps', [crypto_lib_target, db_parser_target])
 objects = SConscript('src/build.scons', exports='env', variant_dir='build')
 
 env.Depends(objects["borion"],[crypto_lib_target , db_parser_target])
+env.Depends(objects["orionsq"],[crypto_lib_target , db_parser_target])
 
-Clean(objects["borion"], 'build')
+Clean(objects["borion"]+objects["orionsq"], 'build')
 
 outter_env = env.Clone()
 outter_env.Append(CPPPATH = ['build'])
@@ -81,8 +82,11 @@ outter_env.Append(CPPPATH = ['build'])
 
 
 borion_debug_prog   = outter_env.Program('borion_debug',    ['test_borion.cpp']     + objects["borion"])
+orionsq_debug_prog   = outter_env.Program('orionsq_debug',    ['test_orionsq.cpp']     + objects["orionsq"])
 
 
 env.Alias('borion', [borion_debug_prog])
+env.Alias('orionsq', [orionsq_debug_prog])
 
 env.Default(['borion'])
+env.Default(['orionsq'])

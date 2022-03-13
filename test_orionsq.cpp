@@ -57,7 +57,7 @@ static void list_dir (const char * dir_name, Orion& orion)
 	          file = file.append(d_name);
 	          vector<string> kws1, kws;
 	          string cont = getFileContent(file);
-	          cout <<"=====================================" << endl;
+	          cout <<"============================================" << endl;
                   cout << endl <<file<< " " << fileid <<endl ;
 	     
 	     	  orion.insertWrap(cont,fileid, batch);
@@ -95,22 +95,20 @@ int main(int argc, char**argv)
 	Orion orion(usehdd, size);  
         ofstream sres;
 	sres.open("orionsq.txt");//,ios::app);	
-/*
+
         auto start = high_resolution_clock::now();
 	list_dir(argv[2],orion);
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
-*/	
-
-	
-	list_dir("allen-p/del",orion);
+/*	
+	list_dir("allen-p/deleted_items",orion);
         auto start = high_resolution_clock::now();
 	auto s = orion.search("borion");
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
 	sres <<(fileid-1)<<" "<< duration.count()<<" "<< s.size()<<endl;
 
-	list_dir("allen-p/small_deleted_items",orion);
+	list_dir("allen-p/sent_items",orion);
         start = high_resolution_clock::now();
 	s = orion.search("borion");
         stop = high_resolution_clock::now();
@@ -139,7 +137,7 @@ int main(int argc, char**argv)
 	sres <<(fileid-1)<<" "<<duration.count()<<" "<< s.size()<<endl;
 
 	return 0;
-
+*/
 	cout <<"== TOTAL files inserted :"<<fileid-1<<" =="<<endl;
 	cout <<"Time taken for setup(orionsq):"<<duration.count()<<endl;
 	cout << endl<<" SETUP INSERT DONE!"<< endl;

@@ -230,11 +230,11 @@ void BOrion::setupinsertkw(string keyword, int ind)
 void BOrion::setupinsertFile(int id, vector<string> blocks)
 {
 	string ind = toS(id);
-	Bid mapKey(id);
+	Bid mapKey(to_string(id));
 	int sz = blocks.size();
-        string par = ind;
-	par.append(to_string(sz));// pad later to 64 byte
-	srch->setupinsert(mapKey, make_pair("",par));
+        //string par = ind;
+	//par.append(to_string(sz));// pad later to 64 byte
+	fcnt->setupinsert(mapKey, sz);
 	int i =1;
         for(auto block : blocks)
 	{       
@@ -513,23 +513,20 @@ vector<pair<string,string>> BOrion::search(string keyword)
     while(fetched < updc && point < COM)
     {
 	    string fid = freq.substr(point*FID_SIZE,FID_SIZE);
-	    int fID = stoI(fid);
+	    string fID = to_string(stoI(fid));
             Bid bid(fID); 
 	    //fileids.push_back(bid);
 	    fetched++;
 	    point++;
     //}
     //counts = srch->batchSearch(fileids); //2. block-size of first COM fileids
-    	    pair<string,string> id1 = srch->find(bid);
+    	    int sz = fcnt->find(bid);
     //for(auto id1 : counts)
     //{
-        string id = id1.second;
 	//string idd = id.substr(0,FID_SIZE);
-	string size = id.substr(FID_SIZE,id.size());
-	int sz = stoI(size);
 	for(int i = 1;i<=sz;i++)
 	{
-		Bid fb = createBid(to_string(fID),i);
+		Bid fb = createBid(fID,i);
 		fileblocks.push_back(fb);
 	}
     }
@@ -548,14 +545,10 @@ vector<pair<string,string>> BOrion::search(string keyword)
 	    	point++;
 	    	fetched++;
     //}
-        auto id1 = srch->find(bid);//3. block-size of rest of the files
+                int sz = fcnt->find(bid);//3. block-size of rest of the files
     //for(auto id1 : counts)
     //{
-        string id = id1.second;
-	string idd = id.substr(0,FID_SIZE);
-        int fID = stoI(idd);
-	string size = id.substr(FID_SIZE,id.size());
-	int sz = stoI(size);
+                int fID = stoI(str);
 	for(int i = 1;i<=sz;i++)
 	{
 		Bid fb = createBid(to_string(fID),i);

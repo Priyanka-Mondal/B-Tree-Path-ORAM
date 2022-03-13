@@ -2,6 +2,9 @@
 
 AVLTree::AVLTree(int maxSize, bytes<Key> key) : rd(), mt(rd()), dis(0, (pow(2, floor(log2(maxSize / Z)) + 1) - 1) / 2) {
     oram = new ORAM(maxSize, key);
+    totalleaves = (pow(2, floor(log2(maxSize/Z))+1)-1)/2;
+    cout <<"total leaves in treef:(0.."<< totalleaves<<")"<<totalleaves+1<<endl;
+    cout <<"--------------------------------------------"<<endl;
 }
 
 AVLTree::~AVLTree() {
@@ -42,12 +45,24 @@ Node* AVLTree::newNode(Bid key, string value) {
     return node;
 }
 
+Node* AVLTree::setupnewNode(Bid key, string value) {
+    Node* node = new Node();
+    node->key = key;
+    std::fill(node->value.begin(), node->value.end(), 0);
+    std::copy(value.begin(),value.end(), node->value.begin());
+    node->leftID = 0;
+    node->rightID = 0;
+    node->pos = notsoRandomPath();
+    //cout <<"not so random node->pos"<< node->pos<<endl;
+    node->height = 1; // new node is initially added at leaf
+    return node;
+}
 
 Node* AVLTree::setuprightRotate(Node* y,Bid rootKey, int& pos) {
     Node* x = oram->setupReadN(y->leftID,y->leftPos);
     Node* T2;
     if (x->rightID == 0) {
-        T2 = newNode(0, "");
+        T2 = setupnewNode(0, "");
     } else {
         T2 = oram->setupReadN(x->rightID,x->rightPos);
     }
@@ -97,7 +112,7 @@ Node* AVLTree::setupleftRotate(Node* x,Bid rootKey, int& pos) {
     Node* y = oram->setupReadN(x->rightID,x->rightPos);
     Node* T2;
     if (y->leftID == 0) {
-        T2 = newNode(0, "");
+        T2 = setupnewNode(0, "");
     } else {
         T2 = oram->setupReadN(y->leftID,y->leftPos);
     }
@@ -158,7 +173,7 @@ int AVLTree::getBalance(Node* N) {
 Bid AVLTree::setupinsert(Bid rootKey, int& pos, Bid key, string value) 
 {
     if (rootKey == 0) {
-        Node* nnode = newNode(key, value);
+        Node* nnode = setupnewNode(key, value);
         pos = oram->setupWriteN(key, nnode,key,pos);
 //	cout <<pos<<":pos RETURNING root IS----------------"<<nnode->key<< endl;
         return nnode->key;
@@ -392,6 +407,14 @@ int AVLTree::RandomPath() {
 }
 
 
+int AVLTree::notsoRandomPath() 
+{
+    if(setupleaf != totalleaves)
+	    setupleaf++;
+    else
+	    setupleaf = 0;
+    return setupleaf;
+}
 
 //delete functions
 Node* AVLTree::minValueNode(Bid rootKey, int rootPos, Node* rootroot)

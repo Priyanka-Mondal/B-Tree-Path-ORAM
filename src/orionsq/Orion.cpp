@@ -6,10 +6,10 @@ Orion::Orion(bool usehdd, int maxSize ) {
     this->useHDD = usehdd;
     bytes<Key> key1{0};
     bytes<Key> key2{1};
-    srch = new OMAPf(maxSize*16, key1);
+    srch = new OMAPf(maxSize*8, key1);
     updt = new OMAPf(maxSize*8, key1);
     fcnt = new OMAPf(maxSize, key1);
-    file = new OMAP(maxSize*8,key2);
+    file = new OMAP(maxSize*5,key2);
 }
 
 Orion::~Orion() {
@@ -20,6 +20,7 @@ Orion::~Orion() {
 
 int inserted = 0; 
 int uniquekw = 0;
+int fileblks = 0;
 string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
 set<string> neg = {"\n","\0", " ", "-","?","from","to", "in"};
 
@@ -149,10 +150,12 @@ cout << "batch inserted all the keywords(total:"<<kws.size() <<") of:"<<ind<< en
       }
       Bid lastblock = createBid(id,block_num);
       file->setupinsert(lastblock,"last");
-      cout <<"inserted "<<block_num-1<<" blocks of " << id<<endl;
+      cout <<"inserted "<<block_num<<" blocks of " << id<<endl;
+      fileblks = fileblks+block_num;
       inserted = inserted+kws.size();
-      cout << endl<<"--TOTAL keywords inserted so far: "<<inserted<<endl;
+      //cout << endl<<"--TOTAL keywords inserted so far: "<<inserted<<endl;
       cout <<"--TOTAL unique keywords inserted so far: "<<uniquekw<<endl;
+      cout <<"--TOTAL fileblocks inserted so far: "<<fileblks<<endl;
 
 }
 
@@ -183,10 +186,12 @@ void Orion::insert(vector<string> kws, vector<string> blocks, int ind)
       }
       Bid lastblock = createBid(id,block_num);
       file->insert(lastblock,"last");
-      cout <<"inserted "<<block_num-1<<"blocks of " << id<<endl;
+      cout <<"inserted "<<block_num<<" blocks of " << id<<endl;
       inserted = inserted+kws.size();
-      cout << endl<<"--TOTAL keywords inserted so far: "<<inserted<<endl;
+      fileblks = fileblks+block_num;
+      //cout << endl<<"--TOTAL keywords inserted so far: "<<inserted<<endl;
       cout <<"--TOTAL unique keywords inserted so far: "<<uniquekw<<endl;
+      cout <<"--TOTAL fileblocks inserted so far: "<<fileblks<<endl;
 }
 
 map<int,string> Orion::search(string keyword) {

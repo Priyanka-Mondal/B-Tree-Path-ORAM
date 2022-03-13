@@ -23,14 +23,18 @@ private:
     std::random_device rd;
     std::mt19937 mt;
     std::uniform_int_distribution<int> dis;
+    int totalleaves;
+    int setupleaf= -1;
 
     int height(Bid N, int& leaf);
     int max(int a, int b);
     Nodef* newNodef(Bid key, int value);
+    Nodef* setupnewNodef(Bid key, int value);
     Nodef* rightRotate(Nodef* y);
     Nodef* leftRotate(Nodef* x);
     int getBalance(Nodef* N);
     int RandomPath();
+    int notsoRandomPath();
     int setupheight(Bid key, int& leaf);
     Nodef* setuprightRotate(Nodef* y, Bid rootKey, int& pos);
     Nodef* setupleftRotate(Nodef* x, Bid rootKey, int& pos);

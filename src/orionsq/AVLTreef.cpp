@@ -2,6 +2,9 @@
 
 AVLTreef::AVLTreef(int maxSize, bytes<Key> key) : rd(), mt(rd()), dis(0, (pow(2, floor(log2(maxSize / Z)) + 1) - 1) / 2) {
     oram = new ORAMf(maxSize, key);
+    totalleaves = (pow(2, floor(log2(maxSize/Z))+1)-1)/2;
+    cout <<"total leaves in treef:(0.."<< totalleaves<<")"<<totalleaves+1<<endl;
+    cout <<"--------------------------------------------"<<endl;
 }
 
 AVLTreef::~AVLTreef() {
@@ -43,12 +46,24 @@ Nodef* AVLTreef::newNodef(Bid key, int value) {
     return node;
 }
 
+Nodef* AVLTreef::setupnewNodef(Bid key, int value) {
+    Nodef* node = new Nodef();
+    node->key = key;
+    auto val = to_string(value);
+    std::fill(node->value.begin(), node->value.end(), 0);
+    std::copy(val.begin(), val.end(), node->value.begin());
+    node->leftID = 0;
+    node->rightID = 0;
+    node->pos = notsoRandomPath();
+    node->height = 1; // new node is initially added at leaf
+    return node;
+}
 
 Nodef* AVLTreef::setuprightRotate(Nodef* y, Bid rootKey, int& pos) {
     Nodef* x = oram->setupReadNf(y->leftID,y->leftPos);
     Nodef* T2;
     if (x->rightID == 0) {
-        T2 = newNodef(0, 0);
+        T2 = setupnewNodef(0, 0);
     } else {
         T2 = oram->setupReadNf(x->rightID,x->rightPos);
     }
@@ -95,7 +110,7 @@ Nodef* AVLTreef::setupleftRotate(Nodef* x, Bid rootKey, int& pos) {
     Nodef* y = oram->setupReadNf(x->rightID,x->rightPos);
     Nodef* T2;
     if (y->leftID == 0) {
-        T2 = newNodef(0, 0);
+        T2 = setupnewNodef(0, 0);
     } else {
         T2 = oram->setupReadNf(y->leftID,y->leftPos);
     }
@@ -152,7 +167,7 @@ int AVLTreef::getBalance(Nodef* N) {
 Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, int value) 
 {
     if (rootKey == 0) {
-        Nodef* nnode = newNodef(key, value);
+        Nodef* nnode = setupnewNodef(key, value);
         pos = oram->setupWriteNf(key, nnode,key,pos);
 //	cout <<pos<<":pos RETURNING root IS----------------"<<nnode->key<< endl;
         return nnode->key;
@@ -386,6 +401,14 @@ void AVLTreef::finishOperation(bool find, Bid& rootKey, int& rootPos) {
 int AVLTreef::RandomPath() {
     int val = dis(mt);
     return val;
+}
+int AVLTreef::notsoRandomPath() 
+{
+    if(setupleaf != totalleaves)
+	    setupleaf++;
+    else
+	    setupleaf = 0;
+    return setupleaf;
 }
 
 

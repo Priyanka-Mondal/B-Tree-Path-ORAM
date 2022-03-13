@@ -38,7 +38,6 @@ int AVLTree::max(int a, int b) {
 Node* AVLTree::newNode(Bid key, pair<string,string> value) {
     Node* node = new Node();
     node->key = key;
-    auto meta = value.first;//to_bytes(value.first);
     std::fill(node->value.first.begin(), node->value.first.end(), 0);
     std::copy(value.first.begin(),value.first.end(), node->value.first.begin());
     std::fill(node->value.second.begin(), node->value.second.end(), 0);
@@ -53,7 +52,6 @@ Node* AVLTree::newNode(Bid key, pair<string,string> value) {
 Node* AVLTree::setupnewNode(Bid key, pair<string,string> value) {
     Node* node = new Node();
     node->key = key;
-    auto meta = value.first;//to_bytes(value.first);
     std::fill(node->value.first.begin(), node->value.first.end(), 0);
     std::copy(value.first.begin(),value.first.end(), node->value.first.begin());
     std::fill(node->value.second.begin(), node->value.second.end(), 0);

@@ -97,25 +97,25 @@ int main(int argc, char**argv)
 	int size = to_int(argv[1]);
 	BOrion borion(usehdd, size);  
         ofstream sres;
-	sres.open("vardbsearchborion.txt");//,ios::app);	
+	sres.open("borion.txt");//,ios::app);	
 
         auto start = high_resolution_clock::now();
 	list_dir(argv[2],borion);
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
 
-
 /*
+
 	list_dir("allen-p/deleted_items",borion);
         auto start = high_resolution_clock::now();
-	auto s = borion.setupsearch("borion");
+	auto s = borion.search("borion");
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
 	sres <<(fileid-1)<<" "<< duration.count()<<" "<<s.size()<<endl;
 	
-	list_dir("allen-p/small_deleted_items",borion);
+	list_dir("allen-p/sent_items",borion);
         start = high_resolution_clock::now();
-	s = borion.setupsearch("borion");
+	s = borion.search("borion");
         stop = high_resolution_clock::now();
 	duration = duration_cast<microseconds>(stop-start);
 	sres <<(fileid-1)<<" "<< duration.count()<< " "<<s.size()<<endl;

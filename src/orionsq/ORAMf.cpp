@@ -14,6 +14,7 @@ ORAMf::ORAMf(int maxSize, bytes<Key> key)
 : key(key), rd(), mt(rd()), dis(0, (pow(2, floor(log2(maxSize / Z))) - 1) / 2) {
     AES::Setup();
     depth = floor(log2(maxSize / Z));
+    cout <<"depth of treeF:"<<depth<<endl;
     bucketCount = pow(2, depth + 1) - 1;
     blockSize = sizeof (Nodef); // B
     size_t blockCount = Z * (pow(2, depth + 1) - 1);
@@ -22,7 +23,7 @@ ORAMf::ORAMf(int maxSize, bytes<Key> key)
     clen_size = AES::GetCiphertextLength((blockSize) * Z);
     plaintext_size = (blockSize) * Z;
     store = new RAMStore(storeBlockfCount, storeBlockfSize);
-    cout << "Bucketf and block count in ORAMf:" << bucketCount<<"|"<<Z<<"="<<bucketCount*Z<<endl;
+    cout << "Buckets:"<<bucketCount<<" block count in ORAMf:"<<blockCount<<endl;
     for (size_t i = 0; i < bucketCount; i++) {
         Bucketf bucket;
         for (int z = 0; z < Z; z++) {
