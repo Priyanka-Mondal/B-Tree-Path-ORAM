@@ -322,7 +322,7 @@ Nodef* AVLTreef::setupsearch(Nodef* head, Bid key) {
     } else if (head->key < key) {
     //cout <<head->key<<"setupsearch reading headkey < key:"<< key<<endl;
         return setupsearch(oram->setupReadNf(head->rightID, head->rightPos), key);
-    } else if(head->key == key)
+    } else 
         return head;
 }
 Nodef* AVLTreef::search(Nodef* head, Bid key) {

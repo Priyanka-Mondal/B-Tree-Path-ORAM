@@ -26,6 +26,7 @@ public:
     void removekw(vector <string> kws, int id);
     
     map<int,string> search(string keyword);
+    vector<pair<int,string>> searchsimple(string keyword);
     
     Orion(bool useHDD,int maxSize);    
     

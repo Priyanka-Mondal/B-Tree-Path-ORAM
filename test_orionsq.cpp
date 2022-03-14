@@ -95,49 +95,51 @@ int main(int argc, char**argv)
 	Orion orion(usehdd, size);  
         ofstream sres;
 	sres.open("orionsq.txt");//,ios::app);	
-
+/*
         auto start = high_resolution_clock::now();
 	list_dir(argv[2],orion);
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
+	list_dir("allen-p/del",orion);
+*/	
 	list_dir("allen-p/deleted_items",orion);
-/*	
+	cout <<"SEARCHING..."<<endl;
         auto start = high_resolution_clock::now();
-	auto s = orion.search("borion");
+	auto s = orion.searchsimple("borion");
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
 	sres <<(fileid-1)<<" "<< duration.count()<<" "<< s.size()<<endl;
-
+return 0;
 	list_dir("allen-p/sent_items",orion);
         start = high_resolution_clock::now();
-	s = orion.search("borion");
+	s = orion.searchsimple("borion");
         stop = high_resolution_clock::now();
 	duration = duration_cast<microseconds>(stop-start);
 	sres <<(fileid-1)<<" "<<duration.count() <<" "<< s.size()<<endl;
 
 	list_dir("allen-p/sent",orion);
         start = high_resolution_clock::now();
-	s = orion.search("borion");
+	s = orion.searchsimple("borion");
         stop = high_resolution_clock::now();
 	duration = duration_cast<microseconds>(stop-start);
 	sres <<(fileid-1)<<" "<<duration.count()<<" "<< s.size()<<endl;
 
 	list_dir("allen-p/all_documents",orion);
         start = high_resolution_clock::now();
-	s = orion.search("borion");
+	s = orion.searchsimple("borion");
         stop = high_resolution_clock::now();
 	duration = duration_cast<microseconds>(stop-start);
 	sres <<(fileid-1)<<" "<<duration.count()<<" "<< s.size()<<endl;
 
 	list_dir("allen-p/discussion_threads",orion);
         start = high_resolution_clock::now();
-	s = orion.search("borion");
+	s = orion.searchsimple("borion");
         stop = high_resolution_clock::now();
 	duration = duration_cast<microseconds>(stop-start);
 	sres <<(fileid-1)<<" "<<duration.count()<<" "<< s.size()<<endl;
 
 	return 0;
-*/
+
 	cout <<"== TOTAL files inserted :"<<fileid-1<<" =="<<endl;
 	cout <<"Time taken for setup(orionsq):"<<duration.count()<<endl;
 	cout << endl<<" SETUP INSERT DONE!"<< endl;
@@ -165,16 +167,17 @@ int main(int argc, char**argv)
 			cout << "Enter the keyword to be searched: ";
 			string keyword;
 			cin>> keyword;
+			cout <<"SEARCHING ..."<<endl;
 			start = high_resolution_clock::now();
-	    		map<int,string> files = orion.search(keyword);
+	    		vector<pair<int,string>> files = orion.searchsimple(keyword);
 			stop = high_resolution_clock::now();
 			duration = duration_cast<microseconds>(stop-start);
 			cout <<"--------Search result---------"<<endl;
-	    		for(auto file:files)
-			{
-	    			cout << "["<<file.first<<"] ";
+	    		//for(auto file:files)
+			//{
+	    		//	cout << "["<<file.first<<"] ";
 				//cout << file.second<< endl<<endl;
-			}
+			//}
 	    		cout <<endl<<endl;
 			cout << "RESULT size: " << files.size() << endl<<endl;
 			cout << "Search time: "<< duration.count()<<endl;  

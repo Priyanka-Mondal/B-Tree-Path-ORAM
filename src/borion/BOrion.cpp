@@ -494,6 +494,44 @@ vector<pair<string,string>> BOrion::setupsearch(string keyword)
     return result;
 }
 
+vector<pair<string,string>> BOrion::searchsimple(string keyword)
+{
+    vector<pair<string,string>> result;
+    vector<Bid> fileblocks; 
+    Bid mapKey(keyword);
+    int updc = fcnt->find(mapKey); 
+    if (updc == 0) 
+        return result;
+    cout <<"UPDC:"<<updc;
+    int pos = 1;
+    int fetched = 0;
+    int point = 0;
+    while(fetched < updc) 
+    {
+    	    mapKey = createBid(keyword,pos);
+            string ids = srch->find(mapKey).second;
+	    point = 0;
+	    while(fetched < updc && point < COM)
+	    {
+	    	string str = ids.substr(point*FID_SIZE,FID_SIZE);
+	    	point++;
+	    	fetched++;
+                string fID = to_string(stoI(str));
+            	Bid bid(fID); 
+                int sz = fcnt->find(bid);
+		for(int i = 1;i<=sz;i++)
+		{
+			Bid fb = createBid(fID,i);
+			fileblocks.push_back(fb);
+		}
+            }
+	    pos++;
+    }
+    for(fbid:fileblocks)
+    	result.push_back(srch->find(fbid)); 
+    return result;
+}
+
 vector<pair<string,string>> BOrion::search(string keyword)
 {
     vector<pair<string,string>> result;
@@ -502,10 +540,10 @@ vector<pair<string,string>> BOrion::search(string keyword)
     int updc = fcnt->find(mapKey); //0. get file count i.e. updc 
     if (updc == 0) 
         return result;
-
+    cout <<"UPDC:"<< updc;
     int pos = 1;
     mapKey = createBid(keyword,pos);
-    string freq = srch->find(mapKey).second; //1. first COM fileids
+    string freq = srch->find(mapKey).second; 
     int fetched = 0;
     vector<Bid> fileids; // fileids
     vector<Bid> fileblocks; // fileids

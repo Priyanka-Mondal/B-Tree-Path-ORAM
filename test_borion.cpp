@@ -59,8 +59,8 @@ static void list_dir ( const char * dir_name, BOrion& borion)
 	          file = file.append(d_name);
 	          vector<string> kws1, kws;
 	          string cont = getFileContent(file);
-	    cout <<endl<<"============================================" << endl;
-                  cout <<file<< " " << fileid <<endl;
+	    cout <<endl<<"================================================" << endl;
+                  cout <<file<< "   id:" << fileid <<endl;
 	     
 	     	  borion.insertWrap(cont,fileid,batch);
              
@@ -103,21 +103,28 @@ int main(int argc, char**argv)
 	list_dir(argv[2],borion);
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
-*/
 
+*/
 	list_dir("allen-p/deleted_items",borion);
+	list_dir("allen-p/sent_items",borion);
+	list_dir("allen-p/sent",borion);
+	list_dir("allen-p/all_documents",borion);
+	list_dir("allen-p/discussion_threads",borion);
         auto start = high_resolution_clock::now();
-	auto s = borion.search("borion");
+	cout<<"SEARCHING ..."<<endl;
+	auto s = borion.searchsimple("borion");
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
 	sres <<(fileid-1)<<" "<< duration.count()<<" "<<s.size()<<endl;
 	
+	return 0;
 	list_dir("allen-p/sent_items",borion);
         start = high_resolution_clock::now();
 	s = borion.search("borion");
         stop = high_resolution_clock::now();
 	duration = duration_cast<microseconds>(stop-start);
 	sres <<(fileid-1)<<" "<< duration.count()<< " "<<s.size()<<endl;
+
 
 	list_dir("allen-p/sent",borion);
         start = high_resolution_clock::now();
@@ -126,7 +133,6 @@ int main(int argc, char**argv)
 	duration = duration_cast<microseconds>(stop-start);
 	sres <<(fileid-1)<<" "<< duration.count()<< " " <<s.size()<<endl;
 
-/*
 	list_dir("allen-p/all_documents",borion);
         start = high_resolution_clock::now();
 	s = borion.setupsearch("borion");
@@ -142,7 +148,7 @@ int main(int argc, char**argv)
 	sres <<(fileid-1)<<" "<< duration.count()<< " "<<s.size()<<endl;
 
 	return 0;
-*/
+
 	
 	cout <<"== TOTAL files inserted :"<<fileid-1<<" =="<<endl;
 	cout <<"Time taken for setup(borion):"<<duration.count()<<endl;
@@ -203,7 +209,7 @@ int main(int argc, char**argv)
 */
 			map<string,string>  files2;
 			start = high_resolution_clock::now();
-	    	vector<pair<string,string>> res2=borion.search(keyword);
+	    	vector<pair<string,string>> res2=borion.searchsimple(keyword);
 			stop = high_resolution_clock::now();
 			duration = duration_cast<microseconds>(stop-start);
 			cout << "search TIME: "<< duration.count()<<endl;  

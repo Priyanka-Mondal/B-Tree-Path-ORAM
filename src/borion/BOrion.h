@@ -38,6 +38,7 @@ public:
     
     //map<string,string> searchWrapper(string keyword);
     vector<pair<string,string>> search(string keyword);
+    vector<pair<string,string>> searchsimple(string keyword);
     vector<pair<string,string>> setupsearch(string keyword);
     
     void print();

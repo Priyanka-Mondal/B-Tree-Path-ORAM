@@ -327,10 +327,10 @@ Nodef* ORAMf::ReadNodef(Bid bid, int lastLeaf, int newLeaf) {
 void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
 {
     int flag = 0;
-    int sz= store->GetEmptySize();
-  if (sz > 0) 
+    int oramsz= store->GetEmptySize();
+  if (oramsz > 0) 
   {
-		//cout <<"Empty nodes in ORAMf:"<<sz<<endl<<endl;
+    //cout <<"Empty nodes in ORAMf:"<<oramsz<<endl<<endl;
     for (size_t d = depth; d >= 0; d--) 
     {
         int node = GetNodefOnPath(n->pos, d);
@@ -338,14 +338,13 @@ void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
         Bucketf newbucket;
         for (int z = 0; z < Z; z++) 
 	{
-            Blockf &newblock = newbucket[z];
 	    Blockf &block = bucket[z];
 	    int pos ;
             if (flag==0 && block.id == 0) 
 	    {    
             	Nodef* curnode = n;
-		newblock.id = bid;
-                newblock.data = convertNodefToBlock(curnode);
+		block.id = bid;
+                block.data = convertNodefToBlock(curnode);
 		flag = 1;
 		store->ReduceEmptyNumbers();
                 //cout<<"Empty Nodes in ORAMf:"<<sz<<":"<<bid<<endl;
@@ -355,8 +354,8 @@ void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
 	    else if(flag ==0 && block.id == bid)
 	    {    
             	Nodef* curnode = n;
-		newblock.id = bid;
-                newblock.data = convertNodefToBlock(curnode);
+		block.id = bid;
+                block.data = convertNodefToBlock(curnode);
 		flag = 1;
 		//store->ReduceEmptyNumbers();
 		pos = curnode->pos;
@@ -364,19 +363,20 @@ void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
             }
 	    else if(block.id == 0)
 	    {
-            	newblock.id = 0;
-            	newblock.data.resize(blockSize, 0);
+            	block.id = 0;
+            	block.data.resize(blockSize, 0);
 	    }
 	    else
 	    {
                 Nodef* curnode = convertBlockToNodef(block.data);
-		newblock.id = curnode->key;
+		block.id = curnode->key;
 		//cout <<"full blocks setupWriting:"<<block.id<<endl;
-		newblock.data = convertNodefToBlock(curnode);
+		block.data = convertNodefToBlock(curnode);
 		pos = curnode->pos;
 		//delete curnode;
 	    }
-	    if(rootKey == newblock.id)
+
+	    if(rootKey == block.id)
 	    {
 		    rootPos = pos;
 		    //cout <<"At ROOT :"<< rootPos<< endl;
@@ -384,7 +384,7 @@ void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
 		
         }
 
-        WriteBucket(node, newbucket);
+        WriteBucket(node, bucket);
 	if(flag == 1)
 		break;
      }
@@ -393,10 +393,6 @@ void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
 	    cache[bid] = n;
 	    cout <<"WRITING INCACHEf===========>"<<bid<<"  leaf:"<<n->pos<<endl;
     }
-    //{
-//	    n->pos = (n->pos)+1;
-	  //  setupWriteBucket(bid, n, rootKey, rootPos);
-  //  }
   }
   else {
         throw runtime_error("NO more space in ORAMf");

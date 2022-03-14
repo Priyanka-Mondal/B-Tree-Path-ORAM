@@ -320,14 +320,13 @@ void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
         Bucket newbucket;
         for (int z = 0; z < Z; z++) 
 	{
-            Block &newblock = newbucket[z];
 	    Block &block = bucket[z];
 	    int pos ;
             if (flag==0 &&  block.id == 0) 
 	    {    
             	Node* curnode = n;
-		newblock.id = bid;
-                newblock.data = convertNodeToBlock(curnode);
+		block.id = bid;
+                block.data = convertNodeToBlock(curnode);
 		flag = 1;
 		store->ReduceEmptyNumbers();
 		pos = curnode->pos;
@@ -336,8 +335,8 @@ void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
 	    else if (flag==0 && block.id == bid ) 
 	    {    
             	Node* curnode = n;
-		newblock.id = bid;
-                newblock.data = convertNodeToBlock(curnode);
+		block.id = bid;
+                block.data = convertNodeToBlock(curnode);
 		flag = 1;
 		//store->ReduceEmptyNumbers();
 		pos = curnode->pos;
@@ -345,19 +344,19 @@ void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
             }
 	    else if(block.id == 0)
 	    {
-            	newblock.id = 0;
-            	newblock.data.resize(blockSize, 0);
+            	block.id = 0;
+            	block.data.resize(blockSize, 0);
 	    }
 	    else
 	    {
                 Node* curnode = convertBlockToNode(block.data);
-		newblock.id = curnode->key;
+		block.id = curnode->key;
 		//cout <<"full blocks setupWriting:"<<block.id<<endl;
-		newblock.data = convertNodeToBlock(curnode);
+		block.data = convertNodeToBlock(curnode);
 		pos = curnode->pos;
 		//delete curnode;
 	    }
-	    if(rootKey == newblock.id)
+	    if(rootKey == block.id)
 	    {
 		    rootPos = pos;
 		    //cout <<"At ROOT :"<< rootPos<< endl;
@@ -365,7 +364,7 @@ void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
 		
         }
 
-        WriteBucket(node, newbucket);
+        WriteBucket(node, bucket);
 	if(flag == 1)
 		break;
      }

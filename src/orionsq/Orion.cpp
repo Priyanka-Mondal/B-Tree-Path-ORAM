@@ -6,10 +6,10 @@ Orion::Orion(bool usehdd, int maxSize ) {
     this->useHDD = usehdd;
     bytes<Key> key1{0};
     bytes<Key> key2{1};
-    srch = new OMAPf(maxSize*8, key1);
-    updt = new OMAPf(maxSize*8, key1);
+    srch = new OMAPf(maxSize*4, key1);
+    updt = new OMAPf(maxSize*4, key1);
     fcnt = new OMAPf(maxSize, key1);
-    file = new OMAP(maxSize*5,key2);
+    file = new OMAP(maxSize*2,key2);
 }
 
 Orion::~Orion() {
@@ -134,22 +134,21 @@ void Orion::setupinsert(vector<string> kws, vector<string> blocks, int ind)
   	      Bid mapKey = createBid(kw, ind);
   	      updt->setupinsert(mapKey, fc); 
   	      fcnt->setupinsert(firstKey, fc); 
-  	      
   	      Bid key = createBid(kw, fc);
   	      srch->setupinsert(key, ind);
     }
 cout << "batch inserted all the keywords(total:"<<kws.size() <<") of:"<<ind<< endl;
       //insert blocks
-      int block_num = 1;
       string id = to_string(ind);
+      Bid blkcnt(id);
+      fcnt->setupinsert(blkcnt,blocks.size());
+      int block_num = 1;
       for(auto blk: blocks)
       {
 	      Bid fb = createBid(id,block_num);
 	      file->setupinsert(fb,blk);
 	      block_num++;
       }
-      Bid lastblock = createBid(id,block_num);
-      file->setupinsert(lastblock,"last");
       cout <<"inserted "<<block_num<<" blocks of " << id<<endl;
       fileblks = fileblks+block_num;
       inserted = inserted+kws.size();
@@ -176,22 +175,47 @@ void Orion::insert(vector<string> kws, vector<string> blocks, int ind)
     }
       cout << "inserted all the kw (total keywords: " <<kws.size() <<")"<< endl;
       //insert blocks
-      int block_num = 1;
       string id = to_string(ind);
+      Bid blkcnt(id);
+      fcnt->insert(blkcnt,blocks.size());
+      int block_num = 1;
       for(auto blk: blocks)
       {
 	      Bid fb = createBid(id,block_num);
 	      file->insert(fb,blk);
 	      block_num++;
       }
-      Bid lastblock = createBid(id,block_num);
-      file->insert(lastblock,"last");
       cout <<"inserted "<<block_num<<" blocks of " << id<<endl;
       inserted = inserted+kws.size();
       fileblks = fileblks+block_num;
       //cout << endl<<"--TOTAL keywords inserted so far: "<<inserted<<endl;
       cout <<"--TOTAL unique keywords inserted so far: "<<uniquekw<<endl;
       cout <<"--TOTAL fileblocks inserted so far: "<<fileblks<<endl;
+}
+
+vector<pair<int,string>> Orion::searchsimple(string keyword) 
+{
+    vector<pair<int,string>> fileblocks;
+    Bid firstKey(keyword);
+    int fc = fcnt->setupfind(firstKey);
+    cout <<"UPDC:"<< fc<< endl;
+    if (fc == 0) 
+	return fileblocks;
+    for (int i = 1; i <= fc; i++) 
+    {
+	Bid bid = createBid(keyword, i);
+        int id = srch->find(bid);
+	string fileid = to_string(id);
+	Bid blkcnt(fileid);
+        int blocknum = fcnt->setupfind(blkcnt);
+	for (int j= 1;j<=blocknum;j++)
+	{
+		Bid block = createBid(fileid,j);
+        	string cont = file->find(block);
+		fileblocks.push_back(make_pair(id,cont));
+	}
+    }//client will figure out files
+    return fileblocks;
 }
 
 map<int,string> Orion::search(string keyword) {
@@ -209,19 +233,16 @@ map<int,string> Orion::search(string keyword) {
             Bid bid = createBid(keyword, i);
             bids.push_back(bid);
     }
-    auto tmpRes = srch->batchSearch(bids);
-    for(auto item:tmpRes)
-    {
-        result.push_back(item);
-    }
+    result = srch->batchSearch(bids);
     for(auto id:result)
     {
-	int j = 1;
-	string fileid = to_string(id);
-	Bid block = createBid(fileid,j);
-        string cont = (file->find(block));
-	while(cont != "last")
+        string fileid = to_string(id);
+	Bid blkcnt(fileid);
+        int blocknum = fcnt->find(blkcnt);
+	for (int j= 1;j<=blocknum;j++)
 	{
+		Bid block = createBid(fileid,j);
+        	string cont = file->find(block);
 		if(files.find(id)!=files.end())
 		{
 			string con = files.at(id);
@@ -233,9 +254,6 @@ map<int,string> Orion::search(string keyword) {
 		{
 			files.insert(pair<int,string>(id,cont));
 		}
-		j++;
-		block = createBid(fileid,j);
-		cont = (file->find(block));
 	}
     }
     return files;
