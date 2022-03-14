@@ -9,7 +9,7 @@ Orion::Orion(bool usehdd, int maxSize ) {
     srch = new OMAPf(maxSize*4, key1);
     updt = new OMAPf(maxSize*4, key1);
     fcnt = new OMAPf(maxSize, key1);
-    file = new OMAP(maxSize*2,key2);
+    file = new OMAP(maxSize,key2);
 }
 
 Orion::~Orion() {
@@ -197,7 +197,7 @@ vector<pair<int,string>> Orion::searchsimple(string keyword)
 {
     vector<pair<int,string>> fileblocks;
     Bid firstKey(keyword);
-    int fc = fcnt->setupfind(firstKey);
+    int fc = fcnt->find(firstKey);
     cout <<"UPDC:"<< fc<< endl;
     if (fc == 0) 
 	return fileblocks;
@@ -207,7 +207,8 @@ vector<pair<int,string>> Orion::searchsimple(string keyword)
         int id = srch->find(bid);
 	string fileid = to_string(id);
 	Bid blkcnt(fileid);
-        int blocknum = fcnt->setupfind(blkcnt);
+        int blocknum = fcnt->find(blkcnt);
+	//cout <<"fID:"<< id<<" blockCnt:"<<blocknum<< endl;
 	for (int j= 1;j<=blocknum;j++)
 	{
 		Bid block = createBid(fileid,j);

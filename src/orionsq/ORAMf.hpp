@@ -24,7 +24,7 @@ public:
     ~Nodef() {
     }
     Bid key;
-    std::array< byte_t, 16> value; 
+    std::array< byte_t, 8> value; 
     int pos;
     Bid leftID;
     int leftPos;
@@ -62,7 +62,7 @@ private:
 
     int RandomPath();
     int GetNodefOnPath(int leaf, int depth);
-    std::vector<Bid> GetIntersectingBlockfs(int x, int depth);
+    std::vector<Bid> GetIntersectingBlocks(int x, int depth);
 
     void FetchPath(int leaf);
     void WritePath(int leaf, int level);
@@ -70,11 +70,11 @@ private:
     Nodef* ReadData(Bid bid);
     void WriteData(Bid bid, Nodef* b);
 
-    block SerialiseBucketf(Bucketf bucket);
-    Bucketf DeserialiseBucketf(block buffer);
+    block SerialiseBucket(Bucketf bucket);
+    Bucketf DeserialiseBucket(block buffer);
 
-    Bucketf ReadBucketf(int pos);
-    void WriteBucketf(int pos, Bucketf bucket);
+    Bucketf ReadBucket(int pos);
+    void WriteBucket(int pos, Bucketf bucket);
     void Access(Bid bid, Nodef*& node, int lastLeaf, int newLeaf);
     void Access(Bid bid, Nodef*& node);
     void AccessDelete(Bid bid, Nodef*& node); 
@@ -99,8 +99,8 @@ public:
     int DeleteNodef(Bid bid, Nodef* node);
     void start(bool batchWrite);
     void finilize(bool find, Bid& rootKey, int& rootPos);
-    static Nodef* convertBlockfToNodef(block b);
-    static block convertNodefToBlockf(Nodef* node);
+    static Nodef* convertBlockToNodef(block b);
+    static block convertNodefToBlock(Nodef* node);
 
 
     Nodef* setupReadNf(Bid bid, int leaf);

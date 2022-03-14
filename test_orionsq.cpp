@@ -94,15 +94,18 @@ int main(int argc, char**argv)
 	int size = to_int(argv[1]);
 	Orion orion(usehdd, size);  
         ofstream sres;
-	sres.open("orionsq.txt");//,ios::app);	
+	sres.open("orionsq.txt",ios::app);	
 /*
         auto start = high_resolution_clock::now();
 	list_dir(argv[2],orion);
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
 	list_dir("allen-p/del",orion);
-*/	
+	*/
+///*	
 	list_dir("allen-p/deleted_items",orion);
+	list_dir("allen-p/sent_items",orion);
+	list_dir("allen-p/sent",orion);
 	cout <<"SEARCHING..."<<endl;
         auto start = high_resolution_clock::now();
 	auto s = orion.searchsimple("borion");
@@ -145,7 +148,7 @@ return 0;
 	cout << endl<<" SETUP INSERT DONE!"<< endl;
 	cout <<"=================================="<< endl;
 	cout <<"READY TO PERFORM QUERIES!" << endl;
-	
+//*/	
 	
 	while(1)
 	{
@@ -173,6 +176,7 @@ return 0;
 			stop = high_resolution_clock::now();
 			duration = duration_cast<microseconds>(stop-start);
 			cout <<"--------Search result---------"<<endl;
+			sres<<fileid-1<<" "<<duration.count()<<" "<<files.size();
 	    		//for(auto file:files)
 			//{
 	    		//	cout << "["<<file.first<<"] ";
