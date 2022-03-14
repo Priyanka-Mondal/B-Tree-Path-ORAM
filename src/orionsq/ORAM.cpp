@@ -11,7 +11,7 @@
 #include <stdexcept>
 
 ORAM::ORAM(int maxSize, bytes<Key> key)
-: key(key), rd(), mt(rd()), dis(0, (pow(2, floor(log2(maxSize / Z))) - 1) / 2) {
+: key(key), rd(), mt(rd()), dis(0, (pow(2, floor(log2(maxSize / Z)) + 1) - 1) / 2) {
     AES::Setup();
     depth = floor(log2(maxSize / Z));
     cout <<"depth of tree:"<<depth<<endl;
@@ -202,6 +202,7 @@ void ORAM::WriteData(Bid bid, Node* node)
     if (store->GetEmptySize() > 0) {
         cache[bid] = node;
         store->ReduceEmptyNumbers();
+	cout <<"FREE:"<<store->GetEmptySize()<<endl;
     } else {
         throw runtime_error("There is no more space in ORAM-WriteData");
     }
@@ -298,6 +299,11 @@ Node* ORAM::ReadNode(Bid bid, int lastLeaf, int newLeaf) {
         if (node != NULL) {
             modified.insert(bid);
         }
+	else 
+	{
+		cout <<"Node is NULL : "<< bid << endl ;
+		cout <<"free node:" << store->GetEmptySize() << endl;
+	}
         return node;
     } else {
         modified.insert(bid);
@@ -311,7 +317,6 @@ void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
 {
 	int oramsz = store->GetEmptySize();
 	 if (oramsz>0) {
-		 //cout<<"Empty Nodes in ORAM:"<<oramsz<<endl;
     int flag = 0;
     for (size_t d = depth; d >= 0; d--) 
     {
@@ -329,6 +334,7 @@ void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
 		flag = 1;
 		store->ReduceEmptyNumbers();
 		pos = curnode->pos;
+		 cout<<pos<<endl;//" Empty Nodes in ORAM:"<<oramsz<<endl;
 		//delete curnode;
             }
 	    else if (flag==0 && block.id == bid ) 

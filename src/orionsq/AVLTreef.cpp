@@ -63,6 +63,7 @@ Nodef* AVLTreef::setuprightRotate(Nodef* y, Bid rootKey, int& pos) {
     Nodef* x = oram->setupReadNf(y->leftID,y->leftPos);
     Nodef* T2;
     if (x->rightID == 0) {
+		setupleaf--;
         T2 = setupnewNodef(0, 0);
     } else {
         T2 = oram->setupReadNf(x->rightID,x->rightPos);
@@ -110,6 +111,7 @@ Nodef* AVLTreef::setupleftRotate(Nodef* x, Bid rootKey, int& pos) {
     Nodef* y = oram->setupReadNf(x->rightID,x->rightPos);
     Nodef* T2;
     if (y->leftID == 0) {
+		setupleaf--;
         T2 = setupnewNodef(0, 0);
     } else {
         T2 = oram->setupReadNf(y->leftID,y->leftPos);
@@ -169,7 +171,6 @@ Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, int value)
     if (rootKey == 0) {
         Nodef* nnode = setupnewNodef(key, value);
         pos = oram->setupWriteNf(key, nnode,key,pos);
-//	cout <<pos<<":pos RETURNING root IS----------------"<<nnode->key<< endl;
         return nnode->key;
     }
     Nodef* node = oram->setupReadNf(rootKey, pos);

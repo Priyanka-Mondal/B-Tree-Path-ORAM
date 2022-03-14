@@ -47,6 +47,7 @@ private:
     size_t depth;
     size_t blockSize;
     map<Bid, Nodef*> cache;
+    map<Bid, Nodef*> cacheb;
     vector<int> leafList;
     vector<int> readviewmap;
     vector<int> writeviewmap;
@@ -63,6 +64,7 @@ private:
     int RandomPath();
     int GetNodefOnPath(int leaf, int depth);
     std::vector<Bid> GetIntersectingBlocks(int x, int depth);
+    std::vector<Bid> GetIntersectingBlocks(int x, int depth, int node);
 
     void FetchPath(int leaf);
     void WritePath(int leaf, int level);

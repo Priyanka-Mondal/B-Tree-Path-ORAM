@@ -6,8 +6,8 @@ Orion::Orion(bool usehdd, int maxSize ) {
     this->useHDD = usehdd;
     bytes<Key> key1{0};
     bytes<Key> key2{1};
-    srch = new OMAPf(maxSize*4, key1);
-    updt = new OMAPf(maxSize*4, key1);
+    srch = new OMAPf(maxSize, key1);
+    updt = new OMAPf(maxSize, key1);
     fcnt = new OMAPf(maxSize, key1);
     file = new OMAP(maxSize,key2);
 }
@@ -125,32 +125,38 @@ void Orion::insertWrap(string cont, int fileid, bool batch)
 void Orion::setupinsert(vector<string> kws, vector<string> blocks, int ind) 
 {
     for(auto kw: kws)
-    {		
+    {	
+    	      cout <<"inserting:"<<kw<<endl;	    
   	      Bid firstKey(kw);// = createBid(kw);
-  	      int fc = fcnt->setupfind(firstKey);
+	      int fc = fcnt->setupfind(firstKey);
   	      if(fc == 0)
 		uniquekw++;
   	      fc++;
   	      Bid mapKey = createBid(kw, ind);
+  	      cout <<"updt:"; 
   	      updt->setupinsert(mapKey, fc); 
+  	      cout <<"fcnt:"; 
   	      fcnt->setupinsert(firstKey, fc); 
   	      Bid key = createBid(kw, fc);
+  	      cout <<"srch:"; 
   	      srch->setupinsert(key, ind);
     }
 cout << "batch inserted all the keywords(total:"<<kws.size() <<") of:"<<ind<< endl;
       //insert blocks
       string id = to_string(ind);
       Bid blkcnt(id);
+      cout <<"fcnt:"; 
       fcnt->setupinsert(blkcnt,blocks.size());
       int block_num = 1;
       for(auto blk: blocks)
       {
 	      Bid fb = createBid(id,block_num);
+  	      cout <<"file:"; 
 	      file->setupinsert(fb,blk);
 	      block_num++;
       }
-      cout <<"inserted "<<block_num<<" blocks of " << id<<endl;
-      fileblks = fileblks+block_num;
+      //cout <<"inserted "<<block_num-1<<" blocks of " << id<<endl;
+      fileblks = fileblks+blocks.size();
       inserted = inserted+kws.size();
       //cout << endl<<"--TOTAL keywords inserted so far: "<<inserted<<endl;
       cout <<"--TOTAL unique keywords inserted so far: "<<uniquekw<<endl;
@@ -204,9 +210,11 @@ vector<pair<int,string>> Orion::searchsimple(string keyword)
     for (int i = 1; i <= fc; i++) 
     {
 	Bid bid = createBid(keyword, i);
+	cout <<"srch:";
         int id = srch->find(bid);
 	string fileid = to_string(id);
 	Bid blkcnt(fileid);
+	cout <<"fcnt:";
         int blocknum = fcnt->find(blkcnt);
 	//cout <<"fID:"<< id<<" blockCnt:"<<blocknum<< endl;
 	for (int j= 1;j<=blocknum;j++)

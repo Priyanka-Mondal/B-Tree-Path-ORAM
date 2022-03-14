@@ -78,10 +78,10 @@ void OMAPf::setupinsert(Bid key, int value)
     //treeHandler->startOperation();
     if (rootKey == 0) {
         rootKey = treeHandler->setupinsert(0, rootPos, key, value);
-	//cout <<rootPos<<"root at OMAP is :"<< rootKey<<endl;
+//	cout <<rootPos<<"root at OMAP fis :"<< rootKey<<endl;
     } else {
         rootKey = treeHandler->setupinsert(rootKey, rootPos, key, value);
-	//cout <<rootPos<<"root at OMAP is :"<< rootKey<<endl;
+	cout <<rootPos<<":root:"<< rootKey<<endl;
     }
 }
 void OMAPf::insert(Bid key, int value) {
