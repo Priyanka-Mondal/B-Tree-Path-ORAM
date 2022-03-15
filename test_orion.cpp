@@ -267,7 +267,7 @@ neg.insert("from");
 			cout << "Enter the keyword to be searched: ";
 			string keyword;
 			cin>> keyword;
-	    		vector<int> files = orion.search(keyword);
+	    		vector<int> files = orion.searchsimple(keyword);
 			cout <<"--------Search result---------"<<endl;
 	    		for(auto file:files)
 			{

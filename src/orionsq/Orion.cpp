@@ -203,18 +203,19 @@ vector<pair<int,string>> Orion::searchsimple(string keyword)
 {
     vector<pair<int,string>> fileblocks;
     Bid firstKey(keyword);
+    cout <<firstKey<<"fcnt:";
     int fc = fcnt->find(firstKey);
-    cout <<"UPDC:"<< fc<< endl;
+    //cout <<"UPDC:"<< fc<< endl;
     if (fc == 0) 
 	return fileblocks;
     for (int i = 1; i <= fc; i++) 
     {
 	Bid bid = createBid(keyword, i);
-	cout <<"srch:";
+	cout <<bid<<"srch:";
         int id = srch->find(bid);
 	string fileid = to_string(id);
 	Bid blkcnt(fileid);
-	cout <<"fcnt:";
+	cout <<blkcnt<<"fcnt:";
         int blocknum = fcnt->find(blkcnt);
 	//cout <<"fID:"<< id<<" blockCnt:"<<blocknum<< endl;
 	for (int j= 1;j<=blocknum;j++)

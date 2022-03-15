@@ -125,6 +125,7 @@ void ORAMf::FetchPath(int leaf) {
                 }
             }
         }
+        cout<<"LEAF FETCHED:"<<leaf<<endl;
     }
     cout <<"CACHE SIZE IS:"<< cache.size()<<endl;
     for(auto c:cache)
@@ -483,14 +484,17 @@ void ORAMf::finilize(bool find, Bid& rootKey, int& rootPos) {
     }*/
 
     //updating the binary tree positions
-    //for (unsigned int i = 0; i <= depth + 2; i++) {
+    for (unsigned int i = 0; i <= depth + 2; i++) {
     //for (unsigned int i = depth+2; i >= 0; i--) {
-    for (unsigned int i = 0; i <= depth + 1; i++) {
+    //for (unsigned int i = 0; i <= depth + 1; i++) {
         for (auto t : cache) {
-            if (t.second != NULL && t.second->height == i) {
+            if (t.second != NULL && t.second->height == i) 
+	     {  Bid temp = t.first;
                 Nodef* tmp = t.second;
                 if (modified.count(tmp->key)) {
+		    cout <<tmp->pos<<"new pos of"<<tmp->key;
                     tmp->pos = RandomPath();
+		    cout <<tmp->pos<<endl;
                 }
                 if (tmp->leftID != 0 && cache.count(tmp->leftID) > 0) {
                     tmp->leftPos = cache[tmp->leftID]->pos;
@@ -498,6 +502,7 @@ void ORAMf::finilize(bool find, Bid& rootKey, int& rootPos) {
                 if (tmp->rightID != 0 && cache.count(tmp->rightID) > 0) {
                     tmp->rightPos = cache[tmp->rightID]->pos;
                 }
+		cache[temp]=tmp;
             }
         }
     }
