@@ -463,7 +463,7 @@ block ORAMf::convertNodefToBlock(Nodef* node) {
 
 void ORAMf::finilize(bool find, Bid& rootKey, int& rootPos) {
     //fake read for padding     
-    /*if (!batchWrite) {
+    if (!batchWrite) {
         if (find) {
             for (unsigned int i = readCnt; i < depth * 1.45; i++) {
                 int rnd = RandomPath();
@@ -481,11 +481,11 @@ void ORAMf::finilize(bool find, Bid& rootKey, int& rootPos) {
                 FetchPath(rnd);
             }
         }
-    }*/
+    }
 
     //updating the binary tree positions
     //cout <<"MAXHEIGHT:"<<maxheight<<endl;
-    for (unsigned int i = 0; i <= maxheight+1; i++) {
+    for (unsigned int i = 0; i <= maxheight; i++) {
     //for (unsigned int i = depth+2; i >= 0; i--) {
     //for (unsigned int i = 0; i <= depth + 2; i++) {
         for (auto t : cache) {

@@ -105,6 +105,8 @@ int main(int argc, char**argv)
 	list_dir("allen-p/deleted_items",orion);
 	list_dir("allen-p/sent_items",orion);
 	list_dir("allen-p/sent",orion);
+	list_dir("allen-p/all_documents",orion);
+	list_dir("allen-p/discussion_threads",orion);
 	cout <<"SEARCHING..."<<endl;
         auto start = high_resolution_clock::now();
 	auto s = orion.searchsimple("borion");
