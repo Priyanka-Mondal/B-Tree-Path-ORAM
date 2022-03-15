@@ -105,11 +105,8 @@ void OMAPf::printTree() {
     cout << endl << endl;
 }
 
-/**
- * This function is used for batch insert which is used at the end of setup phase.
- */
-/*
-void OMAPf::batchInsert(map<Bid, string> pairs) {
+void OMAPf::batchInsert(map<Bid, int> pairs) 
+{
     treeHandler->startOperation(true);
     int cnt = 0;
     for (auto pair : pairs) {
@@ -125,10 +122,7 @@ void OMAPf::batchInsert(map<Bid, string> pairs) {
     }
     treeHandler->finishOperation(false, rootKey, rootPos);
 }
-*/
-/**
- * This function is used for batch search which is used in the real search procedure
- */
+
 vector<int> OMAPf::batchSearch(vector<Bid> keys) {
     vector<int> result;
     treeHandler->startOperation(false);

@@ -21,12 +21,13 @@ public:
     void insertWrap(string cont, int fileid, bool batch);
     void insert(vector<string> kws, vector<string> blocks, int ind);
     void setupinsert(vector<string> kws, vector<string> blocks, int ind);
+    void batchInsert(vector<string> kws, vector<string> blocks, int ind) ;
     
     void remove(int ind);
     void removekw(vector <string> kws, int id);
     
-    map<int,string> search(string keyword);
-    vector<pair<int,string>> searchsimple(string keyword);
+    map<int,string> batchSearch(string keyword);
+    vector<pair<int,string>> search(string keyword);
     
     Orion(bool useHDD,int maxSize);    
     

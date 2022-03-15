@@ -90,33 +90,32 @@ static void list_dir (const char * dir_name, Orion& orion)
 
 int main(int argc, char**argv) 
 {
-
 	int size = to_int(argv[1]);
 	Orion orion(usehdd, size);  
         ofstream sres;
 	sres.open("orionsq.txt",ios::app);	
-/*
+
         auto start = high_resolution_clock::now();
 	list_dir(argv[2],orion);
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
-*/	
 	
+	/*
 	list_dir("allen-p/deleted_items",orion);
 	list_dir("allen-p/sent_items",orion);
 	list_dir("allen-p/sent",orion);
-	list_dir("allen-p/all_documents",orion);
-	list_dir("allen-p/discussion_threads",orion);
+	//list_dir("allen-p/all_documents",orion);
+	//list_dir("allen-p/discussion_threads",orion);
 	cout <<"SEARCHING..."<<endl;
         auto start = high_resolution_clock::now();
-	auto s = orion.searchsimple("borion");
+	auto s = orion.search("borion");
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
 	sres <<(fileid-1)<<" "<< duration.count()<<" "<< s.size()<<endl;
 return 0;
 	list_dir("allen-p/sent_items",orion);
         start = high_resolution_clock::now();
-	s = orion.searchsimple("borion");
+	s = orion.search("borion");
         stop = high_resolution_clock::now();
 	duration = duration_cast<microseconds>(stop-start);
 	sres <<(fileid-1)<<" "<<duration.count() <<" "<< s.size()<<endl;
@@ -144,6 +143,7 @@ return 0;
 
 	return 0;
 
+*/	
 	cout <<"== TOTAL files inserted :"<<fileid-1<<" =="<<endl;
 	cout <<"Time taken for setup(orionsq):"<<duration.count()<<endl;
 	cout << endl<<" SETUP INSERT DONE!"<< endl;
@@ -173,7 +173,8 @@ return 0;
 			cin>> keyword;
 			cout <<"SEARCHING ..."<<endl;
 			start = high_resolution_clock::now();
-	    		vector<pair<int,string>> files = orion.searchsimple(keyword);
+	    		vector<pair<int,string>> files = orion.search(keyword);
+	    		map<int,string> files2 = orion.batchSearch(keyword);
 			stop = high_resolution_clock::now();
 			duration = duration_cast<microseconds>(stop-start);
 			cout <<"--------Search result---------"<<endl;
@@ -184,7 +185,7 @@ return 0;
 				//cout << file.second<< endl<<endl;
 			//}
 	    		cout <<endl<<endl;
-			cout << "RESULT size: " << files.size() << endl<<endl;
+			cout << "RESULT size: " << files.size() << " size2:"<<files2.size()<<endl<<endl;
 			cout << "Search time: "<< duration.count()<<endl;  
 			sres<<duration.count()<<" "<< files.size()<<endl;
 		}

@@ -25,7 +25,7 @@ public:
     int find(Bid key);
     void delKey(Bid key);
     void printTree();
-    void batchInsert(map<Bid, string> cont);
+    void batchInsert(map<Bid, int> cont);
     vector<int> batchSearch(vector<Bid> keys);
 
 
