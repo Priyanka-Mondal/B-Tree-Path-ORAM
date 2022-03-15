@@ -95,13 +95,13 @@ int main(int argc, char**argv)
 	Orion orion(usehdd, size);  
         ofstream sres;
 	sres.open("orionsq.txt",ios::app);	
-
+/*
         auto start = high_resolution_clock::now();
 	list_dir(argv[2],orion);
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
+*/	
 	
-/*	
 	list_dir("allen-p/deleted_items",orion);
 	list_dir("allen-p/sent_items",orion);
 	list_dir("allen-p/sent",orion);
@@ -147,7 +147,7 @@ return 0;
 	cout << endl<<" SETUP INSERT DONE!"<< endl;
 	cout <<"=================================="<< endl;
 	cout <<"READY TO PERFORM QUERIES!" << endl;
-*/	
+	
 	
 	while(1)
 	{

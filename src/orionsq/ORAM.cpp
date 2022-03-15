@@ -334,7 +334,7 @@ void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
 		flag = 1;
 		store->ReduceEmptyNumbers();
 		pos = curnode->pos;
-		 cout<<pos<<endl;//" Empty Nodes in ORAM:"<<oramsz<<endl;
+		 //cout<<pos<<endl;//" Empty Nodes in ORAM:"<<oramsz<<endl;
 		//delete curnode;
             }
 	    else if (flag==0 && block.id == bid ) 
@@ -465,9 +465,10 @@ void ORAM::finilize(bool find, Bid& rootKey, int& rootPos) {
             }
         }
     }
-
+    //cout <<"MAXHEIGHT OF FILES:"<<maxheight<<endl;
     //updating the binary tree positions
-    for (unsigned int i = 0; i <= depth + 2; i++) {
+    //for (unsigned int i = 0; i <= depth + 2; i++) {
+    for (unsigned int i = 0; i <= maxheight; i++) {
         for (auto t : cache) {
             if (t.second != NULL && t.second->height == i) {
                 Node* tmp = t.second;

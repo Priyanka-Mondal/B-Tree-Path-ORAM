@@ -125,16 +125,16 @@ void ORAMf::FetchPath(int leaf) {
                 }
             }
         }
-        cout<<"LEAF FETCHED:"<<leaf<<endl;
+        //cout<<"LEAF FETCHED:"<<leaf<<endl;
     }
-    cout <<"CACHE SIZE IS:"<< cache.size()<<endl;
+    //cout <<"CACHE SIZE IS:"<< cache.size()<<endl;
     for(auto c:cache)
     {
 	    Bid c1=c.first;
-	    cout<<c1<<" ";
+	    //cout<<c1<<" ";
 	    if(cache[c1]==NULL)
 		    cout<<"<--NULL"<<"   ";
-    }cout<<endl;
+    }
 }
 
 // Gets a list of blocks on the cache which can be placed at a specific point
@@ -218,7 +218,7 @@ void ORAMf::WriteData(Bid bid, Nodef* node) {
     if (store->GetEmptySize() > 0) {
         cache[bid] = node;
         store->ReduceEmptyNumbers();
-	cout<<"free:"<<store->GetEmptySize()<<endl;
+	cout<<"freeF:"<<store->GetEmptySize()<<endl;
     } else {
         throw runtime_error("There is no more space in ORAMf");
     }
@@ -355,7 +355,7 @@ void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
 		flag = 1;
 		store->ReduceEmptyNumbers();
 		pos = curnode->pos;
-    cout <<pos<<endl;//" Empty nodes in ORAMf:"<<oramsz<<endl;
+    //cout <<pos<<endl;//" Empty nodes in ORAMf:"<<oramsz<<endl;
 		//delete curnode;
             }
 	    else if(flag ==0 && block.id == bid)
@@ -484,25 +484,30 @@ void ORAMf::finilize(bool find, Bid& rootKey, int& rootPos) {
     }*/
 
     //updating the binary tree positions
-    for (unsigned int i = 0; i <= depth + 2; i++) {
+    //cout <<"MAXHEIGHT:"<<maxheight<<endl;
+    for (unsigned int i = 0; i <= maxheight+1; i++) {
     //for (unsigned int i = depth+2; i >= 0; i--) {
-    //for (unsigned int i = 0; i <= depth + 1; i++) {
+    //for (unsigned int i = 0; i <= depth + 2; i++) {
         for (auto t : cache) {
             if (t.second != NULL && t.second->height == i) 
-	     {  Bid temp = t.first;
+	     {  //Bid temp = t.first;
                 Nodef* tmp = t.second;
                 if (modified.count(tmp->key)) {
-		    cout <<tmp->pos<<"new pos of"<<tmp->key;
+		    //cout <<tmp->pos<<"new pos of"<<tmp->key;
                     tmp->pos = RandomPath();
-		    cout <<tmp->pos<<endl;
+		    //cout <<tmp->pos<<endl;
                 }
                 if (tmp->leftID != 0 && cache.count(tmp->leftID) > 0) {
+		    //cout <<tmp->leftPos<<"new leftpos of"<<tmp->key;
                     tmp->leftPos = cache[tmp->leftID]->pos;
+		    //cout <<tmp->leftPos<<endl;
                 }
                 if (tmp->rightID != 0 && cache.count(tmp->rightID) > 0) {
+		    //cout <<tmp->rightPos<<"new rightpos of"<<tmp->key;
                     tmp->rightPos = cache[tmp->rightID]->pos;
+		    //cout <<tmp->rightPos<<endl;
                 }
-		cache[temp]=tmp;
+		//cache[temp]=tmp;
             }
         }
     }

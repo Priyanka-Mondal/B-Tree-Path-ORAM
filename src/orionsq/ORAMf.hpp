@@ -32,7 +32,6 @@ public:
     int rightPos;
     unsigned int height;
 };
-
 struct Blockf {
     Bid id;
     block data;
@@ -92,6 +91,7 @@ private:
     void Print();
 
 public:
+    int maxheight;
     ORAMf(int maxSize, bytes<Key> key);
     ~ORAMf();
 

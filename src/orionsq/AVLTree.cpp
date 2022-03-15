@@ -75,8 +75,10 @@ Node* AVLTree::setuprightRotate(Node* y,Bid rootKey, int& pos) {
 
     // Update heights
     y->height = max(setupheight(y->leftID, y->leftPos), setupheight(y->rightID, y->rightPos)) + 1;
+    oram->maxheight = max(y->height,oram->maxheight);
     oram->setupWriteN(y->key, y, rootKey,  pos);
     x->height = max(setupheight(x->leftID, x->leftPos), setupheight(x->rightID, x->rightPos)) + 1;
+    oram->maxheight = max(x->height,oram->maxheight);
     oram->setupWriteN(x->key, x, rootKey,  pos);
     // Return new root
 
@@ -99,8 +101,10 @@ Node* AVLTree::rightRotate(Node* y) {
 
     // Update heights
     y->height = max(height(y->leftID, y->leftPos), height(y->rightID, y->rightPos)) + 1;
+    oram->maxheight = max(y->height,oram->maxheight);
     oram->WriteNode(y->key, y);
     x->height = max(height(x->leftID, x->leftPos), height(x->rightID, x->rightPos)) + 1;
+    oram->maxheight = max(x->height,oram->maxheight);
     oram->WriteNode(x->key, x);
     // Return new root
 
@@ -126,8 +130,10 @@ Node* AVLTree::setupleftRotate(Node* x,Bid rootKey, int& pos) {
 
     // Update heights
     x->height = max(setupheight(x->leftID, x->leftPos), setupheight(x->rightID, x->rightPos)) + 1;
+    oram->maxheight = max(x->height,oram->maxheight);
     oram->setupWriteN(x->key, x, rootKey,  pos);
     y->height = max(setupheight(y->leftID, y->leftPos), setupheight(y->rightID, y->rightPos)) + 1;
+    oram->maxheight = max(y->height,oram->maxheight);
     oram->setupWriteN(y->key, y, rootKey,  pos);
     // Return new root
     return y;
@@ -150,8 +156,10 @@ Node* AVLTree::leftRotate(Node* x) {
 
     // Update heights
     x->height = max(height(x->leftID, x->leftPos), height(x->rightID, x->rightPos)) + 1;
+    oram->maxheight = max(x->height,oram->maxheight);
     oram->WriteNode(x->key, x);
     y->height = max(height(y->leftID, y->leftPos), height(y->rightID, y->rightPos)) + 1;
+    oram->maxheight = max(y->height,oram->maxheight);
     oram->WriteNode(y->key, y);
     // Return new root
     return y;
@@ -194,6 +202,7 @@ Bid AVLTree::setupinsert(Bid rootKey, int& pos, Bid key, string value)
     }
 
     node->height = max(setupheight(node->leftID, node->leftPos), setupheight(node->rightID, node->rightPos)) + 1;
+    oram->maxheight = max(node->height,oram->maxheight);
 
     int balance = setupgetBalance(node);
     
@@ -263,6 +272,7 @@ Bid AVLTree::insert(Bid rootKey, int& pos, Bid key, string value) {
 
     /* 2. Update height of this ancestor node */
     node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
+    oram->maxheight = max(node->height,oram->maxheight);
 
     /* 3. Get the balance factor of this ancestor node to check whether
        this node became unbalanced */
@@ -593,6 +603,7 @@ Node* lc = oram->ReadNode(delnode->leftID,delnode->leftPos,delnode->leftPos);
 			minnode->leftID = lc->key;
 			minnode->leftPos = lc->pos;
 			minnode->height =  max(height(minnode->leftID,minnode->leftPos), height(minnode->rightID, minnode->rightPos)) + 1;
+    			oram->maxheight = max(minnode->height,oram->maxheight);
 			oram->WriteNode(minnode->key,minnode);
 			int minPos = minnode->pos;
 			Bid minKey = balance(minnode,minnode->pos);
@@ -610,12 +621,14 @@ Node* lc = oram->ReadNode(delnode->leftID,delnode->leftPos,delnode->leftPos);
 			parmin->leftID = rc->key;
 			parmin->leftPos = rc->pos;
 			parmin->height = max(height(parmin->leftID,parmin->leftPos), height(parmin->rightID, parmin->rightPos)) + 1;
+    			oram->maxheight = max(parmin->height,oram->maxheight);
 			oram->WriteNode(parmin->key,parmin);
 			minnode->leftID = delnode->leftID;
 			minnode->leftPos = delnode->leftPos;
 			minnode->rightID = delnode->rightID;
 			minnode->rightPos = delnode->rightPos;
 			minnode->height = max(height(minnode->leftID,minnode->leftPos), height(minnode->rightID, minnode->rightPos)) + 1;
+    			oram->maxheight = max(minnode->height,oram->maxheight);
 			oram->WriteNode(minnode->key,minnode);
 			int minPos = minnode->pos;
 			Bid minKey = balanceDel(minnode->key,minnode->pos, parmin);
@@ -646,6 +659,7 @@ Bid AVLTree::removeDel(Bid rootKey,int& pos,Bid delKey,int delPos,Node* paren)
 	}
 //BALANCE:
     node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
+    oram->maxheight = max(node->height,oram->maxheight);
     int balance = getBalance(node);
     //cout << "Balance is:"<<balance<<endl;
     Bid key = node->key;
@@ -736,6 +750,7 @@ Node* lc = oram->ReadNode(delnode->leftID,delnode->leftPos,delnode->leftPos);
 			paren->rightPos = lc->pos;
 		}
 		paren->height=max(height(paren->leftID,paren->leftPos), height(paren->rightID, paren->rightPos)) + 1;
+    		oram->maxheight = max(paren->height,oram->maxheight);
 		oram->WriteNode(paren->key,paren);
 		deleteNode(delnode);
 		return paren->key;
@@ -749,6 +764,7 @@ Node* lc = oram->ReadNode(delnode->leftID,delnode->leftPos,delnode->leftPos);
 		minnode->leftID = lc->key;
 		minnode->leftPos = lc->pos;
 		minnode->height =  max(height(minnode->leftID,minnode->leftPos), height(minnode->rightID, minnode->rightPos)) + 1;
+    		oram->maxheight = max(minnode->height,oram->maxheight);
 		oram->WriteNode(minnode->key,minnode);
 		int minPos = minnode->pos;
 		Bid minKey = balance(minnode,minnode->pos);
@@ -764,6 +780,7 @@ Node* lc = oram->ReadNode(delnode->leftID,delnode->leftPos,delnode->leftPos);
 			paren->rightPos = minnode->pos;
 		}
 		paren->height=max(height(paren->leftID,paren->leftPos), height(paren->rightID, paren->rightPos)) + 1;
+    		oram->maxheight = max(paren->height,oram->maxheight);
 		oram->WriteNode(paren->key,paren);
 		deleteNode(delnode);
 		return paren->key;
@@ -777,12 +794,14 @@ Node* rc = oram->ReadNode(minnode->rightID,minnode->rightPos,minnode->rightPos);
 		parmin->leftID = rc->key;
 		parmin->leftPos = rc->pos;
 		parmin->height = max(height(parmin->leftID,parmin->leftPos), height(parmin->rightID, parmin->rightPos)) + 1;
+    		oram->maxheight = max(parmin->height,oram->maxheight);
 		oram->WriteNode(parmin->key,parmin);
 		minnode->leftID = delnode->leftID;
 		minnode->leftPos = delnode->leftPos;
 		minnode->rightID = delnode->rightID;
 		minnode->rightPos = delnode->rightPos;
 		minnode->height = max(height(minnode->leftID,minnode->leftPos), height(minnode->rightID, minnode->rightPos)) + 1;
+    		oram->maxheight = max(minnode->height,oram->maxheight);
 		oram->WriteNode(minnode->key,minnode);
 		int minPos = minnode->pos;
 		Bid minKey = balanceDel(minnode->key,minnode->pos, parmin);
@@ -798,6 +817,7 @@ Node* rc = oram->ReadNode(minnode->rightID,minnode->rightPos,minnode->rightPos);
 			paren->rightPos = minnode->pos;
 		}
 		paren->height=max(height(paren->leftID,paren->leftPos), height(paren->rightID, paren->rightPos)) + 1;
+    		oram->maxheight = max(paren->height,oram->maxheight);
 		oram->WriteNode(paren->key,paren);
 		deleteNode(delnode);
 		return paren->key;
@@ -821,6 +841,7 @@ Bid AVLTree::balanceDel(Bid key, int& pos, Node* parmin)
 	//{
 
     node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
+    oram->maxheight = max(node->height,oram->maxheight);
     int balance = getBalance(node);
     //cout <<"balance is:"<<balance<<endl;
     if (balance > 1 )

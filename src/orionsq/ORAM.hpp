@@ -90,7 +90,7 @@ private:
 public:
     ORAM(int maxSize, bytes<Key> key);
     ~ORAM();
-
+    int maxheight;
     Node* ReadNode(Bid bid, int lastLeaf, int newLeaf);
     Node* ReadNode(Bid bid);
     int WriteNode(Bid bid, Node* n);

@@ -126,32 +126,32 @@ void Orion::setupinsert(vector<string> kws, vector<string> blocks, int ind)
 {
     for(auto kw: kws)
     {	
-    	      cout <<"inserting:"<<kw<<endl;	    
+    	      //cout <<"inserting:"<<kw<<endl;	    
   	      Bid firstKey(kw);// = createBid(kw);
 	      int fc = fcnt->setupfind(firstKey);
   	      if(fc == 0)
 		uniquekw++;
   	      fc++;
   	      Bid mapKey = createBid(kw, ind);
-  	      cout <<"updt:"; 
+  	      //cout <<"updt:"; 
   	      updt->setupinsert(mapKey, fc); 
-  	      cout <<"fcnt:"; 
+  	      //cout <<"fcnt:"; 
   	      fcnt->setupinsert(firstKey, fc); 
   	      Bid key = createBid(kw, fc);
-  	      cout <<"srch:"; 
+  	      //cout <<"srch:"; 
   	      srch->setupinsert(key, ind);
     }
 cout << "batch inserted all the keywords(total:"<<kws.size() <<") of:"<<ind<< endl;
       //insert blocks
       string id = to_string(ind);
       Bid blkcnt(id);
-      cout <<"fcnt:"; 
+      //cout <<"fcnt:"; 
       fcnt->setupinsert(blkcnt,blocks.size());
       int block_num = 1;
       for(auto blk: blocks)
       {
 	      Bid fb = createBid(id,block_num);
-  	      cout <<"file:"; 
+  	      //cout <<"file:"; 
 	      file->setupinsert(fb,blk);
 	      block_num++;
       }
@@ -203,19 +203,19 @@ vector<pair<int,string>> Orion::searchsimple(string keyword)
 {
     vector<pair<int,string>> fileblocks;
     Bid firstKey(keyword);
-    cout <<firstKey<<"fcnt:";
+    //cout <<firstKey<<"filecnt:";
     int fc = fcnt->find(firstKey);
-    //cout <<"UPDC:"<< fc<< endl;
+    cout <<"UPDC:"<< fc<< endl;
     if (fc == 0) 
 	return fileblocks;
     for (int i = 1; i <= fc; i++) 
     {
 	Bid bid = createBid(keyword, i);
-	cout <<bid<<"srch:";
+	//cout <<bid<<"srch:";
         int id = srch->find(bid);
 	string fileid = to_string(id);
 	Bid blkcnt(fileid);
-	cout <<blkcnt<<"fcnt:";
+	//cout <<blkcnt<<"blockfcnt:";
         int blocknum = fcnt->find(blkcnt);
 	//cout <<"fID:"<< id<<" blockCnt:"<<blocknum<< endl;
 	for (int j= 1;j<=blocknum;j++)
