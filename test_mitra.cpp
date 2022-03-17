@@ -86,7 +86,7 @@ string getFileContent(string path)
 	      return content;
 }
 
-/*
+
 static void list_dir (const char * dir_name, Client& client, bool real)
 {
     string delimiters("|?@,:!\">; -./  \n");
@@ -111,14 +111,12 @@ static void list_dir (const char * dir_name, Client& client, bool real)
       d_name = entry->d_name;
             if (! (entry->d_type & DT_DIR)) 
 	    {
-              printf ("%s/%s\n", dir_name, d_name);
 	      string file = dir_name;
 	      file = file.append("/");
 	      file = file.append(d_name);
 	      vector<string> kws1, kws;
 	      string cont = getFileContent(file);
-	      cout <<"=====================================" << endl;
-
+	      cout <<"===========================================" << endl;
 	      boost::split(kws1, cont, boost::is_any_of(delimiters));
 	      kws =  getUniquedWords(kws1, fileid);
 	      for (auto it = kws.begin(); it != kws.end(); it++)
@@ -128,13 +126,7 @@ static void list_dir (const char * dir_name, Client& client, bool real)
 			 kws.erase(it--);
 		      }
 	      }
-	      cout << endl <<file<< " " << fileid <<endl << endl;
-	      cout << "============================" << endl;
-    		//vector<string> blocks;
-		//blocks = divideString(file,BLOCK,id);
-		if(real)
-		{
-        		client.insertFile(OP::INS,fileid, cont, false);
+	      cout <<file<< " " << fileid <<endl << endl;
 			for(auto k: kws)
 			{
 				int lenn = k.length();
@@ -142,19 +134,8 @@ static void list_dir (const char * dir_name, Client& client, bool real)
 				{
 					client.insert(k, fileid,false);
 				}
-				else
-				{
-					cout << "GREATER THAN 12:"<<k<< endl;
-				}
 			}
 			cout << "inserted "<< kws.size() <<" keywords"<<endl;
-		}
-		else
-		{
-			client.insertFile(OP::INS,fileid,cont,false);
-			client.addfakefileid(fileid);
-			//no keywords to insert for fake files
-		}
                 fileid++;
               }
              if (entry->d_type & DT_DIR) {
@@ -196,7 +177,7 @@ void insertSingleFile(Client &client,string file)
 	      }
       }
       cout << endl <<file<< " " << fileid <<endl << endl;
-      client.insertFile(OP::INS,fileid, cont, false);
+      //client.insertFile(OP::INS,fileid, cont, false);
       for(auto k: kws)
       {
       	int lenn = k.length();
@@ -211,7 +192,7 @@ void insertSingleFile(Client &client,string file)
       }
       fileid++;
 }
-
+/*
 void deleteSinglefile(Client &client, int fileid)
 {
 	vector <int> singlefile;
@@ -248,8 +229,7 @@ void deleteSinglefile(Client &client, int fileid)
 */
 int main(int argc, char** argv) 
 {
-    bool usehdd = false, cleaningMode = false;
-
+/*
     Server server(usehdd, cleaningMode);
     Client client(&server, cleaningMode, 100);
 
@@ -263,16 +243,16 @@ int main(int argc, char** argv)
     for (auto item : res) {
         cout << item << endl;
     }
-
     return 0;
-/*
-    bool usehdd = false, deletFiles = false;
+*/
+
+    bool usehdd = true, deletFiles = false;
     Server server(usehdd, deletFiles);
-    Client client(&server, deletFiles, 10000, 8000);
+    int kwcnt = stoI(argv[1]);
+    Client client(&server, deletFiles, kwcnt);
     //client.endSetup();    
-    list_dir("tiny",client, FAKE);
-	cout <<"==================fake files added=================="<<endl;
-	list_dir("allen-p/deleted_items",client, REAL);
+    list_dir(argv[2],client, REAL);
+	//list_dir("allen-p/deleted_items",client, REAL);
 	cout << endl<<" SETUP INSERT DONE!"<< endl;
 	cout <<"=================================="<< endl;
 	cout <<"READY TO PERFORM QUERIES!" << endl;
@@ -296,23 +276,25 @@ int main(int argc, char** argv)
 			cout << "Enter the keyword to be searched: ";
 			string keyword;
 			cin>> keyword;
-   			map<int,string> files = client.search(keyword);
+   			vector<int> files = client.search(keyword);
 			cout <<"--------Search result---------"<<endl;
-			vector<int> forfile;
 	    		for(auto file:files)
 			{
-	    			cout << "["<<file.first<<":"<<file.second<<"]";
-				forfile.push_back(file.first);
+	    			cout << "["<<file<<"] ";
 			}
+			cout <<endl<<"RESULT SIZE:"<< files.size()<<endl;
+			/*
+			  vector<int> forfile;
 	    		cout <<endl<<endl;
 			cout << "RESULT size: " << files.size() << endl<<endl;
 			map<int,string> content = client.searchfile(forfile);
+			*/
 			//for(auto m: content)
 			//{
 			//	cout <<"["<<m.first<<"]{"<<m.second<<"}"<<endl;
 			//}
 		}
-		else if(c=='d'|| c=='D')
+		/*else if(c=='d'|| c=='D')
 		{
 			cout <<"Enter file id to be deleted: ";
 			string idstr;
@@ -338,7 +320,7 @@ int main(int argc, char** argv)
 			}
 			else
 				cout <<"***invalid id (enter integer)***"<<endl;
-		}
+		}*/
 		else if(c=='i' || c=='I')
 		{
 			string file;
@@ -351,12 +333,14 @@ int main(int argc, char** argv)
 		{
 			//mitra.print();
 		}
-		else //if(c=='q'||c=='Q')
+		else if(c=='q'||c=='Q')
 		{
 			cout <<"QUITTING..."<<endl<<endl;
 			break;
 		}
+		else
+			cout <<"INVALID CHOICE!"<<endl;
 	}    
     return 0;
-*/
+
 }
