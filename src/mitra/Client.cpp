@@ -28,7 +28,8 @@ Client::Client(bool deleteFiles, int keyworsSize) {
 Client::~Client() {
 }
 
-void Client::update(OP op, string keyword, int ind, bool setup) {
+void Client::insert(string keyword, int ind, bool setup) 
+{
     if (!localStorage) {
         omap->treeHandler->oram->totalRead = 0;
         omap->treeHandler->oram->totalWrite = 0;
@@ -72,7 +73,7 @@ void Client::update(OP op, string keyword, int ind, bool setup) {
     prf_type addr, rnd;
     getAESRandomValue(k_w.data(), 0, srcCnt, fileCnt, addr.data());
     getAESRandomValue(k_w.data(), 1, srcCnt, fileCnt, rnd.data());
-    prf_type val = bitwiseXOR(ind, op, rnd);
+    prf_type val = bitwiseXOR(ind, 0, rnd);
     if (!localStorage) {
         totalUpdateCommSize = (sizeof (prf_type) * 2) + (omap->treeHandler->oram->totalRead + omap->treeHandler->oram->totalWrite)*(sizeof (prf_type) + sizeof (int));
     }
@@ -80,7 +81,8 @@ void Client::update(OP op, string keyword, int ind, bool setup) {
 
 }
 
-vector<int> Client::search(string keyword) {
+vector<int> Client::search(string keyword) 
+{
     if (!localStorage) {
         omap->treeHandler->oram->totalRead = 0;
         omap->treeHandler->oram->totalWrite = 0;

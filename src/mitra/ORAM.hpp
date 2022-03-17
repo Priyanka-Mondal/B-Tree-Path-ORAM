@@ -24,7 +24,7 @@ public:
     ~Node() {
     }
     Bid key;
-    std::array< byte_t, 16> value;
+    std::array< byte_t, 6> value;
     int pos;
     Bid leftID;
     int leftPos;

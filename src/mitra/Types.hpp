@@ -1,12 +1,35 @@
 #ifndef TYPES
 #define TYPES
 
-#include <array>
 #include <vector>
 #include <iostream>
+#include<memory>
+#include <string>
+#include <map>
+#include <vector>
+#include <array>
+#include "utils/rocksdb_wrapper.hpp"
+#include <iostream>
+#include <unistd.h>
+#include <iostream>
+#include <sstream>
+#include <cryptopp/rng.h>
+#include <cryptopp/sha.h>
+#include <cryptopp/hex.h>
+#include <cryptopp/modes.h>
+#include <cryptopp/aes.h>
+#include <vector>
+#include "utils/Utilities.h"
 
-// The main type for passing around raw file data
+using namespace std;
+#ifndef AES_KEY_SIZE
+#define AES_KEY_SIZE CryptoPP::AES::DEFAULT_KEYLENGTH
+typedef array<uint8_t, AES_KEY_SIZE> prf_type;
 #define ID_SIZE 16
+#define BLOCK_SIZE 480
+typedef array<uint8_t, BLOCK_SIZE> block_type;
+#endif
+// The main type for passing around raw file data
 
 using byte_t = uint8_t;
 using block = std::vector<byte_t>;
@@ -40,5 +63,22 @@ T& from_bytes(const std::array< byte_t, sizeof (T) >& bytes, T& object) {
 
     return object;
 }
+template <typename T>
+std::string Pack(const T* data)
+{
+	    std::string d(sizeof(T), L'\0');
+	        memcpy(&d[0], data, d.size());
+		    return d;
+}
 
+template <typename T>
+std::unique_ptr<T> Unpack(const std::string& data)
+{
+	    if (data.size() != sizeof(T))
+		            return nullptr;
+
+	        auto d = std::make_unique<T>();
+		    memcpy(d.get(), data.data(), data.size());
+		        return d;
+}
 #endif

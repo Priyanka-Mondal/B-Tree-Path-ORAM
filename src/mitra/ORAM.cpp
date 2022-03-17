@@ -16,12 +16,14 @@ ORAM::ORAM(int maxSize, bytes<Key> oram_key)
 : key(oram_key), dis(0, (int) (pow(2, floor(log2(maxSize / Z)) + 1) - 1) / 2) {
     AES::Setup();
     depth = (int) floor(log2(maxSize / Z));
+    cout <<"depth of OMAPac :"<<depth<<endl;
     bucketCount = (int) pow(2, depth + 1) - 1;
     blockSize = sizeof (Node); // B
     size_t blockCount = (size_t) (Z * (pow(2, depth + 1) - 1));
     maxHeightOfAVLTree = (int) floor(log2(blockCount)) + 1;
     size_t storeBlockSize = (size_t) (IV + AES::GetCiphertextLength((int) (Z * (blockSize))));
     size_t storeBlockCount = blockCount;
+    cout << "Buckets:"<<bucketCount<<" block count in ORAM:"<<blockCount<<endl;
     clen_size = AES::GetCiphertextLength((int) (blockSize) * Z);
     plaintext_size = (blockSize) * Z;
     store = new RAMStore(storeBlockCount, storeBlockSize);
@@ -58,8 +60,6 @@ block ORAM::SerialiseBucket(Bucket bucket) {
 
     for (int z = 0; z < Z; z++) {
         Block b = bucket[z];
-
-        // Write block data
         buffer.insert(buffer.end(), b.data.begin(), b.data.end());
     }
 

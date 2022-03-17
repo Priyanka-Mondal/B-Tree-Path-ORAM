@@ -50,6 +50,9 @@ public:
     double getTotalUpdateCommSize() const;
     void endSetup();
 
+    void insertFile(OP op, int ind, string content, bool setup); 
+    void insert(string keyword, int ind, bool setup);
+    void remove(string keyword, int ind, bool setup);
 };
 
 #endif /* CLIENT_H */

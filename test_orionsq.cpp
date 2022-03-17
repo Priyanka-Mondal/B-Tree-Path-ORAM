@@ -57,8 +57,8 @@ static void list_dir (const char * dir_name, Orion& orion)
 	          file = file.append(d_name);
 	          vector<string> kws1, kws;
 	          string cont = getFileContent(file);
-	          cout <<"============================================" << endl;
-                  cout << endl <<file<< " " << fileid <<endl ;
+	          cout <<"============================================================" << endl;
+                  cout << file<< " " << fileid <<endl ;
 	     
 	     	  orion.insertWrap(cont,fileid, batch);
              
@@ -94,16 +94,16 @@ int main(int argc, char**argv)
 	Orion orion(usehdd, size);  
         ofstream sres;
 	sres.open("orionsq.txt",ios::app);	
-
+/*
         auto start = high_resolution_clock::now();
 	list_dir(argv[2],orion);
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
+*/	
 	
-	/*
 	list_dir("allen-p/deleted_items",orion);
 	list_dir("allen-p/sent_items",orion);
-	list_dir("allen-p/sent",orion);
+	//list_dir("allen-p/sent",orion);
 	//list_dir("allen-p/all_documents",orion);
 	//list_dir("allen-p/discussion_threads",orion);
 	cout <<"SEARCHING..."<<endl;
@@ -112,6 +112,7 @@ int main(int argc, char**argv)
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
 	sres <<(fileid-1)<<" "<< duration.count()<<" "<< s.size()<<endl;
+	/*
 return 0;
 	list_dir("allen-p/sent_items",orion);
         start = high_resolution_clock::now();

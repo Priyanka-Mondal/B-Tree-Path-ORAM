@@ -236,6 +236,7 @@ vector<pair<int,string>> Orion::search(string keyword)
 	string fileid = to_string(id);
 	Bid blkcnt(fileid);
         int blocknum = fcnt->find(blkcnt);
+	cout<<"BLKCNT:"<<blocknum<<endl;
 	for (int j= 1;j<=blocknum;j++)
 	{
 		Bid block = createBid(fileid,j);

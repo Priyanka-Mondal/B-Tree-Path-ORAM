@@ -237,9 +237,9 @@ void ORAM::Access(Bid bid, Node*& node, int lastLeaf, int newLeaf) {
 }
 
 void ORAM::Access(Bid bid, Node*& node) {
-    if (!batchWrite) {
+    //if (!batchWrite) {
         FetchPath(node->pos);
-    }
+   // }
     WriteData(bid, node);
     if (find(leafList.begin(), leafList.end(), node->pos) == leafList.end()) {
         leafList.push_back(node->pos);
