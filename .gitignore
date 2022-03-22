@@ -21,3 +21,6 @@ fake/*
 data
 searchres*
 *.txt
+maildir
+DBmitra
+OMAPfcsc

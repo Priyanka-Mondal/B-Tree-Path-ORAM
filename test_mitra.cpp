@@ -234,9 +234,9 @@ int main(int argc, char** argv)
     bool usehdd = true, deletFiles = true;
     Server server(usehdd, deletFiles);
     int kwcnt = stoI(argv[1]);
-    int filecnt = stoI(argv[2]);
+    int filecnt = 0;//stoI(argv[3]);
     Client client(&server, deletFiles, kwcnt, filecnt);
-    list_dir(argv[3],client, REAL);
+    list_dir(argv[2],client, REAL);
     client.endSetup();
 	//list_dir("allen-p/deleted_items",client, REAL);
 	cout << endl<<" SETUP INSERT DONE!"<< endl;

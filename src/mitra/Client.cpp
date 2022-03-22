@@ -14,14 +14,14 @@ Client::Client(Server* server, bool deleteFiles, int keyworsSize, int fileSize)
     this->deleteFiles = deleteFiles;
     bytes<Key> key{0};
     omap = new OMAP(keyworsSize, key);
-    ac = new OMAPf(fileSize,key);
+    //ac = new OMAPf(fileSize,key);
 }
 Client::Client(bool deleteFiles, int keyworsSize, int fileSize) 
 {
     this->deleteFiles = deleteFiles;
     bytes<Key> key{0};
     omap = new OMAP(keyworsSize, key);
-    ac = new OMAPf(fileSize, key);
+    //ac = new OMAPf(fileSize, key);
 }
 
 Client::~Client() { }
@@ -104,10 +104,11 @@ void Client::insertFile(int ind, string content, bool setup)
     string id = to_string(ind);
     copy(id.begin(), id.end(), file.data());
     Bid mapKey(id);
-    if(setup)
-	    setupAC[mapKey] = to_string(1);
-    else
-    	    ac->insert(mapKey,to_string(1));
+    //if(setup)
+//	    setupAC[mapKey] = to_string(1);
+  //  else
+    	    //ac->insert(mapKey,to_string(1));
+	    accCnt[ind]=1;
     prf_type addr;
     getAESRandomValue(file.data(), 0, 1, 1, addr.data());
     int sz = content.size();
@@ -193,7 +194,7 @@ map<int,string> Client::search(string keyword)
     {
 	string id = to_string(ind);
 	Bid acKey(id);
-        int accsCnt = to_int(ac->find(acKey));
+        int accsCnt = accCnt[ind];//to_int(ac->find(acKey));
         prf_type file;
         memset(file.data(), 0, AES_KEY_SIZE);
         copy(id.begin(), id.end(), file.data());
@@ -215,7 +216,8 @@ map<int,string> Client::search(string keyword)
 	    copy(temp.begin(), temp.end(), val.data());
 	    append(&newhead,val);
         }
-	ac->insert(acKey,to_string(++accsCnt));
+	//ac->insert(acKey,to_string(++accsCnt));
+	accCnt[ind] = ++accsCnt;
         prf_type newaddr;
         getAESRandomValue(file.data(), 0, accsCnt, accsCnt, newaddr.data());
 	DictF.erase(addr);
@@ -272,5 +274,5 @@ Bid Client::getBid(string input) {
 void Client::endSetup() 
 {
         omap->setupInsert(setupOMAP);
-	ac->setupInsert(setupAC);
+	//ac->setupInsert(setupAC);
 }
