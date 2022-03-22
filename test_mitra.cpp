@@ -12,6 +12,7 @@ using namespace std;
 #define FAKE false
 
 int fileid = 1;
+int uniquekw = 0;
 string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
 set<string> neg = {"\n","\0","*" ," ", "-","?","from","to", "in"};
 
@@ -29,10 +30,13 @@ vector<string> getUniquedWords(vector<string> kws, int fileid)
     string word;
     for(auto word : kws)
     {
-        if (!mp.count(word))
-            mp.insert(make_pair(word, 1));
-        else
-            mp[word]++;
+	    if(word.length()<=12)
+	    {
+       		 if (!mp.count(word))
+       		     mp.insert(make_pair(word, 1));
+       		 else
+       		     mp[word]++;
+	    }
     }
     for (map<string, int> :: iterator p = mp.begin();p != mp.end(); p++)
     {
@@ -42,11 +46,8 @@ vector<string> getUniquedWords(vector<string> kws, int fileid)
     return kw;
 }
 
-vector<string> divideString(string filename, int sz, int id)
+vector<string> divideString(string str, int sz)
 {
-	fstream fs(filename); 
-	string str((istreambuf_iterator<char>(fs)),
-	               (istreambuf_iterator<char>()));
 	int str_size = str.length();
 	if (str_size% sz !=0)
 	{
@@ -126,16 +127,11 @@ static void list_dir (const char * dir_name, Client& client, bool real)
 			 kws.erase(it--);
 		      }
 	      }
-	      cout <<file<< " " << fileid <<endl << endl;
-			for(auto k: kws)
-			{
-				int lenn = k.length();
-				if(lenn <= 12)
-				{
-					client.insert(k, fileid,false);
-				}
-			}
-			cout << "inserted "<< kws.size() <<" keywords"<<endl;
+	      cout <<file<< " " << fileid <<endl;
+			client.insert(kws, fileid,true);
+			uniquekw = uniquekw+kws.size();
+			cout << "inserted "<< uniquekw <<" unique keywords"<<endl;
+			client.insertFile(fileid,cont,true);
                 fileid++;
               }
              if (entry->d_type & DT_DIR) {
@@ -177,19 +173,8 @@ void insertSingleFile(Client &client,string file)
 	      }
       }
       cout << endl <<file<< " " << fileid <<endl << endl;
-      //client.insertFile(OP::INS,fileid, cont, false);
-      for(auto k: kws)
-      {
-      	int lenn = k.length();
-      	if(lenn <= 12)
-      	{
-      		client.insert(k, fileid,false);
-      	}
-      	else
-      	{
-      		cout << "GREATER THAN 12"<< endl;
-      	}
-      }
+      client.insert(kws, fileid,false);
+      client.insertFile(fileid, cont, false);
       fileid++;
 }
 /*
@@ -246,12 +231,13 @@ int main(int argc, char** argv)
     return 0;
 */
 
-    bool usehdd = true, deletFiles = false;
+    bool usehdd = true, deletFiles = true;
     Server server(usehdd, deletFiles);
     int kwcnt = stoI(argv[1]);
-    Client client(&server, deletFiles, kwcnt);
-    //client.endSetup();    
-    list_dir(argv[2],client, REAL);
+    int filecnt = stoI(argv[2]);
+    Client client(&server, deletFiles, kwcnt, filecnt);
+    list_dir(argv[3],client, REAL);
+    client.endSetup();
 	//list_dir("allen-p/deleted_items",client, REAL);
 	cout << endl<<" SETUP INSERT DONE!"<< endl;
 	cout <<"=================================="<< endl;
@@ -276,11 +262,13 @@ int main(int argc, char** argv)
 			cout << "Enter the keyword to be searched: ";
 			string keyword;
 			cin>> keyword;
-   			vector<int> files = client.search(keyword);
+   			map<int,string> files = client.search(keyword);
 			cout <<"--------Search result---------"<<endl;
 	    		for(auto file:files)
 			{
-	    			cout << "["<<file<<"] ";
+	    			cout << "["<<file.first<<"] ";
+	    			//cout << file.second<<endl;
+				cout <<endl;
 			}
 			cout <<endl<<"RESULT SIZE:"<< files.size()<<endl;
 			/*

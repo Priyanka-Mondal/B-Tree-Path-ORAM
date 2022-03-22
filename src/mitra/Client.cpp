@@ -8,116 +8,151 @@
 using namespace std;
 using namespace boost::algorithm;
 
-Client::Client(Server* server, bool deleteFiles, int keyworsSize) {
+Client::Client(Server* server, bool deleteFiles, int keyworsSize, int fileSize) 
+{
     this->server = server;
     this->deleteFiles = deleteFiles;
     bytes<Key> key{0};
-    if (!localStorage) {
-        omap = new OMAP(keyworsSize, key);
-    }
+    omap = new OMAP(keyworsSize, key);
+    ac = new OMAPf(fileSize,key);
 }
-
-Client::Client(bool deleteFiles, int keyworsSize) {
+Client::Client(bool deleteFiles, int keyworsSize, int fileSize) 
+{
     this->deleteFiles = deleteFiles;
     bytes<Key> key{0};
-    if (!localStorage) {
-        omap = new OMAP(keyworsSize, key);
-    }
+    omap = new OMAP(keyworsSize, key);
+    ac = new OMAPf(fileSize, key);
 }
 
-Client::~Client() {
-}
+Client::~Client() { }
 
-void Client::insert(string keyword, int ind, bool setup) 
+int to_int(string del_cnt)
 {
-    if (!localStorage) {
+        int updc;
+        stringstream convstoi(del_cnt);
+        convstoi >> updc;
+        return updc;
+}
+void append(FileNode** head_ref, fblock new_data)
+{
+	FileNode* new_node = new FileNode();
+	FileNode *last = *head_ref;
+	new_node->data = new_data;
+	new_node->next = NULL;
+	if(*head_ref == NULL)
+	{
+		*head_ref = new_node;
+		return;
+	}
+	while(last->next != NULL)
+		last = last->next;
+
+	last->next = new_node;
+	return;
+}
+
+int nextPowerOf2(int n)
+{
+         int count = 0;
+	         
+         if (n && !(n & (n - 1)))
+            return n;
+         
+	 while( n != 0)
+         {
+                n >>= 1;
+                count += 1;
+         }
+         return 1 << count;
+}
+
+void Client::insert(vector<string> keywords, int ind, bool setup) 
+{
+    for(string keyword:keywords)
+    {
         omap->treeHandler->oram->totalRead = 0;
         omap->treeHandler->oram->totalWrite = 0;
-    }
-    totalUpdateCommSize = 0;
-    prf_type k_w;
-    memset(k_w.data(), 0, AES_KEY_SIZE);
-    copy(keyword.begin(), keyword.end(), k_w.data());
-    int fileCnt = 0, srcCnt = 0;
-
-    if (localStorage) {
-        if (FileCnt.find(k_w) == FileCnt.end()) {
-            FileCnt[k_w] = 1;
-            fileCnt = 1;
-        } else {
-            FileCnt[k_w]++;
-            fileCnt = FileCnt[k_w];
-        }
-        if (deleteFiles) {
-            if (SrcCnt.find(k_w) == SrcCnt.end()) {
-                SrcCnt[k_w] = 0;
-                srcCnt = 0;
-            } else {
-                srcCnt = SrcCnt[k_w];
-            }
-        }
-    } else {
+        totalUpdateCommSize = 0;
+        prf_type k_w;
+        memset(k_w.data(), 0, AES_KEY_SIZE);
+        copy(keyword.begin(), keyword.end(), k_w.data());
+        int fileCnt = 0, srcCnt = 0;
         Bid mapKey = getBid(keyword);
         string fileCntStr = setup ? setupOMAP[mapKey] : omap->incrementFileCnt(mapKey);
-        if (fileCntStr != "") {
+        if (fileCntStr != "") 
+        {
             auto parts = Utilities::splitData(fileCntStr, "-");
             fileCnt = stoi(parts[0]);
             srcCnt = stoi(parts[1]);
         }
         fileCnt++;
-        if (setup) {
+        if (setup)
             setupOMAP[mapKey] = to_string(fileCnt) + "-" + to_string(srcCnt);
-        }
+        prf_type addr, rnd;
+        getAESRandomValue(k_w.data(), 0, srcCnt, fileCnt, addr.data());
+        getAESRandomValue(k_w.data(), 1, srcCnt, fileCnt, rnd.data());
+        prf_type val = bitwiseXOR(ind, 0, rnd);
+        totalUpdateCommSize=(sizeof(prf_type)*2)+(omap->treeHandler->oram->totalRead+omap->treeHandler->oram->totalWrite)*(sizeof(prf_type)+sizeof(int));
+        server->update(addr, val);
     }
-
-    prf_type addr, rnd;
-    getAESRandomValue(k_w.data(), 0, srcCnt, fileCnt, addr.data());
-    getAESRandomValue(k_w.data(), 1, srcCnt, fileCnt, rnd.data());
-    prf_type val = bitwiseXOR(ind, 0, rnd);
-    if (!localStorage) {
-        totalUpdateCommSize = (sizeof (prf_type) * 2) + (omap->treeHandler->oram->totalRead + omap->treeHandler->oram->totalWrite)*(sizeof (prf_type) + sizeof (int));
-    }
-    server->update(addr, val);
-
 }
 
-vector<int> Client::search(string keyword) 
+void Client::insertFile(int ind, string content, bool setup)
 {
-    if (!localStorage) {
-        omap->treeHandler->oram->totalRead = 0;
-        omap->treeHandler->oram->totalWrite = 0;
+    prf_type file; 
+    memset(file.data(), 0, AES_KEY_SIZE); 
+    string id = to_string(ind);
+    copy(id.begin(), id.end(), file.data());
+    Bid mapKey(id);
+    if(setup)
+	    setupAC[mapKey] = to_string(1);
+    else
+    	    ac->insert(mapKey,to_string(1));
+    prf_type addr;
+    getAESRandomValue(file.data(), 0, 1, 1, addr.data());
+    int sz = content.size();
+    sz = sz < sizeof(fblock)? sizeof(fblock):nextPowerOf2(sz);
+    if(content.size()<sz) 
+	  content.insert(content.size(),sz-content.size(),'#');
+    FileNode *head = NULL;
+    int len = 0;
+    while(len < content.size())
+    {
+	    string part = content.substr(len,sizeof(fblock));
+	    fblock val;
+	    copy(part.begin(), part.end(), val.data());
+	    append(&head,val);
+	    len = len+ sizeof(fblock);
     }
+    DictF[addr]=head;
+}
+
+map<int,string> Client::search(string keyword) 
+{
+    omap->treeHandler->oram->totalRead = 0;
+    omap->treeHandler->oram->totalWrite = 0;
     totalSearchCommSize = 0;
     vector<int> finalRes;
+    map<int,string> files;
     vector<prf_type> KList;
     prf_type k_w;
     memset(k_w.data(), 0, AES_KEY_SIZE);
     copy(keyword.begin(), keyword.end(), k_w.data());
     Bid mapKey = getBid(keyword);
     int fileCnt = 0, srcCnt = 0;
-    if (localStorage) {
-        if (FileCnt.find(k_w) == FileCnt.end()) {
-            return finalRes;
-        }
-        fileCnt = FileCnt[k_w];
-        if (deleteFiles) {
-            srcCnt = SrcCnt[k_w];
-        }
-    } else {
-
-        string fileCntStr = omap->find(mapKey);
-        if (fileCntStr != "") {
-            auto parts = Utilities::splitData(fileCntStr, "-");
-            fileCnt = stoi(parts[0]);
-            srcCnt = stoi(parts[1]);
-        } else {
-            return finalRes;
-        }
-    }
-
+    string fileCntStr = omap->find(mapKey);
+    if (fileCntStr != "") 
+    {
+        auto parts = Utilities::splitData(fileCntStr, "-");
+        fileCnt = stoi(parts[0]);
+        srcCnt = stoi(parts[1]);
+    } 
+    else 
+        return files;
     KList.reserve(fileCnt);
     finalRes.reserve(fileCnt);
-    for (int i = 1; i <= fileCnt; i++) {
+    for (int i = 1; i <= fileCnt; i++) 
+    {
         prf_type rnd;
         getAESRandomValue(k_w.data(), 0, srcCnt, i, rnd.data());
         KList.emplace_back(rnd);
@@ -125,7 +160,8 @@ vector<int> Client::search(string keyword)
     vector<prf_type> encIndexes = server->search(KList);
     map<int, int> remove;
     int cnt = 1;
-    for (auto i = encIndexes.begin(); i != encIndexes.end(); i++) {
+    for (auto i = encIndexes.begin(); i != encIndexes.end(); i++) 
+    {
         prf_type tmp;
         getAESRandomValue(k_w.data(), 1, srcCnt, cnt, tmp.data());
         prf_type decodedString = *i;
@@ -134,38 +170,58 @@ vector<int> Client::search(string keyword)
         remove[plaintext] += (2 * plaintextBytes[4] - 1);
         cnt++;
     }
-    if (deleteFiles) {
-        if (localStorage) {
-            SrcCnt[k_w]++;
-        }
-        fileCnt = 0;
-        srcCnt++;
-    }
-    for (auto const& cur : remove) {
-        if (cur.second < 0) {
-            finalRes.emplace_back(cur.first);
-            if (deleteFiles) {
+    fileCnt = 0;
+    srcCnt++;
+    for (auto const& cur : remove) 
+    {
+        if (cur.second < 0) 
+	{
+                finalRes.emplace_back(cur.first);
                 fileCnt++;
                 prf_type addr, rnd;
                 getAESRandomValue(k_w.data(), 0, srcCnt, fileCnt, addr.data());
                 getAESRandomValue(k_w.data(), 1, srcCnt, fileCnt, rnd.data());
                 prf_type val = bitwiseXOR(cur.first, OP::INS, rnd);
                 server->update(addr, val);
-            }
         }
     }
-    if (deleteFiles) {
-        totalSearchCommSize += (fileCnt * 2 * sizeof (prf_type));
-        if (localStorage) {
-            FileCnt[k_w] = fileCnt;
-        } else {
-            omap->insert(mapKey, to_string(fileCnt) + "-" + to_string(srcCnt));
+    totalSearchCommSize += (fileCnt * 2 * sizeof (prf_type));
+    omap->insert(mapKey, to_string(fileCnt) + "-" + to_string(srcCnt));
+    totalSearchCommSize += sizeof (prf_type) * KList.size() + encIndexes.size() * sizeof (prf_type) + (omap->treeHandler->oram->totalRead + omap->treeHandler->oram->totalWrite)*(sizeof (prf_type) + sizeof (int));
+   cout <<"sizeof finalRes:"<< finalRes.size()<<endl; 
+    for(int ind : finalRes)
+    {
+	string id = to_string(ind);
+	Bid acKey(id);
+        int accsCnt = to_int(ac->find(acKey));
+        prf_type file;
+        memset(file.data(), 0, AES_KEY_SIZE);
+        copy(id.begin(), id.end(), file.data());
+        Bid mapKey(id);
+        prf_type addr;
+        getAESRandomValue(file.data(), 0, accsCnt, accsCnt, addr.data());
+        FileNode* head = DictF[addr];
+	FileNode* newhead = NULL;
+        while(head!=NULL)
+        {
+    	    string temp;
+            temp.assign((head->data).begin(),(head->data).end());
+    	    if(files.find(ind) == files.end())
+    	    	files[ind]= temp;
+    	    else
+    	    	(files[ind]).append(temp);
+    	    head = head->next;
+	    fblock val;
+	    copy(temp.begin(), temp.end(), val.data());
+	    append(&newhead,val);
         }
+	ac->insert(acKey,to_string(++accsCnt));
+        prf_type newaddr;
+        getAESRandomValue(file.data(), 0, accsCnt, accsCnt, newaddr.data());
+	DictF.erase(addr);
+        DictF[newaddr]=newhead;
     }
-    if (!localStorage) {
-        totalSearchCommSize += sizeof (prf_type) * KList.size() + encIndexes.size() * sizeof (prf_type) + (omap->treeHandler->oram->totalRead + omap->treeHandler->oram->totalWrite)*(sizeof (prf_type) + sizeof (int));
-    }
-    return finalRes;
+    return files;
 }
 
 prf_type Client::bitwiseXOR(int input1, int op, prf_type input2) {
@@ -213,18 +269,8 @@ Bid Client::getBid(string input) {
     Bid res(value);
     return res;
 }
-
-void Client::endSetup() {
-    if (!localStorage) {
+void Client::endSetup() 
+{
         omap->setupInsert(setupOMAP);
-        cout << "setup size:" << setupOMAP.size() << endl;
-
-        for (int i = 0; i < 500; i++) {
-            cout << i << "/500" << endl;
-            Bid testBid;
-            testBid.setValue(1);
-            omap->insert(testBid, "TEST");
-        }
-        //omap->printTree();
-    }
+	ac->setupInsert(setupAC);
 }

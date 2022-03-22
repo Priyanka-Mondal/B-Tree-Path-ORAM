@@ -465,10 +465,8 @@ void ORAM::finilize(bool find, Bid& rootKey, int& rootPos) {
             }
         }
     }
-    //cout <<"MAXHEIGHT OF FILES:"<<maxheight<<endl;
-    //updating the binary tree positions
     //for (unsigned int i = 0; i <= depth + 2; i++) {
-    for (unsigned int i = 0; i <= maxheight; i++) {
+    for (unsigned int i = 1; i <= maxheight; i++) {
         for (auto t : cache) {
             if (t.second != NULL && t.second->height == i) {
                 Node* tmp = t.second;

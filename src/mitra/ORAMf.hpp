@@ -1,5 +1,5 @@
-#ifndef ORAM_H
-#define ORAM_H
+#ifndef ORAMf_H
+#define ORAMf_H
 
 #include "AES.hpp"
 #include <random>
@@ -9,14 +9,53 @@
 #include <iostream>
 #include <map>
 #include <set>
-#include "RAMStore.hpp"
+#include "RAMStoref.hpp"
 #include <bits/stdc++.h>
 #include "Bid.h"
-#include "Node.h"
+#include "ORAM.hpp"
 
 using namespace std;
 
-class ORAM {
+/*
+class Node {
+public:
+
+    Node() {
+    }
+
+    ~Node() {
+    }
+    Bid key;
+    std::array< byte_t, 6> value;
+    int pos;
+    Bid leftID;
+    int leftPos;
+    Bid rightID;
+    int rightPos;
+    int evictionNode;
+    int height;
+};
+
+struct Block {
+    Bid id;
+    block data;
+};
+
+using Bucket = std::array<Block, Z>;
+
+struct BidHasher {
+
+    std::size_t operator()(const Bid &key) const {
+        std::hash<byte_t> hasher;
+        size_t result = 0; // I would still seed this.
+        for (size_t i = 0; i < ID_SIZE; ++i) {
+            result = (result << 1) ^ hasher(key.id[i]); // ??
+        }
+        return result;
+    }
+};
+*/
+class ORAMf {
 private:
     int depth;
     size_t blockSize;
@@ -32,7 +71,7 @@ private:
     size_t clen_size;
     bool batchWrite = false;
     int maxHeightOfAVLTree;
-    RAMStore* store;
+    RAMStoref* store;
 
     // Randomness
     std::random_device rd;
@@ -64,8 +103,8 @@ private:
     block convertNodeToBlock(Node* node);
 
 public:
-    ORAM(int maxSize, bytes<Key> key);
-    ~ORAM();
+    ORAMf(int maxSize, bytes<Key> key);
+    ~ORAMf();
     int totalRead = 0, totalWrite = 0;
 
     Node* ReadNode(Bid bid, int lastLeaf, int newLeaf);

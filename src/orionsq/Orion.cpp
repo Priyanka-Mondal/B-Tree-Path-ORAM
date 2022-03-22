@@ -236,7 +236,6 @@ vector<pair<int,string>> Orion::search(string keyword)
 	string fileid = to_string(id);
 	Bid blkcnt(fileid);
         int blocknum = fcnt->find(blkcnt);
-	cout<<"BLKCNT:"<<blocknum<<endl;
 	for (int j= 1;j<=blocknum;j++)
 	{
 		Bid block = createBid(fileid,j);
@@ -296,23 +295,23 @@ void Orion::remove(int id)
 	string ind = to_string(id);
 	string cont = "";
 	int blk = 1;
-	Bid del = createBid(ind, blk);
-	string ret = (file->find(del));
-	if(ret=="")
+	Bid delKey(ind);
+	int blkcnt = fcnt->find(delKey);
+	fcnt->remove(delKey);
+	if(blkcnt == 0)
 	{
 		cout <<" File does NOT EXIST!"<<endl;
 		return;
 	}
-	while (ret != "last")
+	for(int bc = 1; bc <= blkcnt; bc++)
 	{
+		delKey = createBid(ind, bc);
+		string ret = file->find(delKey);
 		cont = cont.append(ret);
-		blk++;
-		del = createBid(ind, blk);
-		ret = file->find(del);
-		file->remove(del);	
+		file->remove(delKey);	
 	}
-	cout <<"Removed "<<blk<<" blocks from srch"<<del<<endl;
-	
+	cout <<"Removed "<<blk<<" blocks from srch:"<<ind<<endl;
+        	
 	vector<string> kws1;
 	boost::split(kws1, cont, boost::is_any_of(delimiters));
 	vector<string> kws = getUniquedWords(kws1);

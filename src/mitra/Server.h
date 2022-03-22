@@ -14,6 +14,7 @@ private:
 public:
     sse::sophos::RockDBWrapper edb_;
     map<prf_type, prf_type > DictW;
+
     Server(bool useHDD, bool deleteFiles);
     void update(prf_type addr, prf_type val);
     vector<prf_type> search(vector<prf_type> KList);

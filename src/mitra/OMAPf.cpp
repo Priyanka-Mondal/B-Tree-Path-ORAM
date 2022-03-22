@@ -1,16 +1,16 @@
-#include "OMAP.h"
+#include "OMAPf.h"
 using namespace std;
 
-OMAP::OMAP(int maxSize, bytes<Key> key) {
-    treeHandler = new AVLTree(maxSize, key);
+OMAPf::OMAPf(int maxSize, bytes<Key> key) {
+    treeHandler = new AVLTreef(maxSize, key);
     rootKey = 0;
 }
 
-OMAP::~OMAP() {
+OMAPf::~OMAPf() {
 
 }
 
-string OMAP::find(Bid key) {
+string OMAPf::find(Bid key) {
     if (rootKey == 0) {
         return "";
     }
@@ -28,7 +28,7 @@ string OMAP::find(Bid key) {
     return res;
 }
 
-void OMAP::insert(Bid key, string value) {
+void OMAPf::insert(Bid key, string value) {
     treeHandler->startOperation();
     if (rootKey == 0) {
         rootKey = treeHandler->insert(0, rootPos, key, value);
@@ -38,7 +38,7 @@ void OMAP::insert(Bid key, string value) {
     treeHandler->finishOperation(false, rootKey, rootPos);
 }
 
-void OMAP::printTree() {
+void OMAPf::printTree() {
     treeHandler->startOperation();
     Node* node = new Node();
     node->key = rootKey;
@@ -48,7 +48,7 @@ void OMAP::printTree() {
     treeHandler->finishOperation(true, rootKey, rootPos);
 }
 
-void OMAP::batchInsert(map<Bid, string> pairs) {
+void OMAPf::batchInsert(map<Bid, string> pairs) {
     treeHandler->startOperation(true);
     for (auto pair : pairs) {
         if (rootKey == 0) {
@@ -60,7 +60,7 @@ void OMAP::batchInsert(map<Bid, string> pairs) {
     treeHandler->finishOperation(false, rootKey, rootPos);
 }
 
-vector<string> OMAP::batchSearch(vector<Bid> keys) {
+vector<string> OMAPf::batchSearch(vector<Bid> keys) {
     vector<string> result;
     treeHandler->startOperation(false);
     Node* node = new Node();
@@ -82,11 +82,11 @@ vector<string> OMAP::batchSearch(vector<Bid> keys) {
     return result;
 }
 
-void OMAP::setupInsert(map<Bid, string> pairs) {
+void OMAPf::setupInsert(map<Bid, string> pairs) {
     treeHandler->setupInsert(rootKey, rootPos, pairs);
 }
 
-string OMAP::incrementFileCnt(Bid key) {
+string OMAPf::incrementFileCnt(Bid key) {
     string res = "";
     treeHandler->startOperation();
     Node* node = new Node();

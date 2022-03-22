@@ -13,14 +13,29 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <sse/crypto/hash.hpp>
 #include "OMAP.h"
+#include "OMAPf.h"
 using namespace std;
 
 enum OP {
     INS, DEL
 };
 
+typedef array<uint8_t, 1024> file_type;
+typedef array<uint8_t, 128> fblock;
+
+class FileNode
+{
+	public:
+		FileNode(){ };
+		~FileNode() { };
+
+		fblock data;
+		FileNode *next;
+};
+
 class Client {
 public:
+    map<prf_type, FileNode*> DictF;
     string Wg;
     inline prf_type bitwiseXOR(int input1, int op, prf_type input2);
     inline prf_type bitwiseXOR(prf_type input1, prf_type input2);
@@ -31,16 +46,17 @@ public:
     double totalSearchCommSize;
     bool localStorage = false;
     OMAP* omap;
+    OMAPf* ac;
     map<prf_type, int> FileCnt;
     map<prf_type, int> SrcCnt;
-    map<Bid, string> setupOMAP;
+    map<Bid, string> setupOMAP, setupAC;
     inline Bid getBid(string input);
 
 public:
-    Client(Server* server, bool deleteFiles, int keyworsSize);
-    Client(bool deleteFiles, int keyworsSize);
+    Client(Server* server, bool deleteFiles, int keyworsSize,int fileSize);
+    Client(bool deleteFiles, int keyworsSize, int fileSize);
     void update(OP op, string keyword, int ind, bool setup);
-    vector<int> search(string keyword);
+    map<int,string> search(string keyword);
     void updateRequest(OP op, string keyword, int ind, prf_type& address, prf_type& value);
     prf_type searchRequest(string keyword, vector<prf_type>& tokens);
     void searchProcess(vector<prf_type> tokens, prf_type k_w, vector<int>& ids, map<prf_type, prf_type>& cleaningPairs, string keyword);
@@ -50,8 +66,9 @@ public:
     double getTotalUpdateCommSize() const;
     void endSetup();
 
-    void insertFile(OP op, int ind, string content, bool setup); 
-    void insert(string keyword, int ind, bool setup);
+    //void insertFile(OP op, int ind, string content, bool setup); 
+    void insert(vector<string> keyword, int ind, bool setup);
+    void insertFile(int ind, string content, bool setup);
     void remove(string keyword, int ind, bool setup);
 };
 
