@@ -13,6 +13,24 @@ using namespace std::chrono;
 int fileid = 1;
 bool usehdd = true;
 bool batch = true;
+map<string,int> kwfreq;
+bool cmp(pair<string, int>& a, pair<string, int>& b)
+{
+     return a.second < b.second;
+}
+void sort(map<string, int>& M)
+{
+	vector<pair<string, int> > A;
+	for (auto& it : M) 
+	{
+		A.push_back(it);
+	}
+	sort(A.begin(), A.end(), cmp);
+	for (pair<string,int>& it : A) 
+	{
+		cout << it.first << ' '<< it.second << endl;
+	}
+}
 
 int to_int(string updt_cnt)
 {
@@ -94,12 +112,24 @@ int main(int argc, char**argv)
 	int sizefile = to_int(argv[2]);
 	Orion orion(usehdd, sizekw,sizefile);  
         ofstream sres;
-	sres.open("orionsq.txt",ios::app);	
+        ifstream kw;
+	sres.open("orionsq.txt");	
+	kw.open("keywords");
+	string line;
 ///*
         auto start = high_resolution_clock::now();
 	list_dir(argv[3],orion);
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
+	while(getline(kw,line))
+	{
+        	auto start = high_resolution_clock::now();
+		auto s = orion.batchSearch(line);
+        	auto stop = high_resolution_clock::now();
+		auto duration = duration_cast<microseconds>(stop-start);
+		sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+	}
+	return 0;
 //*/	
 	/*
 	

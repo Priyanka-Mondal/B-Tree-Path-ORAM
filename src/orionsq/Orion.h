@@ -12,8 +12,7 @@ private:
     map<Bid,string > setupPairs2;
     OMAPf* srch,*updt, *fcnt;
     OMAP* file;
-    map<string, int> UpdtCnt;
-    map<string, int> LastIND;        
+    map<Bid, int> UpdtCnt;
     
 public:
     Bid createBid(string keyword,int number);

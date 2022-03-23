@@ -13,9 +13,34 @@ using namespace std;
 
 int fileid = 1;
 int uniquekw = 0;
-string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
-set<string> neg = {"\n","\0","*" ," ", "-","?","from","to", "in"};
+string delimiters("_|+#(){}[]0123456789*?&@=,:!\"><; _-./ \t\n");
+map<string,int> kwfreq;
+std::set<std::string> neg = {"_","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","\n","\0", " ", "-","?","from","to", "in","on","so","how""me","you","this","that","ok","no","yes","him","her","they","them","not","none","an","under","below","behind","he","she","their","has","our","would","am","may","know","all","can","any","me","or","as","your","it","we","please","at","if","will","are","by","with","be","com","have","is","of","for","and","the","date","cc","up","but","do","what","which","been","where","could","who","would","did","put","done","too","get","got","yet","co","if"};
 
+bool cmp(pair<string, int>& a, pair<string, int>& b)
+{
+     return a.second < b.second;
+}
+void sort(map<string, int>& M)
+{
+	vector<pair<string, int> > A;
+	for (auto& it : M) 
+	{
+		A.push_back(it);
+	}
+	sort(A.begin(), A.end(), cmp);
+        ofstream kw,freq, both;
+	kw.open("keywords.txt");//,ios::app);	
+	freq.open("frequency.txt");//,ios::app);	
+	both.open("kw-freq.txt");//,ios::app);	
+	for (pair<string,int>& it : A) 
+	{
+		cout << it.first << ' '<< it.second << endl;
+		kw << it.first<<endl;
+		freq << it.second<<endl;
+		both << it.first <<" "<<it.second<<endl;
+	}
+}
 int stoI(string updt_cnt)
 {
         int updc;
@@ -73,7 +98,7 @@ vector<string> divideString(string str, int sz)
 	    }
 	    temp +=str[i];
 	}
-	string ttemp = "";//id;
+	string ttemp = "";
 	ttemp.append(temp);	
 	result.push_back(ttemp); 
 	return result;
@@ -110,12 +135,12 @@ static void list_dir (const char * dir_name, Client& client, bool real)
             break;
       }
       d_name = entry->d_name;
+	      vector<string> kws1, kws;
             if (! (entry->d_type & DT_DIR)) 
 	    {
 	      string file = dir_name;
 	      file = file.append("/");
 	      file = file.append(d_name);
-	      vector<string> kws1, kws;
 	      string cont = getFileContent(file);
 	      cout <<"===========================================" << endl;
 	      boost::split(kws1, cont, boost::is_any_of(delimiters));
@@ -128,12 +153,19 @@ static void list_dir (const char * dir_name, Client& client, bool real)
 		      }
 	      }
 	      cout <<file<< " " << fileid <<endl;
-			client.insert(kws, fileid,true);
+			//client.insert(kws, fileid,true);
 			uniquekw = uniquekw+kws.size();
 			cout << "inserted "<< uniquekw <<" unique keywords"<<endl;
-			client.insertFile(fileid,cont,true);
+			//client.insertFile(fileid,cont,true);
                 fileid++;
               }
+	    for(auto word: kws)
+	    {
+       		 if (!kwfreq.count(word))
+       		     kwfreq.insert(make_pair(word, 1));
+       		 else
+       		     kwfreq[word]++;
+	    }
              if (entry->d_type & DT_DIR) {
                 if (strcmp (d_name, "..") != 0 &&
                   strcmp (d_name, ".") != 0) {
@@ -239,6 +271,8 @@ int main(int argc, char** argv)
     list_dir(argv[2],client, REAL);
     client.endSetup();
 	//list_dir("allen-p/deleted_items",client, REAL);
+	sort(kwfreq);
+	return 0;
 	cout << endl<<" SETUP INSERT DONE!"<< endl;
 	cout <<"=================================="<< endl;
 	cout <<"READY TO PERFORM QUERIES!" << endl;
