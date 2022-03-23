@@ -4,6 +4,8 @@
 #include <array>
 #include <vector>
 #include <iostream>
+#include <set>
+#include <string>
 
 // The main type for passing around raw file data
 #define ID_SIZE 16

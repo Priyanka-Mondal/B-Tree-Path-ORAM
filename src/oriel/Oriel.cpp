@@ -29,7 +29,6 @@ int stoI(string del_cnt)
 }
 
 string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
-set<string> neg = {"\n","\0", " ", "-","?","from","to", "in"};
 
 vector<string> getUniquedWords(vector<string> kws)
 {

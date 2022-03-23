@@ -38,6 +38,8 @@ enum Op {
     WRITE
 };
 
+set<string> neg = {"\n","\0", " ", "-","?","from","to", "in"};
+
 template< typename T >
 std::array< byte_t, sizeof (T) > to_bytes(const T& object) {
     std::array< byte_t, sizeof (T) > bytes;

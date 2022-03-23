@@ -1,15 +1,17 @@
 #include "Orion.h"
 #include <boost/algorithm/string.hpp>
+#include "stopword.hpp"
 
 
-Orion::Orion(bool usehdd, int maxSize ) {
+Orion::Orion(bool usehdd, int kwsize , int filesize) 
+{
     this->useHDD = usehdd;
     bytes<Key> key1{0};
     bytes<Key> key2{1};
-    srch = new OMAPf(maxSize, key1);
-    updt = new OMAPf(maxSize, key1);
-    fcnt = new OMAPf(maxSize, key1);
-    file = new OMAP(maxSize,key2);
+    srch = new OMAPf(kwsize*filesize, key1);
+    updt = new OMAPf(kwsize*filesize, key1);
+    fcnt = new OMAPf(kwsize, key1);
+    file = new OMAP(filesize,key2);
 }
 
 Orion::~Orion() {
@@ -22,7 +24,6 @@ int inserted = 0;
 int uniquekw = 0;
 int fileblks = 0;
 string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
-set<string> neg = {"\n","\0", " ", "-","?","from","to", "in"};
 
 int stoI(string updt_cnt)
 {
@@ -40,7 +41,7 @@ vector<string> getUniquedWords(vector<string> kws)
     string word;
     for(auto word : kws)
     {
-	    if(word.size()<=12 && (neg.find(word)==neg.end()))
+	    if(word.size()<=12 && (stopwords.find(word)==stopwords.end()))
 	    {
     		    if ((!mp.count(word)) && (word.size()<=12))
     		    {
@@ -108,7 +109,7 @@ void Orion::insertWrap(string cont, int fileid, bool batch)
       kws =  getUniquedWords(kws1);
       for (auto it = kws.begin(); it != kws.end(); it++)
       {
-	      if(neg.find(*it)!=neg.end())
+	      if(stopwords.find(*it)!=stopwords.end())
 	      {
 		 kws.erase(it--);
 	      }

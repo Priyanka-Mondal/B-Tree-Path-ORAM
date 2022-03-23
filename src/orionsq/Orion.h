@@ -29,7 +29,7 @@ public:
     map<int,string> batchSearch(string keyword);
     vector<pair<int,string>> search(string keyword);
     
-    Orion(bool useHDD,int maxSize);    
+    Orion(bool useHDD,int maxSize, int filesize);    
     
     virtual ~Orion();
     

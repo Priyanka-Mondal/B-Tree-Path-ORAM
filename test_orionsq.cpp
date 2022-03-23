@@ -90,13 +90,14 @@ static void list_dir (const char * dir_name, Orion& orion)
 
 int main(int argc, char**argv) 
 {
-	int size = to_int(argv[1]);
-	Orion orion(usehdd, size);  
+	int sizekw = to_int(argv[1]);
+	int sizefile = to_int(argv[2]);
+	Orion orion(usehdd, sizekw,sizefile);  
         ofstream sres;
 	sres.open("orionsq.txt",ios::app);	
 ///*
         auto start = high_resolution_clock::now();
-	list_dir(argv[2],orion);
+	list_dir(argv[3],orion);
         auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(stop-start);
 //*/	
