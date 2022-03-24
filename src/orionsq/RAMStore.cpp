@@ -20,6 +20,7 @@ void RAMStore::Write(int pos, block b)
 	store[pos] = b;
 }
 
+
 size_t RAMStore::GetBlockCount()
 {
 	return store.size();

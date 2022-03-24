@@ -12,7 +12,7 @@ using namespace std;
 
 int fileid = 1;
 bool usehdd = false;
-Orion orion(usehdd, 10000);  
+Orion orion(usehdd, 1000000);  
 set<string> neg;
 int totk = 0;
 vector<string> getUniquedWords(vector<string> kws, string fileid)

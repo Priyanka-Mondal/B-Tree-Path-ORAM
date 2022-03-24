@@ -8,16 +8,18 @@ Orion::Orion(bool usehdd, int filecnt , int filesize)
     this->useHDD = usehdd;
     bytes<Key> key1{0};
     bytes<Key> key2{1};
-    srch = new OMAPf(50*filecnt, key1);
+    srch = new OMAPf(filecnt, key1);
     //updt = new OMAPf(50*filecnt, key1);
     //fcnt = new OMAPf(kwsize+filecnt, key1);
     file = new OMAP(filesize,key2);
 }
 
-Orion::~Orion() {
+Orion::~Orion() 
+{
     delete srch;
     delete file;
     //delete updt;
+    UpdtCnt.clear();
 }
 
 
@@ -59,6 +61,7 @@ vector<string> getUniquedWords(vector<string> kws)
         if (p->second >= 1)
             kw.push_back(p->first) ;
     }
+    mp.clear();
 return kw;
 }
 
@@ -74,7 +77,6 @@ vector<string> divideString(string str, int sz)
 	str_size = str.length(); // new length
   	int i;
         vector<string> result;
-
         string temp="";
 	/*int cover = 0;
 	while(cover < str_size)
@@ -112,9 +114,7 @@ void Orion::insertWrap(string cont, int fileid, bool batch)
       for (auto it = kws.begin(); it != kws.end(); it++)
       {
 	      if(stopwords.find(*it)!=stopwords.end())
-	      {
 		 kws.erase(it--);
-	      }
       }
       vector<string> blocks;
       blocks = divideString(cont,BLOCK);
@@ -122,6 +122,9 @@ void Orion::insertWrap(string cont, int fileid, bool batch)
 	  setupinsert(kws,blocks,fileid);
       else
           insert(kws, blocks, fileid);
+      kws1.clear();
+      kws.clear();
+      blocks.clear();
 }
 
 
@@ -145,6 +148,7 @@ void Orion::setupinsert(vector<string> kws, vector<string> blocks, int ind)
       Bid blkcnt(id);
       srch->setupinsert(blkcnt,blocks.size());
       int block_num = 1;
+      
       for(auto blk: blocks)
       {
 	      Bid fb = createBid(id,block_num);
@@ -193,6 +197,9 @@ void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind)
     inserted = inserted+kws.size();
     fileblks = fileblks+block_num;
     cout << "BATCH inserted keywords and blocks(kw:"<<kws.size() <<",b:"<<blocks.size()<<") of:"<<ind<<" uk:"<<uniquekw<<" fb:"<<fileblks<< endl;
+    fcntbids.clear();
+    srchbids.clear();
+    filebids.clear();
 }
 
 void Orion::insert(vector<string> kws, vector<string> blocks, int ind) 
@@ -231,7 +238,6 @@ vector<pair<int,string>> Orion::search(string keyword)
     vector<pair<int,string>> fileblocks;
     Bid firstKey(keyword);
     int fc = srch->find(firstKey);
-    cout <<"UPDC:"<< fc<< endl;
     if (fc == 0) 
 	return fileblocks;
     for (int i = 1; i <= fc; i++) 
@@ -258,7 +264,6 @@ map<int,string> Orion::batchSearch(string keyword)
     vector<Bid> bids;
     Bid firstKey(keyword);
     int fc = srch->find(firstKey);
-    cout <<"UPDC:"<< fc<< endl;
     if (fc == 0) 
 	    return files;
     for (int i = 1; i <= fc; i++) 
@@ -292,6 +297,8 @@ map<int,string> Orion::batchSearch(string keyword)
 				files.insert(pair<int,string>(id,cont));
 		}
      }
+    bids.clear();
+    result.clear();
     return files;
 }
 

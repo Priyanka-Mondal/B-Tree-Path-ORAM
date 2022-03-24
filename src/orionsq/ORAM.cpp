@@ -64,7 +64,6 @@ block ORAM::SerialiseBucket(Bucket bucket) {
 
     assert(buffer.size() == Z * (blockSize));
 
-    cout <<"blockSize:"<< Z*blockSize<<endl;
     return buffer;
 }
 
@@ -97,8 +96,8 @@ Bucket ORAM::ReadBucket(int index) {
 void ORAM::WriteBucket(int index, Bucket bucket) {
     block b = SerialiseBucket(bucket);
     block ciphertext = AES::Encrypt(key, b, clen_size, plaintext_size);
-    cout <<"size of plain"<< b.size();
-    cout <<"size of cipher"<< ciphertext.size()<<endl;
+    //cout <<"size of plain"<< b.size();
+    //cout <<"size of cipher"<< ciphertext.size()<<endl;
     store->Write(index, ciphertext);
 }
 
@@ -332,23 +331,27 @@ void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
 	    int pos ;
             if (flag==0 &&  block.id == 0) 
 	    {    
-            	Node* curnode = n;
+            	//Node* curnode = n;
 		block.id = bid;
-                block.data = convertNodeToBlock(curnode);
+                //block.data = convertNodeToBlock(curnode);
+                block.data = convertNodeToBlock(n);
 		flag = 1;
 		store->ReduceEmptyNumbers();
-		pos = curnode->pos;
+		//pos = curnode->pos;
+		pos = n->pos;
 		 //cout<<pos<<endl;//" Empty Nodes in ORAM:"<<oramsz<<endl;
 		//delete curnode;
             }
 	    else if (flag==0 && block.id == bid ) 
 	    {    
-            	Node* curnode = n;
+            	//Node* curnode = n;
 		block.id = bid;
-                block.data = convertNodeToBlock(curnode);
+                //block.data = convertNodeToBlock(curnode);
+                block.data = convertNodeToBlock(n);
 		flag = 1;
 		//store->ReduceEmptyNumbers();
-		pos = curnode->pos;
+		//pos = curnode->pos;
+		pos = n->pos;
 		//delete curnode;
             }
 	    else if(block.id == 0)
@@ -359,11 +362,13 @@ void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
 	    else
 	    {
                 Node* curnode = convertBlockToNode(block.data);
-		block.id = curnode->key;
+		//Bid kk = curnode->key;
+		block.id = curnode->key;//kk
 		//cout <<"full blocks setupWriting:"<<block.id<<endl;
+		//block.data = convertNodeToBlock(block.data);
 		block.data = convertNodeToBlock(curnode);
 		pos = curnode->pos;
-		//delete curnode;
+		delete curnode;
 	    }
 	    if(rootKey == block.id)
 	    {

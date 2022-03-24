@@ -7,7 +7,7 @@ OMAPf::OMAPf(int maxSize, bytes<Key> key) {
 }
 
 OMAPf::~OMAPf() {
-
+delete treeHandler;
 }
 
 int stoint(string del_cnt)
@@ -36,6 +36,7 @@ int OMAPf::setupfind(Bid key) {
     }
     //else if(resNode == NULL)
 //	    cout <<"Null recieved in OMAPf for"<< key<< endl;
+delete node;	    
     return res;
 }
 int OMAPf::find(Bid key) {
@@ -145,5 +146,6 @@ vector<int> OMAPf::batchSearch(vector<Bid> keys) {
         }
     }
     treeHandler->finishOperation(true, rootKey, rootPos);
+    delete node;
     return result;
 }

@@ -7,7 +7,7 @@ OMAP::OMAP(int maxSize, bytes<Key> key) {
 }
 
 OMAP::~OMAP() {
-
+delete treeHandler;
 }
 
 string OMAP::setupfind(Bid key) {
@@ -26,7 +26,9 @@ string OMAP::setupfind(Bid key) {
     }
     //else if(resNode == NULL)
 //	    cout <<"Null recieved in OMAPf for"<< key<< endl;
+delete node;
     return res;
+
 }
 string OMAP::find(Bid key) {
     if (rootKey == 0) {
@@ -132,5 +134,6 @@ vector<string> OMAP::batchSearch(vector<Bid> keys) {
         }
     }
     treeHandler->finishOperation(true, rootKey, rootPos);
+    delete node;
     return result;
 }

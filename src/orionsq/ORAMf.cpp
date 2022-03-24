@@ -349,22 +349,22 @@ void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
 	    int pos ;
             if (flag==0 && block.id == 0) 
 	    {    
-            	Nodef* curnode = n;
+            	//Nodef* curnode = n;
 		block.id = bid;
-                block.data = convertNodefToBlock(curnode);
+                block.data = convertNodefToBlock(n);
 		flag = 1;
 		store->ReduceEmptyNumbers();
-		pos = curnode->pos;
+		pos = n->pos;
     //cout <<pos<<endl;//" Empty nodes in ORAMf:"<<oramsz<<endl;
 		//delete curnode;
             }
 	    else if(flag ==0 && block.id == bid)
 	    {    
-            	Nodef* curnode = n;
+            	//Nodef* curnode = n;
 		block.id = bid;
-                block.data = convertNodefToBlock(curnode);
+                block.data = convertNodefToBlock(n);
 		flag = 1;
-		pos = curnode->pos;
+		pos = n->pos;
 		//delete curnode;
             }
 	    else if(block.id == 0)
@@ -379,7 +379,7 @@ void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
 		//cout <<"full blocks setupWriting:"<<block.id<<endl;
 		block.data = convertNodefToBlock(curnode);
 		pos = curnode->pos;
-		//delete curnode;
+		delete curnode;
 	    }
 
 	    if(rootKey == block.id)

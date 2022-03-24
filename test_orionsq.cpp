@@ -13,11 +13,12 @@ using namespace std::chrono;
 int fileid = 1;
 bool usehdd = true;
 bool batch = true;
-map<string,int> kwfreq;
+/*map<string,int> kwfreq;
 bool cmp(pair<string, int>& a, pair<string, int>& b)
 {
      return a.second < b.second;
 }
+
 void sort(map<string, int>& M)
 {
 	vector<pair<string, int> > A;
@@ -31,7 +32,7 @@ void sort(map<string, int>& M)
 		cout << it.first << ' '<< it.second << endl;
 	}
 }
-
+*/
 int to_int(string updt_cnt)
 {
         int updc;
@@ -73,7 +74,6 @@ static void list_dir (const char * dir_name, Orion& orion)
 	          string file = dir_name;
 	          file = file.append("/");
 	          file = file.append(d_name);
-	          vector<string> kws1, kws;
 	          string cont = getFileContent(file);
 	          cout <<"============================================================" << endl;
                   cout << file<< " " << fileid <<endl ;
@@ -114,7 +114,7 @@ int main(int argc, char**argv)
         ofstream sres;
         ifstream kw;
 	sres.open("orionsq.txt");	
-	kw.open("keyws");
+	kw.open("keywordsdel");
 	string line;
 ///*
 	list_dir(argv[3],orion);
@@ -125,6 +125,7 @@ int main(int argc, char**argv)
         	auto stop = high_resolution_clock::now();
 		auto duration = duration_cast<microseconds>(stop-start);
 		sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+		cout <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
 	}
 	return 0;
 //*/	
