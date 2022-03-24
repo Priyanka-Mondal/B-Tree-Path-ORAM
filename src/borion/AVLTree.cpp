@@ -79,8 +79,10 @@ Node* AVLTree::setuprightRotate(Node* y, Bid rootKey, int& pos) {
     y->leftPos = T2->pos;
 
     y->height = max(setupheight(y->leftID, y->leftPos), setupheight(y->rightID, y->rightPos)) + 1;
+    oram->maxheight = max(y->height,oram->maxheight);
     oram->setupWriteN(y->key, y, rootKey,pos);
     x->height = max(setupheight(x->leftID, x->leftPos), setupheight(x->rightID, x->rightPos)) + 1;
+    oram->maxheight = max(x->height,oram->maxheight);
     oram->setupWriteN(x->key, x, rootKey,  pos);
 
     return x;
@@ -102,8 +104,10 @@ Node* AVLTree::setupleftRotate(Node* x, Bid rootKey, int& pos) {
     x->rightPos = T2->pos;
 
     x->height = max(setupheight(x->leftID, x->leftPos), setupheight(x->rightID, x->rightPos)) + 1;
+    oram->maxheight = max(x->height,oram->maxheight);
     oram->setupWriteN(x->key, x, rootKey, pos);
     y->height = max(setupheight(y->leftID, y->leftPos), setupheight(y->rightID, y->rightPos)) + 1;
+    oram->maxheight = max(y->height,oram->maxheight);
     oram->setupWriteN(y->key, y, rootKey, pos);
     return y;
 }
@@ -127,8 +131,10 @@ Node* AVLTree::rightRotate(Node* y) {
 
     // Update heights
     y->height = max(height(y->leftID, y->leftPos), height(y->rightID, y->rightPos)) + 1;
+    oram->maxheight = max(y->height,oram->maxheight);
     oram->WriteNode(y->key, y);
     x->height = max(height(x->leftID, x->leftPos), height(x->rightID, x->rightPos)) + 1;
+    oram->maxheight = max(x->height,oram->maxheight);
     oram->WriteNode(x->key, x);
     // Return new root
 
@@ -156,8 +162,10 @@ Node* AVLTree::leftRotate(Node* x) {
 
     // Update heights
     x->height = max(height(x->leftID, x->leftPos), height(x->rightID, x->rightPos)) + 1;
+    oram->maxheight = max(x->height,oram->maxheight);
     oram->WriteNode(x->key, x);
     y->height = max(height(y->leftID, y->leftPos), height(y->rightID, y->rightPos)) + 1;
+    oram->maxheight = max(y->height,oram->maxheight);
     oram->WriteNode(y->key, y);
     // Return new root
     return y;
@@ -204,6 +212,7 @@ Bid AVLTree::setupinsert(Bid rootKey, int& pos, Bid key, pair<string,string> val
     }
 
     node->height = max(setupheight(node->leftID, node->leftPos), setupheight(node->rightID, node->rightPos)) + 1;
+    oram->maxheight = max(node->height,oram->maxheight);
 
     int balance = setupgetBalance(node);
 //cout <<node->key <<" BALANCEof >>>>>>>>>>>>>>>:"<< balance<<endl;
@@ -274,6 +283,7 @@ Bid AVLTree::insert(Bid rootKey, int& pos, Bid key, pair<string,string> value) {
        }
 	        /* 2. Update height of this ancestor node */
         node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
+        oram->maxheight = max(node->height,oram->maxheight);
 
 	    /* 3. Get the balance factor of this ancestor node to check whether
 	     *        this node became unbalanced */

@@ -10,14 +10,14 @@
 int inserted = 0;
 int uniquekw = 0;
 
-Oriel::Oriel(bool usehdd, int maxSize) 
+Oriel::Oriel(bool usehdd, int maxSize,int filesize) 
 {
     this->useHDD = usehdd;
     bytes<Key> key1{0};
     bytes<Key> key2{1};
-    I = new OMAPf(maxSize*16, key1);
-    del = new OMAPf(maxSize*8,key2);
-    ac = new OMAPf(maxSize, key2); 
+    I = new OMAPf(maxSize, key1);
+    del = new OMAPf(maxSize,key2);
+    ac = new OMAPf(filesize, key2); 
 }
 
 int stoI(string del_cnt)
@@ -28,8 +28,9 @@ int stoI(string del_cnt)
         return updc;
 }
 
-string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
+string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./ \n\t");
 
+std::set<std::string> neg = {"_","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","\n","\0", " ", "-","?","from","to", "in","on","so","how""me","you","this","that","ok","no","yes","him","her","they","them","not","none","an","under","below","behind","he","she","their","has","our","would","am","may","know","all","can","any","me","or","as","your","it","we","please","at","if","will","are","by","with","be","com","have","is","of","for","and","the","date","cc","up","but","do","what","which","been","where","could","who","would","did","put","done","too","get","got","yet","co","if"};
 vector<string> getUniquedWords(vector<string> kws)
 {
     vector<string> kw;
@@ -123,7 +124,7 @@ void Oriel::insertWrapper(vector<string> kws, string content,int ind,bool batch)
    	    insertkw(kw,ind); 
      } 
      cout << "inserted keywords (total:" <<kws.size() <<")for id:"<<ind<< endl;
-     //insertFile(ind,content); 
+     insertFile(ind,content); 
      inserted=inserted+kws.size();
      cout << endl<<"--TOTAL keywords inserted so far: "<<inserted<<endl;
      cout <<"--TOTAL unique keywords inserted so far: "<<uniquekw<<endl;
@@ -219,6 +220,7 @@ map<int,string> Oriel::search(string keyword)
 	FileNode* newhead = NULL;
         while(head!=NULL)
         {
+		cout <<"searching blocks of:"<< id<< endl;
     	    string temp;
             temp.assign((head->data).begin(),(head->data).end());
     	    if(files.find(ind) == files.end())
@@ -236,6 +238,7 @@ map<int,string> Oriel::search(string keyword)
 	DictF.erase(addr);
         DictF[newaddr]=newhead;
     }
+cout <<"size of files:"<<files.size()<<endl;
     return files;
 }
 

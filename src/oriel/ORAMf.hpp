@@ -90,7 +90,7 @@ private:
 public:
     ORAMf(int maxSize, bytes<Key> key);
     ~ORAMf();
-
+int maxheight;
     Nodef* ReadNodef(Bid bid, int lastLeaf, int newLeaf);
     Nodef* ReadNodef(Bid bid);
     int WriteNodef(Bid bid, Nodef* n);

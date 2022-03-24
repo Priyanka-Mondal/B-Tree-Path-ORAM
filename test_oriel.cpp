@@ -95,17 +95,26 @@ static void list_dir ( const char * dir_name, Oriel& oriel)
 int main(int argc, char**argv) 
 {
 	int size = to_int(argv[1]);
-	Oriel oriel(usehdd, size);  
+	int fsize = to_int(argv[2]);
+	Oriel oriel(usehdd, size, fsize);  
         ofstream sres;
 	sres.open("oriel.txt");//,ios::app);	
+        ifstream kw;
+	kw.open("keyws");
+	string line;
+	list_dir(argv[3],oriel);
+	while(getline(kw,line))
+	{
+        	auto start = high_resolution_clock::now();
+		auto s = oriel.search(line);
+        	auto stop = high_resolution_clock::now();
+		auto duration = duration_cast<microseconds>(stop-start);
+		sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+	}
+	return 0;
+
+
 /*
-        auto start = high_resolution_clock::now();
-	list_dir(argv[2],oriel);
-        auto stop = high_resolution_clock::now();
-	auto duration = duration_cast<microseconds>(stop-start);
-
-*/
-
 	list_dir("allen-p/deleted_items",oriel);
         auto start = high_resolution_clock::now();
 	auto s = oriel.search("borion");
@@ -226,5 +235,6 @@ int main(int argc, char**argv)
 		else
 			cout <<"invalid choice!"<<endl;
 	}    
+*/
         return 0;
 }

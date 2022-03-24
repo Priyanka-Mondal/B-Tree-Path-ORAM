@@ -2,6 +2,7 @@
 
 AVLTreef::AVLTreef(int maxSize, bytes<Key> key) : rd(), mt(rd()), dis(0, (pow(2, floor(log2(maxSize / Z)) + 1) - 1) / 2) {
     oram = new ORAMf(maxSize, key);
+    totalleaves = (pow(2, floor(log2(maxSize/Z))+1)-1)/2;
 }
 
 AVLTreef::~AVLTreef() {
@@ -43,12 +44,24 @@ Nodef* AVLTreef::newNodef(Bid key, int value) {
     node->height = 1; // new node is initially added at leaf
     return node;
 }
+Nodef* AVLTreef::setupnewNodef(Bid key, int value) {
+    Nodef* node = new Nodef();
+    node->key = key;
+    auto val = to_string(value);
+    std::fill(node->value.begin(), node->value.end(), 0);
+    std::copy(val.begin(), val.end(), node->value.begin());
+    node->leftID = 0;
+    node->rightID = 0;
+    node->pos = notsoRandomPath();
+    node->height = 1; // new node is initially added at leaf
+    return node;
+}
 
 Nodef* AVLTreef::setuprightRotate(Nodef* y, Bid rootKey, int& pos) {
     Nodef* x = oram->setupReadNf(y->leftID,y->leftPos);
     Nodef* T2;
     if (x->rightID == 0) {
-        T2 = newNodef(0, 0);
+        T2 = setupnewNodef(0, 0);
     } else {
         T2 = oram->setupReadNf(x->rightID,x->rightPos);
     }
@@ -59,8 +72,10 @@ Nodef* AVLTreef::setuprightRotate(Nodef* y, Bid rootKey, int& pos) {
     y->leftPos = T2->pos;
 
     y->height = max(setupheight(y->leftID, y->leftPos), setupheight(y->rightID, y->rightPos)) + 1;
+    oram->maxheight = max(y->height,oram->maxheight);
     oram->setupWriteNf(y->key, y, rootKey,pos);
-    x->height = max(setupheight(x->leftID, x->leftPos), setupheight(x->rightID, x->rightPos)) + 1;
+    x->height = max(setupheight(x->leftID, x->leftPos), setupheight(x->rightID, x->rightPos)) + 1;  
+    oram->maxheight = max(x->height,oram->maxheight);
     oram->setupWriteNf(x->key, x, rootKey,  pos);
 
     return x;
@@ -70,7 +85,7 @@ Nodef* AVLTreef::setupleftRotate(Nodef* x, Bid rootKey, int& pos) {
     Nodef* y = oram->setupReadNf(x->rightID,x->rightPos);
     Nodef* T2;
     if (y->leftID == 0) {
-        T2 = newNodef(0, 0);
+        T2 = setupnewNodef(0, 0);
     } else {
         T2 = oram->setupReadNf(y->leftID,y->leftPos);
     }
@@ -81,8 +96,10 @@ Nodef* AVLTreef::setupleftRotate(Nodef* x, Bid rootKey, int& pos) {
     x->rightPos = T2->pos;
 
     x->height = max(setupheight(x->leftID, x->leftPos), setupheight(x->rightID, x->rightPos)) + 1;
+    oram->maxheight = max(x->height,oram->maxheight);
     oram->setupWriteNf(x->key, x, rootKey, pos);
     y->height = max(setupheight(y->leftID, y->leftPos), setupheight(y->rightID, y->rightPos)) + 1;
+    oram->maxheight = max(y->height,oram->maxheight);
     oram->setupWriteNf(y->key, y, rootKey, pos);
     return y;
 }
@@ -102,8 +119,10 @@ Nodef* AVLTreef::rightRotate(Nodef* y) {
     y->leftPos = T2->pos;
 
     y->height = max(height(y->leftID, y->leftPos), height(y->rightID, y->rightPos)) + 1;
+    oram->maxheight = max(y->height,oram->maxheight);
     oram->WriteNodef(y->key, y);
     x->height = max(height(x->leftID, x->leftPos), height(x->rightID, x->rightPos)) + 1;
+    oram->maxheight = max(x->height,oram->maxheight);
     oram->WriteNodef(x->key, x);
 
     return x;
@@ -125,8 +144,10 @@ Nodef* AVLTreef::leftRotate(Nodef* x) {
     x->rightPos = T2->pos;
 
     x->height = max(height(x->leftID, x->leftPos), height(x->rightID, x->rightPos)) + 1;
+    oram->maxheight = max(x->height,oram->maxheight);
     oram->WriteNodef(x->key, x);
     y->height = max(height(y->leftID, y->leftPos), height(y->rightID, y->rightPos)) + 1;
+    oram->maxheight = max(y->height,oram->maxheight);
     oram->WriteNodef(y->key, y);
     return y;
 }
@@ -149,7 +170,7 @@ int AVLTreef::setupgetBalance(Nodef* N) {
 Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, int value) 
 {
     if (rootKey == 0) {
-        Nodef* nnode = newNodef(key, value);
+        Nodef* nnode = setupnewNodef(key, value);
         pos = oram->setupWriteNf(key, nnode,key,pos);
 //	cout <<pos<<":pos RETURNING root IS----------------"<<nnode->key<< endl;
         return nnode->key;
@@ -172,6 +193,7 @@ Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, int value)
     }
 
     node->height = max(setupheight(node->leftID, node->leftPos), setupheight(node->rightID, node->rightPos)) + 1;
+    oram->maxheight = max(node->height,oram->maxheight);
 
     int balance = setupgetBalance(node);
     
@@ -246,6 +268,7 @@ Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, int value) {
 
     /* 2. Update height of this ancestor node */
     node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
+    oram->maxheight = max(node->height,oram->maxheight);
 
     /* 3. Get the balance factor of this ancestor node to check whether
        this node became unbalanced */
@@ -385,7 +408,14 @@ int AVLTreef::RandomPath() {
     int val = dis(mt);
     return val;
 }
-
+int AVLTreef::notsoRandomPath() 
+{
+    if(setupleaf != totalleaves)
+	    setupleaf++;
+    else
+	    setupleaf = 0;
+    return setupleaf;
+}
 
 Nodef* AVLTreef::minValueNode(Bid rootKey, int rootPos, Nodef* rootroot)
 {

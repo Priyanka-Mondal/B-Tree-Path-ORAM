@@ -97,7 +97,20 @@ int main(int argc, char**argv)
 	int size = to_int(argv[1]);
 	BOrion borion(usehdd, size);  
         ofstream sres;
-	sres.open("borion.txt",ios::app);	
+	sres.open("borion.txt");//,ios::app);	
+	ifstream kw;
+	kw.open("keyws");
+	string line;
+///*
+	list_dir(argv[2],borion);
+	while(getline(kw,line))
+	{
+        	auto start = high_resolution_clock::now();
+		auto s = borion.searchsimple(line);
+        	auto stop = high_resolution_clock::now();
+		auto duration = duration_cast<microseconds>(stop-start);
+		sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+	}
 /*
         auto start = high_resolution_clock::now();
 	list_dir(argv[2],borion);
@@ -105,6 +118,8 @@ int main(int argc, char**argv)
 	auto duration = duration_cast<microseconds>(stop-start);
 
 */
+return 0;
+/*
 	list_dir("allen-p/deleted_items",borion);
 	list_dir("allen-p/sent_items",borion);
 	list_dir("allen-p/sent",borion);
@@ -149,7 +164,8 @@ int main(int argc, char**argv)
 
 	return 0;
 
-	
+*/	
+/*
 	cout <<"== TOTAL files inserted :"<<fileid-1<<" =="<<endl;
 	cout <<"Time taken for setup(borion):"<<duration.count()<<endl;
 	cout << endl<<" SETUP INSERT DONE!"<< endl;
@@ -177,7 +193,7 @@ int main(int argc, char**argv)
 			string keyword;
 			cin>> keyword;
 		cout <<"---------------Search result----------------"<<endl;
-		/*	map<string,string> files;
+			map<string,string> files;
 			start = high_resolution_clock::now();
 	    	vector<pair<string,string>> results=borion.search(keyword);
 			stop = high_resolution_clock::now();
@@ -206,7 +222,7 @@ int main(int argc, char**argv)
 		}
 		cout<<endl<<"RESULT stupsrchSIZE: "<<files.size()<<endl<<endl;
 			sres<< duration.count() <<" "<<files.size()<<endl;
-*/
+
 			map<string,string>  files2;
 			start = high_resolution_clock::now();
 	    	vector<pair<string,string>> res2=borion.searchsimple(keyword);
@@ -261,18 +277,18 @@ int main(int argc, char**argv)
 		}
 		else if(c=='p' || c=='P')
 		{
-			cout << "Enter file name to be inserted:";
-			string file;
-			cin>> file;
-	          	string cont = getFileContent(file);
-			start = high_resolution_clock::now();
-			borion.insertWrap(cont,fileid,true);
-			stop = high_resolution_clock::now();
-			duration = duration_cast<microseconds>(stop-start);
-			cout << "Insertion time: "<< duration.count()<<endl;  
-		cout <<"--TOTAL files inserted so far:"<<fileid<<endl;
-			fileid++;
-			cout <<endl;
+		//	cout << "Enter file name to be inserted:";
+		//	string file;
+		//	cin>> file;
+	        //  	string cont = getFileContent(file);
+		//	start = high_resolution_clock::now();
+		//	borion.insertWrap(cont,fileid,true);
+		//	stop = high_resolution_clock::now();
+		//	duration = duration_cast<microseconds>(stop-start);
+		//	cout << "Insertion time: "<< duration.count()<<endl;  
+		//cout <<"--TOTAL files inserted so far:"<<fileid<<endl;
+		//	fileid++;
+		//	cout <<endl;
 		}
 		else if(c=='q'||c=='Q')
 		{
@@ -282,5 +298,6 @@ int main(int argc, char**argv)
 		else
 			cout <<"invalid choice!"<<endl;
 	}    
-        return 0;
+        return 0;*/
+	
 }

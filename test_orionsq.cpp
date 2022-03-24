@@ -114,13 +114,10 @@ int main(int argc, char**argv)
         ofstream sres;
         ifstream kw;
 	sres.open("orionsq.txt");	
-	kw.open("keywords");
+	kw.open("keyws");
 	string line;
 ///*
-        auto start = high_resolution_clock::now();
 	list_dir(argv[3],orion);
-        auto stop = high_resolution_clock::now();
-	auto duration = duration_cast<microseconds>(stop-start);
 	while(getline(kw,line))
 	{
         	auto start = high_resolution_clock::now();
@@ -175,7 +172,7 @@ return 0;
 
 	return 0;
 
-*/	
+	
 	cout <<"== TOTAL files inserted :"<<fileid-1<<" =="<<endl;
 	cout <<"Time taken for setup(orionsq):"<<duration.count()<<endl;
 	cout << endl<<" SETUP INSERT DONE!"<< endl;
@@ -259,5 +256,5 @@ return 0;
 		else
 			cout <<"invalid choice!"<<endl;
 	}    
-        return 0;
+        return 0;*/
 }

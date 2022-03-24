@@ -329,7 +329,7 @@ void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
     int oramsz= store->GetEmptySize();
   if (oramsz > 0) 
   {
-		 cout<<"Empty Nodes in ORAM:"<<oramsz<<endl;
+		 //cout<<"Empty Nodes in ORAM:"<<oramsz<<endl;
 		//cout <<"Empty nodes in ORAMf:"<<sz<<endl<<endl;
     for (size_t d = 0; d <= depth; d++) 
     {
@@ -483,7 +483,7 @@ void ORAMf::finilize(bool find, Bid& rootKey, int& rootPos) {
     }
 
     //updating the binary tree positions
-    for (unsigned int i = 0; i <= depth + 2; i++) {
+    for (unsigned int i = 1; i <= maxheight; i++) {
         for (auto t : cache) {
             if (t.second != NULL && t.second->height == i) {
                 Nodef* tmp = t.second;

@@ -6,7 +6,9 @@
 #include <boost/algorithm/string.hpp>
 #include<limits.h>
 #include<set>
+#include<chrono>
 using namespace std;
+using namespace std::chrono;
 
 #define REAL true
 #define FAKE false
@@ -153,19 +155,19 @@ static void list_dir (const char * dir_name, Client& client, bool real)
 		      }
 	      }
 	      cout <<file<< " " << fileid <<endl;
-			//client.insert(kws, fileid,true);
+			client.insert(kws, fileid,true);
 			uniquekw = uniquekw+kws.size();
 			cout << "inserted "<< uniquekw <<" unique keywords"<<endl;
-			//client.insertFile(fileid,cont,true);
+			client.insertFile(fileid,cont,true);
                 fileid++;
-              }
+              }/*
 	    for(auto word: kws)
 	    {
        		 if (!kwfreq.count(word))
        		     kwfreq.insert(make_pair(word, 1));
        		 else
        		     kwfreq[word]++;
-	    }
+	    }*/
              if (entry->d_type & DT_DIR) {
                 if (strcmp (d_name, "..") != 0 &&
                   strcmp (d_name, ".") != 0) {
@@ -266,12 +268,29 @@ int main(int argc, char** argv)
     bool usehdd = true, deletFiles = true;
     Server server(usehdd, deletFiles);
     int kwcnt = stoI(argv[1]);
-    int filecnt = 0;//stoI(argv[3]);
+    int filecnt = stoI(argv[2]);
     Client client(&server, deletFiles, kwcnt, filecnt);
-    list_dir(argv[2],client, REAL);
+    list_dir(argv[3],client, REAL);
     client.endSetup();
-	//list_dir("allen-p/deleted_items",client, REAL);
-	sort(kwfreq);
+        ofstream sres;
+	sres.open("mitra.txt");
+        ifstream kw;
+	kw.open("keyws");
+	string line;
+	while(getline(kw,line))
+	{
+        	auto start = high_resolution_clock::now();
+		auto s = client.search(line);
+	    		for(auto file:s)
+			{
+	    			cout << "["<<file.first<<"] ";
+	    			//cout << file.second<<endl;
+				cout <<endl;
+			}
+        	auto stop = high_resolution_clock::now();
+		auto duration = duration_cast<microseconds>(stop-start);
+		sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+	}
 	return 0;
 	cout << endl<<" SETUP INSERT DONE!"<< endl;
 	cout <<"=================================="<< endl;

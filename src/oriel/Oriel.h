@@ -66,7 +66,7 @@ public:
     
     void print();
 
-    Oriel(bool useHDD,int maxSize);    
+    Oriel(bool useHDD,int maxSize, int filesize);    
     virtual ~Oriel();
 
     void getAESRandomValue(unsigned char* keyword, int op, int srcCnt, int fileCnt, unsigned char* result);

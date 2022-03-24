@@ -64,6 +64,7 @@ block ORAM::SerialiseBucket(Bucket bucket) {
 
     assert(buffer.size() == Z * (blockSize));
 
+    cout <<"blockSize:"<< Z*blockSize<<endl;
     return buffer;
 }
 
@@ -88,6 +89,7 @@ Bucket ORAM::DeserialiseBucket(block buffer) {
 Bucket ORAM::ReadBucket(int index) {
     block ciphertext = store->Read(index);
     block buffer = AES::Decrypt(key, ciphertext, clen_size);
+    //block buffer = store->Read(index);
     Bucket bucket = DeserialiseBucket(buffer);
     return bucket;
 }
@@ -95,6 +97,8 @@ Bucket ORAM::ReadBucket(int index) {
 void ORAM::WriteBucket(int index, Bucket bucket) {
     block b = SerialiseBucket(bucket);
     block ciphertext = AES::Encrypt(key, b, clen_size, plaintext_size);
+    cout <<"size of plain"<< b.size();
+    cout <<"size of cipher"<< ciphertext.size()<<endl;
     store->Write(index, ciphertext);
 }
 

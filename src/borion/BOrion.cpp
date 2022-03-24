@@ -14,9 +14,9 @@ BOrion::BOrion(bool usehdd, int maxSize) {
     this->useHDD = usehdd;
     bytes<Key> key1{0};
     bytes<Key> key2{1};
-    srch = new OMAP(maxSize*16, key1);
-    updt = new OMAPf(maxSize*12, key2); // use key2
-    fcnt = new OMAPf(maxSize,key2);
+    srch = new OMAP(maxSize*2, key1);
+    //updt = new OMAPf(maxSize*12, key2); // use key2
+    //fcnt = new OMAPf(maxSize,key2);
     //srch = new OMAP(maxSize*4, key1);
     //updt = new OMAPf(maxSize*2, key2); // use key2
     //fcnt = new OMAPf(maxSize,key2);
@@ -71,8 +71,8 @@ int get_position(int updc, int com)
        return pos_in_block;
 }
 
-string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
-set<string> neg = {"\n","\0", " ", "-","?","from","to", "in"};
+string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./ \n\t");
+std::set<std::string> neg = {"_","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","\n","\0", " ", "-","?","from","to", "in","on","so","how""me","you","this","that","ok","no","yes","him","her","they","them","not","none","an","under","below","behind","he","she","their","has","our","would","am","may","know","all","can","any","me","or","as","your","it","we","please","at","if","will","are","by","with","be","com","have","is","of","for","and","the","date","cc","up","but","do","what","which","been","where","could","who","would","did","put","done","too","get","got","yet","co","if"};
 
 
 
@@ -146,8 +146,8 @@ vector<string> divideString(string str, int sz, int id)
 
 BOrion::~BOrion() {
     delete srch;
-    delete updt;
-    delete fcnt;
+    //delete updt;
+    //delete fcnt;
 }
 
 void BOrion::insertWrap(string cont, int ind, bool batch)
@@ -199,14 +199,16 @@ void BOrion::setupinsertWrapper(vector<string>kws,vector<string>blocks,int ind)
 void BOrion::setupinsertkw(string keyword, int ind) 
 {
     Bid mapKey(keyword);
-    int updc = fcnt->setupfind(mapKey);
+    //int updc = fcnt->setupfind(mapKey);
+    int updc = fcntmap[mapKey];
     if (updc == 0) 
 	 uniquekw++;  
     updc++;
-    fcnt->setupinsert(mapKey,updc);
-
+    //fcnt->setupinsert(mapKey,updc);
+     fcntmap[mapKey]=updc;
     Bid updKey = createBid(keyword, ind);
-    updt->setupinsert(updKey, updc);//pad
+    //updt->setupinsert(updKey, updc);//pad
+    updtmap[updKey]= updc;//pad
 
     int pos_in_block = get_position(updc,COM);
     int block_num = get_block_num(updc,COM);
@@ -234,7 +236,8 @@ void BOrion::setupinsertFile(int id, vector<string> blocks)
 	int sz = blocks.size();
         //string par = ind;
 	//par.append(to_string(sz));// pad later to 64 byte
-	fcnt->setupinsert(mapKey, sz);
+	//fcnt->setupinsert(mapKey, sz);
+	fcntmap[mapKey]=sz;
 	int i =1;
         for(auto block : blocks)
 	{       
@@ -268,14 +271,17 @@ void BOrion::insertWrapper(vector<string> kws,vector<string> blocks,int ind)
 void BOrion::insertkw(string keyword, int ind) 
 {
     Bid mapKey(keyword);
-    int updc = (fcnt->find(mapKey));
+    //int updc = fcnt->find(mapKey);
+    int updc = fcntmap[mapKey];
     if (updc == 0) 
 	 uniquekw++;  
     cout <<"updc:"<< updc;
     updc++;
-    fcnt->insert(mapKey,updc);
+    //fcnt->insert(mapKey,updc);
+    fcntmap[mapKey]=updc;
     Bid updKey = createBid(keyword, ind);
-    updt->insert(updKey, updc);//pad, can we store number in updc 
+    //updt->insert(updKey, updc);//pad, can we store number in updc 
+    updtmap[updKey]= updc;//pad, can we store number in updc 
 
     int pos_in_block = get_position(updc,COM);
     int block_num = get_block_num(updc,COM);
@@ -365,11 +371,13 @@ void BOrion::removekw(vector<string> kws, int ind)
     for(auto keyword : kws)
     {
       Bid mapKey = createBid(keyword, ind);
-      int delcnt = updt->find(mapKey);
+      //int delcnt = updt->find(mapKey);
+      int delcnt = updtmap[mapKey];
       if (delcnt!=0)
       {
 	Bid firstKey(keyword);
-        int updc = fcnt->find(firstKey);
+        //int updc = fcnt->find(firstKey);
+        int updc = fcntmap[firstKey];
 	cout <<keyword<<":UPDC IN DELETE:"<< updc<<endl;
 	if(updc==0)
 		return;
@@ -381,11 +389,13 @@ void BOrion::removekw(vector<string> kws, int ind)
 	updc--;
   	if (updc > 0) 
     	{
-    	    fcnt->insert(firstKey,updc);
+    	    //fcnt->insert(firstKey,updc);
+	    fcntmap[firstKey]=updc;
             if (updc + 1 != delcnt) 
             {
                 Bid curKey = createBid(keyword, stoI(lastid)); 
-                updt->insert(curKey, delcnt);
+                //updt->insert(curKey, delcnt);
+                updtmap[curKey]= delcnt;
                 int pos_in_blockdel = get_position(delcnt,COM);
                 int block_del = get_block_num(delcnt, COM);
                 Bid cur = createBid(keyword, block_del);
@@ -411,10 +421,12 @@ void BOrion::removekw(vector<string> kws, int ind)
        } 
        else 
        {
-		fcnt->remove(firstKey);
+		//fcnt->remove(firstKey);
+		fcntmap[firstKey]=0;
 		srch->remove(lastKey);
        }
-       updt->remove(mapKey); // delete in updt
+       //updt->remove(mapKey); // delete in updt
+       updtmap[mapKey]=0; // delete in updt
     }
   }
 }
@@ -425,7 +437,8 @@ vector<pair<string,string>> BOrion::setupsearch(string keyword)
     vector<pair<string,string>> result;
     vector<pair <string,string>> counts;
     Bid mapKey(keyword);
-    int updc = fcnt->setupfind(mapKey); //0. get file count i.e. updc 
+    //int updc = fcnt->setupfind(mapKey); //0. get file count i.e. updc 
+    int updc = fcntmap[mapKey]; //0. get file count i.e. updc 
     if (updc == 0) 
         return result;
 
@@ -499,7 +512,8 @@ vector<pair<string,string>> BOrion::searchsimple(string keyword)
     vector<pair<string,string>> result;
     vector<Bid> fileblocks; 
     Bid mapKey(keyword);
-    int updc = fcnt->find(mapKey); 
+    //int updc = fcnt->find(mapKey); 
+    int updc = fcntmap[mapKey]; 
     if (updc == 0) 
         return result;
     cout <<"UPDC:"<<updc;
@@ -518,7 +532,8 @@ vector<pair<string,string>> BOrion::searchsimple(string keyword)
 	    	fetched++;
                 string fID = to_string(stoI(str));
             	Bid bid(fID); 
-                int sz = fcnt->find(bid);
+                //int sz = fcnt->find(bid);
+                int sz = fcntmap[bid];
 		for(int i = 1;i<=sz;i++)
 		{
 			Bid fb = createBid(fID,i);
@@ -537,7 +552,8 @@ vector<pair<string,string>> BOrion::search(string keyword)
     vector<pair<string,string>> result;
     vector<pair<string,string>> counts;
     Bid mapKey(keyword);
-    int updc = fcnt->find(mapKey); //0. get file count i.e. updc 
+    //int updc = fcnt->find(mapKey); //0. get file count i.e. updc 
+    int updc = fcntmap[mapKey]; //0. get file count i.e. updc 
     if (updc == 0) 
         return result;
     cout <<"UPDC:"<< updc;
@@ -583,7 +599,8 @@ vector<pair<string,string>> BOrion::search(string keyword)
 	    	point++;
 	    	fetched++;
     //}
-                int sz = fcnt->find(bid);//3. block-size of rest of the files
+                //int sz = fcnt->find(bid);//3. block-size of rest of the files
+                int sz = fcntmap[bid];//3. block-size of rest of the files
     //for(auto id1 : counts)
     //{
                 int fID = stoI(str);
@@ -618,6 +635,6 @@ Bid BOrion::createBid(string keyword, string id)
 
 void BOrion::print()
 {
-	updt->printTree();
+	//updt->printTree();
 	srch->printTree();
 }
