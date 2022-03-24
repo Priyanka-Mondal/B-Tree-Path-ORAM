@@ -1,3 +1,4 @@
+#pragma once
 #ifndef OMAPf_H
 #define OMAPf_H
 #include <iostream>

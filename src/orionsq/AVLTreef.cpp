@@ -179,7 +179,11 @@ Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, int value)
     if (rootKey == 0) {
         Nodef* nnode = setupnewNodef(key, value);
         pos = oram->setupWriteNf(key, nnode,key,pos);
-        return nnode->key;
+        //return nnode->key;
+        
+	Bid nnk = nnode->key;
+	delete nnode;
+	return nnk;
     }
     Nodef* node = oram->setupReadNf(rootKey, pos);
     //if(node ==NULL ) cout<<rootKey<<"rootKey/"<<pos<<":rootPos /got NULL while inserting"<<key<<endl;
@@ -209,7 +213,11 @@ Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, int value)
     //cout <<" Left Left Case-----------------------------------"<<endl;
         Nodef* res = setuprightRotate(node, rootKey, pos);
         pos = res->pos;
-        return res->key;
+       // return res->key;
+        
+	Bid nnk = res->key;
+	delete res;
+	return nnk;
     }
 
     // Right Right Case
@@ -217,7 +225,11 @@ Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, int value)
     //cout <<" Right Right Case-----------------------------------"<<endl;
         Nodef* res = setupleftRotate(node, rootKey, pos);
         pos = res->pos;
-        return res->key;
+       // return res->key;
+        
+	Bid nnk = res->key;
+	delete res;
+	return nnk;
     }
     // Left Right Case
     if (balance > 1 && key > oram->setupReadNf(node->leftID,node->leftPos)->key) {
@@ -228,7 +240,12 @@ Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, int value)
         oram->setupWriteNf(node->key, node, rootKey,pos);
         Nodef* res2 = setuprightRotate(node, rootKey, pos);
         pos = res2->pos;
-        return res2->key;
+        //return res2->key;
+        
+	Bid nnk = res2->key;
+	delete res2;
+	delete res;
+	return nnk;
     }
 
     // Right Left Case
@@ -240,12 +257,21 @@ Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, int value)
         oram->setupWriteNf(node->key, node, rootKey,pos);
         auto res2 = setupleftRotate(node, rootKey, pos);
         pos = res2->pos;
-        return res2->key;
+       // return res2->key;
+        
+	Bid nnk = res2->key;
+	delete res2;
+	delete res;
+	return nnk;
     }
 
     /* return the (unchanged) node pointer */
     oram->setupWriteNf(node->key, node, rootKey,pos);
-    return node->key;
+    //return node->key;
+        
+	Bid nnk = node->key;
+	delete node;
+	return nnk;
 }
 
 

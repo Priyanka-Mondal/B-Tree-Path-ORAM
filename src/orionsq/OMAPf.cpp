@@ -37,6 +37,7 @@ int OMAPf::setupfind(Bid key) {
     //else if(resNode == NULL)
 //	    cout <<"Null recieved in OMAPf for"<< key<< endl;
 delete node;	    
+delete resNode;
     return res;
 }
 int OMAPf::find(Bid key) {
@@ -57,7 +58,9 @@ int OMAPf::find(Bid key) {
 	res = stoint(res2);
     }
     treeHandler->finishOperation(true, rootKey, rootPos);
-    return res;
+delete node;	    
+//delete resNode;
+return res;
 }
 
 
@@ -147,5 +150,6 @@ vector<int> OMAPf::batchSearch(vector<Bid> keys) {
     }
     treeHandler->finishOperation(true, rootKey, rootPos);
     delete node;
+    resNodes.clear();
     return result;
 }

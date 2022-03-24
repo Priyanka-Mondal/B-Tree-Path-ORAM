@@ -27,7 +27,8 @@ string OMAP::setupfind(Bid key) {
     //else if(resNode == NULL)
 //	    cout <<"Null recieved in OMAPf for"<< key<< endl;
 delete node;
-    return res;
+//delete resNode;
+return res;
 
 }
 string OMAP::find(Bid key) {
@@ -45,18 +46,17 @@ string OMAP::find(Bid key) {
         res = res.c_str();
     }
     treeHandler->finishOperation(true, rootKey, rootPos);
-    return res;
+delete node;
+delete resNode;
+return res;
 }
 
 void OMAP::setupinsert(Bid key, string value)
 {
-    //treeHandler->startOperation();
     if (rootKey == 0) {
         rootKey = treeHandler->setupinsert(0, rootPos, key, value);
-	//cout <<rootPos<<"root at OMAP is :"<< rootKey<<endl;
     } else {
         rootKey = treeHandler->setupinsert(rootKey, rootPos, key, value);
-	//cout <<rootPos<<"root at OMAP is :"<< rootKey<<endl;
     }
 }
 void OMAP::insert(Bid key, string value) {
@@ -135,5 +135,6 @@ vector<string> OMAP::batchSearch(vector<Bid> keys) {
     }
     treeHandler->finishOperation(true, rootKey, rootPos);
     delete node;
+    resNodes.clear();
     return result;
 }

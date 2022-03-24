@@ -183,17 +183,17 @@ Bid AVLTree::setupinsert(Bid rootKey, int& pos, Bid key, string value)
     if (rootKey == 0) {
         Node* nnode = setupnewNode(key, value);
         pos = oram->setupWriteN(key, nnode,key,pos);
-//	cout <<pos<<":pos RETURNING root IS----------------"<<nnode->key<< endl;
-        return nnode->key;
+        //return nnode->key;
+	
+	Bid nnk = nnode->key;
+	delete nnode;
+	return nnk;
     }
     Node* node = oram->setupReadN(rootKey, pos);
     if (key < node->key) {
-	    //cout <<"key<nodef"<<key<<node->key<<node->leftPos<<endl;
         node->leftID = setupinsert(node->leftID, node->leftPos, key, value);
     } else if (key > node->key) {
-	    //cout <<"key>nodef"<<key<<node->key<<node->rightPos<<endl;
         node->rightID = setupinsert(node->rightID, node->rightPos, key, value);
-//	cout <<node->rightPos<<"the RIGHT ID IS -----"<< node->rightID<<endl;
     } else {
         std::fill(node->value.begin(), node->value.end(), 0);
         std::copy(value.begin(), value.end(), node->value.begin());
@@ -210,17 +210,24 @@ Bid AVLTree::setupinsert(Bid rootKey, int& pos, Bid key, string value)
     //cout <<" Left Left Case-----------------------------------"<<endl;
         Node* res = setuprightRotate(node, rootKey, pos);
         pos = res->pos;
-        return res->key;
+	//return res->key;
+	
+	Bid nnk = res->key;
+	delete res;
+	return nnk;
+        
     }
 
-    // Right Right Case
     if (balance < -1 && key > oram->setupReadN(node->rightID,node->rightPos)->key) {
     //cout <<" Right Right Case-----------------------------------"<<endl;
         Node* res = setupleftRotate(node, rootKey, pos);
         pos = res->pos;
-        return res->key;
+        //return res->key;
+	
+	Bid nnk = res->key;
+	delete res;
+	return nnk;
     }
-    // Left Right Case
     if (balance > 1 && key > oram->setupReadN(node->leftID,node->leftPos)->key) {
 //    cout <<" Left Right Case-----------------------------------"<<endl;
         Node* res = setupleftRotate(oram->setupReadN(node->leftID,node->leftPos),rootKey, pos);
@@ -229,10 +236,14 @@ Bid AVLTree::setupinsert(Bid rootKey, int& pos, Bid key, string value)
         oram->setupWriteN(node->key, node, rootKey,pos);
         Node* res2 = setuprightRotate(node, rootKey, pos);
         pos = res2->pos;
-        return res2->key;
+       // return res2->key;
+	
+	Bid nnk = res2->key;
+	delete res2;
+	delete res;
+	return nnk;
     }
 
-    // Right Left Case
     if (balance < -1 && key < oram->setupReadN(node->rightID,node->rightPos)->key) {
 //    cout <<" Right Left Case-----------------------------------"<<endl;
         auto res = setuprightRotate(oram->setupReadN(node->rightID,node->rightPos), rootKey, pos);
@@ -241,12 +252,21 @@ Bid AVLTree::setupinsert(Bid rootKey, int& pos, Bid key, string value)
         oram->setupWriteN(node->key, node, rootKey,pos);
         auto res2 = setupleftRotate(node, rootKey, pos);
         pos = res2->pos;
-        return res2->key;
+        //return res2->key;
+	
+	Bid nnk = res2->key;
+	delete res2;
+	delete res;
+	return nnk;
     }
 
     /* return the (unchanged) node pointer */
     oram->setupWriteN(node->key, node, rootKey,pos);
-    return node->key;
+    //return node->key;
+
+        Bid nnk = node->key;
+	delete node;
+	return nnk;
 }
 
 

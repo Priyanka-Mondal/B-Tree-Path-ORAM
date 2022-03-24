@@ -139,7 +139,7 @@ void Orion::setupinsert(vector<string> kws, vector<string> blocks, int ind)
   	      fc++;
   	      Bid mapKey = createBid(kw, ind);
   	      //updt->setupinsert(mapKey, fc); 
-	      UpdtCnt[mapKey]=fc;
+	      //UpdtCnt[mapKey]=fc;
   	      srch->setupinsert(firstKey, fc); 
   	      Bid key = createBid(kw, fc);
   	      srch->setupinsert(key, ind);
@@ -213,7 +213,7 @@ void Orion::insert(vector<string> kws, vector<string> blocks, int ind)
   	      fc++;
   	      Bid mapKey = createBid(kw, ind);
   	      //updt->insert(mapKey, fc);
-	      UpdtCnt[mapKey]=fc;
+	      //UpdtCnt[mapKey]=fc;
   	      srch->insert(firstKey, fc);
   	      Bid key = createBid(kw, fc);
   	      srch->insert(key, ind);
@@ -327,11 +327,11 @@ void Orion::remove(int id)
 	vector<string> kws1;
 	boost::split(kws1, cont, boost::is_any_of(delimiters));
 	vector<string> kws = getUniquedWords(kws1);
-	removekw(kws, id);
+	//removekw(kws, id);
 }
 
 
-
+/*
 void Orion::removekw(vector <string> kws, int id) 
 {
 	for(auto kw : kws)
@@ -370,7 +370,7 @@ void Orion::removekw(vector <string> kws, int id)
 		}
 	}
 }
-
+*/
 Bid Orion::createBid(string keyword, int number) {
     Bid bid(keyword);
     auto arr = to_bytes(number);

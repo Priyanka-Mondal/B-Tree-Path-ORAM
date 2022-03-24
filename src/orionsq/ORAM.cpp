@@ -252,7 +252,6 @@ void ORAM::Access(Bid bid, Node*& node) {
 Node* ORAM::setupReadN(Bid bid,int leaf)
 {
     if (bid == 0) {
-	    //cout <<"Hey setupReadN is 0"<<endl;
         return NULL;
     }
     Node* n;
@@ -394,14 +393,10 @@ void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
 
 
 int ORAM::setupWriteN(Bid bid, Node* node, Bid rootKey, int& rootPos) {
-    if (bid == 0) {
+    if (bid == 0) 
         throw runtime_error("Node id is not set in WriteNode");
-    }
     else
-    {
-	    setupWriteBucket(bid,node,rootKey,rootPos);
-    }
-    //cout <<"returning rootPOs ------"<< node->key << endl;
+	setupWriteBucket(bid,node,rootKey,rootPos);
     return rootPos;
 }
 int ORAM::WriteNode(Bid bid, Node* node) {

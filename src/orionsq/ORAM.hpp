@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ORAM_H
 #define ORAM_H
 

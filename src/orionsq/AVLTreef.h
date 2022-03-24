@@ -1,3 +1,4 @@
+#pragma once
 #ifndef AVLTREEF_H
 #define AVLTREEF_H
 #include <iostream>

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef BID_H
 #define BID_H
 #include "../borion/Types.hpp"
