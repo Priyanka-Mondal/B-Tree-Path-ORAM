@@ -42,11 +42,9 @@ using Bucketf = std::array<Blockf, Z>;
 class ORAMf {
 private:
     RAMStore* store;
-    using Stash = std::unordered_map<Bid, block>;
     size_t depth;
     size_t blockSize;
     map<Bid, Nodef*> cache;
-    map<Bid, Nodef*> cacheb;
     vector<int> leafList;
     vector<int> readviewmap;
     vector<int> writeviewmap;

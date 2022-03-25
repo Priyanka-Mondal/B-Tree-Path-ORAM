@@ -36,10 +36,9 @@ ORAM::ORAM(int maxSize, bytes<Key> key)
 
 ORAM::~ORAM() {
     AES::Cleanup();
+    delete store;
 }
 
-// Fetches the array index a bucket
-// that lise on a specific path
 
 int ORAM::GetNodeOnPath(int leaf, int curDepth) {
     leaf += bucketCount / 2;
@@ -57,13 +56,12 @@ block ORAM::SerialiseBucket(Bucket bucket) {
 
     for (int z = 0; z < Z; z++) {
         Block b = bucket[z];
-
-        // Write block data
         buffer.insert(buffer.end(), b.data.begin(), b.data.end());
+    //delete b;
     }
 
     assert(buffer.size() == Z * (blockSize));
-
+    
     return buffer;
 }
 
@@ -88,17 +86,18 @@ Bucket ORAM::DeserialiseBucket(block buffer) {
 Bucket ORAM::ReadBucket(int index) {
     block ciphertext = store->Read(index);
     block buffer = AES::Decrypt(key, ciphertext, clen_size);
-    //block buffer = store->Read(index);
     Bucket bucket = DeserialiseBucket(buffer);
+    ciphertext.clear();
+    buffer.clear();
     return bucket;
 }
 
 void ORAM::WriteBucket(int index, Bucket bucket) {
     block b = SerialiseBucket(bucket);
     block ciphertext = AES::Encrypt(key, b, clen_size, plaintext_size);
-    //cout <<"size of plain"<< b.size();
-    //cout <<"size of cipher"<< ciphertext.size()<<endl;
     store->Write(index, ciphertext);
+    ciphertext.clear();
+    b.clear();
 }
 
 // Fetches blocks along a path, adding them to the cache
@@ -386,13 +385,14 @@ void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
 	    cache[bid] = n;
 	    cout <<"Writing in CACHE!!!!!!"<<endl;
     }
-	 }
-	 else
-		 throw runtime_error("No more spaCe in ORAM");
+ }
+    else
+	 throw runtime_error("No more spaCe in ORAM");
 }
 
 
-int ORAM::setupWriteN(Bid bid, Node* node, Bid rootKey, int& rootPos) {
+int ORAM::setupWriteN(Bid bid, Node* node, Bid rootKey, int& rootPos) 
+{
     if (bid == 0) 
         throw runtime_error("Node id is not set in WriteNode");
     else

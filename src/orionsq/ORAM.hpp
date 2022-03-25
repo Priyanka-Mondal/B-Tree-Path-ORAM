@@ -44,7 +44,6 @@ using Bucket = std::array<Block, Z>;
 class ORAM {
 private:
     RAMStore* store;
-    using Stash = std::unordered_map<Bid, block>;
     size_t depth;
     size_t blockSize;
     map<Bid, Node*> cache;

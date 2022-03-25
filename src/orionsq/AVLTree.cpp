@@ -16,7 +16,10 @@ int AVLTree::setupheight(Bid key, int& leaf) {
     if (key == 0)
         return 0;
     Node* node = oram->setupReadN(key, leaf);
-    return node->height;
+    //return node->height;
+    int hei = node->height;
+    delete node;
+    return hei;
 }
 int AVLTree::height(Bid key, int& leaf) {
     if (key == 0)
@@ -81,7 +84,7 @@ Node* AVLTree::setuprightRotate(Node* y,Bid rootKey, int& pos) {
     oram->maxheight = max(x->height,oram->maxheight);
     oram->setupWriteN(x->key, x, rootKey,  pos);
     // Return new root
-
+delete T2;
     return x;
 }
 Node* AVLTree::rightRotate(Node* y) {
@@ -108,6 +111,7 @@ Node* AVLTree::rightRotate(Node* y) {
     oram->WriteNode(x->key, x);
     // Return new root
 
+delete T2;
     return x;
 }
 

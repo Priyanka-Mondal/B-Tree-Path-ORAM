@@ -36,6 +36,7 @@ ORAMf::ORAMf(int maxSize, bytes<Key> key)
 
 ORAMf::~ORAMf() {
     AES::Cleanup();
+    delete store;
 }
 
 // Fetches the array index a bucket
@@ -89,6 +90,8 @@ Bucketf ORAMf::ReadBucket(int index) {
     block ciphertext = store->Read(index);
     block buffer = AES::Decrypt(key, ciphertext, clen_size);
     Bucketf bucket = DeserialiseBucket(buffer);
+    ciphertext.clear();
+    buffer.clear();
     return bucket;
 }
 
@@ -96,6 +99,8 @@ void ORAMf::WriteBucket(int index, Bucketf bucket) {
     block b = SerialiseBucket(bucket);
     block ciphertext = AES::Encrypt(key, b, clen_size, plaintext_size);
     store->Write(index, ciphertext);
+    ciphertext.clear();
+    b.clear();
 }
 
 // Fetches blocks along a path, adding them to the cache
@@ -135,6 +140,7 @@ void ORAMf::FetchPath(int leaf) {
 	    if(cache[c1]==NULL)
 		    cout<<"<--NULL"<<"   ";
     }
+
 }
 
 // Gets a list of blocks on the cache which can be placed at a specific point

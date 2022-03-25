@@ -25,7 +25,7 @@ int OMAPf::setupfind(Bid key) {
     Nodef* node = new Nodef();
     node->key = rootKey;
     node->pos = rootPos;
-    auto resNode = treeHandler->setupsearch(node, key);
+    Nodef* resNode = treeHandler->setupsearch(node, key);
     int res;
     if (resNode != NULL) 
     {
@@ -48,7 +48,7 @@ int OMAPf::find(Bid key) {
     Nodef* node = new Nodef();
     node->key = rootKey;
     node->pos = rootPos;
-    auto resNode = treeHandler->search(node, key);
+    Nodef* resNode = treeHandler->search(node, key);
     int res;
     if (resNode != NULL) 
     {

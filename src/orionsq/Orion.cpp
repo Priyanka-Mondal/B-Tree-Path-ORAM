@@ -5,7 +5,7 @@
 
 Orion::Orion(bool usehdd, int filecnt , int filesize) 
 {
-    this->useHDD = usehdd;
+    this->useHDD = false;//usehdd;
     bytes<Key> key1{0};
     bytes<Key> key2{1};
     srch = new OMAPf(filecnt, key1);
@@ -26,7 +26,6 @@ Orion::~Orion()
 int inserted = 0; 
 int uniquekw = 0;
 int fileblks = 0;
-string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
 
 
 int stoI(string updt_cnt)
@@ -108,6 +107,7 @@ vector<string> divideString(string str, int sz)
 
 void Orion::insertWrap(string cont, int fileid, bool batch)
 {
+string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
       vector<string> kws1, kws;
       boost::split(kws1, cont, boost::is_any_of(delimiters));
       kws =  getUniquedWords(kws1);
@@ -142,23 +142,27 @@ void Orion::setupinsert(vector<string> kws, vector<string> blocks, int ind)
 	      //UpdtCnt[mapKey]=fc;
   	      srch->setupinsert(firstKey, fc); 
   	      Bid key = createBid(kw, fc);
-  	      srch->setupinsert(key, ind);
+  	      //srch->setupinsert(key, ind);
+      firstKey.~Bid();
+      mapKey.~Bid();
+      key.~Bid();
     }
       string id = to_string(ind);
       Bid blkcnt(id);
-      srch->setupinsert(blkcnt,blocks.size());
+      //srch->setupinsert(blkcnt,blocks.size());
+blkcnt.~Bid();
       int block_num = 1;
-      
+     /* 
       for(auto blk: blocks)
       {
 	      Bid fb = createBid(id,block_num);
 	      file->setupinsert(fb,blk);
 	      block_num++;
-      }
+fb.~Bid();
+      }*/
       fileblks = fileblks+blocks.size();
       inserted = inserted+kws.size();
       cout << "SETUP inserted (kw:"<<kws.size() <<",fb:"<<blocks.size()<<")  ukw:"<<uniquekw<<" tfb:"<<fileblks<< endl;
-
 }
 
 void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind) 
@@ -240,20 +244,24 @@ vector<pair<int,string>> Orion::search(string keyword)
     int fc = srch->find(firstKey);
     if (fc == 0) 
 	return fileblocks;
+firstKey.~Bid();
     for (int i = 1; i <= fc; i++) 
     {
 	Bid bid = createBid(keyword, i);
         int id = srch->find(bid);
+bid.~Bid();
 	string fileid = to_string(id);
 	Bid blkcnt(fileid);
         int blocknum = srch->find(blkcnt);
+blkcnt.~Bid();
 	for (int j= 1;j<=blocknum;j++)
 	{
 		Bid block = createBid(fileid,j);
-        	string cont = file->find(block);
+		string cont = file->find(block);
+block.~Bid();
 		fileblocks.push_back(make_pair(id,cont));
 	}
-    }//client will figure out files
+    }
     return fileblocks;
 }
 
@@ -325,6 +333,7 @@ void Orion::remove(int id)
 	cout <<"Removed "<<blk<<" blocks from srch:"<<ind<<endl;
         	
 	vector<string> kws1;
+string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
 	boost::split(kws1, cont, boost::is_any_of(delimiters));
 	vector<string> kws = getUniquedWords(kws1);
 	//removekw(kws, id);

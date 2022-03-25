@@ -8,9 +8,8 @@ using namespace std;
 class Orion {
 private:
     bool useHDD;
-    map<Bid,string > setupPairs1;
-    map<Bid,string > setupPairs2;
-    OMAPf* srch,*updt, *fcnt;
+    OMAPf* srch;
+    //OMAPf *updt, *fcnt;
     OMAP* file;
     map<Bid, int> UpdtCnt;
     

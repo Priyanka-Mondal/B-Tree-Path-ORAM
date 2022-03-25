@@ -16,7 +16,10 @@ int AVLTreef::setupheight(Bid key, int& leaf) {
     if (key == 0)
         return 0;
     Nodef* node = oram->setupReadNf(key, leaf);
-    return node->height;
+    //return node->height;
+    int hei = node->height;
+    delete node;
+    return hei;
 }
 int AVLTreef::height(Bid key, int& leaf) {
     if (key == 0)
@@ -80,7 +83,7 @@ Nodef* AVLTreef::setuprightRotate(Nodef* y, Bid rootKey, int& pos) {
     x->height = max(setupheight(x->leftID, x->leftPos), setupheight(x->rightID, x->rightPos)) + 1;
     oram->maxheight = max(x->height,oram->maxheight);
     oram->setupWriteNf(x->key, x, rootKey,  pos);
-
+delete T2;
     return x;
 }
 Nodef* AVLTreef::rightRotate(Nodef* y) {
@@ -132,6 +135,7 @@ Nodef* AVLTreef::setupleftRotate(Nodef* x, Bid rootKey, int& pos) {
     y->height = max(setupheight(y->leftID, y->leftPos), setupheight(y->rightID, y->rightPos)) + 1;
     oram->maxheight = max(y->height,oram->maxheight);
     oram->setupWriteNf(y->key, y, rootKey, pos);
+delete T2;
     return y;
 }
 Nodef* AVLTreef::leftRotate(Nodef* x) {
