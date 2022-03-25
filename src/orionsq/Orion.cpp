@@ -142,24 +142,24 @@ void Orion::setupinsert(vector<string> kws, vector<string> blocks, int ind)
 	      //UpdtCnt[mapKey]=fc;
   	      srch->setupinsert(firstKey, fc); 
   	      Bid key = createBid(kw, fc);
-  	      //srch->setupinsert(key, ind);
+  	      srch->setupinsert(key, ind);
       firstKey.~Bid();
       mapKey.~Bid();
       key.~Bid();
     }
       string id = to_string(ind);
       Bid blkcnt(id);
-      //srch->setupinsert(blkcnt,blocks.size());
+      srch->setupinsert(blkcnt,blocks.size());
 blkcnt.~Bid();
       int block_num = 1;
-     /* 
+      
       for(auto blk: blocks)
       {
 	      Bid fb = createBid(id,block_num);
 	      file->setupinsert(fb,blk);
 	      block_num++;
 fb.~Bid();
-      }*/
+      }
       fileblks = fileblks+blocks.size();
       inserted = inserted+kws.size();
       cout << "SETUP inserted (kw:"<<kws.size() <<",fb:"<<blocks.size()<<")  ukw:"<<uniquekw<<" tfb:"<<fileblks<< endl;

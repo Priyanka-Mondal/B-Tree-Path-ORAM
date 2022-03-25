@@ -253,7 +253,6 @@ Node* ORAM::setupReadN(Bid bid,int leaf)
     if (bid == 0) {
         return NULL;
     }
-    Node* n;
     for (size_t d = depth; d >= 0; d--) 
     {
         int node = GetNodeOnPath(leaf, d);
@@ -263,20 +262,58 @@ Node* ORAM::setupReadN(Bid bid,int leaf)
             Block &block = bucket[z];
             if (block.id == bid) 
 	    {    
-                n = convertBlockToNode(block.data);
+                Node* n = new Node();
+    std::array<byte_t, sizeof (Node) > arr;
+    std::copy(block.data.begin(), block.data.begin() + sizeof (Node), arr.begin());
+    from_bytes(arr, *n);
 		return n;
             }
         }
 
      }
-    if(n==cache[bid])
+    if(cache.count(bid)>0)
     {
     	cout <<"found "<<bid<<" in cache ORAM"<<endl;
-    	n=cache[bid];
+    	return cache[bid];
     }
     else
 	    cout<<bid<<"NOT FOUND at ALL in setupRead"<<endl;
-    return n;
+    return NULL;
+}
+void ORAM::setupReadN(Node*& n, Bid bid,int leaf)
+{
+    if (bid == 0) {
+        return ;
+    }
+    for (size_t d = depth; d >= 0; d--) 
+    {
+        int node = GetNodeOnPath(leaf, d);
+        Bucket bucket = ReadBucket(node);
+        for (int z = 0; z < Z; z++) 
+	{
+            Block &block = bucket[z];
+            if (block.id == bid) 
+	    {    
+                //Node* n = new Node();
+	       	//convertBlockToNode(n,block.data);
+		//return n;
+
+    std::array<byte_t, sizeof (Node) > arr;
+    std::copy(block.data.begin(), block.data.begin() + sizeof (Node), arr.begin());
+    from_bytes(arr, *n);
+    return;
+            }
+        }
+
+     }
+    if(cache.count(bid)>0)
+    {
+    	cout <<"found "<<bid<<" in cache ORAM"<<endl;
+    	n = cache[bid];
+    }
+    else
+	    cout<<bid<<"NOT FOUND at ALL in setupRead"<<endl;
+    //return NULL;
 }
 Node* ORAM::ReadNode(Bid bid) {
     if (bid == 0) {
@@ -440,6 +477,14 @@ Node* ORAM::convertBlockToNode(block b) {
     std::copy(b.begin(), b.begin() + sizeof (Node), arr.begin());
     from_bytes(arr, *node);
     return node;
+}
+
+void ORAM::convertBlockToNode(Node*& node, block b) {
+    //Node* node = new Node();
+    std::array<byte_t, sizeof (Node) > arr;
+    std::copy(b.begin(), b.begin() + sizeof (Node), arr.begin());
+    from_bytes(arr, *node);
+    //return node;
 }
 
 block ORAM::convertNodeToBlock(Node* node) {

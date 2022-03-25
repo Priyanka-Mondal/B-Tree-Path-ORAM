@@ -44,6 +44,7 @@ if env['PLATFORM'] == 'darwin':
     env.Append(CPPPATH=['/usr/local/opt/openssl/include'])
     env.Append(LIBPATH=['/usr/local/opt/openssl/lib'])    
     env.Append(LIBPATH=['/usr/local/lib/libboost_regex.so'])
+    env.Append(LIBPATH=['debug_new.cpp'])
     # env.Append(LINKFLAGS = ['-rpath', cryto_lib_dir+'/lib'])
 
 env['STATIC_AND_SHARED_OBJECTS_ARE_THE_SAME']=1

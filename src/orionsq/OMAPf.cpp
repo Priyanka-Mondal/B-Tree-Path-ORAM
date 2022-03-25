@@ -17,6 +17,7 @@ int stoint(string del_cnt)
         convstoi >> updc;
         return updc;
 }
+/*
 int OMAPf::setupfind(Bid key) {
     if (rootKey == 0) {
         return 0;
@@ -39,6 +40,24 @@ int OMAPf::setupfind(Bid key) {
 delete node;	    
 delete resNode;
     return res;
+}*/
+
+int OMAPf::setupfind(Bid key) {
+    if (rootKey == 0) {
+        return 0;
+    }
+    string resNode = treeHandler->setupsimplesearch(rootKey,rootPos,key);
+    int res;
+    if (resNode != "") 
+    {
+	//string res2;
+        //res2.assign(resNode.begin(), resNode.end());
+        //res2 = res2.c_str();
+	res = stoint(resNode);
+    }
+    //else if(resNode == NULL)
+//	    cout <<"Null recieved in OMAPf for"<< key<< endl;
+return res;
 }
 int OMAPf::find(Bid key) {
     if (rootKey == 0) {

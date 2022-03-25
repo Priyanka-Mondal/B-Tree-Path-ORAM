@@ -9,7 +9,7 @@ OMAP::OMAP(int maxSize, bytes<Key> key) {
 OMAP::~OMAP() {
 delete treeHandler;
 }
-
+/*
 string OMAP::setupfind(Bid key) {
     if (rootKey == 0) {
         return "";
@@ -30,6 +30,14 @@ delete node;
 //delete resNode;
 return res;
 
+}*/
+string OMAP::setupfind(Bid key) {
+    if (rootKey == 0) {
+        return 0;
+    }
+    string resNode = treeHandler->setupsimplesearch(rootKey,rootPos,key);
+    int res;
+return resNode;
 }
 string OMAP::find(Bid key) {
     if (rootKey == 0) {

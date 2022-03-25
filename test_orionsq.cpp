@@ -7,6 +7,9 @@
 #include<set>
 #include<chrono>
 
+//#define DEBUG_NEW new(__FILE__, __LINE__)
+//#define new DEBUG_NEW
+
 using namespace std;
 using namespace std::chrono;
 

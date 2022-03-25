@@ -277,7 +277,7 @@ Nodef* ORAMf::setupReadNf(Bid bid,int leaf)
 	    //cout <<"Heyyyy setupReadNf is 0"<<endl;
         return NULL;
     }
-    Nodef* n;
+    //Nodef* n;
     for (size_t d =depth; d >= 0; d--) 
     {
         int node = GetNodefOnPath(leaf, d);
@@ -287,7 +287,9 @@ Nodef* ORAMf::setupReadNf(Bid bid,int leaf)
             Blockf &block = bucket[z];
             if (block.id == bid) 
 	    {    
-                n = convertBlockToNodef(block.data);
+                //Nodef* n = convertBlockToNodef(block.data);
+                Nodef* n = new Nodef();
+	       	convertBlockToNodef(n,block.data);
 		return n;
             }
         }
@@ -295,13 +297,44 @@ Nodef* ORAMf::setupReadNf(Bid bid,int leaf)
     if(cache.count(bid)>0)
     {
     	cout <<"found "<<bid<<" in CACHE , leaf:"<<cache[bid]->pos<<" free node:"<<store->GetEmptySize()<<endl;
-    	n=cache[bid];
+    	return cache[bid];
     }
     else
 	    cout<<"leaf:"<<leaf<<"/"<<bid<<"NOT FOUND at ALL in setupReadNf "<<store->GetEmptySize()<<endl;
-    return n;
+    return NULL;
 }
 
+void ORAMf::setupReadNf(Nodef*& n,Bid bid,int leaf)
+{
+    if (bid == 0) {
+	    //cout <<"Heyyyy setupReadNf is 0"<<endl;
+        return;
+    }
+    //Nodef* n;
+    for (size_t d =depth; d >= 0; d--) 
+    {
+        int node = GetNodefOnPath(leaf, d);
+        Bucketf bucket = ReadBucket(node);
+        for (int z = 0; z < Z; z++) 
+	{
+            Blockf &block = bucket[z];
+            if (block.id == bid) 
+	    {    
+    std::array<byte_t, sizeof (Nodef) > arr;
+    std::copy(block.data.begin(), block.data.begin() + sizeof (Nodef), arr.begin());
+    from_bytes(arr, *n);
+		return;
+            }
+        }
+     }
+    if(cache.count(bid)>0)
+    {
+    	cout <<"found "<<bid<<" in CACHE , leaf:"<<cache[bid]->pos<<" free node:"<<store->GetEmptySize()<<endl;
+    	n= cache[bid];
+    }
+    else
+	    cout<<"leaf:"<<leaf<<"/"<<bid<<"NOT FOUND at ALL in setupReadNf "<<store->GetEmptySize()<<endl;
+}
 Nodef* ORAMf::ReadNodef(Bid bid) {
     if (bid == 0) {
         throw runtime_error("Nodef id is not set");
@@ -461,6 +494,13 @@ Nodef* ORAMf::convertBlockToNodef(block b) {
     return node;
 }
 
+void ORAMf::convertBlockToNodef(Nodef*& node, block b) {
+    //Nodef* node = new Nodef();
+    std::array<byte_t, sizeof (Nodef) > arr;
+    std::copy(b.begin(), b.begin() + sizeof (Nodef), arr.begin());
+    from_bytes(arr, *node);
+    //return node;
+}
 block ORAMf::convertNodefToBlock(Nodef* node) {
     std::array<byte_t, sizeof (Nodef) > data = to_bytes(*node);
     block b(data.begin(), data.end());

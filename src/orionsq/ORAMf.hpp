@@ -100,10 +100,12 @@ public:
     void start(bool batchWrite);
     void finilize(bool find, Bid& rootKey, int& rootPos);
     static Nodef* convertBlockToNodef(block b);
+    void convertBlockToNodef(Nodef*& node, block b);
     static block convertNodefToBlock(Nodef* node);
 
 
     Nodef* setupReadNf(Bid bid, int leaf);
+    void setupReadNf(Nodef*& n,Bid bid,int leaf);
     int setupWriteNf(Bid bid, Nodef* n, Bid rootkey, int& rootPos);
     void setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos);
 };

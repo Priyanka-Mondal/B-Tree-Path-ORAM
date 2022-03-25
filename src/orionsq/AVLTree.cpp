@@ -15,7 +15,9 @@ AVLTree::~AVLTree() {
 int AVLTree::setupheight(Bid key, int& leaf) {
     if (key == 0)
         return 0;
-    Node* node = oram->setupReadN(key, leaf);
+    Node* node = new Node();
+    oram->setupReadN(node,key,leaf);
+    //Node* node = oram->setupReadN(key, leaf);
     //return node->height;
     int hei = node->height;
     delete node;
@@ -67,7 +69,9 @@ Node* AVLTree::setuprightRotate(Node* y,Bid rootKey, int& pos) {
     if (x->rightID == 0) {
         T2 = setupnewNode(0, "");
     } else {
-        T2 = oram->setupReadN(x->rightID,x->rightPos);
+        //T2 = oram->setupReadN(x->rightID,x->rightPos);
+	T2 = new Node();
+        oram->setupReadN(T2,x->rightID,x->rightPos);
     }
 
     // Perform rotation
@@ -122,7 +126,9 @@ Node* AVLTree::setupleftRotate(Node* x,Bid rootKey, int& pos) {
     if (y->leftID == 0) {
         T2 = setupnewNode(0, "");
     } else {
-        T2 = oram->setupReadN(y->leftID,y->leftPos);
+        //T2 = oram->setupReadN(y->leftID,y->leftPos);
+	T2 = new Node();
+        oram->setupReadN(T2,y->leftID,y->leftPos);
     }
 
 
@@ -193,8 +199,11 @@ Bid AVLTree::setupinsert(Bid rootKey, int& pos, Bid key, string value)
 	delete nnode;
 	return nnk;
     }
-    Node* node = oram->setupReadN(rootKey, pos);
+    Node* node = new Node();
+    oram->setupReadN(node, rootKey, pos);
+    //Node* node = oram->setupReadN(rootKey, pos);
     if (key < node->key) {
+
         node->leftID = setupinsert(node->leftID, node->leftPos, key, value);
     } else if (key > node->key) {
         node->rightID = setupinsert(node->rightID, node->rightPos, key, value);
@@ -202,7 +211,9 @@ Bid AVLTree::setupinsert(Bid rootKey, int& pos, Bid key, string value)
         std::fill(node->value.begin(), node->value.end(), 0);
         std::copy(value.begin(), value.end(), node->value.begin());
         oram->setupWriteN(rootKey, node,rootKey, pos);
-        return node->key;
+        //return node->key;
+	Bid nodekey = node->key;
+	return nodekey;
     }
 
     node->height = max(setupheight(node->leftID, node->leftPos), setupheight(node->rightID, node->rightPos)) + 1;
@@ -210,7 +221,7 @@ Bid AVLTree::setupinsert(Bid rootKey, int& pos, Bid key, string value)
 
     int balance = setupgetBalance(node);
     
-    if (balance > 1 && key < oram->setupReadN(node->leftID,node->leftPos)->key) {
+    if (balance > 1 && key < node->leftID){// oram->setupReadN(node->leftID,node->leftPos)->key) {
     //cout <<" Left Left Case-----------------------------------"<<endl;
         Node* res = setuprightRotate(node, rootKey, pos);
         pos = res->pos;
@@ -222,7 +233,7 @@ Bid AVLTree::setupinsert(Bid rootKey, int& pos, Bid key, string value)
         
     }
 
-    if (balance < -1 && key > oram->setupReadN(node->rightID,node->rightPos)->key) {
+    if (balance < -1 && key > node->rightID){//oram->setupReadN(node->rightID,node->rightPos)->key) {
     //cout <<" Right Right Case-----------------------------------"<<endl;
         Node* res = setupleftRotate(node, rootKey, pos);
         pos = res->pos;
@@ -232,9 +243,11 @@ Bid AVLTree::setupinsert(Bid rootKey, int& pos, Bid key, string value)
 	delete res;
 	return nnk;
     }
-    if (balance > 1 && key > oram->setupReadN(node->leftID,node->leftPos)->key) {
+    if (balance > 1 && key > node->leftID){//oram->setupReadN(node->leftID,node->leftPos)->key) {
 //    cout <<" Left Right Case-----------------------------------"<<endl;
-        Node* res = setupleftRotate(oram->setupReadN(node->leftID,node->leftPos),rootKey, pos);
+        Node* nodel = new Node();
+        oram->setupReadN(nodel,node->leftID,node->leftPos);
+        Node* res = setupleftRotate(nodel,rootKey,pos);//oram->setupReadN(node->leftID,node->leftPos),rootKey, pos);
         node->leftID = res->key;
         node->leftPos = res->pos;
         oram->setupWriteN(node->key, node, rootKey,pos);
@@ -245,22 +258,26 @@ Bid AVLTree::setupinsert(Bid rootKey, int& pos, Bid key, string value)
 	Bid nnk = res2->key;
 	delete res2;
 	delete res;
+	delete nodel;
 	return nnk;
     }
 
-    if (balance < -1 && key < oram->setupReadN(node->rightID,node->rightPos)->key) {
+    if (balance < -1 && key < node->rightID){//oram->setupReadN(node->rightID,node->rightPos)->key) {
 //    cout <<" Right Left Case-----------------------------------"<<endl;
-        auto res = setuprightRotate(oram->setupReadN(node->rightID,node->rightPos), rootKey, pos);
+        Node* noder = new Node();
+        oram->setupReadN(noder,node->rightID,node->rightPos);
+        auto res = setuprightRotate(noder,rootKey,pos);//oram->setupReadN(node->rightID,node->rightPos),rootKey, pos);
         node->rightID = res->key;
         node->rightPos = res->pos;
         oram->setupWriteN(node->key, node, rootKey,pos);
-        auto res2 = setupleftRotate(node, rootKey, pos);
+        Node* res2 = setupleftRotate(node, rootKey, pos);
         pos = res2->pos;
         //return res2->key;
 	
 	Bid nnk = res2->key;
 	delete res2;
 	delete res;
+	delete noder;
 	return nnk;
     }
 
@@ -351,16 +368,40 @@ Bid AVLTree::insert(Bid rootKey, int& pos, Bid key, string value) {
 Node* AVLTree::setupsearch(Node* head, Bid key) {
     if (head == NULL || head->key == 0)
         return head;
-    //cout <<head->pos <<":headpos setupsearch reading headkey:"<< head->key<<endl;
     head = oram->setupReadN(head->key, head->pos);
     if (head->key > key) {
-    //cout <<head->key<<"setupsearch reading headkey > key:"<< key<<endl;
         return setupsearch(oram->setupReadN(head->leftID, head->leftPos), key);
     } else if (head->key < key) {
-    //cout <<head->key<<"setupsearch reading headkey < key:"<< key<<endl;
         return setupsearch(oram->setupReadN(head->rightID, head->rightPos), key);
     } else if(head->key == key)
         return head;
+}
+string AVLTree::setupsimplesearch(Bid rkey, int rpos, Bid key) {
+    if (rkey == 0)
+        return "";
+    Node *head = new Node();
+    oram->setupReadN(head,rkey, rpos);
+    if (head->key > key) 
+    {
+        Bid hl = head->leftID;
+	int lp = head->leftPos;
+	delete head;
+        return setupsimplesearch(hl,lp, key);
+    } 
+    else if (head->key < key) 
+    {
+        Bid hr = head->rightID;
+	int rp = head->rightPos;
+	delete head;
+        return setupsimplesearch(hr, rp, key);
+    } 
+    else 
+    {
+	string val;
+        val.assign(head->value.begin(), head->value.end());
+	delete head;
+        return val;
+    }
 }
 Node* AVLTree::search(Node* head, Bid key) {
     if (head == NULL || head->key == 0)

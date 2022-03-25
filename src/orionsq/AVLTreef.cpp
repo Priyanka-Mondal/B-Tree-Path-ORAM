@@ -15,7 +15,9 @@ AVLTreef::~AVLTreef() {
 int AVLTreef::setupheight(Bid key, int& leaf) {
     if (key == 0)
         return 0;
-    Nodef* node = oram->setupReadNf(key, leaf);
+    Nodef* node = new Nodef();
+    oram->setupReadNf(node,key,leaf);
+    //Nodef* node = oram->setupReadNf(key, leaf);
     //return node->height;
     int hei = node->height;
     delete node;
@@ -92,7 +94,9 @@ Nodef* AVLTreef::rightRotate(Nodef* y) {
     if (x->rightID == 0) {
         T2 = newNodef(0, 0);
     } else {
-        T2 = oram->ReadNodef(x->rightID,x->rightPos,x->rightPos);
+        //T2 = oram->ReadNodef(x->rightID,x->rightPos,x->rightPos);
+	T2 = new Nodef();
+        oram->setupReadNf(T2,x->rightID,x->rightPos);
     }
 
     // Perform rotation
@@ -121,7 +125,9 @@ Nodef* AVLTreef::setupleftRotate(Nodef* x, Bid rootKey, int& pos) {
 		//setupleaf--;
         T2 = setupnewNodef(0, 0);
     } else {
-        T2 = oram->setupReadNf(y->leftID,y->leftPos);
+        //T2 = oram->setupReadNf(y->leftID,y->leftPos);
+	T2 = new Nodef();
+        oram->setupReadNf(T2,y->leftID,y->leftPos);
     }
 
     y->leftID = x->key;
@@ -189,7 +195,9 @@ Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, int value)
 	delete nnode;
 	return nnk;
     }
-    Nodef* node = oram->setupReadNf(rootKey, pos);
+    Nodef* node = new Nodef();
+    oram->setupReadNf(node, rootKey, pos);
+    //Nodef* node = oram->setupReadNf(rootKey, pos);
     //if(node ==NULL ) cout<<rootKey<<"rootKey/"<<pos<<":rootPos /got NULL while inserting"<<key<<endl;
     if (key < node->key) {
 	    //cout <<"key<nodef"<<key<<node->key<<node->leftPos<<endl;
@@ -213,7 +221,7 @@ Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, int value)
 
     int balance = setupgetBalance(node);
     
-    if (balance > 1 && key < oram->setupReadNf(node->leftID,node->leftPos)->key) {
+    if (balance > 1 && key < node->leftID){//oram->setupReadNf(node->leftID,node->leftPos)->key) {
     //cout <<" Left Left Case-----------------------------------"<<endl;
         Nodef* res = setuprightRotate(node, rootKey, pos);
         pos = res->pos;
@@ -225,7 +233,7 @@ Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, int value)
     }
 
     // Right Right Case
-    if (balance < -1 && key > oram->setupReadNf(node->rightID,node->rightPos)->key) {
+    if (balance < -1 && key > node->rightID){//oram->setupReadNf(node->rightID,node->rightPos)->key) {
     //cout <<" Right Right Case-----------------------------------"<<endl;
         Nodef* res = setupleftRotate(node, rootKey, pos);
         pos = res->pos;
@@ -236,9 +244,11 @@ Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, int value)
 	return nnk;
     }
     // Left Right Case
-    if (balance > 1 && key > oram->setupReadNf(node->leftID,node->leftPos)->key) {
+    if (balance > 1 && key > node->leftID){//oram->setupReadNf(node->leftID,node->leftPos)->key) {
 //    cout <<" Left Right Case-----------------------------------"<<endl;
-        Nodef* res = setupleftRotate(oram->setupReadNf(node->leftID,node->leftPos),rootKey, pos);
+        Nodef* nodel = new Nodef();
+        oram->setupReadNf(nodel,node->leftID,node->leftPos);
+        Nodef* res = setupleftRotate(nodel,rootKey,pos);//oram->setupReadNf(node->leftID,node->leftPos),rootKey, pos);
         node->leftID = res->key;
         node->leftPos = res->pos;
         oram->setupWriteNf(node->key, node, rootKey,pos);
@@ -249,13 +259,16 @@ Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, int value)
 	Bid nnk = res2->key;
 	delete res2;
 	delete res;
+	delete nodel;
 	return nnk;
     }
 
     // Right Left Case
-    if (balance < -1 && key < oram->setupReadNf(node->rightID,node->rightPos)->key) {
+    if (balance < -1 && key < node->rightID){//oram->setupReadNf(node->rightID,node->rightPos)->key) {
 //    cout <<" Right Left Case-----------------------------------"<<endl;
-        auto res = setuprightRotate(oram->setupReadNf(node->rightID,node->rightPos), rootKey, pos);
+        Nodef* noder = new Nodef();
+        oram->setupReadNf(noder,node->rightID,node->rightPos);
+        Nodef* res = setuprightRotate(noder,rootKey,pos);//oram->setupReadNf(node->rightID,node->rightPos), rootKey, pos);
         node->rightID = res->key;
         node->rightPos = res->pos;
         oram->setupWriteNf(node->key, node, rootKey,pos);
@@ -266,6 +279,7 @@ Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, int value)
 	Bid nnk = res2->key;
 	delete res2;
 	delete res;
+	delete noder;
 	return nnk;
     }
 
@@ -352,18 +366,46 @@ Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, int value) {
     return node->key;
 }
 
+string AVLTreef::setupsimplesearch(Bid rkey, int rpos, Bid key) {
+    if (rkey == 0)
+        return "";
+    Nodef *head = new Nodef();
+    oram->setupReadNf(head,rkey, rpos);
+    if (head->key > key) 
+    {
+        Bid hl = head->leftID;
+	int lp = head->leftPos;
+	delete head;
+        return setupsimplesearch(hl,lp, key);
+    } 
+    else if (head->key < key) 
+    {
+        Bid hr = head->rightID;
+	int rp = head->rightPos;
+	delete head;
+        return setupsimplesearch(hr, rp, key);
+    } 
+    else 
+    {
+	string val;
+        val.assign(head->value.begin(), head->value.end());
+	delete head;
+        return val;
+    }
+}
 Nodef* AVLTreef::setupsearch(Nodef* head, Bid key) {
     if (head == NULL || head->key == 0)
         return head;
-    //cout <<head->pos <<":headpos setupsearch reading headkey:"<< head->key<<endl;
     head = oram->setupReadNf(head->key, head->pos);
-    if (head->key > key) {
-    //cout <<head->key<<"setupsearch reading headkey > key:"<< key<<endl;
+    if (head->key > key) 
+    {
         return setupsearch(oram->setupReadNf(head->leftID, head->leftPos), key);
-    } else if (head->key < key) {
-    //cout <<head->key<<"setupsearch reading headkey < key:"<< key<<endl;
+    } 
+    else if (head->key < key) 
+    {
         return setupsearch(oram->setupReadNf(head->rightID, head->rightPos), key);
-    } else 
+    } 
+    else 
         return head;
 }
 Nodef* AVLTreef::search(Nodef* head, Bid key) {

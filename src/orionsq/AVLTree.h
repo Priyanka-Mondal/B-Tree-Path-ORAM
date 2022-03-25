@@ -30,6 +30,7 @@ private:
     int max(int a, int b);
     Node* newNode(Bid key, string value);
     Node* setupnewNode(Bid key, string value);
+    //Node* setupnewNode(Node*& n, Bid key, string value);
     Node* rightRotate(Node* y);
     Node* leftRotate(Node* x);
     int getBalance(Node* N);
@@ -62,6 +63,7 @@ public:
     Bid realDelete(Node* paren,Bid delKey,int delPos);
 
 
+    string setupsimplesearch(Bid rkey, int rpos, Bid key);
     Node* setupsearch(Node* head, Bid key);
     Bid setupinsert(Bid rootKey, int& pos, Bid key, string value);
 };

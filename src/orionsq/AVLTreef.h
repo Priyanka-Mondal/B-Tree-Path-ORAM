@@ -64,6 +64,7 @@ public:
     Bid deleteKey(Nodef* node, Bid key);
 
 
+    string setupsimplesearch(Bid rkey, int rpos, Bid key);
     Nodef* setupsearch(Nodef* head, Bid key);
     Bid setupinsert(Bid rootKey, int& pos, Bid key, int value);
 };
