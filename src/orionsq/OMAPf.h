@@ -32,6 +32,7 @@ public:
 
     void setupinsert(Bid key, int value);
     int setupfind(Bid key);
+    void setupInsert(map<Bid, int> pairs);
 };
 
 #endif /* OMAPf_H */

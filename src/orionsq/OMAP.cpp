@@ -31,6 +31,9 @@ delete node;
 return res;
 
 }*/
+void OMAP::setupInsert(map<Bid, string> pairs) {
+    treeHandler->setupInsert(rootKey, rootPos, pairs);
+}
 string OMAP::setupfind(Bid key) {
     if (rootKey == 0) {
         return 0;

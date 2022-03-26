@@ -26,6 +26,7 @@ private:
     std::uniform_int_distribution<int> dis;
     int totalleaves;
     int setupleaf= -1;
+    int setupProgress = 0;
 
     int height(Bid N, int& leaf);
     int max(int a, int b);
@@ -40,6 +41,7 @@ private:
     Nodef* setuprightRotate(Nodef* y, Bid rootKey, int& pos);
     Nodef* setupleftRotate(Nodef* x, Bid rootKey, int& pos);
     int setupgetBalance(Nodef* N);
+    vector<Nodef*> setupNodes;
 
 public:
     AVLTreef(int maxSize, bytes<Key> key);
@@ -67,6 +69,8 @@ public:
     string setupsimplesearch(Bid rkey, int rpos, Bid key);
     Nodef* setupsearch(Nodef* head, Bid key);
     Bid setupinsert(Bid rootKey, int& pos, Bid key, int value);
+    int sortedArrayToBST(int start, int end, int& pos, Bid& node);
+    void setupInsert(Bid& rootKey, int& rootPos, map<Bid, int> pairs);
 };
 
 #endif /* AVLTREEF_H */

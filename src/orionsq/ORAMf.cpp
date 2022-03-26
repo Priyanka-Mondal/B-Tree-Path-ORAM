@@ -591,3 +591,88 @@ int ORAMf::RandomPath() {
     int val = dis(mt);
     return val;
 }
+void ORAMf::setupInsert(vector<Nodef*> nodes) {
+    sort(nodes.begin(), nodes.end(), [ ](const Nodef* lhs, const Nodef * rhs) {
+        return lhs->pos < rhs->pos;
+    });
+    int curPos = 0;
+    if (nodes.size() > 0) {
+        curPos = nodes[0]->pos;
+    }
+    map<int, Bucketf> buckets;
+    map<int, int> bucketsCnt;
+    int cnt = 0;
+    unsigned int i = 0;
+    bool cannotInsert = false;
+    while (i < nodes.size()) {
+        cnt++;
+        if (cnt % 1000 == 0) {
+            cout << "i:" << i << "/" << nodes.size() << endl;
+        }
+        for (int d = depth; d >= 0 && i < nodes.size() && curPos == nodes[i]->pos; d--) {
+            int nodeIndex = GetNodefOnPath(curPos, d);
+            Bucketf bucket;
+            if (bucketsCnt.count(nodeIndex) == 0) {
+                bucketsCnt[nodeIndex] = 0;
+                for (int z = 0; z < Z; z++) {
+                    if (i < nodes.size() && nodes[i]->pos == curPos) {
+                        Blockf &curBlock = bucket[z];
+                        curBlock.id = nodes[i]->key;
+                        curBlock.data = convertNodefToBlock(nodes[i]);
+                        delete nodes[i];
+                        bucketsCnt[nodeIndex]++;
+                        i++;
+                    }
+                }
+                buckets[nodeIndex] = bucket;
+            } else {
+                if (bucketsCnt[nodeIndex] < Z) {
+                    bucket = buckets[nodeIndex];
+                    for (int z = bucketsCnt[nodeIndex]; z < Z; z++) {
+                        if (i < nodes.size() && nodes[i]->pos == curPos) {
+                            Blockf &curBlock = bucket[z];
+                            curBlock.id = nodes[i]->key;
+                            curBlock.data = convertNodefToBlock(nodes[i]);
+                            delete nodes[i];
+                            bucketsCnt[nodeIndex]++;
+                            i++;
+                        }
+                    }
+                    buckets[nodeIndex] = bucket;
+                } else {
+                    cannotInsert = true;
+		}
+            }
+
+        }
+
+        if (i < nodes.size()) {
+            if (cannotInsert) {
+                cache[nodes[i]->key] = nodes[i];
+                i++;
+                cannotInsert = false;
+            }
+            if (i < nodes.size()) {
+                curPos = nodes[i]->pos;
+            }
+        }
+    }
+
+
+    for (auto buk : buckets) {
+        if (bucketsCnt[buk.first] == Z) {
+            WriteBucket(buk.first, buk.second);
+        } else {
+            for (long unsigned int z = bucketsCnt[buk.first]; z < Z; z++) {
+                Blockf &curBlock = buk.second[z];
+                curBlock.id = 0;
+                curBlock.data.resize(blockSize, 0);
+            }
+            WriteBucket(buk.first, buk.second);
+        }
+    }
+
+    for (; i < nodes.size(); i++) {
+        cache[nodes[i]->key] = nodes[i];
+    }
+}

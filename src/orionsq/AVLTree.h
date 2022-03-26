@@ -25,6 +25,7 @@ private:
     std::uniform_int_distribution<int> dis;
     int totalleaves;
     int setupleaf= -1;
+    int setupProgress = 0;
 
     int height(Bid N, int& leaf);
     int max(int a, int b);
@@ -40,6 +41,7 @@ private:
     Node* setuprightRotate(Node* y, Bid rootKey, int& pos);
     Node* setupleftRotate(Node* x, Bid rootKey, int& pos);
     int setupgetBalance(Node* N);
+    vector<Node*> setupNodes;
 
 public:
     AVLTree(int maxSize, bytes<Key> key);
@@ -66,6 +68,8 @@ public:
     string setupsimplesearch(Bid rkey, int rpos, Bid key);
     Node* setupsearch(Node* head, Bid key);
     Bid setupinsert(Bid rootKey, int& pos, Bid key, string value);
+    void setupInsert(Bid& rootKey, int& rootPos, map<Bid, string> pairs);
+    int sortedArrayToBST(int start, int end, int& pos, Bid& node);
 };
 
 #endif /* AVLTREE_H */

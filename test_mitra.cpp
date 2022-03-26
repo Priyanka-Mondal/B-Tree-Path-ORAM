@@ -263,21 +263,23 @@ int main(int argc, char** argv)
         ofstream sres;
 	sres.open("mitra.txt");
         ifstream kw;
-	kw.open("keyws");
+	kw.open("smallkwdel");
 	string line;
+	
 	while(getline(kw,line))
 	{
         	auto start = high_resolution_clock::now();
 		auto s = client.search(line);
-	    		for(auto file:s)
-			{
-	    			cout << "["<<file.first<<"] ";
+	    	//	for(auto file:s)
+		//	{
+	    	//		cout << "["<<file.first<<"] ";
 	    			//cout << file.second<<endl;
-				cout <<endl;
-			}
+		//	}
+		//		cout <<endl;
         	auto stop = high_resolution_clock::now();
 		auto duration = duration_cast<microseconds>(stop-start);
 		sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+		cout <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
 	}
 	return 0;
 	cout << endl<<" SETUP INSERT DONE!"<< endl;

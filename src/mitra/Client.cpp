@@ -193,12 +193,12 @@ map<int,string> Client::search(string keyword)
     for(int ind : finalRes)
     {
 	string id = to_string(ind);
-	Bid acKey(id);
+	Bid acKey = getBid(id);
         int accsCnt = accCnt[ind];//to_int(ac->find(acKey));
         prf_type file;
         memset(file.data(), 0, AES_KEY_SIZE);
         copy(id.begin(), id.end(), file.data());
-        Bid mapKey(id);
+        Bid mapKey = getBid(id);
         prf_type addr;
         getAESRandomValue(file.data(), 0, accsCnt, accsCnt, addr.data());
         FileNode* head = DictF[addr];
@@ -216,12 +216,14 @@ map<int,string> Client::search(string keyword)
 	    copy(temp.begin(), temp.end(), val.data());
 	    append(&newhead,val);
         }
+	delete head;
 	//ac->insert(acKey,to_string(++accsCnt));
 	accCnt[ind] = ++accsCnt;
         prf_type newaddr;
         getAESRandomValue(file.data(), 0, accsCnt, accsCnt, newaddr.data());
 	DictF.erase(addr);
-        DictF[newaddr]=newhead;
+	if(newhead != NULL)
+        	DictF[newaddr]=newhead;
     }
     return files;
 }

@@ -47,7 +47,7 @@ int OMAPf::setupfind(Bid key) {
         return 0;
     }
     string resNode = treeHandler->setupsimplesearch(rootKey,rootPos,key);
-    int res;
+    int res=0;
     if (resNode != "") 
     {
 	//string res2;
@@ -58,6 +58,9 @@ int OMAPf::setupfind(Bid key) {
     //else if(resNode == NULL)
 //	    cout <<"Null recieved in OMAPf for"<< key<< endl;
 return res;
+}
+void OMAPf::setupInsert(map<Bid, int> pairs) {
+    treeHandler->setupInsert(rootKey, rootPos, pairs);
 }
 int OMAPf::find(Bid key) {
     if (rootKey == 0) {

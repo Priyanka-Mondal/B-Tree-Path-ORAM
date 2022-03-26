@@ -108,6 +108,7 @@ public:
     void setupReadNf(Nodef*& n,Bid bid,int leaf);
     int setupWriteNf(Bid bid, Nodef* n, Bid rootkey, int& rootPos);
     void setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos);
+    void setupInsert(vector<Nodef*> nodes);
 };
 
 #endif

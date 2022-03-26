@@ -82,7 +82,6 @@ static void list_dir (const char * dir_name, Orion& orion)
                   cout << file<< " " << fileid <<endl ;
 	     
 	     	  orion.insertWrap(cont,fileid, batch);
-             
 	     	  fileid++;
              }
              if (entry->d_type & DT_DIR) 
@@ -117,10 +116,11 @@ int main(int argc, char**argv)
         ofstream sres;
         ifstream kw;
 	sres.open("orionsq.txt");	
-	kw.open("keywordsdel");
+	kw.open("smallkwdel");
 	string line;
 ///*
 	list_dir(argv[3],orion);
+        	  orion.endSetup();     
 	while(getline(kw,line))
 	{
         	auto start = high_resolution_clock::now();

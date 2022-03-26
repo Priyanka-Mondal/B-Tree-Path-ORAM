@@ -9,7 +9,7 @@ Orion::Orion(bool usehdd, int filecnt , int filesize)
     bytes<Key> key1{0};
     bytes<Key> key2{1};
     srch = new OMAPf(filecnt, key1);
-    //updt = new OMAPf(50*filecnt, key1);
+    updt = new OMAPf(50*filecnt, key1);
     //fcnt = new OMAPf(kwsize+filecnt, key1);
     file = new OMAP(filesize,key2);
 }
@@ -18,7 +18,7 @@ Orion::~Orion()
 {
     delete srch;
     delete file;
-    //delete updt;
+    delete updt;
     UpdtCnt.clear();
 }
 
@@ -119,7 +119,8 @@ string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
       vector<string> blocks;
       blocks = divideString(cont,BLOCK);
       if(batch)
-	  setupinsert(kws,blocks,fileid);
+	  batchInsert(kws,blocks,fileid);
+	  //setupinsert(kws,blocks,fileid);
       else
           insert(kws, blocks, fileid);
       kws1.clear();
@@ -134,6 +135,7 @@ void Orion::setupinsert(vector<string> kws, vector<string> blocks, int ind)
     {	
   	      Bid firstKey(kw);
 	      int fc = srch->setupfind(firstKey);
+	      cout <<kw<<":UPDC:"<< fc<<endl;
   	      if(fc == 0)
 		uniquekw++;
   	      fc++;
@@ -143,9 +145,6 @@ void Orion::setupinsert(vector<string> kws, vector<string> blocks, int ind)
   	      srch->setupinsert(firstKey, fc); 
   	      Bid key = createBid(kw, fc);
   	      srch->setupinsert(key, ind);
-      firstKey.~Bid();
-      mapKey.~Bid();
-      key.~Bid();
     }
       string id = to_string(ind);
       Bid blkcnt(id);
@@ -162,48 +161,54 @@ fb.~Bid();
       }
       fileblks = fileblks+blocks.size();
       inserted = inserted+kws.size();
-      cout << "SETUP inserted (kw:"<<kws.size() <<",fb:"<<blocks.size()<<")  ukw:"<<uniquekw<<" tfb:"<<fileblks<< endl;
+      cout << "SETUP inserted (kw:"<<kws.size() <<",fb:"<<blocks.size()<<")  ukw:"<<inserted<<" tfb:"<<fileblks<< endl;
 }
 
 void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind) 
 {
-    //map<Bid,int> updtbids;
-    map<Bid,int> fcntbids;
-    map<Bid,int> srchbids;
-    map<Bid,string> filebids;
     for(auto kw: kws)
     {		
   	 Bid firstKey(kw);
-  	 int fc = srch->find(firstKey);
-  	 if(fc == 0)
-	   uniquekw++;
-  	 fc++;
-	 fcntbids.insert(make_pair(firstKey,fc));
+  	 int fc;
+  	 if(srchbids.count(firstKey) > 0)
+	 {
+	   fc = srchbids[firstKey];
+	 }
+	 else
+	 {
+		 fc = 0;
+		 uniquekw++;
+	 }
+  	 fc= fc+1;
+	 srchbids[firstKey]=fc;
   	 Bid updKey = createBid(kw, ind);
-  	 //updtbids.insert(make_pair(updKey, fc));
+  	 updtbids[updKey]=fc;
   	 Bid srchKey = createBid(kw, fc);
-  	 srchbids.insert(make_pair(srchKey, ind));
+  	 srchbids[srchKey]= ind;
     }
     string id = to_string(ind);
     Bid blkcnt(id);
-    fcntbids.insert(make_pair(blkcnt,blocks.size()));
+    srchbids[blkcnt]=blocks.size();
     int block_num = 1;
     for(auto blk: blocks)
     {
          Bid fb = createBid(id,block_num);
-         filebids.insert(make_pair(fb,blk));
+         filebids[fb]=blk;
          block_num++;
     }
-    srch->batchInsert(fcntbids);
+    //srch->batchInsert(fcntbids);
     //updt->batchInsert(updtbids);
-    srch->batchInsert(srchbids);
-    file->batchInsert(filebids);
+    //srch->batchInsert(srchbids);
+    //file->batchInsert(filebids);
     inserted = inserted+kws.size();
     fileblks = fileblks+block_num;
     cout << "BATCH inserted keywords and blocks(kw:"<<kws.size() <<",b:"<<blocks.size()<<") of:"<<ind<<" uk:"<<uniquekw<<" fb:"<<fileblks<< endl;
-    fcntbids.clear();
-    srchbids.clear();
-    filebids.clear();
+}
+void Orion::endSetup() 
+{
+        srch->setupInsert(srchbids);
+	updt->setupInsert(updtbids);
+	file->setupInsert(filebids);
 }
 
 void Orion::insert(vector<string> kws, vector<string> blocks, int ind) 
@@ -244,21 +249,18 @@ vector<pair<int,string>> Orion::search(string keyword)
     int fc = srch->find(firstKey);
     if (fc == 0) 
 	return fileblocks;
-firstKey.~Bid();
+   cout <<"UPDC:"<<fc<<endl;
     for (int i = 1; i <= fc; i++) 
     {
 	Bid bid = createBid(keyword, i);
         int id = srch->find(bid);
-bid.~Bid();
 	string fileid = to_string(id);
 	Bid blkcnt(fileid);
         int blocknum = srch->find(blkcnt);
-blkcnt.~Bid();
 	for (int j= 1;j<=blocknum;j++)
 	{
 		Bid block = createBid(fileid,j);
 		string cont = file->find(block);
-block.~Bid();
 		fileblocks.push_back(make_pair(id,cont));
 	}
     }
