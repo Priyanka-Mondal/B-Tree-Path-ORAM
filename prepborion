@@ -1,5 +1,0 @@
-#/bin/sh
-for f in $(find allen-p/deleted_items -type f)
-do 
- cat b >> $f
-done

@@ -1,0 +1,11 @@
+#/bin/sh
+for j in `seq 1 693700`;
+do 
+ echo $j
+ res=$(($j%2))
+ if [ $res == 1 ]
+ then
+   cat $1| tail -n +$j|head -n 1 >>$2;
+ fi
+done 
+mv $2 $1

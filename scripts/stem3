@@ -1,0 +1,7 @@
+#/bin/sh
+for f in $(find tiny3 -type f); 
+do 
+ while read word; do
+    sed -i "s/$word//g" $f
+ done
+done
