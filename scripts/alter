@@ -1,5 +1,5 @@
 #/bin/sh
-for j in `seq 1 693700`;
+for j in `seq 1 1355`;
 do 
  echo $j
  res=$(($j%2))

@@ -14,14 +14,14 @@ Client::Client(Server* server, bool deleteFiles, int keyworsSize, int fileSize)
     this->deleteFiles = deleteFiles;
     bytes<Key> key{0};
     omap = new OMAP(keyworsSize, key);
-    //ac = new OMAPf(fileSize,key);
+    ac = new OMAPf(fileSize,key);
 }
 Client::Client(bool deleteFiles, int keyworsSize, int fileSize) 
 {
     this->deleteFiles = deleteFiles;
     bytes<Key> key{0};
     omap = new OMAP(keyworsSize, key);
-    //ac = new OMAPf(fileSize, key);
+    ac = new OMAPf(fileSize, key);
 }
 
 Client::~Client() { }
@@ -104,11 +104,11 @@ void Client::insertFile(int ind, string content, bool setup)
     string id = to_string(ind);
     copy(id.begin(), id.end(), file.data());
     Bid mapKey(id);
-    //if(setup)
-//	    setupAC[mapKey] = to_string(1);
-  //  else
-    	    //ac->insert(mapKey,to_string(1));
-	    accCnt[ind]=1;
+    if(setup)
+	    setupAC[mapKey] = to_string(1);
+    else
+    	    ac->insert(mapKey,to_string(1));
+	    //accCnt[ind]=1;
     prf_type addr;
     getAESRandomValue(file.data(), 0, 1, 1, addr.data());
     int sz = content.size();
@@ -150,8 +150,8 @@ map<int,string> Client::search(string keyword)
     } 
     else 
         return files;
-    KList.reserve(fileCnt);
-    finalRes.reserve(fileCnt);
+    //KList.reserve(fileCnt);
+    //finalRes.reserve(fileCnt);
     for (int i = 1; i <= fileCnt; i++) 
     {
         prf_type rnd;
@@ -159,8 +159,10 @@ map<int,string> Client::search(string keyword)
         KList.emplace_back(rnd);
     }
     vector<prf_type> encIndexes = server->search(KList);
+    //cout <<"sizeof finalRes:"<< encIndexes.size()<<endl; 
     map<int, int> remove;
     int cnt = 1;
+    
     for (auto i = encIndexes.begin(); i != encIndexes.end(); i++) 
     {
         prf_type tmp;
@@ -189,12 +191,11 @@ map<int,string> Client::search(string keyword)
     totalSearchCommSize += (fileCnt * 2 * sizeof (prf_type));
     omap->insert(mapKey, to_string(fileCnt) + "-" + to_string(srcCnt));
     totalSearchCommSize += sizeof (prf_type) * KList.size() + encIndexes.size() * sizeof (prf_type) + (omap->treeHandler->oram->totalRead + omap->treeHandler->oram->totalWrite)*(sizeof (prf_type) + sizeof (int));
-   cout <<"sizeof finalRes:"<< finalRes.size()<<endl; 
     for(int ind : finalRes)
     {
 	string id = to_string(ind);
 	Bid acKey = getBid(id);
-        int accsCnt = accCnt[ind];//to_int(ac->find(acKey));
+        int accsCnt = to_int(ac->find(acKey));
         prf_type file;
         memset(file.data(), 0, AES_KEY_SIZE);
         copy(id.begin(), id.end(), file.data());
@@ -217,8 +218,8 @@ map<int,string> Client::search(string keyword)
 	    append(&newhead,val);
         }
 	delete head;
-	//ac->insert(acKey,to_string(++accsCnt));
-	accCnt[ind] = ++accsCnt;
+	ac->insert(acKey,to_string(++accsCnt));
+	//accCnt[ind] = ++accsCnt;
         prf_type newaddr;
         getAESRandomValue(file.data(), 0, accsCnt, accsCnt, newaddr.data());
 	DictF.erase(addr);
@@ -276,5 +277,5 @@ Bid Client::getBid(string input) {
 void Client::endSetup() 
 {
         omap->setupInsert(setupOMAP);
-	//ac->setupInsert(setupAC);
+	ac->setupInsert(setupAC);
 }

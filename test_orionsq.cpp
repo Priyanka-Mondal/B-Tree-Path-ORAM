@@ -116,11 +116,11 @@ int main(int argc, char**argv)
         ofstream sres;
         ifstream kw;
 	sres.open("orionsq.txt");	
-	kw.open("smACkw");
-	string line;
 ///*
 	list_dir(argv[3],orion);
         	  orion.endSetup();     
+	kw.open(argv[4]);
+	string line;
 	while(getline(kw,line))
 	{
         	auto start = high_resolution_clock::now();

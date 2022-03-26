@@ -9,7 +9,7 @@ Orion::Orion(bool usehdd, int filecnt , int filesize)
     bytes<Key> key1{0};
     bytes<Key> key2{1};
     srch = new OMAPf(filecnt, key1);
-    updt = new OMAPf(filecnt, key1);
+    //updt = new OMAPf(filecnt, key1);
     //fcnt = new OMAPf(kwsize+filecnt, key1);
     file = new OMAP(filesize,key2);
 }
@@ -18,7 +18,7 @@ Orion::~Orion()
 {
     delete srch;
     delete file;
-    delete updt;
+    //delete updt;
     UpdtCnt.clear();
 }
 
@@ -135,7 +135,7 @@ void Orion::setupinsert(vector<string> kws, vector<string> blocks, int ind)
     {	
   	      Bid firstKey(kw);
 	      int fc = srch->setupfind(firstKey);
-	      cout <<kw<<":UPDC:"<< fc<<endl;
+	      //cout <<kw<<":UPDC:"<< fc<<endl;
   	      if(fc == 0)
 		uniquekw++;
   	      fc++;
@@ -149,7 +149,6 @@ void Orion::setupinsert(vector<string> kws, vector<string> blocks, int ind)
       string id = to_string(ind);
       Bid blkcnt(id);
       srch->setupinsert(blkcnt,blocks.size());
-blkcnt.~Bid();
       int block_num = 1;
       
       for(auto blk: blocks)
@@ -157,7 +156,6 @@ blkcnt.~Bid();
 	      Bid fb = createBid(id,block_num);
 	      file->setupinsert(fb,blk);
 	      block_num++;
-fb.~Bid();
       }
       fileblks = fileblks+blocks.size();
       inserted = inserted+kws.size();
@@ -181,8 +179,8 @@ void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind)
 	 }
   	 fc= fc+1;
 	 srchbids[firstKey]=fc;
-  	 Bid updKey = createBid(kw, ind);
-  	 updtbids[updKey]=fc;
+  	 //Bid updKey = createBid(kw, ind);
+  	 //updtbids[updKey]=fc;
   	 Bid srchKey = createBid(kw, fc);
   	 srchbids[srchKey]= ind;
     }
@@ -196,10 +194,6 @@ void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind)
          filebids[fb]=blk;
          block_num++;
     }
-    //srch->batchInsert(fcntbids);
-    //updt->batchInsert(updtbids);
-    //srch->batchInsert(srchbids);
-    //file->batchInsert(filebids);
     inserted = inserted+kws.size();
     fileblks = fileblks+block_num;
     cout << "BATCH inserted keywords and blocks(kw:"<<kws.size() <<",b:"<<blocks.size()<<") of:"<<ind<<" uk:"<<uniquekw<<" fb:"<<fileblks<< endl;
@@ -207,7 +201,7 @@ void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind)
 void Orion::endSetup() 
 {
         srch->setupInsert(srchbids);
-	updt->setupInsert(updtbids);
+	//updt->setupInsert(updtbids);
 	file->setupInsert(filebids);
 }
 

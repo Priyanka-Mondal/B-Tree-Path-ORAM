@@ -13,7 +13,7 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <sse/crypto/hash.hpp>
 #include "OMAP.h"
-//#include "OMAPf.h"
+#include "OMAPf.h"
 using namespace std;
 
 enum OP {
@@ -46,7 +46,7 @@ public:
     double totalSearchCommSize;
     bool localStorage = false;
     OMAP* omap;
-    //OMAPf* ac;
+    OMAPf* ac;
     map<int,int> accCnt;
     map<prf_type, int> FileCnt;
     map<prf_type, int> SrcCnt;
