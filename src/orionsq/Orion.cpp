@@ -9,7 +9,7 @@ Orion::Orion(bool usehdd, int filecnt , int filesize)
     bytes<Key> key1{0};
     bytes<Key> key2{1};
     srch = new OMAPf(filecnt, key1);
-    updt = new OMAPf(50*filecnt, key1);
+    updt = new OMAPf(filecnt, key1);
     //fcnt = new OMAPf(kwsize+filecnt, key1);
     file = new OMAP(filesize,key2);
 }

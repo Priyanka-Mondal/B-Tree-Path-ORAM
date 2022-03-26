@@ -157,20 +157,20 @@ static void list_dir (const char * dir_name, Client& client, bool real)
 			 kws.erase(it--);
 		      }
 	      }
-	      cout <<file<< " " << fileid <<endl;
+	      /*cout <<file<< " " << fileid <<endl;
 			client.insert(kws, fileid,true);
 			client.insertFile(fileid,cont,true);
 			uniquekw = uniquekw+kws.size();
-			cout << "inserted "<< uniquekw <<" unique keywords"<<endl;
+			cout << "inserted "<< uniquekw <<" unique keywords"<<endl;*/
                 fileid++;
               }
-	    /*for(auto word: kws)
+	    for(auto word: kws)
 	    {
        		 if (!kwfreq.count(word))
        		     kwfreq.insert(make_pair(word, 1));
        		 else
        		     kwfreq[word]++;
-	    }*/
+	    }
              if (entry->d_type & DT_DIR) {
                 if (strcmp (d_name, "..") != 0 &&
                   strcmp (d_name, ".") != 0) {
@@ -258,7 +258,8 @@ int main(int argc, char** argv)
     int filecnt = stoI(argv[2]);
     Client client(&server, deletFiles, kwcnt, filecnt);
     list_dir(argv[3],client, REAL);
-    //sort(kwfreq);
+    sort(kwfreq);
+    return 0;
     client.endSetup();
         ofstream sres;
 	sres.open("mitra.txt");
