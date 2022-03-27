@@ -17,7 +17,6 @@ using namespace std;
 
 class AVLTree {
 private:
-    int setupProgress = 0;
     int height(Bid N, int& leaf);
     int max(int a, int b);
     Node* newNode(Bid key, string value);
@@ -28,6 +27,7 @@ private:
     int maxOfRandom;
     int sortedArrayToBST(int start, int end, int& pos, Bid& node);
     vector<Node*> setupNodes;
+    int setupProgress = 0;
 
 public:
     ORAM *oram;

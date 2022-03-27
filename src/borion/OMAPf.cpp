@@ -27,7 +27,7 @@ int OMAPf::find(Bid key) {
     node->pos = rootPos;
     auto resNode = treeHandler->search(node, key);
     //cout <<"root is Nodef:"<<rootKey<<endl;
-    int res ;
+    int res =0;
     if (resNode != NULL) 
     {
 	string res2;
@@ -40,6 +40,9 @@ int OMAPf::find(Bid key) {
 }
 
 
+void OMAPf::setupInsert(map<Bid, int> pairs) {
+    treeHandler->setupInsert(rootKey, rootPos, pairs);
+}
 int OMAPf::setupfind(Bid key) {
     if (rootKey == 0) {
         return 0;

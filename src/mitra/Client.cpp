@@ -182,7 +182,7 @@ map<int,string> Client::search(string keyword)
         if (cur.second < 0) 
 	{
                 finalRes.emplace_back(cur.first);
-	cout <<keyword<<" id:"<<cur.first<<endl;
+	//cout <<keyword<<" id:"<<cur.first<<endl;
                 fileCnt++;
                 prf_type addr, rnd;
                 getAESRandomValue(k_w.data(), 0, srcCnt, fileCnt, addr.data());

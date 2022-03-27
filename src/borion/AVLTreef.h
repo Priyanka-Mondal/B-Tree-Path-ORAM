@@ -40,6 +40,10 @@ private:
     int RandomPath();
     int notsoRandomPath();
 
+    int maxOfRandom;
+    int sortedArrayToBST(int start, int end, int& pos, Bid& node);
+    vector<Nodef*> setupNodes;
+    int setupProgress = 0;
 public:
     AVLTreef(int maxSize, bytes<Key> key);
     virtual ~AVLTreef();
@@ -65,6 +69,7 @@ public:
 
     Nodef* setupsearch(Nodef* head, Bid key);
     Bid setupinsert(Bid rootKey, int& pos, Bid key, int value);
+    void setupInsert(Bid& rootKey, int& rootPos, map<Bid, int> pairs);
 };
 
 #endif /* AVLTREEF_H */

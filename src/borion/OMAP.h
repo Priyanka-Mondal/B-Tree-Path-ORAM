@@ -31,6 +31,7 @@ public:
 
     pair<string,string> setupfind(Bid key);
     void setupinsert(Bid key, pair<string,string> value);
+    void setupInsert(map<Bid, pair<string,string>> pairs);
 };
 
 #endif /* OMAP_H */

@@ -64,6 +64,9 @@ Bid OMAP::remove(Bid delKey)
     
 }
 
+void OMAP::setupInsert(map<Bid, pair<string,string>> pairs) {
+    treeHandler->setupInsert(rootKey, rootPos, pairs);
+}
 
 void OMAP::setupinsert(Bid key, pair<string,string> value)
 {

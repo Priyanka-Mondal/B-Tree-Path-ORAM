@@ -41,6 +41,10 @@ private:
     int RandomPath();
     int notsoRandomPath();
 
+    int maxOfRandom;
+    int sortedArrayToBST(int start, int end, int& pos, Bid& node);
+    vector<Node*> setupNodes;
+    int setupProgress = 0;
 public:
     AVLTree(int maxSize, bytes<Key> key);
     virtual ~AVLTree();
@@ -67,6 +71,8 @@ public:
 
     Node* setupsearch(Node* head, Bid key);
     Bid setupinsert(Bid rootKey, int& pos, Bid key, pair<string,string> value);
+    void setupInsert(Bid& rootKey, int& rootPos, map<Bid, pair<string,string>> pairs);
+    //int sortedArrayToBST(int start, int end, int& pos, Bid& node);
 };
 
 #endif /* AVLTREE_H */

@@ -13,7 +13,7 @@ class BOrion {
 private:
     bool useHDD;
     map<Bid,pair<string,string>> srchmap;
-    map<Bid,int> updtmap;
+    //map<Bid,int> updtmap;
     map<Bid,int>fcntmap;
     OMAP* srch;
     OMAPf *updt , *fcnt;

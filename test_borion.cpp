@@ -99,10 +99,12 @@ int main(int argc, char**argv)
         ofstream sres;
 	sres.open("borion.txt");//,ios::app);	
 	ifstream kw;
-	kw.open("keyws");
-	string line;
 ///*
 	list_dir(argv[2],borion);
+	borion.endSetup();
+	kw.open(argv[3]);
+	string line;
+	int l = 1;
 	while(getline(kw,line))
 	{
         	auto start = high_resolution_clock::now();
@@ -110,6 +112,8 @@ int main(int argc, char**argv)
         	auto stop = high_resolution_clock::now();
 		auto duration = duration_cast<microseconds>(stop-start);
 		sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+		cout <<l<<" "<< duration.count()<<" "<< s.size()<<endl;
+		l++;
 	}
 /*
         auto start = high_resolution_clock::now();
