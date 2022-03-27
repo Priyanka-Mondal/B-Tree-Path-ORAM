@@ -103,12 +103,14 @@ void Client::insertFile(int ind, string content, bool setup)
     memset(file.data(), 0, AES_KEY_SIZE); 
     string id = to_string(ind);
     copy(id.begin(), id.end(), file.data());
-    Bid mapKey(id);
+    Bid mapKey = getBid(id);
     if(setup)
 	    setupAC[mapKey] = to_string(1);
     else
+    {
     	    ac->insert(mapKey,to_string(1));
-	    //accCnt[ind]=1;
+    }
+	    accCnt[ind]=1;
     prf_type addr;
     getAESRandomValue(file.data(), 0, 1, 1, addr.data());
     int sz = content.size();
@@ -150,8 +152,8 @@ map<int,string> Client::search(string keyword)
     } 
     else 
         return files;
-    //KList.reserve(fileCnt);
-    //finalRes.reserve(fileCnt);
+    KList.reserve(fileCnt);
+    finalRes.reserve(fileCnt);
     for (int i = 1; i <= fileCnt; i++) 
     {
         prf_type rnd;
@@ -159,7 +161,7 @@ map<int,string> Client::search(string keyword)
         KList.emplace_back(rnd);
     }
     vector<prf_type> encIndexes = server->search(KList);
-    //cout <<"sizeof finalRes:"<< encIndexes.size()<<endl; 
+    cout <<"sizeof finalRes:"<< encIndexes.size()<<endl; 
     map<int, int> remove;
     int cnt = 1;
     
@@ -180,6 +182,7 @@ map<int,string> Client::search(string keyword)
         if (cur.second < 0) 
 	{
                 finalRes.emplace_back(cur.first);
+	cout <<keyword<<" id:"<<cur.first<<endl;
                 fileCnt++;
                 prf_type addr, rnd;
                 getAESRandomValue(k_w.data(), 0, srcCnt, fileCnt, addr.data());
@@ -191,11 +194,18 @@ map<int,string> Client::search(string keyword)
     totalSearchCommSize += (fileCnt * 2 * sizeof (prf_type));
     omap->insert(mapKey, to_string(fileCnt) + "-" + to_string(srcCnt));
     totalSearchCommSize += sizeof (prf_type) * KList.size() + encIndexes.size() * sizeof (prf_type) + (omap->treeHandler->oram->totalRead + omap->treeHandler->oram->totalWrite)*(sizeof (prf_type) + sizeof (int));
-    for(int ind : finalRes)
+    
+    for(int i =0;i< finalRes.size();i++)
     {
+	int ind = finalRes[i];
 	string id = to_string(ind);
 	Bid acKey = getBid(id);
-        int accsCnt = to_int(ac->find(acKey));
+	string acnt = ac->find(acKey);
+        int accsCnt;// = accCnt[ind];//to_int(ac->find(acKey));
+	if(acnt=="")
+		continue; // not possible
+	else 
+		accsCnt = to_int(acnt);
         prf_type file;
         memset(file.data(), 0, AES_KEY_SIZE);
         copy(id.begin(), id.end(), file.data());
@@ -212,14 +222,16 @@ map<int,string> Client::search(string keyword)
     	    	files[ind]= temp;
     	    else
     	    	(files[ind]).append(temp);
-    	    head = head->next;
+    	    FileNode* temphead = head->next;
+	    delete head;
+	    head = temphead;
 	    fblock val;
 	    copy(temp.begin(), temp.end(), val.data());
 	    append(&newhead,val);
         }
-	delete head;
-	ac->insert(acKey,to_string(++accsCnt));
-	//accCnt[ind] = ++accsCnt;
+	accsCnt++;
+	ac->insert(acKey,to_string(accsCnt));
+	accCnt[ind] = accsCnt;
         prf_type newaddr;
         getAESRandomValue(file.data(), 0, accsCnt, accsCnt, newaddr.data());
 	DictF.erase(addr);

@@ -85,7 +85,7 @@ vector<string> OMAPf::batchSearch(vector<Bid> keys) {
 void OMAPf::setupInsert(map<Bid, string> pairs) {
     treeHandler->setupInsert(rootKey, rootPos, pairs);
 }
-
+/*
 string OMAPf::incrementFileCnt(Bid key) {
     string res = "";
     treeHandler->startOperation();
@@ -94,9 +94,9 @@ string OMAPf::incrementFileCnt(Bid key) {
     node->pos = rootPos;
     res = treeHandler->incrementFileCnt(node, key);
     if (res == "") {
-        rootKey = treeHandler->insert(rootKey, rootPos, key, "1-0");
-        res = "0-0";
+        rootKey = treeHandler->insert(rootKey, rootPos, key, "1");
+        res = "0";
     }
     treeHandler->finishOperation(true, rootKey, rootPos);
     return res;
-}
+}*/

@@ -295,7 +295,7 @@ int AVLTreef::sortedArrayToBST(int start, int end, int& pos, Bid& node) {
     node = root->key;
     return root->height;
 }
-
+/*
 string AVLTreef::incrementFileCnt(Node* head, Bid key) {
     if (head == NULL || head->key == 0)
         return "";
@@ -314,4 +314,4 @@ string AVLTreef::incrementFileCnt(Node* head, Bid key) {
         oram->WriteNode(key, head);
         return res;
     }
-}
+}*/
