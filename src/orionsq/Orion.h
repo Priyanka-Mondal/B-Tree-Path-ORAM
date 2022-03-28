@@ -28,7 +28,7 @@ public:
     void remove(int ind);
     void removekw(vector <string> kws, int id);
     
-    map<int,string> batchSearch(string keyword);
+    vector<string> batchSearch(string keyword);
     vector<pair<int,string>> search(string keyword);
     
     Orion(bool useHDD,int maxSize, int filesize);    

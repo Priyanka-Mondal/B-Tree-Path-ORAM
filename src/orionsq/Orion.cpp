@@ -262,34 +262,49 @@ vector<pair<int,string>> Orion::search(string keyword)
     return fileblocks;
 }
 
-map<int,string> Orion::batchSearch(string keyword) 
+vector<string> Orion::batchSearch(string keyword) 
 {
     vector<int> result;
-    map<int,string> files;
+    vector<string> conts;
     vector<Bid> bids;
     Bid firstKey(keyword);
     int fc = fcnt->find(firstKey);
     if (fc == 0) 
-	    return files;
+	    return conts;
+    cout<< "UPDC:"<< fc<< endl;
     for (int i = 1; i <= fc; i++) 
     {
             Bid bid = createBid(keyword, i);
             bids.push_back(bid);
     }
     result = srch->batchSearch(bids);
+    bids.clear();
     for(int id:result)
     {
         string fileid = to_string(id);
 	Bid blkcnt(fileid);
-        int blocknum = fcnt->find(blkcnt);
-	bids.clear();
+	bids.push_back(blkcnt);
+    }
+    //results.clear();
+    vector<int> blocknums = fcnt->batchSearch(bids);
+    int pos = 0;
+    bids.clear();
+    for(int blocknum:blocknums)
+    {
+	cout << blocknum<< endl;
+        //string fileid = to_string(id);
+	//Bid blkcnt(fileid);
+        //int blocknum = fcnt->find(blkcnt);
+	//bids.clear();
 	for (int j= 1;j<=blocknum;j++)
 	{
-		Bid block = createBid(fileid,j);
+		Bid block = createBid(to_string(result[pos]),j);
 		bids.push_back(block);
+		pos++;
 	}
-	vector<string> conts = file->batchSearch(bids);
-	for(string cont:conts)
+	conts = file->batchSearch(bids);
+	cout << "sizeof bids:"<< bids.size()<<endl;
+	/*for(string cont:conts)
 	{
 		if(files.find(id)!=files.end())
 		{
@@ -300,9 +315,9 @@ map<int,string> Orion::batchSearch(string keyword)
 		}
 		else
 			files.insert(pair<int,string>(id,cont));
-	}
+	}*/
      }
-    return files;
+    return conts;
 }
 
 void Orion::remove(int id) 

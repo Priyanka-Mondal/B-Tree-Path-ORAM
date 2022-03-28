@@ -246,6 +246,60 @@ void BOrion::endSetup()
 	fcnt->setupInsert(fcntmap);
 }
 
+vector<pair<string,string>> BOrion::batchSearch(string keyword)
+{
+    vector<pair<string,string>> result;
+    vector<Bid> fileblocks; 
+    Bid mapKey(keyword);
+    
+    int updc = fcnt->find(mapKey); 
+    //int updc = fcntmap[mapKey]; 
+    cout << "UPDC"<<":"<<updc<<endl;
+    if (updc == 0) 
+        return result;
+    int blocks= get_block_num(updc, COM);
+    vector<Bid> bids;
+    for(int i=1;i<=blocks;i++)
+    {
+	Bid b = createBid(keyword,i);
+	bids.push_back(b);
+    }
+    vector<pair<string,string>> fids = srch->batchSearch(bids);
+    int fetched = 1;
+    bids.clear();
+    vector<string> filid;
+    int point;
+    for(auto ids:fids)
+    {
+	    point = 0;
+	    while(fetched < updc && point < COM)
+	    {
+	    	string str = ids.second.substr(point*FID_SIZE,FID_SIZE);
+		//cout << str<< endl;
+	    	point++;
+	    	fetched++;
+                string fID = to_string(stoI(str));
+            	Bid bid(fID); 
+		filid.push_back(fID);
+		bids.push_back(bid);
+	    }
+    }
+    vector<int> firsts = fcnt->batchSearch(bids);
+                //int sz = fcntmap[bid];
+    int j = 0;
+    for(auto sz : firsts)
+    {
+	for(int i = 0;i<sz;i++)
+	{
+		Bid fb = createBid(filid[j],i);
+		fileblocks.push_back(fb);
+	}
+	j++;
+    }
+
+    result=srch->batchSearch(fileblocks); 
+    return result;
+}
 vector<pair<string,string>> BOrion::searchsimple(string keyword)
 {
     vector<pair<string,string>> result;

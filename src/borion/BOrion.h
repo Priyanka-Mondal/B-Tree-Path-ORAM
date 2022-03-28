@@ -40,6 +40,7 @@ public:
     vector<pair<string,string>> search(string keyword);
     vector<pair<string,string>> searchsimple(string keyword);
     vector<pair<string,string>> setupsearch(string keyword);
+     vector<pair<string,string>> batchSearch(string keyword);
     
     void print();
 

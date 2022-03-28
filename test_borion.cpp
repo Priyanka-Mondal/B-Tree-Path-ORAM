@@ -96,19 +96,19 @@ int main(int argc, char**argv)
 {
 	int size = to_int(argv[1]);
 	BOrion borion(usehdd, size);  
-        ofstream sres;
-	sres.open("borion.txt");//,ios::app);	
 	ifstream kw;
 ///*
 	list_dir(argv[2],borion);
 	borion.endSetup();
 	kw.open(argv[3]);
 	string line;
+        ofstream sres;
+	sres.open(argv[4]);//,ios::app);	
 	int l = 1;
 	while(getline(kw,line))
 	{
         	auto start = high_resolution_clock::now();
-		auto s = borion.searchsimple(line);
+		auto s = borion.batchSearch(line);
         	auto stop = high_resolution_clock::now();
 		auto duration = duration_cast<microseconds>(stop-start);
 		sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
