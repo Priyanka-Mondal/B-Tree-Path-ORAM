@@ -89,6 +89,7 @@ borion_debug_prog   = outter_env.Program('borion_debug',    ['test_borion.cpp'] 
 orionsq_debug_prog   = outter_env.Program('orionsq_debug',    ['test_orionsq.cpp']     + objects["orionsq"])
 baseline_debug_prog   = outter_env.Program('baseline_debug',    ['test_baseline.cpp']  )
 oriel_debug_prog   = outter_env.Program('oriel_debug',    ['test_oriel.cpp']     + objects["oriel"])
+t111_debug_prog   = outter_env.Program('t111_debug',    ['t111.cpp'] )
 
 
 env.Alias('orionsq', [orionsq_debug_prog])
@@ -96,9 +97,11 @@ env.Alias('oriel', [oriel_debug_prog])
 env.Alias('mitra', [mitra_debug_prog])
 env.Alias('borion', [borion_debug_prog])
 env.Alias('baseline', [baseline_debug_prog])
+env.Alias('t111', [t111_debug_prog])
 
 env.Default(['orionsq'])
 env.Default(['oriel'])
 env.Default(['borion'])
 env.Default(['mitra'])
 env.Default(['baseline'])
+env.Default(['t111'])
