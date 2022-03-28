@@ -96,8 +96,10 @@ Nodef* AVLTreef::setupleftRotate(Nodef* x, Bid rootKey, int& pos) {
     x->rightPos = T2->pos;
 
     x->height = max(setupheight(x->leftID, x->leftPos), setupheight(x->rightID, x->rightPos)) + 1;
+    oram->maxheight= max(x->height,oram->maxheight);
     oram->setupWriteNf(x->key, x, rootKey, pos);
     y->height = max(setupheight(y->leftID, y->leftPos), setupheight(y->rightID, y->rightPos)) + 1;
+    oram->maxheight= max(y->height,oram->maxheight);
     oram->setupWriteNf(y->key, y, rootKey, pos);
     return y;
 }
@@ -117,8 +119,10 @@ Nodef* AVLTreef::rightRotate(Nodef* y) {
     y->leftPos = T2->pos;
 
     y->height = max(height(y->leftID, y->leftPos), height(y->rightID, y->rightPos)) + 1;
+    oram->maxheight= max(y->height,oram->maxheight);
     oram->WriteNodef(y->key, y);
     x->height = max(height(x->leftID, x->leftPos), height(x->rightID, x->rightPos)) + 1;
+    oram->maxheight= max(x->height,oram->maxheight);
     oram->WriteNodef(x->key, x);
 
     return x;
@@ -140,8 +144,10 @@ Nodef* AVLTreef::leftRotate(Nodef* x) {
     x->rightPos = T2->pos;
 
     x->height = max(height(x->leftID, x->leftPos), height(x->rightID, x->rightPos)) + 1;
+    oram->maxheight= max(x->height,oram->maxheight);
     oram->WriteNodef(x->key, x);
     y->height = max(height(y->leftID, y->leftPos), height(y->rightID, y->rightPos)) + 1;
+    oram->maxheight= max(y->height,oram->maxheight);
     oram->WriteNodef(y->key, y);
     return y;
 }
@@ -189,6 +195,7 @@ Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, int value)
     }
 
     node->height = max(setupheight(node->leftID, node->leftPos), setupheight(node->rightID, node->rightPos)) + 1;
+    oram->maxheight= max(node->height,oram->maxheight);
 
     int balance = setupgetBalance(node);
     
@@ -263,6 +270,7 @@ Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, int value) {
 
     /* 2. Update height of this ancestor node */
     node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
+    oram->maxheight= max(node->height,oram->maxheight);
 
     /* 3. Get the balance factor of this ancestor node to check whether
        this node became unbalanced */

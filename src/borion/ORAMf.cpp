@@ -478,7 +478,7 @@ void ORAMf::finilize(bool find, Bid& rootKey, int& rootPos) {
     }
 
     //updating the binary tree positions
-    for (unsigned int i = 0; i <= depth + 2; i++) {
+    for (unsigned int i = 1; i <= maxheight; i++) {
         for (auto t : cache) {
             if (t.second != NULL && t.second->height == i) {
                 Nodef* tmp = t.second;
