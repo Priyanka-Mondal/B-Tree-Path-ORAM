@@ -61,6 +61,9 @@ int OMAPf::setupfind(Bid key) {
     return res;
 }
 
+void OMAPf::setupInsert(map<Bid, int> pairs) {
+    treeHandler->setupInsert(rootKey, rootPos, pairs);
+}
 void OMAPf::remove(Bid delKey)
 {
     treeHandler->startOperation();

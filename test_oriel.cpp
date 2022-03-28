@@ -94,15 +94,22 @@ static void list_dir ( const char * dir_name, Oriel& oriel)
 
 int main(int argc, char**argv) 
 {
+	if(argc<6)
+	{
+		cout <<"incorrect number of arguments"<<endl;
+		return 0;
+	}
 	int size = to_int(argv[1]);
 	int fsize = to_int(argv[2]);
 	Oriel oriel(usehdd, size, fsize);  
-        ofstream sres;
-	sres.open("oriel.txt");//,ios::app);	
-        ifstream kw;
-	kw.open("keyws");
-	string line;
 	list_dir(argv[3],oriel);
+	oriel.endSetup();
+        ifstream kw;
+	kw.open(argv[4]);
+	string line;
+        ofstream sres;
+	sres.open(argv[5]);//,ios::app);	
+	int l = 1;
 	while(getline(kw,line))
 	{
         	auto start = high_resolution_clock::now();
@@ -110,6 +117,8 @@ int main(int argc, char**argv)
         	auto stop = high_resolution_clock::now();
 		auto duration = duration_cast<microseconds>(stop-start);
 		sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+		cout <<l<<" "<< duration.count()<<" "<< s.size()<<endl;
+		l++;
 	}
 	return 0;
 

@@ -27,6 +27,7 @@ private:
     int totalleaves;
     int setupleaf= -1;
     int setupProgress = 0;
+    vector<Nodef*> setupNodes;
 
     int height(Bid N, int& leaf);
     int max(int a, int b);
@@ -41,7 +42,6 @@ private:
     Nodef* setuprightRotate(Nodef* y, Bid rootKey, int& pos);
     Nodef* setupleftRotate(Nodef* x, Bid rootKey, int& pos);
     int setupgetBalance(Nodef* N);
-    vector<Nodef*> setupNodes;
 
 public:
     AVLTreef(int maxSize, bytes<Key> key);

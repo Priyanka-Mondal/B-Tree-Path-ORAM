@@ -46,9 +46,10 @@ class FileNode
 class Oriel {
 private:
     bool useHDD;
-    OMAPf *ac , *I, *del;
+    OMAPf *ac , *I;
+    //OMAPf *del;
     map<prf_type, FileNode*> DictF;
-    
+    map<Bid, int> Imap, acmap;    
 public:
     Bid createBid(string keyword,int number);
     Bid createBid(string keyword,string id);
@@ -57,7 +58,8 @@ public:
     void insertWrapper(vector<string> kws, string cont, int ind, bool batch);
     void insertkw(string keyword, int ind);
     void setupinsertkw(string keyword, int ind); 
-    void insertFile(int ind, string content);
+    void insertFile(int ind, string content,bool batch);
+    void setupInsertkw(string keyword, int ind) ;
     
     void remove(int ind); 
     void removekw(vector<string> keyword, int ind);
@@ -70,6 +72,7 @@ public:
     virtual ~Oriel();
 
     void getAESRandomValue(unsigned char* keyword, int op, int srcCnt, int fileCnt, unsigned char* result);
+    void endSetup();
 };
 
 #endif /* ORIEL_H */

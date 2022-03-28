@@ -869,3 +869,37 @@ Bid AVLTreef::balanceDel(Bid key, int& pos, Nodef* parmin)
     oram->WriteNodef(node->key, node);
     return node->key;
 }
+void AVLTreef::setupInsert(Bid& rootKey, int& rootPos, map<Bid, int> pairs) {
+    for (auto pair : pairs) {
+        Nodef* node = newNodef(pair.first, pair.second);
+        setupNodes.push_back(node);
+    }
+    //cout << "Creating BST" << endl;
+    sortedArrayToBST(0, setupNodes.size() - 1, rootPos, rootKey);
+    //cout << "Inserting in ORAM" << endl;
+    oram->setupInsert(setupNodes);
+}
+
+int AVLTreef::sortedArrayToBST(int start, int end, int& pos, Bid& node) {
+    setupProgress++;
+    if (setupProgress % 100000 == 0) {
+        cout << setupProgress << "/" << setupNodes.size()*2 << " of AVL tree constructed" << endl;
+    }
+    if (start > end) {
+        pos = -1;
+        node = 0;
+        return 0;
+    }
+
+    int mid = (start + end) / 2;
+    Nodef *root = setupNodes[mid];
+
+    int leftHeight = sortedArrayToBST(start, mid - 1, root->leftPos, root->leftID);
+
+    int rightHeight = sortedArrayToBST(mid + 1, end, root->rightPos, root->rightID);
+    root->pos = RandomPath();
+    root->height = max(leftHeight, rightHeight) + 1;
+    pos = root->pos;
+    node = root->key;
+    return root->height;
+}
