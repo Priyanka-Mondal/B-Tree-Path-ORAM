@@ -2,7 +2,7 @@
 #include <map>
 #include <array>
 #include <vector>
-#include "utils/rocksdb_wrapper.hpp"
+//#include "utils/rocksdb_wrapper.hpp"
 
 using namespace std;
 
@@ -16,7 +16,7 @@ class RAMStore {
 public:
     RAMStore(size_t num, size_t size);
     ~RAMStore();
-    sse::sophos::RockDBWrapper omapfcsc_;
+    //sse::sophos::RockDBWrapper omapfcsc_;
     block Read(int pos);
     void Write(int pos, block b);
 

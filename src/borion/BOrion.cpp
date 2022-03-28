@@ -254,7 +254,6 @@ vector<pair<string,string>> BOrion::searchsimple(string keyword)
     cout << keyword<<":";
     int updc = fcnt->find(mapKey); 
     //int updc = fcntmap[mapKey]; 
-    cout <<"UPDC:"<<updc;
     if (updc == 0) 
         return result;
     int pos = 1;
@@ -264,7 +263,7 @@ vector<pair<string,string>> BOrion::searchsimple(string keyword)
     {
     	    mapKey = createBid(keyword,pos);
             string ids = srch->find(mapKey).second;
-	    cout <<ids<<endl;
+	    //cout <<ids<<endl;
 	    point = 0;
 	    while(fetched < updc && point < COM)
 	    {

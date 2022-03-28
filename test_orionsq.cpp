@@ -115,11 +115,11 @@ int main(int argc, char**argv)
 	Orion orion(usehdd, sizekw,sizefile);  
         ofstream sres;
         ifstream kw;
-	sres.open("orionsq.txt");	
 ///*
 	list_dir(argv[3],orion);
         	  orion.endSetup();     
 	kw.open(argv[4]);
+	sres.open(argv[5]);	
 	string line;
 	while(getline(kw,line))
 	{

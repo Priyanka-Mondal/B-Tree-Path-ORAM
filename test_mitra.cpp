@@ -120,7 +120,6 @@ string getFileContent(string path)
 
 static void list_dir (const char * dir_name, Client& client, bool real)
 {
-    string delimiters("|?@,:!\">; -./  \n");
     DIR * d;
     d = opendir (dir_name);
 

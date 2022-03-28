@@ -6,7 +6,7 @@
 using namespace std;
 
 RAMStore::RAMStore(size_t count, size_t size)
-: store(count), size(size) , omapfcsc_("OMAPfcsc"){
+: store(count), size(size){
 }
 
 RAMStore::~RAMStore() {
@@ -14,6 +14,7 @@ RAMStore::~RAMStore() {
 
 block RAMStore::Read(int pos) 
 {
+	/*
     prf_type key;
     memset(key.data(), 0, AES_KEY_SIZE);
     auto arr = to_bytes(pos);
@@ -25,22 +26,22 @@ block RAMStore::Read(int pos)
     if(found)
 	    blk.assign(val.begin(), val.end()); 
     
-    return blk;
+    return blk;*/
 //**********************************************************************    
-    //return store[pos];
+    return store[pos];
 }
 
 void RAMStore::Write(int pos, block blk) 
 {
-    prf_type key;
+    /*prf_type key;
     memset(key.data(), 0, AES_KEY_SIZE);
     auto arr = to_bytes(pos);
     copy(arr.begin(), arr.end(), key.data());
     block_type val;
     std::fill(val.begin(), val.end(), 0);
     std::copy(blk.begin(), blk.end(), val.begin());
-    omapfcsc_.put(key,val);
+    omapfcsc_.put(key,val);*/
 //**********************************************************************    
-    //store[pos] = blk;
+    store[pos] = blk;
 }
 

@@ -12,7 +12,7 @@ private:
     bool useRocksDB;
 
 public:
-    //sse::sophos::RockDBWrapper edb_;
+    sse::sophos::RockDBWrapper edb_;
     map<prf_type, prf_type > DictW;
 
     Server(bool useHDD, bool deleteFiles);

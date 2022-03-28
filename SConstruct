@@ -72,11 +72,11 @@ env.Alias('deps', [crypto_lib_target, db_parser_target])
 
 objects = SConscript('src/build.scons', exports='env', variant_dir='build')
 
-env.Depends(objects["mitra"],[crypto_lib_target , db_parser_target])
 env.Depends(objects["orionsq"],[crypto_lib_target , db_parser_target])
 env.Depends(objects["borion"],[crypto_lib_target , db_parser_target])
+env.Depends(objects["mitra"],[crypto_lib_target , db_parser_target])
 
-Clean(objects["mitra"]+objects["orionsq"]+objects["borion"], 'build')
+Clean(objects["orionsq"]+objects["borion"]+objects["mitra"], 'build')
 
 outter_env = env.Clone()
 outter_env.Append(CPPPATH = ['build'])
@@ -86,12 +86,15 @@ outter_env.Append(CPPPATH = ['build'])
 mitra_debug_prog   = outter_env.Program('mitra_debug',    ['test_mitra.cpp']     + objects["mitra"])
 borion_debug_prog   = outter_env.Program('borion_debug',    ['test_borion.cpp']     + objects["borion"])
 orionsq_debug_prog   = outter_env.Program('orionsq_debug',    ['test_orionsq.cpp']     + objects["orionsq"])
+baseline_debug_prog   = outter_env.Program('baseline_debug',    ['test_baseline.cpp']  )
 
 
-env.Alias('mitra', [mitra_debug_prog])
 env.Alias('orionsq', [orionsq_debug_prog])
+env.Alias('mitra', [mitra_debug_prog])
 env.Alias('borion', [borion_debug_prog])
+env.Alias('baseline', [baseline_debug_prog])
 
-env.Default(['mitra'])
 env.Default(['orionsq'])
 env.Default(['borion'])
+env.Default(['mitra'])
+env.Default(['baseline'])

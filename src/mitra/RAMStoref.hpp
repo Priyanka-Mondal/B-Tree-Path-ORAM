@@ -2,7 +2,7 @@
 #include <map>
 #include <array>
 #include <vector>
-#include "utils/rocksdb_wrapper.hpp"
+//#include "utils/rocksdb_wrapper.hpp"
 
 using namespace std;
 
@@ -16,7 +16,7 @@ class RAMStoref {
 public:
     RAMStoref(size_t num, size_t size);
     ~RAMStoref();
-    sse::sophos::RockDBWrapper omapac_;
+    //sse::sophos::RockDBWrapper omapac_;
     block Read(int pos);
     void Write(int pos, block b);
 

@@ -13,6 +13,7 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <sse/crypto/hash.hpp>
 #include "OMAP.h"
+#include "OMAPf.h"
 using namespace std;
 
 enum OP {

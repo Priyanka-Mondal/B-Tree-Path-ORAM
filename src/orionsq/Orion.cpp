@@ -10,7 +10,7 @@ Orion::Orion(bool usehdd, int filecnt , int filesize)
     bytes<Key> key2{1};
     srch = new OMAPf(filecnt, key1);
     //updt = new OMAPf(filecnt, key1);
-    //fcnt = new OMAPf(kwsize+filecnt, key1);
+    fcnt = new OMAPf(filecnt*3, key1);
     file = new OMAP(filesize,key2);
 }
 
@@ -134,7 +134,7 @@ void Orion::setupinsert(vector<string> kws, vector<string> blocks, int ind)
     for(auto kw: kws)
     {	
   	      Bid firstKey(kw);
-	      int fc = srch->setupfind(firstKey);
+	      int fc = fcnt->setupfind(firstKey);
 	      //cout <<kw<<":UPDC:"<< fc<<endl;
   	      if(fc == 0)
 		uniquekw++;
@@ -142,13 +142,13 @@ void Orion::setupinsert(vector<string> kws, vector<string> blocks, int ind)
   	      Bid mapKey = createBid(kw, ind);
   	      //updt->setupinsert(mapKey, fc); 
 	      //UpdtCnt[mapKey]=fc;
-  	      srch->setupinsert(firstKey, fc); 
+  	      fcnt->setupinsert(firstKey, fc); 
   	      Bid key = createBid(kw, fc);
   	      srch->setupinsert(key, ind);
     }
       string id = to_string(ind);
       Bid blkcnt(id);
-      srch->setupinsert(blkcnt,blocks.size());
+      fcnt->setupinsert(blkcnt,blocks.size());
       int block_num = 1;
       
       for(auto blk: blocks)
@@ -168,9 +168,9 @@ void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind)
     {		
   	 Bid firstKey(kw);
   	 int fc;
-  	 if(srchbids.count(firstKey) > 0)
+  	 if(fcntbids.count(firstKey) > 0)
 	 {
-	   fc = srchbids[firstKey];
+	   fc = fcntbids[firstKey];
 	 }
 	 else
 	 {
@@ -178,7 +178,7 @@ void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind)
 		 uniquekw++;
 	 }
   	 fc= fc+1;
-	 srchbids[firstKey]=fc;
+	 fcntbids[firstKey]=fc;
   	 //Bid updKey = createBid(kw, ind);
   	 //updtbids[updKey]=fc;
   	 Bid srchKey = createBid(kw, fc);
@@ -186,7 +186,7 @@ void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind)
     }
     string id = to_string(ind);
     Bid blkcnt(id);
-    srchbids[blkcnt]=blocks.size();
+    fcntbids[blkcnt]=blocks.size();
     int block_num = 1;
     for(auto blk: blocks)
     {
@@ -201,6 +201,7 @@ void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind)
 void Orion::endSetup() 
 {
         srch->setupInsert(srchbids);
+        fcnt->setupInsert(fcntbids);
 	//updt->setupInsert(updtbids);
 	file->setupInsert(filebids);
 }
@@ -267,7 +268,7 @@ map<int,string> Orion::batchSearch(string keyword)
     map<int,string> files;
     vector<Bid> bids;
     Bid firstKey(keyword);
-    int fc = srch->find(firstKey);
+    int fc = fcnt->find(firstKey);
     if (fc == 0) 
 	    return files;
     for (int i = 1; i <= fc; i++) 
@@ -280,29 +281,27 @@ map<int,string> Orion::batchSearch(string keyword)
     {
         string fileid = to_string(id);
 	Bid blkcnt(fileid);
-        int blocknum = srch->find(blkcnt);
+        int blocknum = fcnt->find(blkcnt);
 	bids.clear();
 	for (int j= 1;j<=blocknum;j++)
 	{
 		Bid block = createBid(fileid,j);
 		bids.push_back(block);
 	}
-        	vector<string> conts = file->batchSearch(bids);
-		for(string cont:conts)
+	vector<string> conts = file->batchSearch(bids);
+	for(string cont:conts)
+	{
+		if(files.find(id)!=files.end())
 		{
-			if(files.find(id)!=files.end())
-			{
-				string con = files.at(id);
-				con.append(cont);
-				files.erase(id);
-				files.insert(pair<int,string>(id,con));
-			}
-			else
-				files.insert(pair<int,string>(id,cont));
+			string con = files.at(id);
+			con.append(cont);
+			files.erase(id);
+			files.insert(pair<int,string>(id,con));
 		}
+		else
+			files.insert(pair<int,string>(id,cont));
+	}
      }
-    bids.clear();
-    result.clear();
     return files;
 }
 

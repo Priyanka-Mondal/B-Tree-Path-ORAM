@@ -10,10 +10,11 @@ private:
     bool useHDD;
     OMAPf* srch;
     OMAPf *updt;
-    //OMAPf *fcnt;
+    OMAPf *fcnt;
     OMAP* file;
     map<Bid, int> UpdtCnt;
     map<Bid,int> srchbids;
+    map<Bid,int> fcntbids;
     map<Bid,int> updtbids;
     map<Bid,string> filebids;
 public:
