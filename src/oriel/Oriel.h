@@ -30,7 +30,6 @@ using namespace std;
 #define FILE_SIZE 1024
 typedef array<uint8_t, AES_KEY_SIZE> prf_type;
 typedef array<uint8_t, 1024> file_type;
-typedef array<uint8_t, 128> fblock;
 #endif
 
 class FileNode
@@ -50,6 +49,10 @@ private:
     //OMAPf *del;
     map<prf_type, FileNode*> DictF;
     map<Bid, int> Imap, acmap;    
+    map<int,int> localAC;
+    bool local;
+    bytes<Key> key;
+    int clen_size;
 public:
     Bid createBid(string keyword,int number);
     Bid createBid(string keyword,string id);
@@ -64,11 +67,11 @@ public:
     void remove(int ind); 
     void removekw(vector<string> keyword, int ind);
     
-    map<int,string> search(string keyword);
+    vector<string> search(string keyword);
     
     void print();
 
-    Oriel(bool useHDD,int maxSize, int filesize);    
+    Oriel(bool useHDD,int maxSize, int filesize, bool local);    
     virtual ~Oriel();
 
     void getAESRandomValue(unsigned char* keyword, int op, int srcCnt, int fileCnt, unsigned char* result);

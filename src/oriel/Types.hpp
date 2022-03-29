@@ -29,6 +29,7 @@ using block = std::vector<byte_t>;
 
 template <size_t N>
 using bytes = std::array<byte_t, N>;
+typedef std::vector<uint8_t> fblock;
 
 // A bucket contains a number of Blocks
 constexpr int Z = 4;

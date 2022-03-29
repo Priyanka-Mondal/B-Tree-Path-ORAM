@@ -13,7 +13,7 @@ using namespace std::chrono;
 int fileid = 1;
 bool usehdd = false;
 bool batch = true;//false;//true; // true makes the program crash
-
+bool local = true;
 int to_int(string updt_cnt)
 {
         int updc;
@@ -101,7 +101,7 @@ int main(int argc, char**argv)
 	}
 	int size = to_int(argv[1]);
 	int fsize = to_int(argv[2]);
-	Oriel oriel(usehdd, size, fsize);  
+	Oriel oriel(usehdd, size, fsize, local);  
 	list_dir(argv[3],oriel);
 	oriel.endSetup();
         ifstream kw;

@@ -137,3 +137,39 @@ bytes<IV> AES::GenerateIV() {
     return iv;
 }
 
+fblock AES::EncryptfBlock(bytes<Key> key, bytes<IV> iv, fblock plaintext,size_t clen_size,size_t plaintext_size) {
+    fblock ciphertext(clen_size);
+    EncryptBytes(key, iv, plaintext.data(), plaintext_size, ciphertext.data());
+    return ciphertext;
+}
+
+fblock AES::DecryptfBlock(bytes<Key> key, bytes<IV> iv, fblock ciphertext,size_t clen_size) {
+    fblock plaintext(clen_size);
+    int plen = DecryptBytes(key, iv, ciphertext.data(), clen_size, plaintext.data());
+
+    // Trim plaintext to actual size
+    plaintext.resize(plen);
+
+    return plaintext;
+}
+fblock AES::Encryptf(bytes<Key> key, fblock plaintext,size_t clen_size,size_t plaintext_size) {
+    fblock ciphertext;
+    bytes<IV> iv = AES::GenerateIV();
+
+    ciphertext = EncryptBlock(key, iv, plaintext,clen_size,plaintext_size);
+
+    // Put randomised IV at the front of the ciphertext
+    ciphertext.insert(ciphertext.end(), iv.begin(), iv.end());
+    return ciphertext;
+}
+
+fblock AES::Decryptf(bytes<Key> key, fblock ciphertext,size_t clen_size) {
+    // Extract the IV
+    bytes<IV> iv;
+    std::copy(ciphertext.end() - IV, ciphertext.end(), iv.begin());
+
+    // Perform the decryption
+    fblock plaintext = DecryptBlock(key, iv, ciphertext,clen_size);
+
+    return plaintext;
+}
