@@ -30,6 +30,34 @@ int to_int(string del_cnt)
         convstoi >> updc;
         return updc;
 }
+string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
+std::set<std::string> stopwords = {"_","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","\n","\0", " ", "-","?","from","to", "in","on","so","how""me","you","this","that","ok","no","yes","him","her","they","them","not","none","an","under","below","behind","he","she","their","has","our","would","am","may","know","all","can","any","me","or","as","your","it","we","please","at","if","will","are","by","with","be","com","have","is","of","for","and","the","date","cc","up","but","do","what","which","been","where","could","who","would","did","put","done","too","get","got","yet","co","if"};
+vector<string> getUniquedWords(vector<string> kws)
+{
+    vector<string> kw;
+    map<string, int> mp;
+    string word;
+    for(auto word : kws)
+    {
+	    if(word.size()<=12 && (stopwords.find(word)==stopwords.end()))
+	    {
+    		    if ((!mp.count(word)) && (word.size()<=12))
+    		    {
+    		        mp.insert(make_pair(word, 1));
+    		    }
+    		    else 
+    		        mp[word]++;
+	    }
+    }
+    for (map<string, int> :: iterator p = mp.begin();
+         p != mp.end(); p++)
+    {
+        if (p->second >= 1)
+            kw.push_back(p->first) ;
+    }
+    mp.clear();
+return kw;
+}
 void append(FileNode** head_ref, fblock new_data)
 {
 	FileNode* new_node = new FileNode();
@@ -105,12 +133,13 @@ int Client::getfreq(string kw, int fileid)
         	FileNode* head = DictF[addr];
 		string cont = getfile(head);
 		//cout << cont<< endl;
-		if(cont.find(kw)!= std::string::npos)
+		vector<string> kws1, kws;
+	        boost::split(kws1, cont, boost::is_any_of(delimiters));
+		kws =  getUniquedWords(kws1);
+	  	if(find(kws.begin(),kws.end(),kw)!=kws.end())
 		{
-			res++;
-			//cout <<"Found in:"<< i<< endl;
+				res++;
 		}
-		
 	}
 	return res;
 }

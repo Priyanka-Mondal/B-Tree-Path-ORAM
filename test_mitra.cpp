@@ -260,7 +260,7 @@ int main(int argc, char** argv)
     //sort(kwfreq);
     client.endSetup();
         ofstream sres;
-	sres.open("mitra.txt");
+	sres.open(argv[5]);
         ifstream kw;
 	kw.open(argv[4]);
 	string line;
