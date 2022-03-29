@@ -159,9 +159,9 @@ static void list_dir (const char * dir_name, Client& client, bool real)
 		      }
 	      }
 	      cout <<file<< " " << fileid <<endl;
-			client.insert(kws, fileid,true, true);
-			client.insertFile(fileid,cont,true, true);
-			uniquekw = uniquekw+kws.size();
+	      client.insert(kws, fileid,true, true);
+	      client.insertFile(fileid,cont,true, true);
+		uniquekw = uniquekw+kws.size();
 			cout << "inserted "<< uniquekw <<" unique keywords"<<endl;
                 fileid++;
               }
@@ -280,7 +280,8 @@ int main(int argc, char** argv)
 		//		cout <<endl;
         	auto stop = high_resolution_clock::now();
 		auto duration = duration_cast<microseconds>(stop-start);
-		sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+		//sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+		sres <<line<<" "<< s.size()<<endl;
 		cout <<l<<" "<< duration.count()<<" "<< s.size()<<endl;
 		l++;
 	}
