@@ -13,6 +13,7 @@ using namespace std::chrono;
 int fileid = 1;
 bool usehdd = false;
 bool batch = true; // true makes the program crash
+bool local = true;
 
 int to_int(string updt_cnt)
 {

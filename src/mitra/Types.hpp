@@ -20,6 +20,7 @@ using namespace std;
 #ifndef AES_KEY_SIZE
 #define AES_KEY_SIZE CryptoPP::AES::DEFAULT_KEYLENGTH
 #define ID_SIZE 16
+#define BLOCK 64
 #define BLOCK_SIZE 480
 typedef array<uint8_t, AES_KEY_SIZE> prf_type;
 typedef array<uint8_t, BLOCK_SIZE> block_type;
@@ -31,6 +32,7 @@ using block = std::vector<byte_t>;
 template <size_t N>
 using bytes = std::array<byte_t, N>;
 
+typedef std::vector<uint8_t> fblock;
 // A bucket contains a number of Blocks
 constexpr int Z = 4;
 

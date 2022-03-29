@@ -16,6 +16,8 @@ using namespace std::chrono;
 int fileid = 1;
 int uniquekw = 0;
 int totentry=0;
+bool local = true;
+bool setup = true;
 string delimiters("_|+#(){}[]0123456789*?&@=,:!\"><; _-./ \t\n");
 map<string,int> kwfreq;
 std::set<std::string> neg = {"_","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","\n","\0", " ", "-","?","from","to", "in","on","so","how""me","you","this","that","ok","no","yes","him","her","they","them","not","none","an","under","below","behind","he","she","their","has","our","would","am","may","know","all","can","any","me","or","as","your","it","we","please","at","if","will","are","by","with","be","com","have","is","of","for","and","the","date","cc","up","but","do","what","which","been","where","could","who","would","did","put","done","too","get","got","yet","co","if"};
@@ -157,8 +159,8 @@ static void list_dir (const char * dir_name, Client& client, bool real)
 		      }
 	      }
 	      cout <<file<< " " << fileid <<endl;
-			client.insert(kws, fileid,true);
-			client.insertFile(fileid,cont,true);
+			client.insert(kws, fileid,true, true);
+			client.insertFile(fileid,cont,true, true);
 			uniquekw = uniquekw+kws.size();
 			cout << "inserted "<< uniquekw <<" unique keywords"<<endl;
                 fileid++;
@@ -209,8 +211,8 @@ void insertSingleFile(Client &client,string file)
 	      }
       }
       cout << endl <<file<< " " << fileid <<endl << endl;
-      client.insert(kws, fileid,false);
-      client.insertFile(fileid, cont, false);
+      client.insert(kws, fileid,false,true);
+      client.insertFile(fileid, cont, false, true);
       fileid++;
 }
 /*
@@ -255,10 +257,11 @@ int main(int argc, char** argv)
     Server server(usehdd, deletFiles);
     int kwcnt = stoI(argv[1]);
     int filecnt = stoI(argv[2]);
-    Client client(&server, deletFiles, kwcnt, filecnt);
+    Client client(&server, deletFiles,kwcnt,filecnt,setup, local);
     list_dir(argv[3],client, REAL);
     //sort(kwfreq);
-    client.endSetup();
+    if(!local)
+    	client.endSetup();
         ofstream sres;
 	sres.open(argv[5]);
         ifstream kw;

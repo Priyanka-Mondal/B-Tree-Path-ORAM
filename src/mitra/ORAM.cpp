@@ -16,7 +16,7 @@ ORAM::ORAM(int maxSize, bytes<Key> oram_key)
 : key(oram_key), dis(0, (int) (pow(2, floor(log2(maxSize / Z)) + 1) - 1) / 2) {
     AES::Setup();
     depth = (int) floor(log2(maxSize / Z));
-    cout <<"depth of OMAPac :"<<depth<<endl;
+    cout <<"depth of OMAP :"<<depth<<endl;
     bucketCount = (int) pow(2, depth + 1) - 1;
     blockSize = sizeof (Node); // B
     size_t blockCount = (size_t) (Z * (pow(2, depth + 1) - 1));

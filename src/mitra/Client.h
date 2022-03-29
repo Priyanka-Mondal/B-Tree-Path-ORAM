@@ -21,7 +21,6 @@ enum OP {
 };
 
 typedef array<uint8_t, 1024> file_type;
-typedef array<uint8_t, 128> fblock;
 
 class FileNode
 {
@@ -37,24 +36,30 @@ class Client {
  public:
    map<prf_type, FileNode*> DictF;
     string Wg;
+    bytes<Key> key;
    inline prf_type bitwiseXOR(int input1, int op, prf_type input2);
     inline prf_type bitwiseXOR(prf_type input1, prf_type input2);
     inline void getAESRandomValue(unsigned char* keyword, int op, int srcCnt, int counter, unsigned char* result);
     Server* server;
     bool deleteFiles;
+    bool local;
+    int clen_size;
     double totalUpdateCommSize;
     double totalSearchCommSize;
     bool localStorage = false;
+    map<string, int> localFC;
+    map<string, int> localSC;
+    map<int, int> localAC;
     OMAP* omap;
-    OMAPf* ac;
+    OMAP* ac;
     map<int,int> accCnt;
     map<prf_type, int> FileCnt;
     map<prf_type, int> SrcCnt;
     map<Bid, string> setupOMAP, setupAC;
     inline Bid getBid(string input);
 public:
-    Client(Server* server, bool deleteFiles, int keyworsSize,int fileSize);
-    Client(bool deleteFiles, int keyworsSize, int fileSize);
+    Client(Server* server, bool deleteFiles, int keyworsSize,int fileSize, bool setup,bool local);
+    Client(bool deleteFiles, int keyworsSize, int fileSize, bool setup, bool local);
     void update(OP op, string keyword, int ind, bool setup);
     map<int,string> search(string keyword);
     void updateRequest(OP op, string keyword, int ind, prf_type& address, prf_type& value);
@@ -67,8 +72,8 @@ public:
     void endSetup();
 
     //void insertFile(OP op, int ind, string content, bool setup); 
-    void insert(vector<string> keyword, int ind, bool setup);
-    void insertFile(int ind, string content, bool setup);
+    void insert(vector<string> keyword, int ind, bool setup, bool local);
+    void insertFile(int ind, string content, bool setup, bool local);
     void remove(string keyword, int ind, bool setup);
 };
 
