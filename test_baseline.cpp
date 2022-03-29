@@ -1,4 +1,4 @@
-#include "mitra/Client.h"
+#include "baseline/Client.h"
 #include<iostream>
 #include<string.h>
 #include<utility>
@@ -60,7 +60,7 @@ string getFileContent(string path)
 }
 
 
-static int list_dir (const char * dir_name, string line)
+static int list_dir (const char * dir_name, Client& client)
 {
    DIR * d;
    d = opendir (dir_name);
@@ -85,13 +85,15 @@ static int list_dir (const char * dir_name, string line)
         file = file.append(d_name);
         string cont = getFileContent(file);
 	//cout <<"searching in file:"<<file<<" :"<< fileid<<endl;
-        boost::split(kws1, cont, boost::is_any_of(delimiters));
-	kws =  getUniquedWords(kws1, fileid);
-  	if(find(kws.begin(),kws.end(),line)!=kws.end())
-	{
+        //boost::split(kws1, cont, boost::is_any_of(delimiters));
+	//kws =  getUniquedWords(kws1, fileid);
+	client.insertFile(fileid, cont);
+	cout <<file << "inserted:"<< fileid<< endl;
+  	//if(find(kws.begin(),kws.end(),line)!=kws.end())
+	//{
 		//cout <<"FOUND in: " << fileid <<endl;
-		ressize++;
-	}
+	//	ressize++;
+	//}
           fileid++;
         }
              if (entry->d_type & DT_DIR) {
@@ -106,7 +108,7 @@ static int list_dir (const char * dir_name, string line)
                              fprintf (stderr, "Path length has got too long.\n");
                                exit (EXIT_FAILURE);
                                  }
-                           list_dir (path, line);
+                           list_dir (path, client);
                             }
                 }
              }
@@ -121,17 +123,20 @@ static int list_dir (const char * dir_name, string line)
 
 int main(int argc, char** argv) 
 {
-    ofstream sres;
-    sres.open("baseline.txt");
+    Server server(false);
+    Client client(&server, false, 100,1001);
     ifstream skw;
     skw.open(argv[2]);
     string line;
+    list_dir(argv[1], client);
     int l = 1;
+    ofstream sres;
+    sres.open(argv[3]);
     while(getline(skw,line))
     {
         ressize = 0;
     	auto start = high_resolution_clock::now();
-    	int s = list_dir(argv[1],line);
+	int s = client.getfreq(line, fileid-1);
     	auto stop = high_resolution_clock::now();
     	auto duration = duration_cast<microseconds>(stop-start);
     	sres <<line<<" "<< duration.count()<<" "<< s <<endl;

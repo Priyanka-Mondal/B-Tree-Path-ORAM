@@ -1,35 +1,30 @@
 #ifndef TYPES
 #define TYPES
 
+#include <array>
 #include <vector>
 #include <iostream>
-#include<memory>
-#include <string>
-#include <map>
-#include <array>
-#include <unistd.h>
 #include <sstream>
+#include <set>
+#include <string>
+#include "utils/Utilities.h"
 #include <cryptopp/rng.h>
 #include <cryptopp/sha.h>
 #include <cryptopp/hex.h>
 #include <cryptopp/modes.h>
 #include <cryptopp/aes.h>
-#include "utils/Utilities.h"
 
-using namespace std;
-#ifndef AES_KEY_SIZE
-#define AES_KEY_SIZE CryptoPP::AES::DEFAULT_KEYLENGTH
+// The main type for passing around raw file data
 #define ID_SIZE 16
-#define BLOCK_SIZE 480
-typedef array<uint8_t, AES_KEY_SIZE> prf_type;
-typedef array<uint8_t, BLOCK_SIZE> block_type;
-#endif
+#define BLOCK 64 // 128 caused seg_fault
+#define FCNT 111
 
 using byte_t = uint8_t;
 using block = std::vector<byte_t>;
 
 template <size_t N>
 using bytes = std::array<byte_t, N>;
+typedef std::vector<uint8_t> fblock;
 
 // A bucket contains a number of Blocks
 constexpr int Z = 4;
@@ -38,7 +33,12 @@ enum Op {
     READ,
     WRITE
 };
-
+#endif
+#ifndef AES_KEY_SIZE
+#define AES_KEY_SIZE CryptoPP::AES::DEFAULT_KEYLENGTH
+typedef std::array<uint8_t, AES_KEY_SIZE> prf_type;
+#define BLOCK_SIZE 480
+typedef std::array<uint8_t, BLOCK_SIZE> block_type;
 template< typename T >
 std::array< byte_t, sizeof (T) > to_bytes(const T& object) {
     std::array< byte_t, sizeof (T) > bytes;
@@ -57,22 +57,5 @@ T& from_bytes(const std::array< byte_t, sizeof (T) >& bytes, T& object) {
 
     return object;
 }
-template <typename T>
-std::string Pack(const T* data)
-{
-	    std::string d(sizeof(T), L'\0');
-	        memcpy(&d[0], data, d.size());
-		    return d;
-}
 
-template <typename T>
-std::unique_ptr<T> Unpack(const std::string& data)
-{
-	    if (data.size() != sizeof(T))
-		            return nullptr;
-
-	        auto d = std::make_unique<T>();
-		    memcpy(d.get(), data.data(), data.size());
-		        return d;
-}
 #endif

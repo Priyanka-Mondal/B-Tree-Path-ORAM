@@ -16,6 +16,7 @@ orionsq_files = Glob('orionsq/*.cpp')
 borion_files = Glob('borion/*.cpp')
 foram_files = Glob('foram/*.cpp')
 orion2_files = Glob('orion2/*.cpp')
+baseline_files = Glob('baseline/*.cpp')
 
 protos = env.SConscript('protos/build.scons', exports='env')
 
@@ -28,6 +29,7 @@ orionsq_objs=env.Object(orionsq_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 borion_objs = env.Object(borion_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 foram_objs = env.Object(foram_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 orion2_objs = env.Object(orion2_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
+baseline_objs = env.Object(baseline_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 
 objs = {}
 objs["oriel"] = oriel_objs + common_objs
@@ -38,4 +40,5 @@ objs["orionsq"] = orionsq_objs + common_objs
 objs["borion"] = borion_objs + common_objs
 objs["foram"] = foram_objs + common_objs
 objs["orion2"] = orion2_objs + common_objs
+objs["baseline"] = baseline_objs + common_objs
 Return('objs')

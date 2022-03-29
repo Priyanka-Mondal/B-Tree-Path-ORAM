@@ -9,13 +9,11 @@ class Server {
 private:
 
     bool deleteFiles;
-    bool useRocksDB;
 
 public:
-    sse::sophos::RockDBWrapper edb_;
-    map<prf_type, prf_type > DictW;
+    map<prf_type, prf_type > DictF;
 
-    Server(bool useHDD, bool deleteFiles);
+    Server(bool deleteFiles);
     void update(prf_type addr, prf_type val);
     vector<prf_type> search(vector<prf_type> KList);
     virtual ~Server();

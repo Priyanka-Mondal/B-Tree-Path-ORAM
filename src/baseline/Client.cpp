@@ -3,6 +3,7 @@
 #include <openssl/err.h>
 #include <string.h>
 #include <sse/crypto/prg.hpp>
+#include "Client.h"
 
 using namespace std;
 using namespace boost::algorithm;
@@ -12,6 +13,7 @@ Client::Client(Server* server, bool deleteFiles, int keyworsSize, int fileSize)
     this->server = server;
     this->deleteFiles = deleteFiles;
     bytes<Key> key{0};
+    clen_size = AES::GetCiphertextLength(BLOCK);
 }
 Client::Client(bool deleteFiles, int keyworsSize, int fileSize) 
 {
@@ -70,39 +72,62 @@ void Client::insertFile(int ind, string content)
     copy(id.begin(), id.end(), file.data());
     prf_type addr;
     getAESRandomValue(file.data(), 0, 1, 1, addr.data());
+
     int sz = content.size();
-    sz = sz < sizeof(fblock)? sizeof(fblock):nextPowerOf2(sz);
+    sz = sz < BLOCK? BLOCK:nextPowerOf2(sz);
     if(content.size()<sz) 
 	  content.insert(content.size(),sz-content.size(),'#');
     FileNode *head = NULL;
     int len = 0;
     while(len < content.size())
     {
-	    string part = content.substr(len,sizeof(fblock));
-	    fblock val;
-	    copy(part.begin(), part.end(), val.data());
-	    append(&head,val);
-	    len = len+ sizeof(fblock);
+	    string part = content.substr(len,BLOCK);
+	    fblock plaintext;
+	    plaintext.insert(plaintext.end(),part.begin(), part.end());
+    	    block ciphertext = AES::Encrypt(key, plaintext, clen_size, BLOCK);
+	    append(&head,ciphertext);
+	    len = len + BLOCK;
     }
+
     DictF[addr]=head;
 }
-
-string Client::getfile(int ind) 
+int Client::getfreq(string kw, int fileid)
 {
-	string id = to_string(ind);
-        prf_type file;
-        memset(file.data(), 0, AES_KEY_SIZE);
-        copy(id.begin(), id.end(), file.data());
-        prf_type addr;
-        getAESRandomValue(file.data(), 0, 1,1, addr.data());
-        FileNode* head = DictF[addr];
-	string filedata
+	int res = 0;
+	for(int i = 1; i<= fileid; i++)
+	{
+    		prf_type file; 
+   		string id = to_string(i);
+    		memset(file.data(), 0, AES_KEY_SIZE); 
+   		copy(id.begin(), id.end(), file.data());
+   		prf_type addr;
+   		getAESRandomValue(file.data(), 0, 1, 1, addr.data());
+        	FileNode* head = DictF[addr];
+		string cont = getfile(head);
+		//cout << cont<< endl;
+		if(cont.find(kw)!= std::string::npos)
+		{
+			res++;
+			//cout <<"Found in:"<< i<< endl;
+		}
+		
+	}
+	return res;
+}
+string Client::getfile(FileNode* head) 
+{
+	string filedata;
         while(head!=NULL)
         {
-    	    string temp;
-            temp.assign((head->data).begin(),(head->data).end());
+    	    fblock ciphertext;
+            ciphertext.insert(ciphertext.end(),(head->data).begin(),(head->data).end());
+	    fblock plaintext  = AES::Decrypt(key, ciphertext, clen_size);
+	    string temp;
+	    temp.assign(plaintext.begin(),plaintext.end());
     	    filedata.append(temp);
+	    head= head->next;
         }
+	// decrypt
     return filedata;
 }
 
