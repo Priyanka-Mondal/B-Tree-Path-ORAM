@@ -129,10 +129,16 @@ Bid& Bid::operator=(std::vector<byte_t> other) {
 }
 
 ostream& operator<<(ostream &o, Bid& bid) {
-    o <<"[";
+    o << "[";
     for(int i=0;i<ID_SIZE;i++){
-    o << (char)bid.id[i];
+    o << (char)bid.id[i];//<<"|"; //(int)
     }
-    o<<"] ";
+//    o << "/";
+//    for(int i=0;i<ID_SIZE;i++)
+//    {
+//       o << (int)bid.id[i];//<<"|"; //(int)
+//    }
+    o <<"]";
     return o;
 }
+

@@ -7,7 +7,6 @@
 #include <cstdlib>
 #include <cstring>
 
-
 void AES::Setup() {
     // Initialise OpenSSL
     ERR_load_crypto_strings();
@@ -84,13 +83,13 @@ int AES::DecryptBytes(bytes<Key> key, bytes<IV> iv, byte_t *ciphertext, int clen
     return plen;
 }
 
-block AES::EncryptBlock(bytes<Key> key, bytes<IV> iv, block plaintext,size_t clen_size,size_t plaintext_size) {
+block AES::EncryptBlock(bytes<Key> key, bytes<IV> iv, block plaintext, size_t clen_size, size_t plaintext_size) {
     block ciphertext(clen_size);
     EncryptBytes(key, iv, plaintext.data(), plaintext_size, ciphertext.data());
     return ciphertext;
 }
 
-block AES::DecryptBlock(bytes<Key> key, bytes<IV> iv, block ciphertext,size_t clen_size) {
+block AES::DecryptBlock(bytes<Key> key, bytes<IV> iv, block ciphertext, size_t clen_size) {
     block plaintext(clen_size);
     int plen = DecryptBytes(key, iv, ciphertext.data(), clen_size, plaintext.data());
 
@@ -100,24 +99,24 @@ block AES::DecryptBlock(bytes<Key> key, bytes<IV> iv, block ciphertext,size_t cl
     return plaintext;
 }
 
-block AES::Encrypt(bytes<Key> key, block plaintext,size_t clen_size,size_t plaintext_size) {
+block AES::Encrypt(bytes<Key> key, block plaintext, size_t clen_size, size_t plaintext_size) {
     block ciphertext;
     bytes<IV> iv = AES::GenerateIV();
 
-    ciphertext = EncryptBlock(key, iv, plaintext,clen_size,plaintext_size);
+    ciphertext = EncryptBlock(key, iv, plaintext, clen_size, plaintext_size);
 
     // Put randomised IV at the front of the ciphertext
     ciphertext.insert(ciphertext.end(), iv.begin(), iv.end());
     return ciphertext;
 }
 
-block AES::Decrypt(bytes<Key> key, block ciphertext,size_t clen_size) {
+block AES::Decrypt(bytes<Key> key, block ciphertext, size_t clen_size) {
     // Extract the IV
     bytes<IV> iv;
     std::copy(ciphertext.end() - IV, ciphertext.end(), iv.begin());
 
     // Perform the decryption
-    block plaintext = DecryptBlock(key, iv, ciphertext,clen_size);
+    block plaintext = DecryptBlock(key, iv, ciphertext, clen_size);
 
     return plaintext;
 }

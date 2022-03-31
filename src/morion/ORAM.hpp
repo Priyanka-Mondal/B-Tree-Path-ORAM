@@ -1,6 +1,7 @@
 #ifndef ORAM_H
 #define ORAM_H
 
+#include <utility>
 #include "AES.hpp"
 #include <random>
 #include <vector>
@@ -17,14 +18,13 @@ using namespace std;
 
 class Node {
 public:
-
     Node() {
     }
 
     ~Node() {
     }
     Bid key;
-    std::array< byte_t, 64> value;
+    std::array< byte_t, 64> value; 
     int pos;
     Bid leftID;
     int leftPos;
@@ -35,10 +35,10 @@ public:
 
 struct Block {
     Bid id;
-    block data;
+    block data; // block vector of uint_8
 };
 
-using Bucket = std::array<Block, Z>;
+using Bucket = std::array<Block, Z>; // Types.hpp constexpr int Z = 4;
 
 class ORAM {
 private:
@@ -68,7 +68,7 @@ private:
 
     Node* ReadData(Bid bid);
     void WriteData(Bid bid, Node* b);
-    void DeleteData(Bid bid, Node* b);
+    void DeleteData(Bid bid, Node* node);
 
     block SerialiseBucket(Bucket bucket);
     Bucket DeserialiseBucket(block buffer);
@@ -90,15 +90,22 @@ private:
 public:
     ORAM(int maxSize, bytes<Key> key);
     ~ORAM();
+    int maxheight;
 
     Node* ReadNode(Bid bid, int lastLeaf, int newLeaf);
     Node* ReadNode(Bid bid);
     int WriteNode(Bid bid, Node* n);
-    int DeleteNode(Bid bid, Node* n);
+    int DeleteNode(Bid bid, Node* node);
     void start(bool batchWrite);
     void finilize(bool find, Bid& rootKey, int& rootPos);
     static Node* convertBlockToNode(block b);
     static block convertNodeToBlock(Node* node);
+
+
+    Node* setupReadN(Bid bid, int leaf);
+    int setupWriteN(Bid bid, Node* n, Bid rootkey, int& rootPos);
+    void setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos);
+    void setupInsert(vector<Node*> nodes);
 };
 
 #endif

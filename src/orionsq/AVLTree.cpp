@@ -428,14 +428,14 @@ void AVLTree::batchSearch(Node* head, vector<Bid> keys, vector<Node*>* results) 
     for (Bid bid : keys) {
         if (head->key > bid) {
             getLeft = true;
-            leftkeys.emplace_back(bid);
+            leftkeys.push_back(bid);
         }
 	else if (head->key < bid) {
             getRight = true;
-            rightkeys.emplace_back(bid);
+            rightkeys.push_back(bid);
         }
 	else if (head->key == bid) {
-            results->emplace_back(head);
+            results->push_back(head);
         }
     }
     if (getLeft) {

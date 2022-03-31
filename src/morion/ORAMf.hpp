@@ -32,6 +32,7 @@ public:
     int rightPos;
     unsigned int height;
 };
+
 struct Blockf {
     Bid id;
     block data;
@@ -42,6 +43,7 @@ using Bucketf = std::array<Blockf, Z>;
 class ORAMf {
 private:
     RAMStore* store;
+    using Stash = std::unordered_map<Bid, block>;
     size_t depth;
     size_t blockSize;
     map<Bid, Nodef*> cache;
@@ -49,7 +51,6 @@ private:
     vector<int> readviewmap;
     vector<int> writeviewmap;
     set<Bid> modified;
-    set<Bid> deleted;
     int readCnt = 0;
     bytes<Key> key;
 
@@ -61,13 +62,13 @@ private:
     int RandomPath();
     int GetNodefOnPath(int leaf, int depth);
     std::vector<Bid> GetIntersectingBlocks(int x, int depth);
-    std::vector<Bid> GetIntersectingBlocks(int x, int depth, int node);
 
     void FetchPath(int leaf);
     void WritePath(int leaf, int level);
 
     Nodef* ReadData(Bid bid);
     void WriteData(Bid bid, Nodef* b);
+    void DeleteData(Bid bid, Nodef* node);
 
     block SerialiseBucket(Bucketf bucket);
     Bucketf DeserialiseBucket(block buffer);
@@ -76,8 +77,6 @@ private:
     void WriteBucket(int pos, Bucketf bucket);
     void Access(Bid bid, Nodef*& node, int lastLeaf, int newLeaf);
     void Access(Bid bid, Nodef*& node);
-    void AccessDelete(Bid bid, Nodef*& node); 
-    void DeleteData(Bid bid, Nodef* node);
 
 
     size_t plaintext_size;
@@ -89,23 +88,21 @@ private:
     void Print();
 
 public:
-    int maxheight;
     ORAMf(int maxSize, bytes<Key> key);
     ~ORAMf();
-
+    int maxheight;
     Nodef* ReadNodef(Bid bid, int lastLeaf, int newLeaf);
     Nodef* ReadNodef(Bid bid);
     int WriteNodef(Bid bid, Nodef* n);
-    int DeleteNodef(Bid bid, Nodef* node);
+    int DeleteNode(Bid bid, Nodef* node);
     void start(bool batchWrite);
     void finilize(bool find, Bid& rootKey, int& rootPos);
     static Nodef* convertBlockToNodef(block b);
-    void convertBlockToNodef(Nodef*& node, block b);
     static block convertNodefToBlock(Nodef* node);
 
 
+
     Nodef* setupReadNf(Bid bid, int leaf);
-    void setupReadNf(Nodef*& n,Bid bid,int leaf);
     int setupWriteNf(Bid bid, Nodef* n, Bid rootkey, int& rootPos);
     void setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos);
     void setupInsert(vector<Nodef*> nodes);

@@ -1,40 +1,38 @@
-#include "morion/Orion.h"
+#include "morion/MOrion.h"
 #include<string.h>
 #include<utility>
 #include <dirent.h>
 #include <boost/algorithm/string.hpp>
 #include<limits.h>
 #include<set>
+#include<chrono>
 
 using namespace std;
+using namespace std::chrono;
 
 int fileid = 1;
-bool usehdd = true;
-Orion orion(usehdd, 60000000,20000000);  
+bool usehdd = false;
+bool batch = true; // true makes the program crash
+bool local = true;
 
-string toS(int id)
+int to_int(string updt_cnt)
 {
-	string s = to_string(id);
-	string front ="";
-	if (id < 10)
-		front = "000";
-	else if(id < 100)
-		front = "00";
-	else if(id < 1000)
-		front = "0";
-	s=front.append(s);
-	return s;
+        int updc;
+        stringstream convstoi(updt_cnt);
+        convstoi >> updc;
+        return updc;
 }
 
 string getFileContent(string path)
 {
     ifstream file(path);
-    string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    string content((std::istreambuf_iterator<char>(file)), 
+		                             std::istreambuf_iterator<char>());
     return content;
 }
 
 
-static void list_dir (const char * dir_name)
+static void list_dir ( const char * dir_name, MOrion& borion)
 {
     DIR * d;
     d = opendir (dir_name);
@@ -62,10 +60,10 @@ static void list_dir (const char * dir_name)
 	          file = file.append(d_name);
 	          vector<string> kws1, kws;
 	          string cont = getFileContent(file);
-	          cout <<"=====================================" << endl;
-                  cout << endl <<file<< " " << fileid <<endl << endl;
+	    cout <<endl<<"================================================" << endl;
+                  cout <<file<< "   id:" << fileid <<endl;
 	     
-	     	  orion.insertWrap(cont,fileid);
+	     	  borion.insertWrap(cont,fileid,batch);
              
 	     	  fileid++;
              }
@@ -76,13 +74,14 @@ static void list_dir (const char * dir_name)
 			cout <<"HERE root 1: " << d_name<< endl ;
                         int path_length;
                         char path[PATH_MAX];
-                  path_length=snprintf(path,PATH_MAX,"%s/%s", dir_name, d_name);
+                  	path_length=snprintf(path,PATH_MAX,"%s/%s", 
+					                   dir_name, d_name);
                          if (path_length >= PATH_MAX) 
 			 {
                                  fprintf (stderr, "Path length too long.\n");
                                  exit (EXIT_FAILURE);
                          }
-                         list_dir (path);
+                         list_dir (path, borion);
                  }
               }
      }
@@ -94,16 +93,109 @@ static void list_dir (const char * dir_name)
 }
 
 
-int main(int, char**) 
+int main(int argc, char**argv) 
 {
+	int size = to_int(argv[1]);
+	int size2 = to_int(argv[2]);
+        string nf = argv[3];
+	bool notfile = (nf == "true");
+	MOrion borion(usehdd, size,size2, local, notfile);  
+	ifstream kw;
+///*
+	list_dir(argv[4],borion);
+	borion.endSetup();
+	kw.open(argv[5]);
+	string line;
+        ofstream sres;
+	sres.open(argv[6]);//,ios::app);	
+	int l = 1;
+		if(local)
+		{
+			while(getline(kw,line))
+			{
+        			auto start = high_resolution_clock::now();
+				auto s = borion.simplebatchSearch(line);
+        			auto stop = high_resolution_clock::now();
+				auto duration = duration_cast<microseconds>(stop-start);
+				sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+				cout <<l<<" "<< duration.count()<<" "<< s.size()<<endl;
+				l++;
+			}
+		}
+		else
+		{
+			cout <<"batchSearch:"<<endl;
+			while(getline(kw,line))
+			{
+        			auto start = high_resolution_clock::now();
+				auto s = borion.batchSearch(line);
+        			auto stop = high_resolution_clock::now();
+				auto duration = duration_cast<microseconds>(stop-start);
+				sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+				cout <<l<<" "<< duration.count()<<" "<< s.size()<<endl;
+				l++;
+			}
+		}
+/*
+        auto start = high_resolution_clock::now();
+	list_dir(argv[2],borion);
+        auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<microseconds>(stop-start);
 
-	//list_dir("allen-p/deleted_items");
-	list_dir("allen-p");
-	//list_dir("tiny");
+*/
+return 0;
+/*
+	list_dir("allen-p/deleted_items",borion);
+	list_dir("allen-p/sent_items",borion);
+	list_dir("allen-p/sent",borion);
+	list_dir("allen-p/all_documents",borion);
+	list_dir("allen-p/discussion_threads",borion);
+        auto start = high_resolution_clock::now();
+	cout<<"SEARCHING ..."<<endl;
+	auto s = borion.searchsimple("borion");
+        auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<microseconds>(stop-start);
+	sres <<(fileid-1)<<" "<< duration.count()<<" "<<s.size()<<endl;
+	
+	return 0;
+	list_dir("allen-p/sent_items",borion);
+        start = high_resolution_clock::now();
+	s = borion.search("borion");
+        stop = high_resolution_clock::now();
+	duration = duration_cast<microseconds>(stop-start);
+	sres <<(fileid-1)<<" "<< duration.count()<< " "<<s.size()<<endl;
+
+
+	list_dir("allen-p/sent",borion);
+        start = high_resolution_clock::now();
+	s = borion.setupsearch("borion");
+        stop = high_resolution_clock::now();
+	duration = duration_cast<microseconds>(stop-start);
+	sres <<(fileid-1)<<" "<< duration.count()<< " " <<s.size()<<endl;
+
+	list_dir("allen-p/all_documents",borion);
+        start = high_resolution_clock::now();
+	s = borion.setupsearch("borion");
+        stop = high_resolution_clock::now();
+	duration = duration_cast<microseconds>(stop-start);
+	sres <<(fileid-1)<<" "<< duration.count()<< " "<<s.size()<<endl;
+
+	list_dir("allen-p/discussion_threads",borion);
+        start = high_resolution_clock::now();
+	s = borion.setupsearch("borion");
+        stop = high_resolution_clock::now();
+	duration = duration_cast<microseconds>(stop-start);
+	sres <<(fileid-1)<<" "<< duration.count()<< " "<<s.size()<<endl;
+
+	return 0;
+
+*/	
+/*
+	cout <<"== TOTAL files inserted :"<<fileid-1<<" =="<<endl;
+	cout <<"Time taken for setup(borion):"<<duration.count()<<endl;
 	cout << endl<<" SETUP INSERT DONE!"<< endl;
 	cout <<"=================================="<< endl;
 	cout <<"READY TO PERFORM QUERIES!" << endl;
-	
 	
 	while(1)
 	{
@@ -125,22 +217,73 @@ int main(int, char**)
 			cout << "Enter the keyword to be searched: ";
 			string keyword;
 			cin>> keyword;
-	    		map<int,string> files = orion.search(keyword);
-			cout <<"--------Search result---------"<<endl;
-	    		for(auto file:files)
+		cout <<"---------------Search result----------------"<<endl;
+			map<string,string> files;
+			start = high_resolution_clock::now();
+	    	vector<pair<string,string>> results=borion.search(keyword);
+			stop = high_resolution_clock::now();
+			duration = duration_cast<microseconds>(stop-start);
+			cout <<endl<< "setupsearch TIME: "<< duration.count()<<endl;  
+		for(auto file:results)
+		{
+			string id = file.second.substr(0,FID_SIZE);
+			int sz = file.second.size();
+			string cont = file.second.substr(FID_SIZE,sz);
+			if(files.find(id)!=files.end())
 			{
-	    			cout << "["<<file.first<<"] ";
-				//cout << file.second<< endl<<endl;
+				string con = files.at(id);
+				con.append(cont);
+				files.erase(id);
+				files.insert(pair<string,string>(id,con));
 			}
-	    		cout <<endl<<endl;
-			cout << "RESULT size: " << files.size() << endl<<endl;
+			else
+			{
+				files.insert(pair<string,string>(id,cont));
+			}
+		}
+		for(auto file : files)
+		{
+			cout <<"["<<file.first<<"]";
+		}
+		cout<<endl<<"RESULT stupsrchSIZE: "<<files.size()<<endl<<endl;
+			sres<< duration.count() <<" "<<files.size()<<endl;
+
+			map<string,string>  files2;
+			start = high_resolution_clock::now();
+	    	vector<pair<string,string>> res2=borion.searchsimple(keyword);
+			stop = high_resolution_clock::now();
+			duration = duration_cast<microseconds>(stop-start);
+			cout << "search TIME: "<< duration.count()<<endl;  
+		for(auto file:res2)
+		{
+			string id = file.second.substr(0,FID_SIZE);
+			int sz = file.second.size();
+			string cont = file.second.substr(FID_SIZE,sz);
+			if(files2.find(id)!=files2.end())
+			{
+				string con = files2.at(id);
+				con.append(cont);
+				files2.erase(id);
+				files2.insert(pair<string,string>(id,con));
+			}
+			else
+			{
+				files2.insert(pair<string,string>(id,cont));
+			}
+		}
+			cout <<endl<< "RESULT srchSIZE: " << files2.size() << endl;
+			sres<< duration.count() <<" "<<files2.size()<<endl;
 		}
 		else if(c=='d'|| c=='D')
 		{
 			cout <<"Enter file id to be deleted: ";
 			int fid;
 			cin>>fid;
-			orion.remove(fid);
+			start = high_resolution_clock::now();
+			borion.remove(fid);
+			stop = high_resolution_clock::now();
+			duration = duration_cast<microseconds>(stop-start);
+			cout << "Deletion time: "<< duration.count()<<endl;  
 		}
 		else if(c=='i' || c=='I')
 		{
@@ -148,19 +291,38 @@ int main(int, char**)
 			string file;
 			cin>> file;
 	          	string cont = getFileContent(file);
-			orion.insertWrap(cont,fileid);
+			start = high_resolution_clock::now();
+			borion.insertWrap(cont,fileid,false);
+			stop = high_resolution_clock::now();
+			duration = duration_cast<microseconds>(stop-start);
+			cout << "Insertion time: "<< duration.count()<<endl;  
+		cout <<"--TOTAL files inserted so far:"<<fileid<<endl;
 			fileid++;
 			cout <<endl;
 		}
 		else if(c=='p' || c=='P')
 		{
-			orion.print();
+		//	cout << "Enter file name to be inserted:";
+		//	string file;
+		//	cin>> file;
+	        //  	string cont = getFileContent(file);
+		//	start = high_resolution_clock::now();
+		//	borion.insertWrap(cont,fileid,true);
+		//	stop = high_resolution_clock::now();
+		//	duration = duration_cast<microseconds>(stop-start);
+		//	cout << "Insertion time: "<< duration.count()<<endl;  
+		//cout <<"--TOTAL files inserted so far:"<<fileid<<endl;
+		//	fileid++;
+		//	cout <<endl;
 		}
-		else //if(c=='q'||c=='Q')
+		else if(c=='q'||c=='Q')
 		{
 			cout <<"QUITTING..."<<endl<<endl;
 			break;
 		}
+		else
+			cout <<"invalid choice!"<<endl;
 	}    
-        return 0;
+        return 0;*/
+	
 }

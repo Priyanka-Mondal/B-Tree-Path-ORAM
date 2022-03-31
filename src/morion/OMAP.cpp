@@ -10,6 +10,24 @@ OMAP::~OMAP() {
 
 }
 
+
+string OMAP::setupfind(Bid key) {
+    if (rootKey == 0) {
+        return "";
+    }
+    treeHandler->startOperation();
+    Node* node = new Node();
+    node->key = rootKey;
+    node->pos = rootPos;
+    //cout <<"root is:"<< rootKey<<endl;
+    auto resNode = treeHandler->setupsearch(node, key);
+    string res = "";
+    if (resNode != NULL) {
+        res.assign(resNode->value.begin(), resNode->value.end());
+        res = res.c_str();
+    }
+    return res;
+}
 string OMAP::find(Bid key) {
     if (rootKey == 0) {
         return "";
@@ -19,6 +37,7 @@ string OMAP::find(Bid key) {
     node->key = rootKey;
     node->pos = rootPos;
     auto resNode = treeHandler->search(node, key);
+    //string res1 = "";
     string res = "";
     if (resNode != NULL) {
         res.assign(resNode->value.begin(), resNode->value.end());
@@ -28,18 +47,8 @@ string OMAP::find(Bid key) {
     return res;
 }
 
-void OMAP::insert(Bid key, string value) {
-    treeHandler->startOperation();
-    if (rootKey == 0) {
-        rootKey = treeHandler->insert(0, rootPos, key, value);
-    } else {
-        rootKey = treeHandler->insert(rootKey, rootPos, key, value);
-    }
-    treeHandler->finishOperation(false, rootKey, rootPos);
-}
 
-
-void OMAP::remove(Bid delKey)
+Bid OMAP::remove(Bid delKey)
 {
     treeHandler->startOperation();
     if (rootKey == 0) {
@@ -48,8 +57,35 @@ void OMAP::remove(Bid delKey)
         rootKey = treeHandler->removeMain(rootKey, rootPos, delKey);
     }
     treeHandler->finishOperation(false, rootKey, rootPos);
+    
 }
 
+void OMAP::setupInsert(map<Bid, string> pairs) {
+    treeHandler->setupInsert(rootKey, rootPos, pairs);
+}
+
+void OMAP::setupinsert(Bid key, string value)
+{
+
+    if (rootKey == 0) {
+        rootKey = treeHandler->setupinsert(0, rootPos, key, value);
+//	cout <<rootPos<<"root at OMAP is :"<< rootKey<<endl;
+    } else {
+        rootKey = treeHandler->setupinsert(rootKey, rootPos, key, value);
+//	cout <<rootPos<<"root at OMAP is :"<< rootKey<<endl;
+    }
+}
+void OMAP::insert(Bid key, string value) {
+    treeHandler->startOperation();
+    if (rootKey == 0) {
+	    cout <<"root is 0"<< endl;
+        rootKey = treeHandler->insert(0, rootPos, key, value);
+    } else {
+	    cout <<"root is :"<<rootKey<< endl;
+        rootKey = treeHandler->insert(rootKey, rootPos, key, value);
+    }
+    treeHandler->finishOperation(false, rootKey, rootPos);
+}
 
 void OMAP::printTree() {
     treeHandler->startOperation();
@@ -65,20 +101,20 @@ void OMAP::printTree() {
  * This function is used for batch insert which is used at the end of setup phase.
  */
 void OMAP::batchInsert(map<Bid, string> pairs) {
-    treeHandler->startOperation(true);
-    int cnt = 0;
-    for (auto pair : pairs) {
-        cnt++;
-        if (cnt % 1000 == 0) {
-            cout << cnt << " items inserted in AVL of " << pairs.size() << endl;
-        }
-        if (rootKey == 0) {
+    //treeHandler->startOperation(true);
+    for (auto pair : pairs) 
+    {
+    	treeHandler->startOperation();
+        if (rootKey == 0) 
+	{
             rootKey = treeHandler->insert(0, rootPos, pair.first, pair.second);
-        } else {
+        } else 
+	{
             rootKey = treeHandler->insert(rootKey, rootPos, pair.first, pair.second);
         }
+        treeHandler->finishOperation(false, rootKey, rootPos);
     }
-    treeHandler->finishOperation(false, rootKey, rootPos);
+    //treeHandler->finishOperation(false, rootKey, rootPos);
 }
 
 /**
@@ -90,16 +126,19 @@ vector<string> OMAP::batchSearch(vector<Bid> keys) {
     Node* node = new Node();
     node->key = rootKey;
     node->pos = rootPos;
-
     vector<Node*> resNodes;
     treeHandler->batchSearch(node, keys, &resNodes);
+
     for (Node* n : resNodes) {
         string res;
+	string res1="";
         if (n != NULL) {
-            res.assign(n->value.begin(), n->value.end());
+            res1.assign(n->value.begin(), n->value.end());
+	    res = res1.c_str();
             result.push_back(res);
         } else {
-            result.push_back("");
+		cout << "Pushing empty" << endl;
+            result.push_back(""); // not sure if first is -1
         }
     }
     treeHandler->finishOperation(true, rootKey, rootPos);

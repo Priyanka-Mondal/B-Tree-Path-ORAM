@@ -274,8 +274,8 @@ vector<string> Orion::batchSearch(string keyword)
     blocknums.reserve(fc);
     blocknums = fcnt->batchSearch(bids);
     int pos = 0;
-    bids.clear();
     int sum = 0;
+    vector<Bid> filebids;
     for(auto it = blocknums.begin(); it!= blocknums.end(); it++)
     {
 	sum = sum + *it;
@@ -283,12 +283,15 @@ vector<string> Orion::batchSearch(string keyword)
 	for (int j= 1;j<=*it;j++)
 	{
 		Bid block = createBid(fID,j);
-		bids.emplace_back(block);
+		filebids.push_back(block);
+        	//string cont = file->find(block);
+		//conts.emplace_back(cont);
 	}
 	pos++;
+	//bids.clear();
      }
-     cout <<"sum:"<< bids.size()<<endl;
-    conts = file->batchSearch(bids);
+     conts = file->batchSearch(filebids);
+     cout <<filebids.size()<<"/"<< conts.size()<<endl;
     /*
     for(auto b : bids)
     {

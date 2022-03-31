@@ -514,8 +514,14 @@ void ORAM::finilize(bool find, Bid& rootKey, int& rootPos) {
             }
         }
     }
+        int maxHeight = 1;
+        for (auto t : cache) {
+            if (t.second != NULL && t.second->height > maxHeight) {
+                maxHeight = t.second->height;
+            }
+        }
     //for (unsigned int i = 0; i <= depth + 2; i++) {
-    for (unsigned int i = 1; i <= maxheight; i++) {
+    for (unsigned int i = 1; i <= maxHeight; i++) {
         for (auto t : cache) {
             if (t.second != NULL && t.second->height == i) {
                 Node* tmp = t.second;

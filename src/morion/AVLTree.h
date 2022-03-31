@@ -1,6 +1,7 @@
 #ifndef AVLTREE_H
 #define AVLTREE_H
 #include <iostream>
+#include<utility>
 #include "ORAM.hpp"
 #include "RAMStore.hpp"
 #include <functional>
@@ -23,19 +24,33 @@ private:
     std::random_device rd;
     std::mt19937 mt;
     std::uniform_int_distribution<int> dis;
+    int totalleaves;
+    int setupleaf= -1;
 
     int height(Bid N, int& leaf);
+    int setupheight(Bid N, int& leaf);
     int max(int a, int b);
     Node* newNode(Bid key, string value);
+    Node* setupnewNode(Bid key, string value);
+    Node* setuprightRotate(Node* y, Bid rootKey, int& pos);
+    Node* setupleftRotate(Node* x, Bid rootKey, int& pos);
+    int setupgetBalance(Node* N);
     Node* rightRotate(Node* y);
     Node* leftRotate(Node* x);
     int getBalance(Node* N);
     int RandomPath();
+    int notsoRandomPath();
 
+    int maxOfRandom;
+    int sortedArrayToBST(int start, int end, int& pos, Bid& node);
+    vector<Node*> setupNodes;
+    int setupProgress = 0;
 public:
     AVLTree(int maxSize, bytes<Key> key);
     virtual ~AVLTree();
     Bid insert(Bid rootKey, int& pos, Bid key, string value);
+    Node* minValueNode(Node* head);
+    Bid remove(Bid rootKey, int& pos, Bid delKey) ;
     Node* search(Node* head, Bid key);
     void batchSearch(Node* head, vector<Bid> keys, vector<Node*>* results);
     void printTree(Node* root, int indent);
@@ -52,6 +67,12 @@ public:
     Bid removeDel(Bid rootKey,int& pos,Bid delKey,int delPos,Node* paren);
     Bid removeRoot(Bid rootKey, int& pos);
     Bid realDelete(Node* paren,Bid delKey,int delPos);
+
+
+    Node* setupsearch(Node* head, Bid key);
+    Bid setupinsert(Bid rootKey, int& pos, Bid key, string value);
+    void setupInsert(Bid& rootKey, int& rootPos, map<Bid, string> pairs);
+    //int sortedArrayToBST(int start, int end, int& pos, Bid& node);
 };
 
 #endif /* AVLTREE_H */

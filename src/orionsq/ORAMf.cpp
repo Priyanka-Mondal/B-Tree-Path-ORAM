@@ -529,9 +529,15 @@ void ORAMf::finilize(bool find, Bid& rootKey, int& rootPos) {
         }
     }
 
+        int maxHeight = 1;
+        for (auto t : cache) {
+            if (t.second != NULL && t.second->height > maxHeight) {
+                maxHeight = t.second->height;
+            }
+        }
     //updating the binary tree positions
     //cout <<"MAXHEIGHT:"<<maxheight<<endl;
-    for (unsigned int i = 1; i <= maxheight; i++) {
+    for (unsigned int i = 1; i <= maxHeight; i++) {
     //for (unsigned int i = 0; i <= depth + 2; i++) {
         for (auto t : cache) {
             if (t.second != NULL && t.second->height == i) 

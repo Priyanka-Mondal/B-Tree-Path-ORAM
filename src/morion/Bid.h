@@ -7,11 +7,11 @@ using namespace std;
 
 class Bid {
 public:
-    std::array< byte_t, ID_SIZE> id;
+    std::array< byte_t, ID_SIZE> id; //array of type byte_t of size ID_SiZE
     Bid();
     Bid(int value);
     Bid(std::array< byte_t, ID_SIZE> value);
-    Bid(string value);
+    Bid(string value); 
     virtual ~Bid();
     Bid operator++ ();
     Bid& operator=(int other);
@@ -25,6 +25,7 @@ public:
     bool operator<=(const Bid& b) const ;
     bool operator>=(const Bid& b) const ;    
     friend ostream& operator<<(ostream &o, Bid& id);
+    void show();
 };
 
 
