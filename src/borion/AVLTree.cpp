@@ -366,24 +366,25 @@ Node* AVLTree::setupsearch(Node* head, Bid key) {
 /**
  * a recursive search function which traverse binary tree to find the target node
  */
-void AVLTree::batchSearch(Node* head, vector<Bid> keys, vector<Node*>* results) {
+void AVLTree::batchSearch(Node* head, vector<Bid> keys, vector<Node*>* results) 
+{
     if (head == NULL || head->key == 0) {
         return;
     }
     head = oram->ReadNode(head->key, head->pos, head->pos);
     bool getLeft = false, getRight = false;
     vector<Bid> leftkeys,rightkeys;
+//	   cout << keys.size() <<" ";
     for (Bid bid : keys) {
-	   //cout << bid ;
         if (head->key > bid) {
             getLeft = true;
             leftkeys.push_back(bid);
         }
-        if (head->key < bid) {
+	else if (head->key < bid) {
             getRight = true;
             rightkeys.push_back(bid);
         }
-        if (head->key == bid) {
+	else if (head->key == bid) {
             results->push_back(head);
         }
     }

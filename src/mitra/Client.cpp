@@ -146,15 +146,12 @@ void Client::insertFile(int ind, string content, bool setup, bool local)
     DictF[addr]=head;
 }
 
-map<int,string> Client::search(string keyword) 
+vector <string> Client::search(string keyword) 
 {
-	//cout<<"SEARCHING..."<<endl;
-    omap->treeHandler->oram->totalRead = 0;
-    omap->treeHandler->oram->totalWrite = 0;
-    totalSearchCommSize = 0;
-    vector<int> finalRes;
-    map<int,string> files;
-    vector<prf_type> KList;
+    //omap->treeHandler->oram->totalRead = 0;
+    //omap->treeHandler->oram->totalWrite = 0;
+    //totalSearchCommSize = 0;
+    vector<string> files;
     prf_type k_w;
     memset(k_w.data(), 0, AES_KEY_SIZE);
     copy(keyword.begin(), keyword.end(), k_w.data());
@@ -181,7 +178,9 @@ map<int,string> Client::search(string keyword)
 	    srcCnt = localSC[keyword];
     }
 
+    vector<prf_type> KList;
     KList.reserve(fileCnt);
+    vector<int> finalRes;
     finalRes.reserve(fileCnt);
     for (int i = 1; i <= fileCnt; i++) 
     {
@@ -220,32 +219,32 @@ map<int,string> Client::search(string keyword)
                 server->update(addr, val);
         }
     }
-    totalSearchCommSize += (fileCnt * 2 * sizeof (prf_type));
+    //totalSearchCommSize += (fileCnt * 2 * sizeof (prf_type));
     if(!local)
     	omap->insert(mapKey, to_string(fileCnt) + "-" + to_string(srcCnt));
     else
 	    localSC[keyword]=srcCnt;
     totalSearchCommSize += sizeof (prf_type) * KList.size() + encIndexes.size() * sizeof (prf_type) + (omap->treeHandler->oram->totalRead + omap->treeHandler->oram->totalWrite)*(sizeof (prf_type) + sizeof (int));
     
-    for(int i =0;i< finalRes.size();i++)
+    for(auto i = finalRes.begin(); i!= finalRes.end(); i++)
     {
-	int ind = finalRes[i];
+	int ind = *i;
 	string id = to_string(ind);
         int accsCnt;// = accCnt[ind];//to_int(ac->find(acKey));
-	Bid acKey = getBid(id);
-	if(!local){
-	string acnt = ac->find(acKey);
-	if(acnt=="")
-		continue; // not possible
-	else 
-		accsCnt = to_int(acnt);
+		Bid acKey = getBid(id);
+	if(!local)
+	{
+		string acnt = ac->find(acKey);
+		if(acnt=="")
+			continue; // not possible
+		else 
+			accsCnt = to_int(acnt);
 	}
 	else
 		accsCnt=accCnt[ind];
         prf_type file;
         memset(file.data(), 0, AES_KEY_SIZE);
         copy(id.begin(), id.end(), file.data());
-        //Bid mapKey = getBid(id);
         prf_type addr;
         getAESRandomValue(file.data(), 0, accsCnt, accsCnt, addr.data());
         FileNode* head = DictF[addr];
@@ -257,11 +256,7 @@ map<int,string> Client::search(string keyword)
 	    fblock plaintext  = AES::Decrypt(key, ciphertext, clen_size);
 	    string temp;
 	    temp.assign(plaintext.begin(),plaintext.end());
-	    //cout << temp<<endl;
-    	    if(files.find(ind) == files.end())
-    	    	files[ind]= temp;
-    	    else
-    	    	(files[ind]).append(temp);
+	    files.emplace_back(temp);
     	    FileNode* temphead = head->next;
 	    delete head;
 	    head = temphead;
@@ -269,7 +264,9 @@ map<int,string> Client::search(string keyword)
         }
 	accsCnt++;
 	if(!local)
+	{
 		ac->insert(acKey,to_string(accsCnt));
+	}
 	else
 		accCnt[ind] = accsCnt;
         prf_type newaddr;
@@ -278,7 +275,6 @@ map<int,string> Client::search(string keyword)
 	if(newhead != NULL)
         	DictF[newaddr]=newhead;
     }
-    //cout <<"size:"<< files.size()<< endl;
     return files;
 }
 
