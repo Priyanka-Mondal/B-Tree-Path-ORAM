@@ -10,13 +10,13 @@ int inserted = 0;
 int uniquekw = 0;
 int totblocks = 0;
 
-BOrion::BOrion(bool usehdd, int maxSize, bool local) {
+BOrion::BOrion(bool usehdd, int maxSize, int cnt, bool local) {
     this->useHDD = usehdd;
     this->local = local;
     bytes<Key> key1{0};
     bytes<Key> key2{1};
     srch = new OMAP(maxSize*2, key1);
-    fcnt = new OMAPf(maxSize,key2);
+    fcnt = new OMAPf(cnt,key2);
     //updt = new OMAPf(maxSize*2, key2); 
 }
 string toS(int id)

@@ -46,7 +46,7 @@ public:
     
     void print();
 
-    BOrion(bool useHDD,int maxSize, bool local);    
+    BOrion(bool useHDD,int maxSize, int count , bool local);    
     virtual ~BOrion();
     void beginSetup();
     void endSetup();

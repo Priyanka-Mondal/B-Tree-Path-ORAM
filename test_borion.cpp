@@ -96,15 +96,16 @@ static void list_dir ( const char * dir_name, BOrion& borion)
 int main(int argc, char**argv) 
 {
 	int size = to_int(argv[1]);
-	BOrion borion(usehdd, size,local);  
+	int size2 = to_int(argv[2]);
+	BOrion borion(usehdd, size,size2, local);  
 	ifstream kw;
 ///*
-	list_dir(argv[2],borion);
+	list_dir(argv[3],borion);
 	borion.endSetup();
-	kw.open(argv[3]);
+	kw.open(argv[4]);
 	string line;
         ofstream sres;
-	sres.open(argv[4]);//,ios::app);	
+	sres.open(argv[5]);//,ios::app);	
 	int l = 1;
 	while(getline(kw,line))
 	{
