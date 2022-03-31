@@ -128,8 +128,8 @@ void Oriel::insertWrapper(vector<string> kws, string content,int ind,bool batch)
      cout << "inserted keywords (total:" <<kws.size() <<")for id:"<<ind<< endl;
      insertFile(ind,content,batch); 
      inserted=inserted+kws.size();
-     cout << endl<<"--TOTAL keywords inserted so far: "<<inserted<<endl;
-     cout <<"--TOTAL unique keywords inserted so far: "<<uniquekw<<endl;
+     //cout << endl<<"--TOTAL keywords inserted so far: "<<inserted<<endl;
+     //cout <<"--TOTAL unique keywords inserted so far: "<<uniquekw<<endl;
 }
 
 void Oriel::insertkw(string keyword, int ind) 
@@ -165,8 +165,8 @@ void Oriel::setupInsertkw(string keyword, int ind)
     int updc = 0;
     if (Imap.count(mapKey)>0)
     	updc = Imap[mapKey];
-    if (updc == 0) 
-	 uniquekw++;  
+    //if (updc == 0) 
+//	 uniquekw++;  
     updc++;
     Imap[mapKey]=updc;
     Bid key = createBid(keyword, updc);
@@ -208,7 +208,8 @@ void Oriel::insertFile(int ind, string content,bool batch)
 void Oriel::endSetup()
 {
 	I->setupInsert(Imap);
-	ac->setupInsert(acmap);
+	if(!local)
+	   ac->setupInsert(acmap);
 }
 
 vector <string> Oriel::search(string keyword)

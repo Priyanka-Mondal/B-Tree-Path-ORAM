@@ -159,8 +159,8 @@ static void list_dir (const char * dir_name, Client& client, bool real)
 		      }
 	      }
 	      cout <<file<< " " << fileid <<endl;
-	      client.insert(kws, fileid,true, true);
-	      client.insertFile(fileid,cont,true, true);
+	      client.insert(kws, fileid,true, local);
+	      client.insertFile(fileid,cont,true, local);
 		uniquekw = uniquekw+kws.size();
 			cout << "inserted "<< uniquekw <<" unique keywords"<<endl;
                 fileid++;
@@ -260,7 +260,7 @@ int main(int argc, char** argv)
     Client client(&server, deletFiles,kwcnt,filecnt,setup, local);
     list_dir(argv[3],client, REAL);
     //sort(kwfreq);
-    if(!local)
+    //if(!local)
     	client.endSetup();
         ofstream sres;
 	sres.open(argv[5]);
