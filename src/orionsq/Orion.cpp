@@ -3,9 +3,10 @@
 #include "stopword.hpp"
 
 
-Orion::Orion(bool usehdd, int filecnt , int filesize) 
+Orion::Orion(bool usehdd, int filecnt , int filesize, bool local) 
 {
     this->useHDD = false;//usehdd;
+    this->local= local;
     bytes<Key> key1{0};
     bytes<Key> key2{1};
     srch = new OMAPf(filecnt, key1);
@@ -160,12 +161,18 @@ void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind)
     {		
   	 Bid firstKey(kw);
   	 int fc = 0;
-  	 if(fcntbids.count(firstKey) > 0)
+	 if(!local)
 	 {
-	   fc = fcntbids[firstKey];
+  	 	if(fcntbids.count(firstKey) > 0)
+	   		fc = fcntbids[firstKey];
 	 }
+	 else if(localFCNT.count(kw)>0)
+		 fc = localFCNT[kw];
   	 fc= fc+1;
-	 fcntbids[firstKey]=fc;
+	 if(!local)
+	 	fcntbids[firstKey]=fc;
+	 else
+		 localFCNT[kw]=fc;
   	 //Bid updKey = createBid(kw, ind);
   	 //updtbids[updKey]=fc;
   	 Bid srchKey = createBid(kw, fc);
@@ -173,7 +180,10 @@ void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind)
     }
     string id = to_string(ind);
     Bid blkcnt(id);
-    fcntbids[blkcnt]=blocks.size();
+    if(!local)
+    	fcntbids[blkcnt]=blocks.size();
+    else
+	localBCNT[ind]=blocks.size();
     int block_num = 1;
     for(auto blk: blocks)
     {
@@ -187,9 +197,10 @@ void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind)
 void Orion::endSetup() 
 {
         srch->setupInsert(srchbids);
-        fcnt->setupInsert(fcntbids);
 	//updt->setupInsert(updtbids);
 	file->setupInsert(filebids);
+	if(!local)
+         fcnt->setupInsert(fcntbids);
 }
 
 void Orion::insert(vector<string> kws, vector<string> blocks, int ind) 
@@ -245,6 +256,39 @@ vector<pair<int,string>> Orion::search(string keyword)
     return fileblocks;
 }
 
+vector<string> Orion::simplebatchSearch(string keyword) 
+{
+	vector<string> conts;
+	int fc;
+        if(localFCNT.count(keyword)>0)
+        	fc = localFCNT[keyword];
+	else 
+	    return conts;
+    	vector<Bid> bids;
+    	bids.reserve(fc);
+   	for (int i = 1; i <= fc; i++) 
+   	{
+   	         Bid bid = createBid(keyword, i);
+   	         bids.push_back(bid);
+   	}
+   	vector<int> result;
+   	result.reserve(fc); 
+   	result = srch->batchSearch(bids);
+   	bids.clear();
+   	for(auto id:result)
+   	 {
+	 	int blocknum = localBCNT[id];
+   	        string fID = to_string(id);
+   	        for (int j= 1;j<=blocknum;j++)
+   	        {
+   	     		Bid block = createBid(fID,j);
+   	     		bids.push_back(block);
+   	     	}
+   	  }
+   	  conts = file->batchSearch(bids);
+   	  cout <<bids.size()<<"/"<< conts.size()<<endl;
+    return conts;
+}
 vector<string> Orion::batchSearch(string keyword) 
 {
     vector<string> conts;
@@ -252,52 +296,36 @@ vector<string> Orion::batchSearch(string keyword)
     int fc = fcnt->find(firstKey);
     if (fc == 0) 
 	    return conts;
-    cout<< "UPDC:"<< fc<< endl;
     vector<Bid> bids;
     bids.reserve(fc);
     for (int i = 1; i <= fc; i++) 
     {
             Bid bid = createBid(keyword, i);
-            bids.emplace_back(bid);
+            bids.push_back(bid);
     }
     vector<int> result;
     result.reserve(fc); 
     result = srch->batchSearch(bids);
     bids.clear();
+    map<string,int> bcnt;
     for(int id:result)
     {
         string fileid = to_string(id);
 	Bid blkcnt(fileid);
-	bids.push_back(blkcnt);
+	bcnt[fileid] = fcnt->find(blkcnt);
     }
-    vector<int> blocknums;
-    blocknums.reserve(fc);
-    blocknums = fcnt->batchSearch(bids);
-    int pos = 0;
-    int sum = 0;
-    vector<Bid> filebids;
-    for(auto it = blocknums.begin(); it!= blocknums.end(); it++)
+    bids.clear();
+    for(auto it : bcnt)
     {
-	sum = sum + *it;
-	string fID = to_string(result[pos]);
-	for (int j= 1;j<=*it;j++)
+	string fID = it.first;
+	for (int j= 1;j<=it.second;j++)
 	{
 		Bid block = createBid(fID,j);
-		filebids.push_back(block);
-        	//string cont = file->find(block);
-		//conts.emplace_back(cont);
+		bids.push_back(block);
 	}
-	pos++;
-	//bids.clear();
      }
-     conts = file->batchSearch(filebids);
-     cout <<filebids.size()<<"/"<< conts.size()<<endl;
-    /*
-    for(auto b : bids)
-    {
-	    string c = file->find(b);
-	    conts.emplace_back(c);
-    }*/
+     conts = file->batchSearch(bids);
+     cout <<bids.size()<<"/"<< conts.size()<<endl;
     return conts;
 }
 

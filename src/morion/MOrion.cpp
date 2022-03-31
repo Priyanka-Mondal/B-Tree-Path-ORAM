@@ -252,7 +252,7 @@ void MOrion::setupinsertFile(int id, vector<string> blocks)
 void MOrion::endSetup()
 {
 	srch->setupInsert(srchmap);
-	//if(!local)
+	if(!local)
 		fcnt->setupInsert(fcntmap);
 }
 
@@ -281,7 +281,6 @@ vector<string> MOrion::simplebatchSearch(string keyword)
     int point=0;
     for(auto ids:fids)
     {
-	   
 	    while(fetched < updc && point < COM)
 	    {
 	    	string str = ids.substr(point*FID_SIZE,FID_SIZE);
@@ -310,13 +309,8 @@ vector<string> MOrion::batchSearch(string keyword)
 {
     vector<string> result;
     int updc=0;
-    if(!local)
-    {
-    	Bid mapKey(keyword);
-    	updc = fcnt->find(mapKey); 
-    }
-    else 
-        updc = localFCNT[keyword];
+    Bid mapKey(keyword);
+    updc = fcnt->find(mapKey); 
     if (updc == 0) 
         return result;
     int blocks= get_block_num(updc, COM);
@@ -347,38 +341,19 @@ vector<string> MOrion::batchSearch(string keyword)
 		filind.push_back(ii);
 	     }
     }
-    if(!notfile)
-    {
     bids.clear();
-    if(!local) 
+    for(auto f :filind)
     {
-	    for(auto f :filind)
-	    {
-		    string ff = to_string(f);
-		    Bid bid(ff);
-		    int sz = fcnt->find(bid);
-			for(int i = 1;i<=sz;i++)
-			{
-				Bid fb = createBid(ff,i);
-				bids.push_back(fb);
-			}
-	    }
-    }
-    else if(local)
-    {
-	    for(auto k :filind)
-	    {
-		string ff = to_string(k);
-                int sz = localBCNT[k];
+	    string ff = to_string(f);
+	    Bid bid(ff);
+	    int sz = fcnt->find(bid);
 		for(int i = 1;i<=sz;i++)
 		{
 			Bid fb = createBid(ff,i);
 			bids.push_back(fb);
 		}
-	    }
     }
     result=srch->batchSearch(bids); 
-    }
     return result;
 }
 /*

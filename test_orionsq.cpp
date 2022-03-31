@@ -16,6 +16,7 @@ using namespace std::chrono;
 int fileid = 1;
 bool usehdd = true;
 bool batch = true;
+bool local = true;
 /*map<string,int> kwfreq;
 bool cmp(pair<string, int>& a, pair<string, int>& b)
 {
@@ -112,7 +113,8 @@ int main(int argc, char**argv)
 {
 	int sizekw = to_int(argv[1]);
 	int sizefile = to_int(argv[2]);
-	Orion orion(usehdd, sizekw,sizefile);  
+
+	Orion orion(usehdd, sizekw,sizefile, local);  
         ofstream sres;
         ifstream kw;
 ///*
@@ -122,15 +124,31 @@ int main(int argc, char**argv)
 	sres.open(argv[5]);	
 	string line;
 	int l = 1;
-	while(getline(kw,line))
+	if(local)
 	{
-        	auto start = high_resolution_clock::now();
-		auto s = orion.batchSearch(line);
-        	auto stop = high_resolution_clock::now();
-		auto duration = duration_cast<microseconds>(stop-start);
-		sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
-		cout <<l<<" "<< duration.count()<<" "<< s.size()<<endl;
-		l++;
+		while(getline(kw,line))
+		{
+	        	auto start = high_resolution_clock::now();
+			auto s = orion.simplebatchSearch(line);
+	        	auto stop = high_resolution_clock::now();
+			auto duration = duration_cast<microseconds>(stop-start);
+			sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+			cout <<l<<" "<< duration.count()<<" "<< s.size()<<endl;
+			l++;
+		}
+	}
+	else
+	{
+		while(getline(kw,line))
+		{
+	        	auto start = high_resolution_clock::now();
+			auto s = orion.batchSearch(line);
+	        	auto stop = high_resolution_clock::now();
+			auto duration = duration_cast<microseconds>(stop-start);
+			sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+			cout <<l<<" "<< duration.count()<<" "<< s.size()<<endl;
+			l++;
+		}
 	}
 	return 0;
 //*/	
