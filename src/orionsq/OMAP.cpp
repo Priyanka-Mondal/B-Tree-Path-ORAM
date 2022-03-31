@@ -57,9 +57,9 @@ string OMAP::find(Bid key) {
         res = res.c_str();
     }
     treeHandler->finishOperation(true, rootKey, rootPos);
-delete node;
-delete resNode;
-return res;
+//delete node;
+//delete resNode;
+//return res;
 }
 
 void OMAP::setupinsert(Bid key, string value)
@@ -139,9 +139,9 @@ vector<string> OMAP::batchSearch(vector<Bid> keys) {
         string res;
         if (n != NULL) {
             res.assign(n->value.begin(), n->value.end());
-            result.push_back(res);
+            result.emplace_back(res);
         } else {
-            result.push_back("");
+            result.emplace_back("");
         }
     }
     treeHandler->finishOperation(true, rootKey, rootPos);

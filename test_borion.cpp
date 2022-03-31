@@ -96,7 +96,7 @@ static void list_dir ( const char * dir_name, BOrion& borion)
 int main(int argc, char**argv) 
 {
 	int size = to_int(argv[1]);
-	BOrion borion(usehdd, size);  
+	BOrion borion(usehdd, size,local);  
 	ifstream kw;
 ///*
 	list_dir(argv[2],borion);
@@ -109,7 +109,7 @@ int main(int argc, char**argv)
 	while(getline(kw,line))
 	{
         	auto start = high_resolution_clock::now();
-		auto s = borion.batchSearch(line);
+		vector<pair<string,string>> s = borion.batchSearch(line);
         	auto stop = high_resolution_clock::now();
 		auto duration = duration_cast<microseconds>(stop-start);
 		sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;

@@ -159,8 +159,8 @@ static void list_dir (const char * dir_name, Client& client, bool real)
 		      }
 	      }
 	      cout <<file<< " " << fileid <<endl;
-	      client.insert(kws, fileid,true, true);
-	      client.insertFile(fileid,cont,true, true);
+	      client.insert(kws, fileid,true, local);
+	      client.insertFile(fileid,cont,true, local);
 		uniquekw = uniquekw+kws.size();
 			cout << "inserted "<< uniquekw <<" unique keywords"<<endl;
                 fileid++;
@@ -286,6 +286,7 @@ int main(int argc, char** argv)
 		l++;
 	}
 	return 0;
+	/*
 	cout << endl<<" SETUP INSERT DONE!"<< endl;
 	cout <<"=================================="<< endl;
 	cout <<"READY TO PERFORM QUERIES!" << endl;
@@ -318,18 +319,18 @@ int main(int argc, char** argv)
 				cout <<endl;
 			}
 			cout <<endl<<"RESULT SIZE:"<< files.size()<<endl;
-			/*
+			
 			  vector<int> forfile;
 	    		cout <<endl<<endl;
 			cout << "RESULT size: " << files.size() << endl<<endl;
 			map<int,string> content = client.searchfile(forfile);
-			*/
+			
 			//for(auto m: content)
 			//{
 			//	cout <<"["<<m.first<<"]{"<<m.second<<"}"<<endl;
 			//}
 		}
-		/*else if(c=='d'|| c=='D')
+		else if(c=='d'|| c=='D')
 		{
 			cout <<"Enter file id to be deleted: ";
 			string idstr;
@@ -355,7 +356,7 @@ int main(int argc, char** argv)
 			}
 			else
 				cout <<"***invalid id (enter integer)***"<<endl;
-		}*/
+		}
 		else if(c=='i' || c=='I')
 		{
 			string file;
@@ -376,6 +377,6 @@ int main(int argc, char** argv)
 		else
 			cout <<"INVALID CHOICE!"<<endl;
 	}    
-    return 0;
+    return 0;*/
 
 }

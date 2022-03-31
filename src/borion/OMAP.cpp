@@ -130,9 +130,9 @@ vector<pair<string,string>> OMAP::batchSearch(vector<Bid> keys) {
     Node* node = new Node();
     node->key = rootKey;
     node->pos = rootPos;
-
     vector<Node*> resNodes;
     treeHandler->batchSearch(node, keys, &resNodes);
+
     for (Node* n : resNodes) {
         pair<string,string> res;
 	string res1="";

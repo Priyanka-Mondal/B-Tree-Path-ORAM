@@ -61,7 +61,7 @@ public:
     Client(Server* server, bool deleteFiles, int keyworsSize,int fileSize, bool setup,bool local);
     Client(bool deleteFiles, int keyworsSize, int fileSize, bool setup, bool local);
     void update(OP op, string keyword, int ind, bool setup);
-    map<int,string> search(string keyword);
+    vector <string> search(string keyword);
     void updateRequest(OP op, string keyword, int ind, prf_type& address, prf_type& value);
     prf_type searchRequest(string keyword, vector<prf_type>& tokens);
     void searchProcess(vector<prf_type> tokens, prf_type k_w, vector<int>& ids, map<prf_type, prf_type>& cleaningPairs, string keyword);

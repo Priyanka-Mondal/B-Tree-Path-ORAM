@@ -121,6 +121,7 @@ int main(int argc, char**argv)
 	kw.open(argv[4]);
 	sres.open(argv[5]);	
 	string line;
+	int l = 1;
 	while(getline(kw,line))
 	{
         	auto start = high_resolution_clock::now();
@@ -128,7 +129,8 @@ int main(int argc, char**argv)
         	auto stop = high_resolution_clock::now();
 		auto duration = duration_cast<microseconds>(stop-start);
 		sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
-		cout <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+		cout <<l<<" "<< duration.count()<<" "<< s.size()<<endl;
+		l++;
 	}
 	return 0;
 //*/	

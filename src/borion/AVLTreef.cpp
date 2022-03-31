@@ -363,11 +363,11 @@ void AVLTreef::batchSearch(Nodef* head, vector<Bid> keys, vector<Nodef*>* result
             getLeft = true;
             leftkeys.push_back(bid);
         }
-        if (head->key < bid) {
+	else if (head->key < bid) {
             getRight = true;
             rightkeys.push_back(bid);
         }
-        if (head->key == bid) {
+	else if (head->key == bid) {
             results->push_back(head);
         }
     }

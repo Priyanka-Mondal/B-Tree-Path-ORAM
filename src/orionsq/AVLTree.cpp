@@ -428,14 +428,14 @@ void AVLTree::batchSearch(Node* head, vector<Bid> keys, vector<Node*>* results) 
     for (Bid bid : keys) {
         if (head->key > bid) {
             getLeft = true;
-            leftkeys.push_back(bid);
+            leftkeys.emplace_back(bid);
         }
-        if (head->key < bid) {
+	else if (head->key < bid) {
             getRight = true;
-            rightkeys.push_back(bid);
+            rightkeys.emplace_back(bid);
         }
-        if (head->key == bid) {
-            results->push_back(head);
+	else if (head->key == bid) {
+            results->emplace_back(head);
         }
     }
     if (getLeft) {
@@ -958,9 +958,9 @@ void AVLTree::setupInsert(Bid& rootKey, int& rootPos, map<Bid, string> pairs) {
         Node* node = newNode(pair.first, pair.second);
         setupNodes.push_back(node);
     }
-    //cout << "Creating BST" << endl;
+    cout << "Creating BST" << endl;
     sortedArrayToBST(0, setupNodes.size() - 1, rootPos, rootKey);
-    //cout << "Inserting in ORAM" << endl;
+    cout << "Inserting in ORAM" << endl;
     oram->setupInsert(setupNodes);
 }
 

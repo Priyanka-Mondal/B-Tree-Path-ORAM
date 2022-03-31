@@ -17,9 +17,11 @@ private:
     map<Bid,int>fcntmap;
     OMAP* srch;
     OMAPf *updt , *fcnt;
-    map<string,int> idvol;
-    map<string,int> tvol;
-    
+    //map<string,int> idvol;
+    //map<string,int> tvol;
+    bool local;
+    map<string,int> localFCNT;
+    map<int,int> localBCNT;
 public:
     Bid createBid(string keyword,int number);
     Bid createBid(string keyword,string id);
@@ -44,7 +46,7 @@ public:
     
     void print();
 
-    BOrion(bool useHDD,int maxSize);    
+    BOrion(bool useHDD,int maxSize, bool local);    
     virtual ~BOrion();
     void beginSetup();
     void endSetup();
