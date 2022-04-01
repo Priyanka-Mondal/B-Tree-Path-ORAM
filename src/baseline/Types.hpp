@@ -14,10 +14,7 @@
 #include <cryptopp/modes.h>
 #include <cryptopp/aes.h>
 
-// The main type for passing around raw file data
-#define ID_SIZE 16
 #define BLOCK 64 // 128 caused seg_fault
-#define FCNT 111
 
 using byte_t = uint8_t;
 using block = std::vector<byte_t>;
@@ -26,13 +23,6 @@ template <size_t N>
 using bytes = std::array<byte_t, N>;
 typedef std::vector<uint8_t> fblock;
 
-// A bucket contains a number of Blocks
-constexpr int Z = 4;
-
-enum Op {
-    READ,
-    WRITE
-};
 #endif
 #ifndef AES_KEY_SIZE
 #define AES_KEY_SIZE CryptoPP::AES::DEFAULT_KEYLENGTH

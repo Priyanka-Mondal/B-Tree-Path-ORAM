@@ -137,8 +137,7 @@ vector<string> OMAP::batchSearch(vector<Bid> keys) {
 	    res = res1.c_str();
             result.push_back(res);
         } else {
-		cout << "Pushing empty" << endl;
-            result.push_back(""); // not sure if first is -1
+            result.push_back(""); 
         }
     }
     treeHandler->finishOperation(true, rootKey, rootPos);

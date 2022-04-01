@@ -116,12 +116,12 @@ void Client::insertFile(int ind, string content)
 	    append(&head,ciphertext);
 	    len = len + BLOCK;
     }
-
-    DictF[addr]=head;
+    server->update(addr,head);
 }
 int Client::getfreq(string kw, int fileid)
 {
 	int res = 0;
+	vector<prf_type> addrs;
 	for(int i = 1; i<= fileid; i++)
 	{
     		prf_type file; 
@@ -130,15 +130,24 @@ int Client::getfreq(string kw, int fileid)
    		copy(id.begin(), id.end(), file.data());
    		prf_type addr;
    		getAESRandomValue(file.data(), 0, 1, 1, addr.data());
-        	FileNode* head = DictF[addr];
+		addrs.emplace_back(addr);
+	}
+	vector<FileNode*> heads = server->search(addrs);
+	for(auto it = heads.begin(); it != heads.end(); it++)
+	{
+        	FileNode* head = *it;
 		string cont = getfile(head);
-		//cout << cont<< endl;
 		vector<string> kws1, kws;
 	        boost::split(kws1, cont, boost::is_any_of(delimiters));
 		kws =  getUniquedWords(kws1);
-	  	if(find(kws.begin(),kws.end(),kw)!=kws.end())
+		int flag = 0;
+		for(auto it = kws.begin();it!=kws.end();it++)
 		{
-				res++;
+			if(*it == kw && flag == 0)
+			{
+			    res++; // 
+			    flag = 1;
+			}
 		}
 	}
 	return res;
@@ -160,26 +169,6 @@ string Client::getfile(FileNode* head)
     return filedata;
 }
 
-prf_type Client::bitwiseXOR(int input1, int op, prf_type input2) {
-    prf_type result;
-    result[3] = input2[3] ^ ((input1 >> 24) & 0xFF);
-    result[2] = input2[2] ^ ((input1 >> 16) & 0xFF);
-    result[1] = input2[1] ^ ((input1 >> 8) & 0xFF);
-    result[0] = input2[0] ^ (input1 & 0xFF);
-    result[4] = input2[4] ^ (op & 0xFF);
-    for (int i = 5; i < AES_KEY_SIZE; i++) {
-        result[i] = (rand() % 255) ^ input2[i];
-    }
-    return result;
-}
-
-prf_type Client::bitwiseXOR(prf_type input1, prf_type input2) {
-    prf_type result;
-    for (unsigned int i = 0; i < input2.size(); i++) {
-        result[i] = input1.at(i) ^ input2[i];
-    }
-    return result;
-}
 
 void Client::getAESRandomValue(unsigned char* keyword, int op, int srcCnt, int fileCnt, unsigned char* result) {
     if (deleteFiles) {

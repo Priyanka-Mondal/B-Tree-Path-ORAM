@@ -67,6 +67,7 @@ public:
     void remove(int ind); 
     void removekw(vector<string> keyword, int ind);
     
+    vector<string> simplebatchSearch(string keyword);
     vector<string> search(string keyword);
     
     void print();

@@ -21,15 +21,6 @@ enum OP {
     INS, DEL
 };
 
-class FileNode
-{
- public:
- FileNode(){ };
-    ~FileNode() { };
-
-   fblock data;
-     FileNode *next;
-};
 
 
 class Client {

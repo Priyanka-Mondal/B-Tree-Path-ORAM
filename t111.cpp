@@ -107,7 +107,6 @@ int main(int argc, char** argv)
 	cout <<"element:"<< duration.count()<<endl;
 	}
 	//element is faster
-	*/
 	vector<int> vec;
 	vec.reserve(10000000);
 	for(int k=1; k<=25; k++)
@@ -139,6 +138,30 @@ int main(int argc, char** argv)
 	cout <<"notrese:"<< duration.count()<<endl<<endl<<endl;
 
 	}
+	*/
 	//reserve is faster
+	//
+	for(int k=1;k<=25;k++)
+	{
+	auto start = high_resolution_clock::now();
+	for(int i=0; i<=100000000;i++)
+	{
+		int y = i*1000;
+
+	}
+	auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<microseconds>(stop-start);
+	cout <<"repeat:"<< duration.count()<<endl;
+	int y;
+	start = high_resolution_clock::now();
+	for(int i=0; i<=100000000;i++)
+	{
+		y = i*1000;
+
+	}
+	stop = high_resolution_clock::now();
+	duration = duration_cast<microseconds>(stop-start);
+	cout <<"single:"<< duration.count()<<endl<<endl<<endl;
+	}
 	return 0;
 }

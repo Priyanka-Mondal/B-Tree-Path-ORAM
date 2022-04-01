@@ -18,16 +18,16 @@ Server::Server(bool deleteFiles)
 
 Server::~Server() { }
 
-void Server::update(prf_type addr, prf_type val) 
+void Server::update(prf_type addr, FileNode* val) 
 {
         DictF[addr]= val;
 }
 
-vector<prf_type> Server::search(vector<prf_type> KList) 
+vector<FileNode*> Server::search(vector<prf_type> KList) 
 {
-    vector<prf_type> result;
+    vector<FileNode*> result;
     for (unsigned int i = 0; i < KList.size(); i++) 
-		result.push_back(DictF[KList[i]]);
+		result.emplace_back(DictF[KList[i]]);
     return result;
 }
 

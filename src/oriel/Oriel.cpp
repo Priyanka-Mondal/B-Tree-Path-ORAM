@@ -127,7 +127,7 @@ void Oriel::insertWrapper(vector<string> kws, string content,int ind,bool batch)
      } 
      cout << "inserted keywords (total:" <<kws.size() <<")for id:"<<ind<< endl;
      insertFile(ind,content,batch); 
-     inserted=inserted+kws.size();
+     //inserted=inserted+kws.size();
      //cout << endl<<"--TOTAL keywords inserted so far: "<<inserted<<endl;
      //cout <<"--TOTAL unique keywords inserted so far: "<<uniquekw<<endl;
 }
@@ -189,12 +189,12 @@ void Oriel::insertFile(int ind, string content,bool batch)
     prf_type addr;
     getAESRandomValue(file.data(), 0, 1, 1, addr.data());
     int sz = content.size();
-    sz = sz < BLOCK? BLOCK:nextPowerOf2(sz);
-    if(content.size()<sz) 
-	  content.insert(content.size(),sz-content.size(),'#');
+    sz = (sz / BLOCK ) * BLOCK;
+    if (sz == 0)
+	    sz = BLOCK;
     FileNode *head = NULL;
     int len = 0;
-    while(len < content.size())
+    while(len < sz)
     {
 	    string part = content.substr(len,BLOCK);
 	    fblock plaintext;
@@ -212,6 +212,55 @@ void Oriel::endSetup()
 	   ac->setupInsert(acmap);
 }
 
+vector <string> Oriel::simplebatchSearch(string keyword)
+{
+    vector<string> files;
+    Bid mapKey(keyword);
+    int updc = I->find(mapKey); 
+    //cout <<"UPDC:"<< updc<< endl;
+    if (updc == 0)
+        return files;
+    vector<Bid> bids;
+    bids.reserve(updc);
+    for(int pos=1;pos<= updc; pos++)
+    {
+    	mapKey =createBid(keyword,pos);
+	bids.push_back(mapKey);
+    }
+    vector<int> ids = I->batchSearch(bids); // add y^m - updc fake accesses
+    for(int ind : ids)
+    {
+	string id = to_string(ind);
+	int accsCnt = localAC[ind];
+        prf_type file;
+        memset(file.data(), 0, AES_KEY_SIZE);
+        copy(id.begin(), id.end(), file.data());
+        prf_type addr;
+        getAESRandomValue(file.data(), 0, accsCnt, accsCnt, addr.data());
+        FileNode* head = DictF[addr];
+	FileNode* newhead = NULL;
+	fblock plaintext;
+        while(head!=NULL)
+        {
+    	    fblock ciphertext;
+            ciphertext.insert(ciphertext.end(),(head->data).begin(),(head->data).end());
+	    plaintext  = AES::Decrypt(key, ciphertext, clen_size);
+	    string temp;
+	    temp.assign(plaintext.begin(),plaintext.end());
+	    files.push_back(temp);
+	    FileNode* temphead;
+    	    temphead = head->next;
+	    delete head;
+	    head = temphead;
+	    append(&newhead,ciphertext);
+        }
+	localAC[ind]=++accsCnt;
+	DictF.erase(addr);
+        getAESRandomValue(file.data(), 0, accsCnt, accsCnt, addr.data());
+        DictF[addr]=newhead;
+    }
+    return files;
+}
 vector <string> Oriel::search(string keyword)
 {
     vector<string> files;

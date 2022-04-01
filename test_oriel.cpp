@@ -110,15 +110,31 @@ int main(int argc, char**argv)
         ofstream sres;
 	sres.open(argv[5]);//,ios::app);	
 	int l = 1;
-	while(getline(kw,line))
+	if(local)
 	{
-        	auto start = high_resolution_clock::now();
-		auto s = oriel.search(line);
-        	auto stop = high_resolution_clock::now();
-		auto duration = duration_cast<microseconds>(stop-start);
-		sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
-		cout <<l<<" "<< duration.count()<<" "<< s.size()<<endl;
-		l++;
+		while(getline(kw,line))
+		{
+        		auto start = high_resolution_clock::now();
+			auto s = oriel.simplebatchSearch(line);
+        		auto stop = high_resolution_clock::now();
+			auto duration = duration_cast<microseconds>(stop-start);
+			sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+			cout <<l<<" "<< duration.count()<<" "<< s.size()<<endl;
+			l++;
+		}
+	}
+	else
+	{
+		while(getline(kw,line))
+		{
+        		auto start = high_resolution_clock::now();
+			auto s = oriel.search(line);
+        		auto stop = high_resolution_clock::now();
+			auto duration = duration_cast<microseconds>(stop-start);
+			sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+			cout <<l<<" "<< duration.count()<<" "<< s.size()<<endl;
+			l++;
+		}
 	}
 	return 0;
 
