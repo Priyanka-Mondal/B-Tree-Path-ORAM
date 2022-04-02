@@ -10,6 +10,7 @@ def filter_cc(list):
 common_files = Glob('*.cpp') + Glob('aux/*.cpp') + Glob('utils/*.cpp') + Glob('*.c')
 orion_files = Glob('orion/*.cpp')
 oriel_files = Glob('oriel/*.cpp')
+packorion_files = Glob('packorion/*.cpp')
 mitra_files = Glob('mitra/*.cpp')
 morion_files = Glob('morion/*.cpp')
 orionsq_files = Glob('orionsq/*.cpp')
@@ -22,6 +23,7 @@ protos = env.SConscript('protos/build.scons', exports='env')
 
 common_objs = env.Object(common_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 orion_objs = env.Object(orion_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
+packorion_objs = env.Object(packorion_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 oriel_objs = env.Object(oriel_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 mitra_objs = env.Object(mitra_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 morion_objs = env.Object(morion_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
@@ -34,6 +36,7 @@ baseline_objs = env.Object(baseline_files, CPPPATH = ['.'] + env.get('CPPPATH', 
 objs = {}
 objs["oriel"] = oriel_objs + common_objs
 objs["orion"] = orion_objs + common_objs
+objs["packorion"] = packorion_objs + common_objs
 objs["mitra"] = mitra_objs + common_objs
 objs["morion"] = morion_objs + common_objs
 objs["orionsq"] = orionsq_objs + common_objs
