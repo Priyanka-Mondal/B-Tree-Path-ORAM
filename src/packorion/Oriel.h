@@ -46,9 +46,9 @@ class Oriel {
 private:
     bool useHDD;
     OMAPf *ac , *I, *fcnt;
-    //OMAPf *del;
+    OMAPf *del;
     map<prf_type, FileNode*> DictF;
-    map<Bid, string> Imap, acmap, fcntmap;    
+    map<Bid, string> Imap, acmap, fcntmap, updtmap;    
     map<int,int> localAC;
     bool local;
     bytes<Key> key;
@@ -67,8 +67,8 @@ public:
     void remove(int ind); 
     void removekw(vector<string> keyword, int ind);
     
-    vector<string> simplebatchSearch(string keyword);
-    vector<string> search(string keyword);
+    vector<string> localbatchSearch(string keyword);
+    vector<string> batchSearch(string keyword);
     
     void print();
 

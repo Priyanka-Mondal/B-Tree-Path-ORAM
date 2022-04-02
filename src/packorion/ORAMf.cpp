@@ -21,7 +21,7 @@ ORAMf::ORAMf(int maxSize, bytes<Key> key)
     size_t storeBlockCount = blockCount;
     clen_size = AES::GetCiphertextLength((blockSize) * Z);
     plaintext_size = (blockSize) * Z;
-    cout << "Bucket and block count in ORAMf:" << bucketCount<<"|"<<Z<<"="<<bucketCount*Z<<endl;
+    cout << "Bucket count:" << bucketCount<<"|blockCount:"<<bucketCount*Z<<"|depth:"<<depth<<endl;
     store = new RAMStore(storeBlockCount, storeBlockSize);
     for (size_t i = 0; i < bucketCount; i++) {
         Bucketf bucket;

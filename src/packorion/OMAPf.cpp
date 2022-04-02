@@ -112,7 +112,7 @@ vector<string> OMAPf::batchSearch(vector<Bid> keys) {
             res2.assign(n->value.begin(), n->value.end());
             result.push_back(res2);
        // } else {
-         //   result.push_back(0);
+         //   result.push_back("");
         }
     }
     treeHandler->finishOperation(true, rootKey, rootPos);

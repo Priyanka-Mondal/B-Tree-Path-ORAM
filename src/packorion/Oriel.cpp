@@ -16,9 +16,9 @@ Oriel::Oriel(bool usehdd, int kwSize,int filesize, bool local)
     this->local = local;
     bytes<Key> key1{0};
     bytes<Key> key2{1};
-    I = new OMAPf(kwSize*10, key1);
+    I = new OMAPf(kwSize*100, key1);
+    del = new OMAPf(kwSize*100,key2);
     fcnt = new OMAPf(kwSize, key1);
-    //del = new OMAPf(maxSize,key2);
     ac = new OMAPf(filesize, key2); 
     clen_size = AES::GetCiphertextLength(FILEBLOCK);
 }
@@ -94,7 +94,7 @@ void append(FileNode** head_ref, fblock new_data)
 
 int get_block_num(int updc, int com)
 {
-       float bnum = ceil(updc/com); // 16 file-ids each block
+       float bnum = ceil(updc/com); // com file-ids each block
        int block_num ;
        if(updc%com == 0)
 	      block_num = bnum;
@@ -160,8 +160,8 @@ void Oriel::setupInsertkw(string keyword, int ind)
     	updc = stoI(fcntmap[mapKey]);
     updc++;
     fcntmap[mapKey]=to_string(updc);
-    //Bid updKey = createBid(keyword, ind);
-    //updtmap[updKey]= updc;//pad
+    Bid updKey = createBid(keyword, ind);
+    updtmap[updKey]= to_string(updc);//pad
 
     int pos_in_block = get_position(updc,COM);
     int block_num = get_block_num(updc,COM);
@@ -200,7 +200,6 @@ void Oriel::insertFile(int ind, string content,bool batch)
     {
     	sz = (sz / FILEBLOCK + 1) * FILEBLOCK;
     }
-    cout <<"SIZE:"<< sz;
     FileNode *head = NULL;
     int len = 0;
     while(len < sz)
@@ -219,11 +218,12 @@ void Oriel::endSetup()
 {
 	I->setupInsert(Imap);
 	fcnt->setupInsert(fcntmap);
+	del->setupInsert(updtmap);
 	if(!local)
 	   ac->setupInsert(acmap);
 }
 
-vector<string> Oriel::simplebatchSearch(string keyword)
+vector<string> Oriel::localbatchSearch(string keyword)
 {
     vector<string> files;
     int updc;
@@ -234,7 +234,6 @@ vector<string> Oriel::simplebatchSearch(string keyword)
 	    updc = 0;
     else 
 	    updc = stoI(updcst);
-    cout <<"UPDC:"<<updc<<endl;
     if (updc == 0) 
         return files;
     int blocks= get_block_num(updc, COM);
@@ -259,6 +258,8 @@ vector<string> Oriel::simplebatchSearch(string keyword)
 	    {
 	    	string str = ids.substr(point*FID_SIZE,FID_SIZE);
 	    	point++;
+		if(str == "######")
+			continue;
 	    	fetched++;
 		int ii = stoI(str);
 		filind.push_back(ii);
@@ -297,67 +298,85 @@ vector<string> Oriel::simplebatchSearch(string keyword)
     }
     return files;
 }
-/*
-vector <string> Oriel::search(string keyword)
+
+vector<string> Oriel::batchSearch(string keyword)
 {
     vector<string> files;
+    int updc;
     Bid mapKey(keyword);
-    int updc = I->find(mapKey); 
-    //cout <<"UPDC:"<< updc<< endl;
-    if (updc == 0)
+    
+    string updcst = (fcnt->find(mapKey)); 
+    if(updcst == "")
+	    updc = 0;
+    else 
+	    updc = stoI(updcst);
+    if (updc == 0) 
         return files;
-    int pos = 1;
+    int blocks= get_block_num(updc, COM);
     vector<Bid> bids;
-    while(pos <= updc)
+    bids.reserve(blocks);
+    for(int i=1;i<=blocks;i++)
     {
-    	mapKey =createBid(keyword,pos);
-	pos++;
-	bids.push_back(mapKey);
+	Bid b = createBid(keyword,i);
+	bids.push_back(b);
     }
-    vector<int> ids = I->batchSearch(bids); // add y^m - updc fake accesses
-    for(int ind : ids)
+    vector<string> fids;
+    fids.reserve(blocks);
+    fids = I->batchSearch(bids);
+    int fetched = 0;
+    vector<int> filind;
+    filind.reserve(updc);
+    int point;
+    for(auto ids:fids)
     {
-        //int ind = I->find(mapKey);
-	string id = to_string(ind);
-	Bid acKey(id);
-	int accsCnt;
-	if(!local)
-            accsCnt = ac->find(acKey);
-	else 
-            accsCnt = localAC[ind];
+	    point = 0;
+	    while(fetched < updc && point < COM)
+	    {
+	    	string str = ids.substr(point*FID_SIZE,FID_SIZE);
+	    	point++;
+		if(str == "######")
+			continue;
+	    	fetched++;
+		int ii = stoI(str);
+		filind.push_back(ii);
+	     }
+    }
+    for(int ind : filind)
+    {
+	Bid acKey(to_string(ind));
+	int accsCnt = stoI(ac->find(acKey));
         prf_type file;
         memset(file.data(), 0, AES_KEY_SIZE);
+	string id = to_string(ind);
         copy(id.begin(), id.end(), file.data());
-        Bid mapKey(id);
         prf_type addr;
         getAESRandomValue(file.data(), 0, accsCnt, accsCnt, addr.data());
         FileNode* head = DictF[addr];
 	FileNode* newhead = NULL;
+	fblock plaintext;
         while(head!=NULL)
         {
     	    fblock ciphertext;
             ciphertext.insert(ciphertext.end(),(head->data).begin(),(head->data).end());
-	    fblock plaintext  = AES::Decrypt(key, ciphertext, clen_size);
+	    plaintext  = AES::Decrypt(key, ciphertext, clen_size);
 	    string temp;
 	    temp.assign(plaintext.begin(),plaintext.end());
 	    files.push_back(temp);
-    	    FileNode* temphead = head->next;
+	    FileNode* temphead;
+    	    temphead = head->next;
 	    delete head;
 	    head = temphead;
 	    append(&newhead,ciphertext);
         }
-	if(!local)
-		ac->insert(acKey,(++accsCnt));
-	else
-		localAC[ind]=++accsCnt;
-        prf_type newaddr;
-        getAESRandomValue(file.data(), 0, accsCnt, accsCnt, newaddr.data());
+	accsCnt = accsCnt+1;
+	ac->insert(acKey,to_string(accsCnt));
 	DictF.erase(addr);
-        DictF[newaddr]=newhead;
+        getAESRandomValue(file.data(), 0, accsCnt, accsCnt, addr.data());
+        DictF[addr]=newhead;
     }
     return files;
 }
-*/
+
 void Oriel::insertkw(string keyword, int ind) 
 {
     Bid mapKey(keyword);
@@ -367,7 +386,7 @@ void Oriel::insertkw(string keyword, int ind)
     updc++;
     fcnt->insert(mapKey,to_string(updc));
     Bid updKey = createBid(keyword, ind);
-    //del->insert(updKey, updc);
+    del->insert(updKey, to_string(updc));
     Bid key = createBid(keyword, updc);
     I->insert(key, to_string(ind));
 }

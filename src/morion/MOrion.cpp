@@ -279,18 +279,22 @@ vector<string> MOrion::simplebatchSearch(string keyword)
     vector<int> filind;
     filind.reserve(updc);
     int point=0;
+    cout <<"UPDC:"<<updc<<endl;
     for(auto ids:fids)
     {
 	    while(fetched < updc && point < COM)
 	    {
 	    	string str = ids.substr(point*FID_SIZE,FID_SIZE);
 	    	point++;
+		if(str == "########")
+			continue;
 	    	fetched++;
 		int ii = stoI(str);
 		filind.push_back(ii);
+		cout <<"["<<fetched<<"-"<<str<<"]";
 	     }
 	     point = 0;
-    }
+    }cout <<endl;
     bids.clear();
     for(auto k :filind)
     {

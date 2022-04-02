@@ -13,7 +13,6 @@ using namespace std::chrono;
 int fileid = 1;
 bool usehdd = false;
 bool batch = true;//false;//true; // true makes the program crash
-bool local = true;
 int to_int(string updt_cnt)
 {
         int updc;
@@ -101,21 +100,23 @@ int main(int argc, char**argv)
 	}
 	int size = to_int(argv[1]);
 	int fsize = to_int(argv[2]);
+        string locl = argv[3];
+	bool local = (locl == "true");
 	Oriel oriel(usehdd, size, fsize, local);  
-	list_dir(argv[3],oriel);
+	list_dir(argv[4],oriel);
 	oriel.endSetup();
         ifstream kw;
-	kw.open(argv[4]);
+	kw.open(argv[5]);
 	string line;
         ofstream sres;
-	sres.open(argv[5]);//,ios::app);	
+	sres.open(argv[6]);//,ios::app);	
 	int l = 1;
 	if(local)
 	{
 		while(getline(kw,line))
 		{
         		auto start = high_resolution_clock::now();
-			auto s = oriel.simplebatchSearch(line);
+			auto s = oriel.localbatchSearch(line);
         		auto stop = high_resolution_clock::now();
 			auto duration = duration_cast<microseconds>(stop-start);
 			sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
@@ -128,7 +129,7 @@ int main(int argc, char**argv)
 		while(getline(kw,line))
 		{
         		auto start = high_resolution_clock::now();
-			auto s = oriel.simplebatchSearch(line);//////
+			auto s = oriel.batchSearch(line);//////
         		auto stop = high_resolution_clock::now();
 			auto duration = duration_cast<microseconds>(stop-start);
 			sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
