@@ -27,6 +27,7 @@ public:
     vector<string> batchSearch(vector<Bid> keys);
     void remove(Bid delKey);
     void setupInsert(map<Bid, string> pairs);
+    string findAndIncrement(Bid key) ;
 
 };
 

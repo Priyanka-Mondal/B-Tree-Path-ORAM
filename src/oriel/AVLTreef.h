@@ -69,6 +69,7 @@ public:
     Bid setupinsert(Bid rootKey, int& pos, Bid key, int value);
     int sortedArrayToBST(int start, int end, int& pos, Bid& node);
     void setupInsert(Bid& rootKey, int& rootPos, map<Bid, int> pairs);
+    string findAndIncrement(Nodef* head, Bid key);
 };
 
 #endif /* AVLTREEF_H */

@@ -286,7 +286,7 @@ vector <string> Oriel::search(string keyword)
 	Bid acKey(id);
 	int accsCnt;
 	if(!local)
-            accsCnt = ac->find(acKey);
+            accsCnt = ac->findAndIncrement(acKey);
 	else 
             accsCnt = localAC[ind];
         prf_type file;
@@ -310,10 +310,13 @@ vector <string> Oriel::search(string keyword)
 	    head = temphead;
 	    append(&newhead,ciphertext);
         }
-	if(!local)
-		ac->insert(acKey,(++accsCnt));
-	else
-		localAC[ind]=++accsCnt;
+	accsCnt = accsCnt+1;
+	//if(!local)
+	//{
+	//	ac->insert(acKey,(++accsCnt));
+	//}
+	if(local)
+		localAC[ind]=accsCnt;
         prf_type newaddr;
         getAESRandomValue(file.data(), 0, accsCnt, accsCnt, newaddr.data());
 	DictF.erase(addr);

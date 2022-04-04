@@ -93,7 +93,7 @@ static void list_dir ( const char * dir_name, Oriel& oriel)
 
 int main(int argc, char**argv) 
 {
-	if(argc<6)
+	if(argc<7)
 	{
 		cout <<"incorrect number of arguments"<<endl;
 		return 0;
@@ -126,6 +126,7 @@ int main(int argc, char**argv)
 	}
 	else
 	{
+		cout <<"AccsCNT not LOCAL"<<endl;
 		while(getline(kw,line))
 		{
         		auto start = high_resolution_clock::now();

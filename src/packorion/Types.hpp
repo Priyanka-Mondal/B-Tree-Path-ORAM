@@ -8,7 +8,7 @@
 
 #define ZKEY 0
 
-#define BLOCK 30 // 128 caused seg_fault
+#define BLOCK 60 // 128 caused seg_fault
 #define ID_SIZE 16 // it was 16 before
 #define FID_SIZE 6
 #define COM (BLOCK/FID_SIZE)

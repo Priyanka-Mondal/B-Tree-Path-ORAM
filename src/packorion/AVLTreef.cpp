@@ -175,6 +175,25 @@ Nodef* AVLTreef::search(Nodef* head, Bid key) {
     } else
         return head;
 }
+string AVLTreef::findAndIncrement(Nodef* head, Bid key) 
+{
+    if (head == NULL || head->key == 0)
+        return "";
+    head = oram->ReadNodef(head->key, head->pos, head->pos);
+    if (head->key > key) {
+        return findAndIncrement(oram->ReadNodef(head->leftID, head->leftPos, head->leftPos), key);
+    } else if (head->key < key) {
+        return findAndIncrement(oram->ReadNodef(head->rightID, head->rightPos, head->rightPos), key);
+    } else {
+        string res(head->value.begin(), head->value.begin()+4);
+        int fileCnt = stoi(res);
+        string newval = to_string(fileCnt + 1);
+        std::fill(head->value.begin(), head->value.end(), 0);
+        std::copy(newval.begin(), newval.end(), head->value.begin());
+        oram->WriteNodef(key, head);
+        return res;
+    }
+}
 
 /**
  * a recursive search function which traverse binary tree to find the target node

@@ -38,7 +38,25 @@ int OMAPf::find(Bid key) {
     return res;
 }
 
-
+int OMAPf::findAndIncrement(Bid key) 
+{
+    if (rootKey == 0) {
+        return 0;
+    }
+    treeHandler->startOperation();
+    Nodef* node = new Nodef();
+    node->key = rootKey;
+    node->pos = rootPos;
+    auto res2 = treeHandler->findAndIncrement(node, key);
+    int res;
+    if (res2 != "") 
+    {
+	res = stoint(res2);
+    }
+    treeHandler->finishOperation(true, rootKey, rootPos);
+    return res;
+}
+ 
 int OMAPf::setupfind(Bid key) {
     if (rootKey == 0) {
         return 0;

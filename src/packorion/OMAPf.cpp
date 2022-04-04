@@ -36,6 +36,19 @@ string OMAPf::find(Bid key) {
     return res2;
 }
 
+string OMAPf::findAndIncrement(Bid key) 
+{
+    if (rootKey == 0) {
+        return 0;
+    }
+    treeHandler->startOperation();
+    Nodef* node = new Nodef();
+    node->key = rootKey;
+    node->pos = rootPos;
+    string res = treeHandler->findAndIncrement(node, key);
+    treeHandler->finishOperation(true, rootKey, rootPos);
+    return res;
+}
 
 
 void OMAPf::setupInsert(map<Bid, string> pairs) {

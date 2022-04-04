@@ -17,7 +17,7 @@ Oriel::Oriel(bool usehdd, int kwSize,int filesize, bool local)
     bytes<Key> key1{0};
     bytes<Key> key2{1};
     I = new OMAPf(kwSize*100, key1);
-    del = new OMAPf(kwSize*100,key2);
+    //del = new OMAPf(kwSize*100,key2);
     fcnt = new OMAPf(kwSize, key1);
     ac = new OMAPf(filesize, key2); 
     clen_size = AES::GetCiphertextLength(FILEBLOCK);
@@ -160,8 +160,8 @@ void Oriel::setupInsertkw(string keyword, int ind)
     	updc = stoI(fcntmap[mapKey]);
     updc++;
     fcntmap[mapKey]=to_string(updc);
-    Bid updKey = createBid(keyword, ind);
-    updtmap[updKey]= to_string(updc);//pad
+    //Bid updKey = createBid(keyword, ind);
+    //updtmap[updKey]= to_string(updc);//pad
 
     int pos_in_block = get_position(updc,COM);
     int block_num = get_block_num(updc,COM);
@@ -218,7 +218,7 @@ void Oriel::endSetup()
 {
 	I->setupInsert(Imap);
 	fcnt->setupInsert(fcntmap);
-	del->setupInsert(updtmap);
+	//del->setupInsert(updtmap);
 	if(!local)
 	   ac->setupInsert(acmap);
 }
@@ -344,7 +344,7 @@ vector<string> Oriel::batchSearch(string keyword)
     for(int ind : filind)
     {
 	Bid acKey(to_string(ind));
-	int accsCnt = stoI(ac->find(acKey));
+	int accsCnt = stoI(ac->findAndIncrement(acKey));
         prf_type file;
         memset(file.data(), 0, AES_KEY_SIZE);
 	string id = to_string(ind);
@@ -369,7 +369,6 @@ vector<string> Oriel::batchSearch(string keyword)
 	    append(&newhead,ciphertext);
         }
 	accsCnt = accsCnt+1;
-	ac->insert(acKey,to_string(accsCnt));
 	DictF.erase(addr);
         getAESRandomValue(file.data(), 0, accsCnt, accsCnt, addr.data());
         DictF[addr]=newhead;
@@ -386,7 +385,7 @@ void Oriel::insertkw(string keyword, int ind)
     updc++;
     fcnt->insert(mapKey,to_string(updc));
     Bid updKey = createBid(keyword, ind);
-    del->insert(updKey, to_string(updc));
+    //del->insert(updKey, to_string(updc));
     Bid key = createBid(keyword, updc);
     I->insert(key, to_string(ind));
 }
@@ -429,7 +428,7 @@ void Oriel::removekw(vector<string> kws, int ind)
     {
           Bid mapKey = createBid(keyword, ind);
           int del_cnt = del->find(mapKey);
-          del->remove(mapKey); 
+          d el->remove(mapKey); 
           if (del_cnt!=0)
           {
                 Bid firstKey(keyword);
