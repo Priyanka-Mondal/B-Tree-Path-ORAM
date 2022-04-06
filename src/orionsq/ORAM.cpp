@@ -148,17 +148,16 @@ std::vector<Bid> ORAM::GetIntersectingBlocks(int x, int curDepth) {
     return validBlocks;
 }
 
-// Greedily writes blocks from the cache to the tree, pushing blocks as deep into the tree as possible
 
-void ORAM::WritePath(int leaf, int d) {
-    // Find blocks that can be on this bucket
+void ORAM::WritePath(int leaf, int d) 
+{
     int node = GetNodeOnPath(leaf, d);
-    if (find(writeviewmap.begin(), writeviewmap.end(), node) == writeviewmap.end()) {
-
+    if (find(writeviewmap.begin(), writeviewmap.end(), node) == writeviewmap.end()) 
+    {
         auto validBlocks = GetIntersectingBlocks(leaf, d);
-        // Write blocks to tree
         Bucket bucket;
-        for (int z = 0; z < std::min((int) validBlocks.size(), Z); z++) {
+        for (int z = 0; z < std::min((int) validBlocks.size(), Z); z++) 
+	{
             Block &block = bucket[z];
             block.id = validBlocks[z];
 	    Bid temp = block.id;
@@ -166,23 +165,18 @@ void ORAM::WritePath(int leaf, int d) {
             block.data = convertNodeToBlock(curnode);
 	    if(curnode->key != block.id)
 	    {
-	          //cout <<"curnode!=block.id"<<curnode->key<<block.id<<endl;
 		    block.id = 0; // curnode->key;
 		    block.data.resize(blockSize, 0);
-        	   //std::fill(curnode->value.begin(), curnode->value.end(), 0);
-            	    //block.data = convertNodefToBlock(curnode);
 	    }
             delete curnode;
             cache.erase(temp);
         }
-        // Fill any empty spaces with dummy blocks
-        for (int z = validBlocks.size(); z < Z; z++) {
+        for (int z = validBlocks.size(); z < Z; z++) 
+	{
             Block &block = bucket[z];
             block.id = 0;
             block.data.resize(blockSize, 0);
         }
-
-        // Write bucket to tree
         writeviewmap.push_back(node);
         WriteBucket(node, bucket);
     }

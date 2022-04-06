@@ -3,6 +3,7 @@
 #include<map>
 #include<unordered_map>
 #include<chrono>
+#include<algorithm>
 
 using namespace std::chrono;
 using namespace std;
@@ -141,6 +142,8 @@ int main(int argc, char** argv)
 	*/
 	//reserve is faster
 	//
+	//
+	/*
 	for(int k=1;k<=25;k++)
 	{
 	auto start = high_resolution_clock::now();
@@ -162,6 +165,30 @@ int main(int argc, char** argv)
 	stop = high_resolution_clock::now();
 	duration = duration_cast<microseconds>(stop-start);
 	cout <<"single:"<< duration.count()<<endl<<endl<<endl;
+	}*/
+	vector<int> vec;
+	for(int i =0; i<=1000; i++)
+	{
+		for(int j =0 ; j<=10000;j++)
+		{
+			vec.push_back(j+i);
+		}
 	}
+		for(int j =0 ; j<=30;j++)
+		{
+			auto start = high_resolution_clock::now();
+			if(std::find(vec.begin(), vec.end(), 100000)!=vec.end())
+			{}
+			auto stop = high_resolution_clock::now();
+			auto duration = duration_cast<microseconds>(stop-start);
+			cout <<"find:"<< duration.count()<<endl;
+
+			start = high_resolution_clock::now();
+			for(int ele : vec)
+			{if(ele == 100000) {}}
+			stop = high_resolution_clock::now();
+			duration = duration_cast<microseconds>(stop-start);
+			cout <<"contains:"<< duration.count()<<endl<<endl<<endl;
+		}
 	return 0;
 }
