@@ -265,9 +265,11 @@ vector<string> Oriel::localbatchSearch(string keyword)
 		filind.push_back(ii);
 	     }
     }
+    int tot = 0;
     for(int ind : filind)
     {
 	int accsCnt = (localAC[ind]);
+	
         prf_type file;
         memset(file.data(), 0, AES_KEY_SIZE);
 	string id = to_string(ind);

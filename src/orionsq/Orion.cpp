@@ -9,7 +9,7 @@ Orion::Orion(bool usehdd, int filecnt , int filesize, bool local)
     this->local= local;
     bytes<Key> key1{0};
     bytes<Key> key2{1};
-    srch = new OMAPf(filecnt, key1);
+    srch = new OMAPf(filecnt*10, key1);
     //updt = new OMAPf(filecnt, key1);
     fcnt = new OMAPf(filecnt, key1);
     file = new OMAP(filesize,key2);
@@ -192,7 +192,7 @@ void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind)
          block_num++;
     }
     fileblks = fileblks+block_num;
-    cout << "BATCH inserted keywords and blocks(kw:"<<kws.size() <<",b:"<<blocks.size()<<") of:"<<ind<<" fb:"<<fileblks<< endl;
+    cout<<"BATCH inserted keywords and blocks(kw:"<<kws.size() <<",b:"<<blocks.size()<<") of:"<<ind<<" fb:"<<fileblks<< endl;
 }
 void Orion::endSetup() 
 {
@@ -258,12 +258,15 @@ vector<pair<int,string>> Orion::search(string keyword)
 
 vector<string> Orion::simplebatchSearch(string keyword) 
 {
+	ofstream bcfc;
+	bcfc.open("bcfc.txt",ios::app);
 	vector<string> conts;
-	int fc;
+	int fc = 0;
         if(localFCNT.count(keyword)>0)
         	fc = localFCNT[keyword];
 	else 
 	    return conts;
+        bcfc<< fc <<" ";
     	vector<Bid> bids;
     	bids.reserve(fc);
    	for (int i = 1; i <= fc; i++) 
@@ -275,9 +278,11 @@ vector<string> Orion::simplebatchSearch(string keyword)
    	result.reserve(fc); 
    	result = srch->batchSearch(bids);
    	bids.clear();
+	int tot = 0;
    	for(auto id:result)
    	 {
 	 	int blocknum = localBCNT[id];
+		tot = tot + blocknum;
    	        string fID = to_string(id);
    	        for (int j= 1;j<=blocknum;j++)
    	        {
@@ -285,8 +290,9 @@ vector<string> Orion::simplebatchSearch(string keyword)
    	     		bids.push_back(block);
    	     	}
    	  }
-   	  conts = file->batchSearch(bids);
-   	  cout <<bids.size()<<"/"<< conts.size()<<endl;
+	bcfc << tot <<endl;
+   	  //conts = file->batchSearch(bids);
+   	  //cout <<bids.size()<<"/"<< conts.size()<<endl;
     return conts;
 }
 vector<string> Orion::batchSearch(string keyword) 
