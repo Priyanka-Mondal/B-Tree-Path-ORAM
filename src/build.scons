@@ -13,7 +13,7 @@ oriel_files = Glob('oriel/*.cpp')
 packorion_files = Glob('packorion/*.cpp')
 mitra_files = Glob('mitra/*.cpp')
 morion_files = Glob('morion/*.cpp')
-orionsq_files = Glob('orionsq/*.cpp')
+zorionsq_files = Glob('zorionsq/*.cpp')
 borion_files = Glob('borion/*.cpp')
 foram_files = Glob('foram/*.cpp')
 orion2_files = Glob('orion2/*.cpp')
@@ -27,7 +27,7 @@ packorion_objs = env.Object(packorion_files, CPPPATH = ['.'] + env.get('CPPPATH'
 oriel_objs = env.Object(oriel_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 mitra_objs = env.Object(mitra_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 morion_objs = env.Object(morion_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
-orionsq_objs=env.Object(orionsq_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
+zorionsq_objs=env.Object(zorionsq_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 borion_objs = env.Object(borion_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 foram_objs = env.Object(foram_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 orion2_objs = env.Object(orion2_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
@@ -39,7 +39,7 @@ objs["orion"] = orion_objs + common_objs
 objs["packorion"] = packorion_objs + common_objs
 objs["mitra"] = mitra_objs + common_objs
 objs["morion"] = morion_objs + common_objs
-objs["orionsq"] = orionsq_objs + common_objs
+objs["zorionsq"] = zorionsq_objs + common_objs
 objs["borion"] = borion_objs + common_objs
 objs["foram"] = foram_objs + common_objs
 objs["orion2"] = orion2_objs + common_objs
