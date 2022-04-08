@@ -3,7 +3,7 @@
 #include "stopword.hpp"
 
 
-Orion::Orion(bool usehdd, int filecnt , int filesize, bool local) 
+Orion::Orion(bool usehdd, int filecnt , int filesize, bool local): rd(), mt(rd()), dis(0, (pow(2, floor(log2(filesize / Z)) + 1) - 1) / 2) 
 {
     this->useHDD = false;//usehdd;
     this->local= local;
@@ -12,7 +12,7 @@ Orion::Orion(bool usehdd, int filecnt , int filesize, bool local)
     srch = new OMAPf(filecnt*10, key1);
     //updt = new OMAPf(filecnt, key1);
     fcnt = new OMAPf(filecnt, key1);
-    fileoram = new ORAM(filesize, key);
+    fileoram = new FileORAM(filesize, key1);
 }
 
 Orion::~Orion() 
@@ -72,7 +72,7 @@ vector<string> divideString(string str, int sz)
 	{
 		int pad = ceil(str_size/sz)+1;
 		pad = pad*sz-str_size;
-	        str.insert(str.size(), pad, '1');
+	        str.insert(str.size(), pad, '#');
 	}
 	str_size = str.length(); // new length
   	int i;
@@ -126,9 +126,11 @@ void Orion::insertWrap(string cont, int fileid, bool batch)
 
 
 
-Fnode* Orion::newNode(Bid key, string value, int pos, int height) {
-    Node* node = new Node();
+Fnode* Orion::newNode(Fbid key, string value, int pos, int height) 
+{
+    Fnode* node = new Fnode();
     node->key = key;
+    cout <<value<<endl;
     std::fill(node->value.begin(), node->value.end(), 0);
     std::copy(value.begin(), value.end(), node->value.begin());
     node->pos = pos;
@@ -161,27 +163,29 @@ void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind)
   	 srchbids[srchKey]= ind;
     }
     string id = to_string(ind);
-    Bid blkcnt(id);
+    Fbid fbid = createFbid(id,1);
     int pos = RandomPath();
     //if(!local)
     //	fcntbids[blkcnt]=make_pair(blocks.size(),pos);
     //else
-	localBCNT[ind]=make_pair(blocks.size(),pos);
+	fileoram->localBCNT[fbid]=make_pair(blocks.size(),pos);
     int block_num = 1;
+    fileoram->start(false);
     for(auto blk: blocks)
     {
-	   Fbid fbid = createFbid(id,block_num);
-	   Fnode *fnode = newNode(ind,blk,pos,block_num);
+	   fbid = createFbid(id,block_num);
 	   int nextPos = RandomPath();
+	   Fnode *fnode = newNode(fbid,blk,pos,block_num);
            fnode->nextPos = nextPos;
-	   if(block_num==blocks.size())
+	   if(block_num!=blocks.size())
 		   fnode->nextID = createFbid(id,block_num+1);
 	   fileoram->WriteFnode(fbid,fnode);
 	   pos = nextPos;
 	   block_num++;
     }
-    fileblks = fileblks+block_num;
-    cout<<"BATCH inserted keywords and blocks(kw:"<<kws.size() <<",b:"<<blocks.size()<<") of:"<<ind<<" fb:"<<fileblks<< endl;
+    fileoram->finalize();
+    fileblks = fileblks+block_num-1;
+    cout<<"BATCH inserted keywords and blocks(kw:"<<kws.size() <<",b:"<<blocks.size()<<") of fileid: "<<ind<<" fb:"<<fileblks<< endl;
 }
 void Orion::endSetup() 
 {
@@ -189,6 +193,57 @@ void Orion::endSetup()
 	//updt->setupInsert(updtbids);
 	if(!local)
          fcnt->setupInsert(fcntbids);
+}
+int Orion::RandomPath() {
+    int val = dis(mt);
+    return val;
+}
+vector<string> Orion::simplebatchSearch(string keyword) 
+{
+	ofstream bcfc;
+	vector<string> conts;
+	int fc = 0;
+        if(localFCNT.count(keyword)>0)
+        	fc = localFCNT[keyword];
+	else 
+	    return conts;
+    	vector<Bid> bids;
+    	bids.reserve(fc);
+   	for (int i = 1; i <= fc; i++) 
+   	{
+   	         Bid bid = createBid(keyword, i);
+   	         bids.push_back(bid);
+   	}
+   	vector<int> result;
+   	result.reserve(fc); 
+   	result = srch->batchSearch(bids);
+   	bids.clear();
+	int tot = 0;
+	fileoram->start(true);
+   	for(auto id:result)
+   	 {
+   	        string fID = to_string(id);
+		Fbid fbid = createFbid(fID,1);
+	 	int blocknum = fileoram->localBCNT[fbid].first;
+		tot = tot + blocknum;
+		int pos = fileoram->localBCNT[fbid].second;
+		Fnode* fnode = fileoram->ReadFnode(fbid,pos,pos);
+		while(fnode!=NULL)
+		{
+			string temp="";
+        		temp.assign(fnode->value.begin(), fnode->value.end());
+        		temp = temp.c_str();
+			conts.push_back(temp);
+			fbid = fnode->nextID;
+			pos = fnode->nextPos;
+			if(fbid == 0)
+				break;
+			fnode = fileoram->ReadFnode(fbid,pos,pos);
+
+		}
+   	  }
+		fileoram->finalize();
+    return conts;
 }
 /*
 void Orion::insert(vector<string> kws, vector<string> blocks, int ind) 

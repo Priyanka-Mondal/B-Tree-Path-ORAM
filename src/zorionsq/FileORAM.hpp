@@ -70,12 +70,13 @@ public:
     FileORAM(int maxSize, bytes<Key> key);
     ~FileORAM();
     int maxheight;
+    map<Fbid,pair<int,int>> localBCNT;
     Fnode* ReadFnode(Fbid bid, int lastLeaf, int newLeaf);
     Fnode* ReadFnode(Fbid bid);
     int WriteFnode(Fbid bid, Fnode* n);
     int DeleteFnode(Fbid bid, Fnode* n);
     void start(bool batchWrite);
-    void finilize(bool find, Fbid& rootKey, int& rootPos);
+    void finalize();
     static Fnode* convertFblockToFnode(block b);
     void convertFblockToFnode(Fnode*& node,block b);
     static block convertFnodeToFblock(Fnode* node);

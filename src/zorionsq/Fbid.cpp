@@ -131,7 +131,7 @@ Fbid& Fbid::operator=(std::vector<byte_t> other) {
 ostream& operator<<(ostream &o, Fbid& bid) {
     o <<"[";
     for(int i=0;i<FID_SIZE;i++){
-    o << (char)bid.id[i];
+    o << (int)bid.id[i];
     }
     o<<"] ";
     return o;

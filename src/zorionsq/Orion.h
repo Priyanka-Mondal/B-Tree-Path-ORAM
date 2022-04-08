@@ -4,6 +4,7 @@
 #include "OMAPf.h"
 #include "FileORAM.hpp"
 #include<iostream>
+#include <random>
 using namespace std;
 
 class Orion {
@@ -20,13 +21,16 @@ private:
     map<Bid,int> fcntbids;
     map<Bid,int> updtbids;
     map<Bid,pair<string,int>> filebids;
-    map<string,pair<int,int>> localFCNT;
-    map<int,int> localBCNT;
+    map<string,int> localFCNT;
+    int RandomPath();
+    std::random_device rd;
+    std::mt19937 mt;
+    std::uniform_int_distribution<int> dis;
 public:
     Fbid createFbid(string keyword,int number);
     Bid createBid(string keyword,int number);
     
-    Fnode* newNode(Bid key, string value, int pos, int height);
+    Fnode* newNode(Fbid key, string value, int pos, int height);
     void insertWrap(string cont, int fileid, bool batch);
     void insert(vector<string> kws, vector<string> blocks, int ind);
     void setupinsert(vector<string> kws, vector<string> blocks, int ind);

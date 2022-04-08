@@ -1,0 +1,4 @@
+the value in class Node in ORAM.hpp file
+is a pair, <@ bytes, 64 bytes>
+The 2 bytes store the info whether the block is index block 
+or file bloct, or filecount block or blocknum block

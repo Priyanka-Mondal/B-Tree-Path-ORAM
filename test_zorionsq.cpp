@@ -124,10 +124,12 @@ int main(int argc, char**argv)
 	sres.open(argv[5]);	
 	string line;
 	int l = 1;
+	
 	if(local)
 	{
 		while(getline(kw,line))
 		{
+			cout <<"SEARCHING:"<< line<<endl;
 	        	auto start = high_resolution_clock::now();
 			auto s = orion.simplebatchSearch(line);
 	        	auto stop = high_resolution_clock::now();
@@ -136,7 +138,7 @@ int main(int argc, char**argv)
 			cout <<l<<" "<< duration.count()<<" "<< s.size()<<endl;
 			l++;
 		}
-	}
+	}/*
 	else
 	{
 		while(getline(kw,line))
@@ -149,7 +151,7 @@ int main(int argc, char**argv)
 			cout <<l<<" "<< duration.count()<<" "<< s.size()<<endl;
 			l++;
 		}
-	}
+	}*/
 	return 0;
 //*/	
 	/*

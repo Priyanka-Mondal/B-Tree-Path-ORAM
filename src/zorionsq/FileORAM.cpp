@@ -198,7 +198,6 @@ void FileORAM::WriteData(Fbid bid, Fnode* node)
     if (store->GetEmptySize() > 0) {
         cache[bid] = node;
         store->ReduceEmptyNumbers();
-	cout <<"FREE:"<<store->GetEmptySize()<<endl;
     } else {
         throw runtime_error("There is no more space in FileORAM-WriteData");
     }
@@ -332,7 +331,7 @@ block FileORAM::convertFnodeToFblock(Fnode* node) {
     return b;
 }
 
-void FileORAM::finilize(bool find, Fbid& rootKey, int& rootPos) {
+void FileORAM::finalize() {
         int maxHeight = 1;
         for (auto t : cache) {
             if (t.second != NULL && t.second->height > maxHeight) {
@@ -340,12 +339,14 @@ void FileORAM::finilize(bool find, Fbid& rootKey, int& rootPos) {
             }
         }
     //for (unsigned int i = 0; i <= depth + 2; i++) {
-    for (unsigned int i = maxHeight; i >= 1; i++) {
+    for (unsigned int i = maxHeight; i >= 1; i--) {
         for (auto t : cache) {
             if (t.second != NULL && t.second->height == i) {
                 Fnode* tmp = t.second;
                 if (modified.count(tmp->key)) {
                     tmp->pos = RandomPath();
+		    if (i==1)
+			localBCNT[t.first] = make_pair(localBCNT[t.first].first,tmp->pos);
                 }
                 if (tmp->nextID != 0 && cache.count(tmp->nextID) > 0) {
                     tmp->nextPos = cache[tmp->nextID]->pos;
