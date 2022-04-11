@@ -109,8 +109,11 @@ void FileORAM::FetchPath(int leaf) {
 
         if (find(readviewmap.begin(), readviewmap.end(), node) != readviewmap.end()) {
             continue;
-        } else {
+        } else 
+	{
+    mut.lock();
             readviewmap.push_back(node);
+    mut.unlock();
         }
 
         Fbucket bucket = ReadFbucket(node);
@@ -222,11 +225,15 @@ void FileORAM::Access(Fbid bid, Fnode*& node, int lastLeaf, int newLeaf) {
     if (node != NULL) {
         node->pos = newLeaf;
         if (cache.count(bid) != 0) {
+    mut.lock();
             cache.erase(bid);
+    mut.unlock();
         }
         cache[bid] = node;
         if (find(leafList.begin(), leafList.end(), lastLeaf) == leafList.end()) {
+    mut.lock();
             leafList.push_back(lastLeaf);
+    mut.unlock();
         }
     }
 }
@@ -240,7 +247,7 @@ void FileORAM::Access(Fbid bid, Fnode*& node) {
         leafList.push_back(node->pos);
     }
 }
-
+/*
 Fnode* FileORAM::ReadFnode(Fbid bid) {
     if (bid == 0) {
         throw runtime_error("Fnode id is not set ReadFnode");
@@ -252,16 +259,21 @@ Fnode* FileORAM::ReadFnode(Fbid bid) {
         return node;
     }
 }
-
-Fnode* FileORAM::ReadFnode(Fbid bid, int lastLeaf, int newLeaf) {
+*/
+Fnode* FileORAM::ReadFnode(Fbid bid, int lastLeaf, int newLeaf) 
+{
     if (bid == 0) {
-        return NULL;
+       return NULL;
     }
-    if (cache.count(bid) == 0 || find(leafList.begin(), leafList.end(), lastLeaf) == leafList.end()) {
+    if (cache.count(bid) == 0 || find(leafList.begin(), leafList.end(), lastLeaf) == leafList.end()) 
+    {
         Fnode* node;
         Access(bid, node, lastLeaf, newLeaf);
-        if (node != NULL) {
+        if (node != NULL) 
+	{
+    //mut.lock();
             modified.insert(bid);
+    //mut.unlock();
         }
 	else 
 	{
@@ -269,8 +281,12 @@ Fnode* FileORAM::ReadFnode(Fbid bid, int lastLeaf, int newLeaf) {
 		cout <<"free node:" << store->GetEmptySize() << endl;
 	}
         return node;
-    } else {
+    } 
+    else 
+    {
+    mut.lock();
         modified.insert(bid);
+    mut.unlock();
         Fnode* node = cache[bid];
         node->pos = newLeaf;
         return node;

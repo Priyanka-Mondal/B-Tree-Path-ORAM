@@ -14,14 +14,16 @@
 #include <bits/stdc++.h>
 #include "Fbid.h"
 #include "Fnode.h"
+#include<atomic>
+#include<mutex>
 
 using namespace std;
 
 
 using Fbucket = std::array<Fblock, Z>;
-
 class FileORAM {
-private:
+public:
+std::mutex mut;
     RAMStore* store;
     size_t depth;
     size_t blockSize;
@@ -66,14 +68,14 @@ private:
     bool WasSerialised();
     void Print();
 
-public:
+//public:
     FileORAM(int maxSize, bytes<Key> key);
     ~FileORAM();
     int maxheight;
     map<Fbid,pair<int,int>> localBCNT;
     map<Fbid,int> localPos;
     Fnode* ReadFnode(Fbid bid, int lastLeaf, int newLeaf);
-    Fnode* ReadFnode(Fbid bid);
+    //Fnode* ReadFnode(Fbid bid);
     int WriteFnode(Fbid bid, Fnode* n);
     int DeleteFnode(Fbid bid, Fnode* n);
     void start(bool batchWrite);

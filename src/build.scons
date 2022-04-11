@@ -9,7 +9,7 @@ def filter_cc(list):
 
 common_files = Glob('*.cpp') + Glob('aux/*.cpp') + Glob('utils/*.cpp') + Glob('*.c')
 orion_files = Glob('orion/*.cpp')
-oriel_files = Glob('oriel/*.cpp')
+parallelORAM_files = Glob('parallelORAM/*.cpp')
 packorion_files = Glob('packorion/*.cpp')
 mitra_files = Glob('mitra/*.cpp')
 morion_files = Glob('morion/*.cpp')
@@ -18,23 +18,25 @@ borion_files = Glob('borion/*.cpp')
 foram_files = Glob('foram/*.cpp')
 orion2_files = Glob('orion2/*.cpp')
 baseline_files = Glob('baseline/*.cpp')
+t111_files = Glob('t111/*.cpp')
 
 protos = env.SConscript('protos/build.scons', exports='env')
 
 common_objs = env.Object(common_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 orion_objs = env.Object(orion_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 packorion_objs = env.Object(packorion_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
-oriel_objs = env.Object(oriel_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
+parallelORAM_objs = env.Object(parallelORAM_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 mitra_objs = env.Object(mitra_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 morion_objs = env.Object(morion_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 zorionsq_objs=env.Object(zorionsq_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 borion_objs = env.Object(borion_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 foram_objs = env.Object(foram_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 orion2_objs = env.Object(orion2_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
+t111_objs = env.Object(t111_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 baseline_objs = env.Object(baseline_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 
 objs = {}
-objs["oriel"] = oriel_objs + common_objs
+objs["parallelORAM"] = parallelORAM_objs + common_objs
 objs["orion"] = orion_objs + common_objs
 objs["packorion"] = packorion_objs + common_objs
 objs["mitra"] = mitra_objs + common_objs
@@ -42,6 +44,7 @@ objs["morion"] = morion_objs + common_objs
 objs["zorionsq"] = zorionsq_objs + common_objs
 objs["borion"] = borion_objs + common_objs
 objs["foram"] = foram_objs + common_objs
+objs["t111"] = t111_objs + common_objs
 objs["orion2"] = orion2_objs + common_objs
 objs["baseline"] = baseline_objs + common_objs
 Return('objs')

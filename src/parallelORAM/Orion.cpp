@@ -1,68 +1,33 @@
 #include "Orion.h"
 #include <boost/algorithm/string.hpp>
 #include "stopword.hpp"
+#include<thread>
+#include <cstdlib>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <ctime>
+#include <numeric>
+#include <cmath>
+#include <sstream>
+#include <chrono>
+#include <ctime>
+#include <mutex>
+#include<future>
 
-
-Orion::Orion(bool usehdd, int filecnt , int filesize, bool local): rd(), mt(rd()), dis(0, (pow(2, floor(log2(filesize / Z)) + 1) - 1) / 2) 
+Orion::Orion(int filesize,bool local):rd(),mt(rd()),dis(0,(pow(2,floor(log2(filesize/Z))+1)-1)/2) 
 {
-    this->useHDD = false;//usehdd;
     this->local= local;
     bytes<Key> key1{0};
-    bytes<Key> key2{1};
-    srch = new OMAPf(filecnt, key1);
-    fcnt = new OMAPf(filecnt, key1);
     fileoram = new FileORAM(filesize, key1);
 }
 
 Orion::~Orion() 
 {
-    delete srch;
-    delete file;
-    //delete updt;
-    UpdtCnt.clear();
+    delete fileoram;
 }
 
-
-int inserted = 0; 
-int uniquekw = 0;
 int fileblks = 0;
-string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
-
-int stoI(string updt_cnt)
-{
-	int updc;
-	stringstream convstoi(updt_cnt);
-	convstoi >> updc;
-	return updc;
-}
-
-
-vector<string> getUniquedWords(vector<string> kws)
-{
-    vector<string> kw;
-    map<string, int> mp;
-    string word;
-    for(auto word : kws)
-    {
-	    if(word.size()<=12 && (stopwords.find(word)==stopwords.end()))
-	    {
-    		    if ((!mp.count(word)) && (word.size()<=12))
-    		    {
-    		        mp.insert(make_pair(word, 1));
-    		    }
-    		    else 
-    		        mp[word]++;
-	    }
-    }
-    for (map<string, int> :: iterator p = mp.begin();
-         p != mp.end(); p++)
-    {
-        if (p->second >= 1)
-            kw.push_back(p->first) ;
-    }
-    mp.clear();
-return kw;
-}
 
 vector<string> divideString(string str, int sz)
 {
@@ -105,25 +70,18 @@ vector<string> divideString(string str, int sz)
 	return result;
 }
 
+int Orion::stoI(string updt_cnt)
+{
+	int updc;
+	stringstream convstoi(updt_cnt);
+	convstoi >> updc;
+	return updc;
+}
 void Orion::insertWrap(string cont, int fileid, bool batch)
 {
-      vector<string> kws1, kws;
-      boost::split(kws1, cont, boost::is_any_of(delimiters));
-      kws =  getUniquedWords(kws1);
-      for (auto it = kws.begin(); it != kws.end(); it++)
-      {
-	      if(stopwords.find(*it)!=stopwords.end())
-		 kws.erase(it--);
-      }
-      vector<string> blocks;
-      blocks = divideString(cont,BLOCK);
-     // if(batch)
-	  batchInsert(kws,blocks,fileid);
- //     else
-   //       insert(kws, blocks, fileid);
+      vector<string> blocks = divideString(cont,BLOCK);
+      batchInsert(blocks,fileid);
 }
-
-
 
 Fnode* Orion::newNode(Fbid key, string value, int pos) 
 {
@@ -134,36 +92,16 @@ Fnode* Orion::newNode(Fbid key, string value, int pos)
     node->pos = pos;
     return node;
 }
-void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind) 
+
+void Orion::batchInsert(vector<string> blocks, int ind) 
 {
-    for(auto kw: kws)
-    {		
-  	 Bid firstKey(kw);
-  	 int fc = 0;
-	 if(!local)
-	 {
-  	 	if(fcntbids.count(firstKey) > 0)
-	   		fc = fcntbids[firstKey];
-	 }
-	 else if(localFCNT.count(kw)>0)
-		 fc = localFCNT[kw];
-  	 fc= fc+1;
-	 if(!local)
-	 	fcntbids[firstKey]=fc;
-	 else
-		 localFCNT[kw]=fc;
-  	 //Bid updKey = createBid(kw, ind);
-  	 //updtbids[updKey]=fc;
-  	 Bid srchKey = createBid(kw, fc);
-  	 srchbids[srchKey]= ind;
-    }
     string id = to_string(ind);
     int block_num = 1;
     localBCNT[ind]=blocks.size();
     fileoram->start(false);
     for(auto blk: blocks)
     {
-	   fbid = createFbid(id,block_num);
+	   Fbid fbid = createFbid(id,block_num);
 	   int pos = RandomPath();
 	   fileoram->localPos[fbid] = pos;
 	   Fnode *fnode = newNode(fbid,blk,pos);
@@ -172,57 +110,82 @@ void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind)
     }
     fileoram->finalize();
     fileblks = fileblks+block_num-1;
-    cout<<"BATCH inserted keywords and blocks(kw:"<<kws.size() <<",b:"<<blocks.size()<<") of fileid: "<<ind<<" fb:"<<fileblks<< endl;
-}
-void Orion::endSetup() 
-{
-        srch->setupInsert(srchbids);
-	//updt->setupInsert(updtbids);
-	if(!local)
-         fcnt->setupInsert(fcntbids);
+    cout<<"BATCH inserted blocks of fileid: "<<ind<<" fb:"<<fileblks<< endl;
 }
 int Orion::RandomPath() {
     int val = dis(mt);
     return val;
 }
-vector<string> Orion::simplebatchSearch(string keyword) 
+vector<string> Orion::asyncSearch(vector<int> result) 
 {
-	ofstream bcfc;
 	vector<string> conts;
-	int fc = 0;
-        if(localFCNT.count(keyword)>0)
-        	fc = localFCNT[keyword];
-	else 
-	    return conts;
-    	vector<Bid> bids;
-    	bids.reserve(fc);
-   	for (int i = 1; i <= fc; i++) 
-   	{
-   	         Bid bid = createBid(keyword, i);
-   	         bids.push_back(bid);
-   	}
-   	vector<int> result;
-   	result.reserve(fc); 
-   	result = srch->batchSearch(bids);
-   	bids.clear();
-	int tot = 0;
 	fileoram->start(true);
 	int block_num = 0;
    	for(auto id:result)
    	{
    		string fID = to_string(id);
 		block_num = block_num+localBCNT[id];
-	}
 	//creat block_num treads
-		for(int i = 1; i<= block_num;i++)
+	}
+	int t = 0;
+	vector<future<Fnode*>> asynctasks;
+	asynctasks.reserve(block_num);
+	for(auto id: result)
+	{
+		for(int i = 1; i<=localBCNT[id];i++)
 		{
+   			string fID = to_string(id);
 			Fbid fbid = createFbid(fID,i);
 			int pos = fileoram->localPos[fbid];
-			Fnode* fnode = fileoram->ReadFnode(fbid,pos,pos);
+			//std::launch::async|std::launch::deferred,
+asynctasks.push_back(async(std::launch::async|std::launch::deferred, &FileORAM::ReadFnode,fileoram, fbid, pos,pos));
+		t++;
 		}
-	 fileoram->finalize();
-    return conts;
+	}
+	for(auto &a:asynctasks)
+	{
+		Fnode* fnode = a.get();
+		string temp ="";
+        	temp.assign(fnode->value.begin(), fnode->value.end());
+        	//temp = temp.c_str();
+		//cout <<fnode->pos<<" "<<temp;
+		conts.push_back(temp);
+	}
+	
+	fileoram->finalize();
+	return conts;
 }
+
+vector<string> Orion::syncSearch(vector<int> result) 
+{
+	vector<string> conts;
+	fileoram->start(true);
+	int block_num = 0;
+   	for(auto id:result)
+   	{
+   		string fID = to_string(id);
+		block_num = block_num+localBCNT[id];
+	//creat block_num treads
+	}
+	int t = 0;
+	for(auto id: result)
+	{
+		for(int i = 1; i<=localBCNT[id];i++)
+		{
+   			string fID = to_string(id);
+			Fbid fbid = createFbid(fID,i);
+			int pos = fileoram->localPos[fbid];
+			Fnode *fnode = fileoram->ReadFnode(fbid,pos,pos);
+			string temp="";
+        		temp.assign(fnode->value.begin(), fnode->value.end());
+        		temp = temp.c_str();
+			conts.push_back(temp);
+		}
+	}
+	fileoram->finalize();
+	return conts;
+}
+
 /*
 void Orion::insert(vector<string> kws, vector<string> blocks, int ind) 
 {
@@ -431,17 +394,4 @@ Fbid Orion::createFbid(string id, int number) {
     auto arr = to_bytes(number);
     std::copy(arr.begin(), arr.end(), bid.id.end() - 4);
     return bid;
-}
-Bid Orion::createBid(string id, int number) {
-    Bid bid(id);
-    auto arr = to_bytes(number);
-    std::copy(arr.begin(), arr.end(), bid.id.end() - 4);
-    return bid;
-}
-
-void Orion::print()
-{
-	srch->printTree();
-	//updt->printTree();
-	//srch->printTree();
 }

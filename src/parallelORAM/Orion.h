@@ -1,56 +1,41 @@
 #ifndef ORION_H
 #define ORION_H
-#include "OMAP.h"
-#include "OMAPf.h"
 #include "FileORAM.hpp"
 #include<iostream>
 #include <random>
 using namespace std;
 
 class Orion {
-private:
-    bool useHDD;
+public:
     bool local;
-    OMAPf* srch;
-    OMAPf *updt;
-    OMAPf *fcnt;
-    OMAP* file;
-    FileORAM *fileoram;
-    map<Bid, int> UpdtCnt;
-    map<Bid,int> srchbids;
-    map<Bid,int> fcntbids;
-    map<Bid,int> updtbids;
-    map<Bid,pair<string,int>> filebids;
     map<string,int> localFCNT;
     map<int,int> localBCNT;
     int RandomPath();
     std::random_device rd;
     std::mt19937 mt;
     std::uniform_int_distribution<int> dis;
-public:
+    std::vector<std::thread> threads;
+    FileORAM *fileoram;
     Fbid createFbid(string keyword,int number);
-    Bid createBid(string keyword,int number);
     
-    Fnode* newNode(Fbid key, string value, int pos, int height);
+    Fnode* newNode(Fbid key, string value, int pos);
     void insertWrap(string cont, int fileid, bool batch);
-    void insert(vector<string> kws, vector<string> blocks, int ind);
-    void setupinsert(vector<string> kws, vector<string> blocks, int ind);
-    void batchInsert(vector<string> kws, vector<string> blocks, int ind) ;
+    void batchInsert(vector<string> blocks, int ind) ;
     
     void remove(int ind);
     void removekw(vector <string> kws, int id);
     
     vector<string> batchSearch(string keyword);
-    vector<string> simplebatchSearch(string keyword);
+    vector<string> syncSearch(vector<int>ids);
+    vector<string> asyncSearch(vector<int>ids);
     vector<pair<int,string>> search(string keyword);
     
-    Orion(bool useHDD,int maxSize, int filesize, bool local);    
+    Orion(int filesize, bool local);    
     
     virtual ~Orion();
     void endSetup();
     void print();
-
-
+    int stoI(string updt_cnt);
 };
 
 #endif /* ORION_H */
