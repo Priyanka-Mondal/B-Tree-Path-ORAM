@@ -38,10 +38,9 @@ int AVLTreef::max(int a, int b) {
 
 /* Helper function that allocates a new node with the given key and
    NULL left and right pointers. */
-Nodef* AVLTreef::newNodef(Bid key, int value) {
+Nodef* AVLTreef::newNodef(Bid key, string val) {
     Nodef* node = new Nodef();
     node->key = key;
-    auto val = to_string(value);
     std::fill(node->value.begin(), node->value.end(), 0);
     std::copy(val.begin(), val.end(), node->value.begin());
     node->leftID = 0;
@@ -293,7 +292,7 @@ Bid AVLTreef::setupinsert(Bid rootKey, int& pos, Bid key, int value)
 }
 
 
-Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, int value) {
+Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, string value) {
     /* 1. Perform the normal BST rotation */
     if (rootKey == 0) {
         Nodef* nnode = newNodef(key, value);
@@ -308,9 +307,8 @@ Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, int value) {
     } 
     else 
     {
-	auto val = to_string(value);
         std::fill(node->value.begin(), node->value.end(), 0);
-        std::copy(val.begin(), val.end(), node->value.begin());
+        std::copy(value.begin(), value.end(), node->value.begin());
         oram->WriteNodef(rootKey, node);
         return node->key;
     }
@@ -366,6 +364,25 @@ Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, int value) {
     return node->key;
 }
 
+string AVLTreef::incrementSrcCnt(Nodef* head, Bid key) {
+    if (head == NULL || head->key == 0)
+        return "";
+    head = oram->ReadNodef(head->key, head->pos, head->pos);
+    if (head->key > key) {
+        return incrementSrcCnt(oram->ReadNodef(head->leftID, head->leftPos, head->leftPos), key);
+    } else if (head->key < key) {
+        return incrementSrcCnt(oram->ReadNodef(head->rightID, head->rightPos, head->rightPos), key);
+    } else {
+        string res(head->value.begin(), head->value.end());
+        auto parts = Utilities::splitData(res, "-");
+        int srcCnt = stoi(parts[0]);
+        string newval = to_string(srcCnt + 1) + "-" + parts[1];
+        std::fill(head->value.begin(), head->value.end(), 0);
+        std::copy(newval.begin(), newval.end(), head->value.begin());
+        oram->WriteNodef(key, head);
+        return res;
+    }
+}
 string AVLTreef::setupsimplesearch(Bid rkey, int rpos, Bid key) {
     if (rkey == 0)
         return "";
@@ -958,7 +975,7 @@ Bid AVLTreef::balanceDel(Bid key, int& pos, Nodef* parmin)
     oram->WriteNodef(node->key, node);
     return node->key;
 }
-void AVLTreef::setupInsert(Bid& rootKey, int& rootPos, map<Bid, int> pairs) {
+void AVLTreef::setupInsert(Bid& rootKey, int& rootPos, map<Bid, string> pairs) {
     for (auto pair : pairs) {
         Nodef* node = newNodef(pair.first, pair.second);
         setupNodes.push_back(node);

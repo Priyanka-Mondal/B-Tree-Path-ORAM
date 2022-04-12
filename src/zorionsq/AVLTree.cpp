@@ -953,6 +953,25 @@ Bid AVLTree::balanceDel(Bid key, int& pos, Node* parmin)
     oram->WriteNode(node->key, node);
     return node->key;
 }
+string AVLTree::incrementSrcCnt(Node* head, Bid key) {
+    if (head == NULL || head->key == 0)
+        return "";
+    head = oram->ReadNode(head->key, head->pos, head->pos);
+    if (head->key > key) {
+        return incrementSrcCnt(oram->ReadNode(head->leftID, head->leftPos, head->leftPos), key);
+    } else if (head->key < key) {
+        return incrementSrcCnt(oram->ReadNode(head->rightID, head->rightPos, head->rightPos), key);
+    } else {
+        string res(head->value.begin(), head->value.end());
+        auto parts = Utilities::splitData(res, "-");
+        int srcCnt = stoi(parts[0]);
+        string newval = to_string(srcCnt + 1) + "-" + parts[1];
+        std::fill(head->value.begin(), head->value.end(), 0);
+        std::copy(newval.begin(), newval.end(), head->value.begin());
+        oram->WriteNode(key, head);
+        return res;
+    }
+}
 void AVLTree::setupInsert(Bid& rootKey, int& rootPos, map<Bid, string> pairs) {
     for (auto pair : pairs) {
         Node* node = newNode(pair.first, pair.second);

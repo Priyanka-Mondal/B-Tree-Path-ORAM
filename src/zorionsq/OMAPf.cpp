@@ -59,7 +59,7 @@ int OMAPf::setupfind(Bid key) {
 //	    cout <<"Null recieved in OMAPf for"<< key<< endl;
 return res;
 }
-void OMAPf::setupInsert(map<Bid, int> pairs) {
+void OMAPf::setupInsert(map<Bid, string> pairs) {
     treeHandler->setupInsert(rootKey, rootPos, pairs);
 }
 int OMAPf::find(Bid key) {
@@ -110,7 +110,7 @@ void OMAPf::setupinsert(Bid key, int value)
 	//cout <<rootPos<<":root:"<< rootKey<<endl;
     }
 }
-void OMAPf::insert(Bid key, int value) {
+void OMAPf::insert(Bid key, string value) {
     treeHandler->startOperation();
     if (rootKey == 0) {
         rootKey = treeHandler->insert(0, rootPos, key, value);
@@ -120,6 +120,22 @@ void OMAPf::insert(Bid key, int value) {
     treeHandler->finishOperation(false, rootKey, rootPos);
 }
 
+string OMAPf::incrementSrcCnt(Bid key) 
+{
+    string res = "";
+    treeHandler->startOperation();
+    Nodef* node = new Nodef();
+    node->key = rootKey;
+    node->pos = rootPos;
+    res = treeHandler->incrementSrcCnt(node, key);
+    if (res == "") 
+    {
+        rootKey = treeHandler->insert(rootKey, rootPos, key, "1-0");
+        res = "0-0";
+    }
+    treeHandler->finishOperation(true, rootKey, rootPos);
+    return res;
+}
 void OMAPf::printTree() {
     treeHandler->startOperation();
     Nodef* node = new Nodef();
@@ -131,7 +147,7 @@ void OMAPf::printTree() {
     cout << endl << endl;
 }
 
-void OMAPf::batchInsert(map<Bid, int> pairs) 
+void OMAPf::batchInsert(map<Bid, string> pairs) 
 {
     treeHandler->startOperation(true);
     int cnt = 0;

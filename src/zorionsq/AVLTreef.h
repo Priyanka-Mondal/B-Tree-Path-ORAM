@@ -16,6 +16,7 @@
 #include <bits/stdc++.h>
 #include "Bid.h"
 #include <random>
+#include "utils/Utilities.h"
 using namespace std;
 
 class AVLTreef {
@@ -31,7 +32,7 @@ private:
 
     int height(Bid N, int& leaf);
     int max(int a, int b);
-    Nodef* newNodef(Bid key, int value);
+    Nodef* newNodef(Bid key, string value);
     Nodef* setupnewNodef(Bid key, int value);
     Nodef* rightRotate(Nodef* y);
     Nodef* leftRotate(Nodef* x);
@@ -46,12 +47,13 @@ private:
 public:
     AVLTreef(int maxSize, bytes<Key> key);
     virtual ~AVLTreef();
-    Bid insert(Bid rootKey, int& pos, Bid key, int value);
+    Bid insert(Bid rootKey, int& pos, Bid key, string value);
     Nodef* search(Nodef* head, Bid key);
     void batchSearch(Nodef* head, vector<Bid> keys, vector<Nodef*>* results);
     void printTree(Nodef* root, int indent);
     void startOperation(bool batchWrite = false);
     void finishOperation(bool find, Bid& rootKey, int& rootPos);
+    string incrementSrcCnt(Nodef* head, Bid key);
    
    //deletion related functions 
     int deleteNode(Nodef* nodef);
@@ -70,7 +72,7 @@ public:
     Nodef* setupsearch(Nodef* head, Bid key);
     Bid setupinsert(Bid rootKey, int& pos, Bid key, int value);
     int sortedArrayToBST(int start, int end, int& pos, Bid& node);
-    void setupInsert(Bid& rootKey, int& rootPos, map<Bid, int> pairs);
+    void setupInsert(Bid& rootKey, int& rootPos, map<Bid, string> pairs);
 };
 
 #endif /* AVLTREEF_H */

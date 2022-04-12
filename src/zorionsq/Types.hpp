@@ -22,7 +22,8 @@ using bytes = std::array<byte_t, N>;
 // A bucket contains a number of Blocks
 constexpr int Z = 4;
 
-enum Op {
+enum Op 
+{
     READ,
     WRITE
 };

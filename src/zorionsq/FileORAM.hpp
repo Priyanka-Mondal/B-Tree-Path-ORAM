@@ -23,13 +23,8 @@ using Fbucket = std::array<Fblock, Z>;
 class FileORAM {
 private:
     RAMStore* store;
-    size_t depth;
     size_t blockSize;
-    map<Fbid, Fnode*> cache;
-    vector<int> leafList;
-    vector<int> readviewmap;
-    vector<int> writeviewmap;
-    set<Fbid> modified;
+    int leaves;
     int readCnt = 0;
     bytes<Key> key;
 
@@ -43,7 +38,6 @@ private:
     std::vector<Fbid> GetIntersectingFblocks(int x, int depth);
 
     void FetchPath(int leaf);
-    void WritePath(int leaf, int level);
 
     Fnode* ReadData(Fbid bid);
     void WriteData(Fbid bid, Fnode* b);
@@ -67,6 +61,13 @@ private:
     void Print();
 
 public:
+    void WritePath(int leaf, int level);
+    size_t depth;
+    map<Fbid, Fnode*> cache;
+    vector<int> leafList;
+    vector<int> readviewmap;
+    vector<int> writeviewmap;
+    set<Fbid> modified;
     FileORAM(int maxSize, bytes<Key> key);
     ~FileORAM();
     int maxheight;
@@ -76,10 +77,12 @@ public:
     int WriteFnode(Fbid bid, Fnode* n);
     int DeleteFnode(Fbid bid, Fnode* n);
     void start(bool batchWrite);
-    void finalize();
+    void finalizefile();
+    void WriteCache();
     static Fnode* convertFblockToFnode(block b);
     void convertFblockToFnode(Fnode*& node,block b);
     static block convertFnodeToFblock(Fnode* node);
+    int RandomSeedPath(string kw,int sc, int fc, int indexleaves);
 
 
 

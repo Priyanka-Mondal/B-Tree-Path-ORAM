@@ -291,7 +291,7 @@ vector<string> Orion::simplebatchSearch(string keyword)
    	     	}
    	  }
 	bcfc << tot <<endl;
-   	  //conts = file->batchSearch(bids);
+   	  conts = file->batchSearch(bids);
    	  //cout <<bids.size()<<"/"<< conts.size()<<endl;
     return conts;
 }

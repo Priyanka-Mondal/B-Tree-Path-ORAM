@@ -14,6 +14,7 @@ FileORAM::FileORAM(int maxSize, bytes<Key> key)
 : key(key), rd(), mt(rd()), dis(0, (pow(2, floor(log2(maxSize / Z)) + 1) - 1) / 2) {
     AES::Setup();
     depth = floor(log2(maxSize / Z));
+    leaves = (pow(2, floor(log2(maxSize/Z))+1)-1)/2;
     cout <<"depth of tree:"<<depth<<endl;
     bucketCount = pow(2, depth + 1) - 1;
     blockSize = sizeof (Fnode); // B
@@ -216,7 +217,8 @@ void FileORAM::DeleteData(Fbid bid, Fnode* node)
 
 // Fetches a block, allowing you to read and write in a block
 
-void FileORAM::Access(Fbid bid, Fnode*& node, int lastLeaf, int newLeaf) {
+void FileORAM::Access(Fbid bid, Fnode*& node, int lastLeaf, int newLeaf) 
+{
     FetchPath(lastLeaf);
     node = ReadData(bid);
     if (node != NULL) {
@@ -331,14 +333,28 @@ block FileORAM::convertFnodeToFblock(Fnode* node) {
     return b;
 }
 
-void FileORAM::finalize() {
+void FileORAM::WriteCache() 
+{
+    for (int d = depth; d >= 0; d--) 
+    {
+        for (unsigned int i = 0; i < leafList.size(); i++) 
+	{
+            WritePath(leafList[i], d);
+        }
+    }
+
+    leafList.clear();
+    modified.clear();
+}
+
+void FileORAM::finalizefile() 
+{
         int maxHeight = 1;
         for (auto t : cache) {
             if (t.second != NULL && t.second->height > maxHeight) {
                 maxHeight = t.second->height;
             }
         }
-    //for (unsigned int i = 0; i <= depth + 2; i++) {
     for (unsigned int i = maxHeight; i >= 1; i--) {
         for (auto t : cache) {
             if (t.second != NULL && t.second->height == i) {
@@ -357,12 +373,13 @@ void FileORAM::finalize() {
     //if (cache[rootKey] != NULL)
       //  rootPos = cache[rootKey]->pos;
 
-    for (int d = depth; d >= 0; d--) {
-        for (unsigned int i = 0; i < leafList.size(); i++) {
+    for (int d = depth; d >= 0; d--) 
+    {
+        for (unsigned int i = 0; i < leafList.size(); i++) 
+	{
             WritePath(leafList[i], d);
         }
     }
-
     leafList.clear();
     modified.clear();
 }
@@ -388,6 +405,16 @@ void FileORAM::Print() {
 int FileORAM::RandomPath() {
     int val = dis(mt);
     return val;
+}
+int FileORAM::RandomSeedPath(string kw,int sc, int fc, int indexleaves) 
+{
+    int sum = 0;
+    for(int i=0;i<kw.size();i++)
+	sum +=kw[i];
+    int rnd = sum+(sc+1)*1000+fc*9999;
+    int pos = rnd%indexleaves;
+    //cout <<"pos:"<< pos<<" ";
+    return pos;
 }
 void FileORAM::setupInsert(vector<Fnode*> nodes) {
     sort(nodes.begin(), nodes.end(), [ ](const Fnode* lhs, const Fnode * rhs) {

@@ -22,17 +22,18 @@ public:
     OMAPf(int maxSize, bytes<Key> key);
     virtual ~OMAPf();
     void remove(Bid delKey);
-    void insert(Bid key, int value);
+    void insert(Bid key, string value);
     int find(Bid key);
     void delKey(Bid key);
     void printTree();
-    void batchInsert(map<Bid, int> cont);
+    void batchInsert(map<Bid, string> cont);
     vector<int> batchSearch(vector<Bid> keys);
 
 
     void setupinsert(Bid key, int value);
     int setupfind(Bid key);
-    void setupInsert(map<Bid, int> pairs);
+    void setupInsert(map<Bid, string> pairs);
+    string incrementSrcCnt(Bid key);
 };
 
 #endif /* OMAPf_H */

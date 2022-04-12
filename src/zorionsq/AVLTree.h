@@ -15,6 +15,7 @@
 #include "ORAM.hpp"
 #include "Bid.h"
 #include <random>
+#include "utils/Utilities.h"
 using namespace std;
 
 class AVLTree {
@@ -70,6 +71,7 @@ public:
     Bid setupinsert(Bid rootKey, int& pos, Bid key, string value);
     void setupInsert(Bid& rootKey, int& rootPos, map<Bid, string> pairs);
     int sortedArrayToBST(int start, int end, int& pos, Bid& node);
+    string incrementSrcCnt(Node* head, Bid key);
 };
 
 #endif /* AVLTREE_H */
