@@ -9,38 +9,8 @@ OMAP::OMAP(int maxSize, bytes<Key> key) {
 OMAP::~OMAP() {
 delete treeHandler;
 }
-/*
-string OMAP::setupfind(Bid key) {
-    if (rootKey == 0) {
-        return "";
-    }
-//    treeHandler->startOperation();
-    Node* node = new Node();
-    node->key = rootKey;
-    node->pos = rootPos;
-    auto resNode = treeHandler->setupsearch(node, key);
-    string res = "";
-    if (resNode != NULL) {
-        res.assign(resNode->value.begin(), resNode->value.end());
-        res = res.c_str();
-    }
-    //else if(resNode == NULL)
-//	    cout <<"Null recieved in OMAPf for"<< key<< endl;
-delete node;
-//delete resNode;
-return res;
-
-}*/
 void OMAP::setupInsert(map<Bid, string> pairs) {
     treeHandler->setupInsert(rootKey, rootPos, pairs);
-}
-string OMAP::setupfind(Bid key) {
-    if (rootKey == 0) {
-        return 0;
-    }
-    string resNode = treeHandler->setupsimplesearch(rootKey,rootPos,key);
-    int res;
-return resNode;
 }
 string OMAP::find(Bid key) {
     if (rootKey == 0) {
@@ -62,14 +32,6 @@ string OMAP::find(Bid key) {
 //return res;
 }
 
-void OMAP::setupinsert(Bid key, string value)
-{
-    if (rootKey == 0) {
-        rootKey = treeHandler->setupinsert(0, rootPos, key, value);
-    } else {
-        rootKey = treeHandler->setupinsert(rootKey, rootPos, key, value);
-    }
-}
 void OMAP::insert(Bid key, string value) {
     treeHandler->startOperation();
     if (rootKey == 0) {

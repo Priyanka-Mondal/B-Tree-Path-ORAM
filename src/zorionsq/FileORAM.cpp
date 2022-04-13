@@ -223,7 +223,8 @@ void FileORAM::Access(Fbid bid, Fnode*& node, int lastLeaf, int newLeaf)
     node = ReadData(bid);
     if (node != NULL) {
         node->pos = newLeaf;
-        if (cache.count(bid) != 0) {
+        if (cache.count(bid) != 0) 
+	{
             cache.erase(bid);
         }
         cache[bid] = node;
@@ -233,7 +234,8 @@ void FileORAM::Access(Fbid bid, Fnode*& node, int lastLeaf, int newLeaf)
     }
 }
 
-void FileORAM::Access(Fbid bid, Fnode*& node) {
+void FileORAM::Access(Fbid bid, Fnode*& node) 
+{
     //if (!batchWrite) {
         FetchPath(node->pos);
    // }
@@ -255,14 +257,25 @@ Fnode* FileORAM::ReadFnode(Fbid bid) {
     }
 }
 
-Fnode* FileORAM::ReadFnode(Fbid bid, int lastLeaf, int newLeaf) {
-    if (bid == 0) {
+Fnode* FileORAM::ReadFnode(Fbid bid, int lastLeaf, int newLeaf) 
+{
+    if (bid == 0) 
+    {
         return NULL;
     }
-    if (cache.count(bid) == 0 || find(leafList.begin(), leafList.end(), lastLeaf) == leafList.end()) {
+    if(cache.count(bid)>0)
+    {
+	Fnode* node = cache[bid];
+	node->pos = newLeaf;
+	cache[bid]=node;
+	return node;
+    }
+    if(cache.count(bid)==0||find(leafList.begin(),leafList.end(),lastLeaf)==leafList.end())
+    {
         Fnode* node;
         Access(bid, node, lastLeaf, newLeaf);
-        if (node != NULL) {
+        if (node != NULL) 
+	{
             modified.insert(bid);
         }
 	else 
@@ -271,7 +284,9 @@ Fnode* FileORAM::ReadFnode(Fbid bid, int lastLeaf, int newLeaf) {
 		cout <<"free node:" << store->GetEmptySize() << endl;
 	}
         return node;
-    } else {
+    } 
+    else 
+    {
         modified.insert(bid);
         Fnode* node = cache[bid];
         node->pos = newLeaf;
@@ -286,11 +301,13 @@ int FileORAM::WriteFnode(Fbid bid, Fnode* node) {
 	cout <<bid<<endl;
         throw runtime_error("Fnode id is not set WriteFnode");
     }
-    if (cache.count(bid) == 0) {
+    if (cache.count(bid) == 0) 
+    {
         modified.insert(bid);
         Access(bid, node);
         return node->pos;
-    } else {
+    } else 
+    {
         modified.insert(bid);
         return node->pos;
     }
@@ -347,14 +364,32 @@ void FileORAM::WriteCache()
     modified.clear();
 }
 
-void FileORAM::finalizefile() 
-{
-        int maxHeight = 1;
-        for (auto t : cache) {
-            if (t.second != NULL && t.second->height > maxHeight) {
-                maxHeight = t.second->height;
+void FileORAM::finalizeindex() 
+{/*
+    for (auto t : cache) 
+    {
+        if (t.second != NULL ) 
+        {
+            Fnode* tmp = t.second;
+            if (modified.count(tmp->key)) 
+    	    {
+                tmp->pos = posCache[t.first];
             }
         }
+    }*/
+    for (int d = depth; d >= 0; d--) 
+    {
+        for (unsigned int i = 0; i < leafList.size(); i++) 
+	{
+            WritePath(leafList[i], d);
+        }
+    }
+    leafList.clear();
+    modified.clear();
+}
+/*
+void FileORAM::finalizefile() 
+{
     for (unsigned int i = maxHeight; i >= 1; i--) {
         for (auto t : cache) {
             if (t.second != NULL && t.second->height == i) {
@@ -383,7 +418,7 @@ void FileORAM::finalizefile()
     leafList.clear();
     modified.clear();
 }
-
+*/
 void FileORAM::start(bool batchWrite) {
     this->batchWrite = batchWrite;
     writeviewmap.clear();
@@ -402,20 +437,12 @@ void FileORAM::Print() {
     }
 }
 
-int FileORAM::RandomPath() {
+int FileORAM::RandomPath() 
+{
     int val = dis(mt);
     return val;
 }
-int FileORAM::RandomSeedPath(string kw,int sc, int fc, int indexleaves) 
-{
-    int sum = 0;
-    for(int i=0;i<kw.size();i++)
-	sum +=kw[i];
-    int rnd = sum+(sc+1)*1000+fc*9999;
-    int pos = rnd%indexleaves;
-    //cout <<"pos:"<< pos<<" ";
-    return pos;
-}
+
 void FileORAM::setupInsert(vector<Fnode*> nodes) {
     sort(nodes.begin(), nodes.end(), [ ](const Fnode* lhs, const Fnode * rhs) {
         return lhs->pos < rhs->pos;

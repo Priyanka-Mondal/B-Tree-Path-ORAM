@@ -18,13 +18,14 @@ private:
     OMAP* file;
     FileORAM *fileoram;
     map<Bid, int> UpdtCnt;
-    map<Bid,string> srchbids;
+    vector<Fnode*> srchnodes;
+    vector<Fnode*> filenodes;
     map<Bid,string> fcntbids;
     map<Bid,int> updtbids;
-    map<Bid,pair<string,int>> filebids;
-    map<string,string> localFCNT;
+    map<string,string> localFCNT;//sc-fc
+    map<string,string> localACNT; //ac-bc
     int RandomPath();
-    int RandomSeedPath(Fbid kw,int fc, int sc, int indexleaves);
+    int RandomSeedPath(string id,int fc, int sc, int leaves);
     std::random_device rd;
     std::mt19937 mt;
     std::uniform_int_distribution<int> dis;
@@ -35,7 +36,7 @@ public:
     Fbid createFbid(string keyword,int number);
     Bid createBid(string keyword,int number);
     
-    Fnode* newNode(Fbid key, string value, int pos, int height);
+    Fnode* newNode(Fbid key, string value, int pos);
     void insertWrap(string cont, int fileid, bool batch);
     void insert(vector<string> kws, vector<string> blocks, int ind);
     void setupinsert(vector<string> kws, vector<string> blocks, int ind);

@@ -8,9 +8,6 @@ public:
     Fbid key;
     std::array< byte_t, 64> value;
     int pos;
-    Fbid nextID;
-    int nextPos;
-    int height;
 };
 
 struct Fblock {

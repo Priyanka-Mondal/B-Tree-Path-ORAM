@@ -64,6 +64,7 @@ public:
     void WritePath(int leaf, int level);
     size_t depth;
     map<Fbid, Fnode*> cache;
+    map<Fbid, int> posCache;
     vector<int> leafList;
     vector<int> readviewmap;
     vector<int> writeviewmap;
@@ -78,11 +79,12 @@ public:
     int DeleteFnode(Fbid bid, Fnode* n);
     void start(bool batchWrite);
     void finalizefile();
+    void finalizeindex();
     void WriteCache();
     static Fnode* convertFblockToFnode(block b);
     void convertFblockToFnode(Fnode*& node,block b);
     static block convertFnodeToFblock(Fnode* node);
-    int RandomSeedPath(string kw,int sc, int fc, int indexleaves);
+    int RandomSeedPath(Fbid kw,int sc, int fc, int indexleaves);
 
 
 

@@ -129,7 +129,6 @@ int main(int argc, char**argv)
 	{
 		while(getline(kw,line))
 		{
-			cout <<"SEARCHING:"<< line<<endl;
 	        	auto start = high_resolution_clock::now();
 			auto s = orion.simplebatchSearch(line);
 	        	auto stop = high_resolution_clock::now();

@@ -127,16 +127,13 @@ void Orion::insertWrap(string cont, int fileid, bool batch)
 
 
 
-Fnode* Orion::newNode(Fbid key, string value, int pos, int height) 
+Fnode* Orion::newNode(Fbid key, string value, int pos) 
 {
     Fnode* node = new Fnode();
     node->key = key;
     std::fill(node->value.begin(), node->value.end(), 0);
     std::copy(value.begin(), value.end(), node->value.begin());
     node->pos = pos;
-    node->nextID = 0;
-    node->nextPos = 0;
-    node->height = height; // new node is initially added at leaf
     return node;
 }
 void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind) 
@@ -154,7 +151,6 @@ void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind)
 	 }
 	 else if(localFCNT.count(kw)>0)
 		 scfc = localFCNT[kw];
-
          auto parts = Utilities::splitData(scfc, "-");
          sc = stoi(parts[0]);
          fc = stoi(parts[1]);
@@ -162,42 +158,40 @@ void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind)
 	 if(!local)
 	 	fcntbids[firstKey]=to_string(sc)+"-"+to_string(fc);
 	 else
-		 localFCNT[kw]=to_string(sc)+"-"+to_string(fc);
+		localFCNT[kw]=to_string(sc)+"-"+to_string(fc);
 	 Fbid kbid = createFbid(kw,fc);
     	 int poskw = RandomSeedPath(kw,sc,fc,indexleaves);
-	 srch->start(false);
-	 Fnode *fnode = newNode(kbid,to_string(ind),poskw,1);
-	 srch->WriteFnode(kbid,fnode);
-	 srch->WriteCache();
+	 //srch->start(false);
+	 Fnode *fnode = newNode(kbid,to_string(ind),poskw);
+	 //srch->WriteFnode(kbid,fnode);
+	 srchnodes.push_back(fnode);
 
     }
+    //srch->finalizeindex();
     string id = to_string(ind);
-    Fbid fbid = createFbid(id,1);
-    int pos = RandomPath();
-    fileoram->localBCNT[fbid]=make_pair(blocks.size(),pos);
+    string acbc = "0-"+to_string(blocks.size());
+    localACNT[id]=acbc;
     int block_num = 1;
-    fileoram->start(false);
-
+    //fileoram->start(false);
     for(auto blk: blocks)
     {
-	   fbid = createFbid(id,block_num);
-	   int nextPos = RandomPath();
-	   Fnode *fnode = newNode(fbid,blk,pos,block_num);
-           fnode->nextPos = nextPos;
-	   if(block_num!=blocks.size())
-		   fnode->nextID = createFbid(id,block_num+1);
-	   fileoram->WriteFnode(fbid,fnode);
-	   pos = nextPos;
+	   Fbid fbid = createFbid(id,block_num);
+	   int pos = RandomSeedPath(id,0,block_num,fileleaves);
+	   //cout <<"leaf for:"<<id<<"|"<<block_num<<":"<<pos<<"-"<<fbid<<endl;
+	   Fnode *fnode = newNode(fbid,blk,pos);
+	   //fileoram->WriteFnode(fbid,fnode);
+	   filenodes.push_back(fnode);
 	   block_num++;
     }
-    fileoram->finalizefile();
+    //fileoram->finalizeindex();
     fileblks = fileblks+block_num-1;
     cout<<"BATCH inserted keywords and blocks(kw:"<<kws.size() <<",b:"<<blocks.size()<<") of fileid: "<<ind<<" fb:"<<fileblks<< endl;
 }
 
 void Orion::endSetup() 
 {
-	//updt->setupInsert(updtbids);
+	srch->setupInsert(srchnodes);
+	fileoram->setupInsert(filenodes);
 	if(!local)
          fcnt->setupInsert(fcntbids);
 }
@@ -207,14 +201,13 @@ int Orion::RandomPath()
     int val = dis(mt);
     return val;
 }
-int Orion::RandomSeedPath(Fbid kw,int sc, int fc, int indexleaves) 
+int Orion::RandomSeedPath(string id,int cntr1, int cntr2, int leaves) 
 {
     int sum = 0;
-    for(int i=0;i<kw.size();i++)
-	sum +=kw[i];
-    int rnd = sum+(sc+1)*1000+fc*9999;
-    int pos = rnd%indexleaves;
-    //cout <<"pos:"<< pos<<" ";
+    for(int i=0;i<id.size();i++)
+	sum +=id[i];
+    int rnd = sum+(cntr1+1)*10001+cntr2*9999;
+    int pos = rnd%leaves;
     return pos;
 }
 
@@ -224,7 +217,7 @@ vector<string> Orion::simplebatchSearch(string keyword)
 	vector<string> conts;
 	int fc = 0;
 	int sc = 0;
-	string scfc;
+	string scfc="0-0";
         if(localFCNT.count(keyword)>0)
         	scfc = localFCNT[keyword];
 	else 
@@ -232,74 +225,48 @@ vector<string> Orion::simplebatchSearch(string keyword)
         auto parts = Utilities::splitData(scfc, "-");
         sc = stoi(parts[0]);
         fc = stoi(parts[1]);
-    	vector<Bid> bids;
-    	bids.reserve(fc);
+	scfc = to_string(sc+1)+"-"+to_string(fc);
+	localFCNT[keyword] = scfc;
         vector<string> result;
+	srch->start(false);
    	for (int i = 1; i <= fc; i++) 
    	{
    	         Fbid kbid = createFbid(keyword,i);
-		 int poskw = RandomSeedPath(kbid,sc,fc,indexleaves);
-		 Fnode* kwnode = srch->ReadFnode(kbid,poskw,poskw);
-			string temp="";
-        		temp.assign(kwnode->value.begin(), kwnode->value.end());
-        		temp = temp.c_str();
-			result.push_back(temp);
+		 int poskw = RandomSeedPath(keyword,sc,i,indexleaves);
+		 int newpos = RandomSeedPath(keyword,sc+1,i,indexleaves);
+		 Fnode* kwnode = srch->ReadFnode(kbid,poskw,newpos);
+		 string temp="";
+        	 temp.assign(kwnode->value.begin(), kwnode->value.end());
+        	 temp = temp.c_str();
+		 result.push_back(temp);
    	}
-	sc=sc+1;
-	scfc = to_string(sc)+"-"+to_string(fc);
-	localFCNT[keyword]=scfc;
-	finalizeindex(kw, sc,fc);
+	srch->finalizeindex();
 	//fcnt->incrementSrcCnt();
 	//**********************************************************
-	int tot = 0;
-	fileoram->start(true);
-   	for(auto fID:result)
+
+	fileoram->start(false);
+   	 for(auto fID:result)
    	 {
-   	        //string fID = to_string(id);
-		Fbid fbid = createFbid(fID,1);
-	 	int blocknum = fileoram->localBCNT[fbid].first;
-		tot = tot + blocknum;
-		int pos = fileoram->localBCNT[fbid].second;
-		Fnode* fnode = fileoram->ReadFnode(fbid,pos,pos);
-		while(fnode!=NULL)
+	 	string acbc = localACNT[fID];
+	        auto parts = Utilities::splitData(acbc, "-");
+	        int ac = stoi(parts[0]);
+	        int bc = stoi(parts[1]);
+		acbc = to_string(ac+1)+"-"+to_string(bc);
+		localACNT[fID] = acbc;
+		for(int i =1;i<=bc;i++)
 		{
+			Fbid fbid = createFbid(fID,i);
+			int pos = RandomSeedPath(fID,ac,i,fileleaves);
+			int newpos = RandomSeedPath(fID,ac+1,i,fileleaves);
+			Fnode* fnode = fileoram->ReadFnode(fbid,pos,newpos);
 			string temp="";
         		temp.assign(fnode->value.begin(), fnode->value.end());
         		temp = temp.c_str();
 			conts.push_back(temp);
-			fbid = fnode->nextID;
-			pos = fnode->nextPos;
-			if(fbid == 0)
-				break;
-			fnode = fileoram->ReadFnode(fbid,pos,pos);
-
 		}
    	  }
-		fileoram->finalizefile();
+	  fileoram->finalizeindex();
     return conts;
-}
-void Orion::finalizeindex(int sc, int fc) 
-{
-        for (auto t : srch->cache) 
-	{
-            if (t.second != NULL ) 
-	    {
-                Fnode* tmp = t.second;
-                if (srch->modified.count(tmp->key)) 
-		{
-                    tmp->pos = RandomSeedPath(t.first,sc,fc,indexleaves);
-                }
-            }
-        }
-    for (int d = srch->depth; d >= 0; d--) 
-    {
-        for (unsigned int i = 0; i < srch->leafList.size(); i++) 
-	{
-            srch->WritePath(srch->leafList[i], d);
-        }
-    }
-    srch->leafList.clear();
-    srch->modified.clear();
 }
 /*
 void Orion::insert(vector<string> kws, vector<string> blocks, int ind) 

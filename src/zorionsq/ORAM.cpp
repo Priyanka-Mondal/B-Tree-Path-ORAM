@@ -216,7 +216,9 @@ void ORAM::DeleteData(Bid bid, Node* node)
 
 // Fetches a block, allowing you to read and write in a block
 
-void ORAM::Access(Bid bid, Node*& node, int lastLeaf, int newLeaf) {
+void ORAM::Access(Bid bid, Node*& node, int lastLeaf, int newLeaf) 
+{
+
     FetchPath(lastLeaf);
     node = ReadData(bid);
     if (node != NULL) {
@@ -241,73 +243,6 @@ void ORAM::Access(Bid bid, Node*& node) {
     }
 }
 
-Node* ORAM::setupReadN(Bid bid,int leaf)
-{
-    if (bid == 0) {
-        return NULL;
-    }
-    for (size_t d = depth; d >= 0; d--) 
-    {
-        int node = GetNodeOnPath(leaf, d);
-        Bucket bucket = ReadBucket(node);
-        for (int z = 0; z < Z; z++) 
-	{
-            Block &block = bucket[z];
-            if (block.id == bid) 
-	    {    
-                Node* n = new Node();
-    std::array<byte_t, sizeof (Node) > arr;
-    std::copy(block.data.begin(), block.data.begin() + sizeof (Node), arr.begin());
-    from_bytes(arr, *n);
-		return n;
-            }
-        }
-
-     }
-    if(cache.count(bid)>0)
-    {
-    	cout <<"found "<<bid<<" in cache ORAM"<<endl;
-    	return cache[bid];
-    }
-    else
-	    cout<<bid<<"NOT FOUND at ALL in setupRead"<<endl;
-    return NULL;
-}
-void ORAM::setupReadN(Node*& n, Bid bid,int leaf)
-{
-    if (bid == 0) {
-        return ;
-    }
-    for (size_t d = depth; d >= 0; d--) 
-    {
-        int node = GetNodeOnPath(leaf, d);
-        Bucket bucket = ReadBucket(node);
-        for (int z = 0; z < Z; z++) 
-	{
-            Block &block = bucket[z];
-            if (block.id == bid) 
-	    {    
-                //Node* n = new Node();
-	       	//convertBlockToNode(n,block.data);
-		//return n;
-
-    std::array<byte_t, sizeof (Node) > arr;
-    std::copy(block.data.begin(), block.data.begin() + sizeof (Node), arr.begin());
-    from_bytes(arr, *n);
-    return;
-            }
-        }
-
-     }
-    if(cache.count(bid)>0)
-    {
-    	cout <<"found "<<bid<<" in cache ORAM"<<endl;
-    	n = cache[bid];
-    }
-    else
-	    cout<<bid<<"NOT FOUND at ALL in setupRead"<<endl;
-    //return NULL;
-}
 Node* ORAM::ReadNode(Bid bid) {
     if (bid == 0) {
         throw runtime_error("Node id is not set ReadNode");

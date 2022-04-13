@@ -244,12 +244,14 @@ void ORAMf::DeleteData(Bid bid, Nodef* node)
 
 // Fetches a block, allowing you to read and write in a block
 
-void ORAMf::Access(Bid bid, Nodef*& node, int lastLeaf, int newLeaf) {
+void ORAMf::Access(Bid bid, Nodef*& node, int lastLeaf, int newLeaf) 
+{
     FetchPath(lastLeaf);
     node = ReadData(bid);
     if (node != NULL) {
         node->pos = newLeaf;
-        if (cache.count(bid) != 0) {
+        if (cache.count(bid) != 0) 
+	{
             cache.erase(bid);
         }
         cache[bid] = node;
