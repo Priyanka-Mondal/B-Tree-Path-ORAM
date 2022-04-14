@@ -11,8 +11,7 @@
 #include <stdexcept>
 
 FileORAM::FileORAM(int maxSize, bytes<Key> key)
-: key(key), rd(), mt(rd()), dis(0, (pow(2, floor(log2(maxSize / Z)) + 1) - 1) / 2) 
-{
+: key(key), rd(), mt(rd()), dis(0, (pow(2, floor(log2(maxSize / Z)) + 1) - 1) / 2) {
     AES::Setup();
     depth = floor(log2(maxSize / Z));
     leaves = (pow(2, floor(log2(maxSize/Z))+1)-1)/2;

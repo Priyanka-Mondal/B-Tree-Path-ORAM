@@ -1,4 +1,4 @@
-#include "FileORAM.hpp"
+#include "IndexORAM.hpp"
 #include "../utils/Utilities.h"
 #include <algorithm>
 #include <iomanip>
@@ -10,39 +10,38 @@
 #include <map>
 #include <stdexcept>
 
-FileORAM::FileORAM(int maxSize, bytes<Key> key)
-: key(key), rd(), mt(rd()), dis(0, (pow(2, floor(log2(maxSize / Z)) + 1) - 1) / 2) 
-{
+IndexORAM::IndexORAM(int maxSize, bytes<Key> key)
+: key(key), rd(), mt(rd()), dis(0, (pow(2, floor(log2(maxSize / Z)) + 1) - 1) / 2) {
     AES::Setup();
     depth = floor(log2(maxSize / Z));
     leaves = (pow(2, floor(log2(maxSize/Z))+1)-1)/2;
     cout <<"depth of tree:"<<depth<<endl;
     bucketCount = pow(2, depth + 1) - 1;
-    blockSize = sizeof (Fnode); // B
+    blockSize = sizeof (Node); // B
     size_t blockCount = Z * (pow(2, depth + 1) - 1);
-    size_t storeFblockSize = IV + AES::GetCiphertextLength(Z * (blockSize));
-    size_t storeFblockCount = blockCount;
+    size_t storeIblockSize = IV + AES::GetCiphertextLength(Z * (blockSize));
+    size_t storeIblockCount = blockCount;
     clen_size = AES::GetCiphertextLength((blockSize) * Z);
     plaintext_size = (blockSize) * Z;
-    store = new RAMStore(storeFblockCount, storeFblockSize);
-    cout << "Fbuckets:"<<bucketCount<<" blockCount:"<<blockCount<<endl;
+    store = new RAMStore(storeIblockCount, storeIblockSize);
+    cout << "Ibuckets:"<<bucketCount<<" blockCount:"<<blockCount<<endl;
     for (size_t i = 0; i < bucketCount; i++) {
-        Fbucket bucket;
+        Ibucket bucket;
         for (int z = 0; z < Z; z++) {
             bucket[z].id = 0;
             bucket[z].data.resize(blockSize, 0);
         }
-        WriteFbucket(i, bucket);
+        WriteIbucket(i, bucket);
     }
 }
 
-FileORAM::~FileORAM() {
+IndexORAM::~IndexORAM() {
     AES::Cleanup();
     delete store;
 }
 
 
-int FileORAM::GetFnodeOnPath(int leaf, int curDepth) {
+int IndexORAM::GetNodeOnPath(int leaf, int curDepth) {
     leaf += bucketCount / 2;
     for (int d = depth - 1; d >= curDepth; d--) {
         leaf = (leaf + 1) / 2 - 1;
@@ -53,11 +52,11 @@ int FileORAM::GetFnodeOnPath(int leaf, int curDepth) {
 
 // Write bucket to a single block
 
-block FileORAM::SerialiseFbucket(Fbucket bucket) {
+block IndexORAM::SerialiseIbucket(Ibucket bucket) {
     block buffer;
 
     for (int z = 0; z < Z; z++) {
-        Fblock b = bucket[z];
+        Iblock b = bucket[z];
         buffer.insert(buffer.end(), b.data.begin(), b.data.end());
     //delete b;
     }
@@ -67,16 +66,16 @@ block FileORAM::SerialiseFbucket(Fbucket bucket) {
     return buffer;
 }
 
-Fbucket FileORAM::DeserialiseFbucket(block buffer) {
+Ibucket IndexORAM::DeserialiseIbucket(block buffer) {
     assert(buffer.size() == Z * (blockSize));
 
-    Fbucket bucket;
+    Ibucket bucket;
 
     for (int z = 0; z < Z; z++) {
-        Fblock &block = bucket[z];
+        Iblock &block = bucket[z];
 
         block.data.assign(buffer.begin(), buffer.begin() + blockSize);
-        Fnode* node = convertFblockToFnode(block.data);
+        Node* node = convertIblockToNode(block.data);
         block.id = node->key;
         delete node;
         buffer.erase(buffer.begin(), buffer.begin() + blockSize);
@@ -85,17 +84,17 @@ Fbucket FileORAM::DeserialiseFbucket(block buffer) {
     return bucket;
 }
 
-Fbucket FileORAM::ReadFbucket(int index) {
+Ibucket IndexORAM::ReadIbucket(int index) {
     block ciphertext = store->Read(index);
     block buffer = AES::Decrypt(key, ciphertext, clen_size);
-    Fbucket bucket = DeserialiseFbucket(buffer);
+    Ibucket bucket = DeserialiseIbucket(buffer);
     ciphertext.clear();
     buffer.clear();
     return bucket;
 }
 
-void FileORAM::WriteFbucket(int index, Fbucket bucket) {
-    block b = SerialiseFbucket(bucket);
+void IndexORAM::WriteIbucket(int index, Ibucket bucket) {
+    block b = SerialiseIbucket(bucket);
     block ciphertext = AES::Encrypt(key, b, clen_size, plaintext_size);
     store->Write(index, ciphertext);
     ciphertext.clear();
@@ -104,10 +103,10 @@ void FileORAM::WriteFbucket(int index, Fbucket bucket) {
 
 // Fetches blocks along a path, adding them to the cache
 
-void FileORAM::FetchPath(int leaf) {
+void IndexORAM::FetchPath(int leaf) {
     readCnt++;
     for (size_t d = 0; d <= depth; d++) {
-        int node = GetFnodeOnPath(leaf, d);
+        int node = GetNodeOnPath(leaf, d);
 
         if (find(readviewmap.begin(), readviewmap.end(), node) != readviewmap.end()) {
             continue;
@@ -115,13 +114,13 @@ void FileORAM::FetchPath(int leaf) {
             readviewmap.push_back(node);
         }
 
-        Fbucket bucket = ReadFbucket(node);
+        Ibucket bucket = ReadIbucket(node);
 
         for (int z = 0; z < Z; z++) {
-            Fblock &block = bucket[z];
+            Iblock &block = bucket[z];
 
             if (block.id != 0) { // It isn't a dummy block   
-                Fnode* n = convertFblockToFnode(block.data);
+                Node* n = convertIblockToNode(block.data);
                 if (cache.count(block.id) == 0) {
                     cache.insert(make_pair(block.id, n));
                 } else {
@@ -134,37 +133,37 @@ void FileORAM::FetchPath(int leaf) {
 
 // Gets a list of blocks on the cache which can be placed at a specific point
 
-std::vector<Fbid> FileORAM::GetIntersectingFblocks(int x, int curDepth) {
-    std::vector<Fbid> validFblocks;
+std::vector<Bid> IndexORAM::GetIntersectingIblocks(int x, int curDepth) {
+    std::vector<Bid> validIblocks;
 
-    int node = GetFnodeOnPath(x, curDepth);
+    int node = GetNodeOnPath(x, curDepth);
     for (auto b : cache) {
-        Fbid bid = b.first;
-        if (b.second != NULL && GetFnodeOnPath(b.second->pos, curDepth) == node) {
-            validFblocks.push_back(bid);
-            if (validFblocks.size() >= Z) {
-                return validFblocks;
+        Bid bid = b.first;
+        if (b.second != NULL && GetNodeOnPath(b.second->pos, curDepth) == node) {
+            validIblocks.push_back(bid);
+            if (validIblocks.size() >= Z) {
+                return validIblocks;
             }
         }
     }
-    return validFblocks;
+    return validIblocks;
 }
 
 
-void FileORAM::WritePath(int leaf, int d) 
+void IndexORAM::WritePath(int leaf, int d) 
 {
-    int node = GetFnodeOnPath(leaf, d);
+    int node = GetNodeOnPath(leaf, d);
     if (find(writeviewmap.begin(), writeviewmap.end(), node) == writeviewmap.end()) 
     {
-        auto validFblocks = GetIntersectingFblocks(leaf, d);
-        Fbucket bucket;
-        for (int z = 0; z < std::min((int) validFblocks.size(), Z); z++) 
+        auto validIblocks = GetIntersectingIblocks(leaf, d);
+        Ibucket bucket;
+        for (int z = 0; z < std::min((int) validIblocks.size(), Z); z++) 
 	{
-            Fblock &block = bucket[z];
-            block.id = validFblocks[z];
-	    Fbid temp = block.id;
-            Fnode* curnode = cache[block.id];
-            block.data = convertFnodeToFblock(curnode);
+            Iblock &block = bucket[z];
+            block.id = validIblocks[z];
+	    Bid temp = block.id;
+            Node* curnode = cache[block.id];
+            block.data = convertNodeToIblock(curnode);
 	    if(curnode->key != block.id)
 	    {
 		    block.id = 0; // curnode->key;
@@ -173,20 +172,20 @@ void FileORAM::WritePath(int leaf, int d)
             delete curnode;
             cache.erase(temp);
         }
-        for (int z = validFblocks.size(); z < Z; z++) 
+        for (int z = validIblocks.size(); z < Z; z++) 
 	{
-            Fblock &block = bucket[z];
+            Iblock &block = bucket[z];
             block.id = 0;
             block.data.resize(blockSize, 0);
         }
         writeviewmap.push_back(node);
-        WriteFbucket(node, bucket);
+        WriteIbucket(node, bucket);
     }
 }
 
 // Gets the data of a block in the cache
 
-Fnode* FileORAM::ReadData(Fbid bid) {
+Node* IndexORAM::ReadData(Bid bid) {
     if (cache.find(bid) == cache.end()) {
         return NULL;
     }
@@ -195,17 +194,17 @@ Fnode* FileORAM::ReadData(Fbid bid) {
 
 // Updates the data of a block in the cache
 
-void FileORAM::WriteData(Fbid bid, Fnode* node) 
+void IndexORAM::WriteData(Bid bid, Node* node) 
 {
     if (store->GetEmptySize() > 0) {
         cache[bid] = node;
         store->ReduceEmptyNumbers();
     } else {
-        throw runtime_error("There is no more space in FileORAM-WriteData");
+        throw runtime_error("There is no more space in IndexORAM-WriteData");
     }
 }
 
-void FileORAM::DeleteData(Fbid bid, Fnode* node) 
+void IndexORAM::DeleteData(Bid bid, Node* node) 
 {
 	if(bid != node->key)
 	{
@@ -218,7 +217,7 @@ void FileORAM::DeleteData(Fbid bid, Fnode* node)
 
 // Fetches a block, allowing you to read and write in a block
 
-void FileORAM::Access(Fbid bid, Fnode*& node, int lastLeaf, int newLeaf) 
+void IndexORAM::Access(Bid bid, Node*& node, int lastLeaf, int newLeaf) 
 {
     FetchPath(lastLeaf);
     node = ReadData(bid);
@@ -236,7 +235,7 @@ void FileORAM::Access(Fbid bid, Fnode*& node, int lastLeaf, int newLeaf)
     }
 }
 
-void FileORAM::Access(Fbid bid, Fnode*& node) 
+void IndexORAM::Access(Bid bid, Node*& node) 
 {
     //if (!batchWrite) {
         FetchPath(node->pos);
@@ -247,19 +246,19 @@ void FileORAM::Access(Fbid bid, Fnode*& node)
     }
 }
 
-Fnode* FileORAM::ReadFnode(Fbid bid) {
+Node* IndexORAM::ReadNode(Bid bid) {
     if (bid == 0) {
-        throw runtime_error("Fnode id is not set ReadFnode");
+        throw runtime_error("Node id is not set ReadNode");
     }
     if (cache.count(bid) == 0) {
-        throw runtime_error("Fnode not found in the cache ReadFnode");
+        throw runtime_error("Node not found in the cache ReadNode");
     } else {
-        Fnode* node = cache[bid];
+        Node* node = cache[bid];
         return node;
     }
 }
 
-Fnode* FileORAM::ReadFnode(Fbid bid, int lastLeaf, int newLeaf) 
+Node* IndexORAM::ReadNode(Bid bid, int lastLeaf, int newLeaf) 
 {
     if (bid == 0) 
     {
@@ -268,7 +267,7 @@ Fnode* FileORAM::ReadFnode(Fbid bid, int lastLeaf, int newLeaf)
     /*
     if(cache.count(bid)>0)
     {
-	Fnode* node = cache[bid];
+	Node* node = cache[bid];
 	node->pos = newLeaf;
 	cache[bid]=node;
         modified.insert(bid);
@@ -276,7 +275,7 @@ Fnode* FileORAM::ReadFnode(Fbid bid, int lastLeaf, int newLeaf)
     }*/
     if(cache.count(bid)==0)//||find(leafList.begin(),leafList.end(),lastLeaf)==leafList.end())
     {
-        Fnode* node;
+        Node* node;
         Access(bid, node, lastLeaf, newLeaf);
         if (node != NULL) 
 	{
@@ -284,7 +283,7 @@ Fnode* FileORAM::ReadFnode(Fbid bid, int lastLeaf, int newLeaf)
         }
 	else 
 	{
-		cout <<"Fnode is NULL : "<< bid << endl ;
+		cout <<"Node is NULL : "<< bid << endl ;
 		cout <<"free node:" << store->GetEmptySize() << endl;
 	}
         return node;
@@ -292,19 +291,19 @@ Fnode* FileORAM::ReadFnode(Fbid bid, int lastLeaf, int newLeaf)
     else 
     {
         modified.insert(bid);
-        Fnode* node = cache[bid];
+        Node* node = cache[bid];
         node->pos = newLeaf;
 	cache[bid] = node;
         return node;
     }
 }
 
-int FileORAM::WriteFnode(Fbid bid, Fnode* node) {
+int IndexORAM::WriteNode(Bid bid, Node* node) {
     
     if (bid == 0) 
     {
 	cout <<bid<<endl;
-        throw runtime_error("Fnode id is not set WriteFnode");
+        throw runtime_error("Node id is not set WriteNode");
     }
     if (cache.count(bid) == 0) 
     {
@@ -319,10 +318,10 @@ int FileORAM::WriteFnode(Fbid bid, Fnode* node) {
 }
 
 
-int FileORAM::DeleteFnode(Fbid bid, Fnode* node) {
+int IndexORAM::DeleteNode(Bid bid, Node* node) {
     if (bid == 0) 
     {
-       throw runtime_error("Fnodef id is not set in DeleteFnode");
+       throw runtime_error("Nodef id is not set in DeleteNode");
     }
     if (cache.count(bid) != 0) 
     {
@@ -333,29 +332,29 @@ int FileORAM::DeleteFnode(Fbid bid, Fnode* node) {
         return node->pos;
 }
 
-Fnode* FileORAM::convertFblockToFnode(block b) {
-    Fnode* node = new Fnode();
-    std::array<byte_t, sizeof (Fnode) > arr;
-    std::copy(b.begin(), b.begin() + sizeof (Fnode), arr.begin());
+Node* IndexORAM::convertIblockToNode(block b) {
+    Node* node = new Node();
+    std::array<byte_t, sizeof (Node) > arr;
+    std::copy(b.begin(), b.begin() + sizeof (Node), arr.begin());
     from_bytes(arr, *node);
     return node;
 }
 
-void FileORAM::convertFblockToFnode(Fnode*& node, block b) {
-    //Fnode* node = new Fnode();
-    std::array<byte_t, sizeof (Fnode) > arr;
-    std::copy(b.begin(), b.begin() + sizeof (Fnode), arr.begin());
+void IndexORAM::convertIblockToNode(Node*& node, block b) {
+    //Node* node = new Node();
+    std::array<byte_t, sizeof (Node) > arr;
+    std::copy(b.begin(), b.begin() + sizeof (Node), arr.begin());
     from_bytes(arr, *node);
     //return node;
 }
 
-block FileORAM::convertFnodeToFblock(Fnode* node) {
-    std::array<byte_t, sizeof (Fnode) > data = to_bytes(*node);
+block IndexORAM::convertNodeToIblock(Node* node) {
+    std::array<byte_t, sizeof (Node) > data = to_bytes(*node);
     block b(data.begin(), data.end());
     return b;
 }
 
-void FileORAM::WriteCache() 
+void IndexORAM::WriteCache() 
 {
     for (int d = depth; d >= 0; d--) 
     {
@@ -369,13 +368,13 @@ void FileORAM::WriteCache()
     modified.clear();
 }
 
-void FileORAM::finalizeindex() 
+void IndexORAM::finalizeindex() 
 {/*
     for (auto t : cache) 
     {
         if (t.second != NULL ) 
         {
-            Fnode* tmp = t.second;
+            Node* tmp = t.second;
             if (modified.count(tmp->key)) 
     	    {
                 tmp->pos = posCache[t.first];
@@ -393,12 +392,12 @@ void FileORAM::finalizeindex()
     modified.clear();
 }
 /*
-void FileORAM::finalizefile() 
+void IndexORAM::finalizefile() 
 {
     for (unsigned int i = maxHeight; i >= 1; i--) {
         for (auto t : cache) {
             if (t.second != NULL && t.second->height == i) {
-                Fnode* tmp = t.second;
+                Node* tmp = t.second;
                 if (modified.count(tmp->key)) {
                     tmp->pos = RandomPath();
 		    if (i==1)
@@ -424,39 +423,39 @@ void FileORAM::finalizefile()
     modified.clear();
 }
 */
-void FileORAM::start(bool batchWrite) {
+void IndexORAM::start(bool batchWrite) {
     this->batchWrite = batchWrite;
     writeviewmap.clear();
     readviewmap.clear();
     readCnt = 0;
 }
 
-void FileORAM::Print() {
+void IndexORAM::Print() {
     for (unsigned int i = 0; i < bucketCount; i++) {
         block ciphertext = store->Read(i);
         block buffer = AES::Decrypt(key, ciphertext, clen_size);
-        Fbucket bucket = DeserialiseFbucket(buffer);
-        Fnode* node = convertFblockToFnode(bucket[0].data);
+        Ibucket bucket = DeserialiseIbucket(buffer);
+        Node* node = convertIblockToNode(bucket[0].data);
         cout << node->key << " ";
         delete node;
     }
 }
 
-int FileORAM::RandomPath() 
+int IndexORAM::RandomPath() 
 {
     int val = dis(mt);
     return val;
 }
 
-void FileORAM::setupInsert(vector<Fnode*> nodes) {
-    sort(nodes.begin(), nodes.end(), [ ](const Fnode* lhs, const Fnode * rhs) {
+void IndexORAM::setupInsert(vector<Node*> nodes) {
+    sort(nodes.begin(), nodes.end(), [ ](const Node* lhs, const Node * rhs) {
         return lhs->pos < rhs->pos;
     });
     int curPos = 0;
     if (nodes.size() > 0) {
         curPos = nodes[0]->pos;
     }
-    map<int, Fbucket> buckets;
+    map<int, Ibucket> buckets;
     map<int, int> bucketsCnt;
     int cnt = 0;
     unsigned int i = 0;
@@ -467,15 +466,15 @@ void FileORAM::setupInsert(vector<Fnode*> nodes) {
          //   cout << "i:" << i << "/" << nodes.size() << endl;
         //}
         for (int d = depth; d >= 0 && i < nodes.size() && curPos == nodes[i]->pos; d--) {
-            int nodeIndex = GetFnodeOnPath(curPos, d);
-            Fbucket bucket;
+            int nodeIndex = GetNodeOnPath(curPos, d);
+            Ibucket bucket;
             if (bucketsCnt.count(nodeIndex) == 0) {
                 bucketsCnt[nodeIndex] = 0;
                 for (int z = 0; z < Z; z++) {
                     if (i < nodes.size() && nodes[i]->pos == curPos) {
-                        Fblock &curFblock = bucket[z];
-                        curFblock.id = nodes[i]->key;
-                        curFblock.data = convertFnodeToFblock(nodes[i]);
+                        Iblock &curIblock = bucket[z];
+                        curIblock.id = nodes[i]->key;
+                        curIblock.data = convertNodeToIblock(nodes[i]);
                         delete nodes[i];
                         bucketsCnt[nodeIndex]++;
                         i++;
@@ -487,9 +486,9 @@ void FileORAM::setupInsert(vector<Fnode*> nodes) {
                     bucket = buckets[nodeIndex];
                     for (int z = bucketsCnt[nodeIndex]; z < Z; z++) {
                         if (i < nodes.size() && nodes[i]->pos == curPos) {
-                            Fblock &curFblock = bucket[z];
-                            curFblock.id = nodes[i]->key;
-                            curFblock.data = convertFnodeToFblock(nodes[i]);
+                            Iblock &curIblock = bucket[z];
+                            curIblock.id = nodes[i]->key;
+                            curIblock.data = convertNodeToIblock(nodes[i]);
                             delete nodes[i];
                             bucketsCnt[nodeIndex]++;
                             i++;
@@ -518,14 +517,14 @@ void FileORAM::setupInsert(vector<Fnode*> nodes) {
 
     for (auto buk : buckets) {
         if (bucketsCnt[buk.first] == Z) {
-            WriteFbucket(buk.first, buk.second);
+            WriteIbucket(buk.first, buk.second);
         } else {
             for (long unsigned int z = bucketsCnt[buk.first]; z < Z; z++) {
-                Fblock &curFblock = buk.second[z];
-                curFblock.id = 0;
-                curFblock.data.resize(blockSize, 0);
+                Iblock &curIblock = buk.second[z];
+                curIblock.id = 0;
+                curIblock.data.resize(blockSize, 0);
             }
-            WriteFbucket(buk.first, buk.second);
+            WriteIbucket(buk.first, buk.second);
         }
     }
 

@@ -1,31 +1,32 @@
 #include <algorithm>
-#include "Fbid.h"
 
-Fbid::Fbid() {
+#include "Bid.h"
+
+Bid::Bid() {
     std::fill(id.begin(),id.end(),0);
 }
 
-Fbid::Fbid(string value) {
+Bid::Bid(string value) {
     std::fill(id.begin(),id.end(),0);
     std::copy(value.begin(), value.end(), id.begin());
 }
 
-Fbid::~Fbid() {
+Bid::~Bid() {
 }
 
-Fbid::Fbid(int value) {
+Bid::Bid(int value) {
     std::fill(id.begin(),id.end(),0);
     auto arr = to_bytes(value);
     std::copy(arr.begin(), arr.end(), id.begin());
 }
 
-Fbid::Fbid(std::array<byte_t, FID_SIZE> value) {
+Bid::Bid(std::array<byte_t, ID_SIZE> value) {
     std::copy(value.begin(), value.end(), id.begin());
 }
 
-Fbid Fbid::operator++() {
-    id[FID_SIZE - 1]++;
-    for (int i = FID_SIZE - 1; i > 0; i--) {
+Bid Bid::operator++() {
+    id[ID_SIZE - 1]++;
+    for (int i = ID_SIZE - 1; i > 0; i--) {
         if (id[i] == 0) {
             id[i - 1]++;
         } else {
@@ -34,14 +35,14 @@ Fbid Fbid::operator++() {
     }
 }
 
-Fbid& Fbid::operator=(int other) {
+Bid& Bid::operator=(int other) {
     for (int i = 0; i < 4; i++) {
         id[3 - i] = (other >> (i * 8));
     }
     std::fill(id.begin()+4,id.end(),0);
 }
 
-bool Fbid::operator!=(const int rhs) const {
+bool Bid::operator!=(const int rhs) const {
     for (int i = 0; i < 4; i++) {
         if (id[3 - i] != (rhs >> (i * 8))) {
             return true;
@@ -50,7 +51,7 @@ bool Fbid::operator!=(const int rhs) const {
     return false;
 }
 
-bool Fbid::operator!=(const Fbid rhs) const {
+bool Bid::operator!=(const Bid rhs) const {
     for (int i = 0; i < 4; i++) {
         if (id[i] != rhs.id[i]) {
             return true;
@@ -59,8 +60,8 @@ bool Fbid::operator!=(const Fbid rhs) const {
     return false;
 }
 
-bool Fbid::operator<(const Fbid& b)const {
-    for (int i = 0; i < FID_SIZE; i++) {
+bool Bid::operator<(const Bid& b)const {
+    for (int i = 0; i < ID_SIZE; i++) {
         if (id[i] < b.id[i]) {
             return true;
         } else if (id[i] > b.id[i]) {
@@ -70,8 +71,8 @@ bool Fbid::operator<(const Fbid& b)const {
     return false;
 }
 
-bool Fbid::operator<=(const Fbid& b)const {
-    for (int i = 0; i < FID_SIZE; i++) {
+bool Bid::operator<=(const Bid& b)const {
+    for (int i = 0; i < ID_SIZE; i++) {
         if (id[i] < b.id[i]) {
             return true;
         } else if (id[i] > b.id[i]) {
@@ -81,8 +82,8 @@ bool Fbid::operator<=(const Fbid& b)const {
     return true;
 }
 
-bool Fbid::operator>(const Fbid& b)const {
-    for (int i = 0; i < FID_SIZE; i++) {
+bool Bid::operator>(const Bid& b)const {
+    for (int i = 0; i < ID_SIZE; i++) {
         if (id[i] > b.id[i]) {
             return true;
         } else if (id[i] < b.id[i]) {
@@ -92,8 +93,8 @@ bool Fbid::operator>(const Fbid& b)const {
     return false;
 }
 
-bool Fbid::operator>=(const Fbid& b)const {
-    for (int i = 0; i < FID_SIZE; i++) {
+bool Bid::operator>=(const Bid& b)const {
+    for (int i = 0; i < ID_SIZE; i++) {
         if (id[i] > b.id[i]) {
             return true;
         } else if (id[i] < b.id[i]) {
@@ -103,7 +104,7 @@ bool Fbid::operator>=(const Fbid& b)const {
     return true;
 }
 
-bool Fbid::operator==(const int rhs) const {
+bool Bid::operator==(const int rhs) const {
     for (int i = 0; i < 4; i++) {
         if (id[3 - i] != (rhs >> (i * 8))) {
             return false;
@@ -112,8 +113,8 @@ bool Fbid::operator==(const int rhs) const {
     return true;
 }
 
-bool Fbid::operator==(const Fbid rhs) const {
-    for (int i = 0; i < FID_SIZE; i++) {
+bool Bid::operator==(const Bid rhs) const {
+    for (int i = 0; i < ID_SIZE; i++) {
         if (id[i] != rhs.id[i]) {
             return false;
         }
@@ -121,16 +122,16 @@ bool Fbid::operator==(const Fbid rhs) const {
     return true;
 }
 
-Fbid& Fbid::operator=(std::vector<byte_t> other) {
-    for (int i = 0; i < FID_SIZE; i++) {
+Bid& Bid::operator=(std::vector<byte_t> other) {
+    for (int i = 0; i < ID_SIZE; i++) {
         id[i] = other[i];
     }
 }
 
-ostream& operator<<(ostream &o, Fbid& bid) {
+ostream& operator<<(ostream &o, Bid& bid) {
     o <<"[";
-    for(int i=0;i<FID_SIZE;i++){
-    o << (int)bid.id[i];
+    for(int i=0;i<ID_SIZE;i++){
+    o << (char)bid.id[i];
     }
     o<<"] ";
     return o;

@@ -1,0 +1,114 @@
+#ifndef ORAMf_H
+#define ORAMf_H
+
+#include "AES.hpp"
+#include <random>
+#include <vector>
+#include <unordered_map>
+#include <string>
+#include <iostream>
+#include "RAMStore.hpp"
+#include <map>
+#include <set>
+#include <bits/stdc++.h>
+#include "Bid.h"
+
+using namespace std;
+
+class Nodef {
+public:
+
+    Nodef() {
+    }
+
+    ~Nodef() {
+    }
+    Bid key;
+    std::array< byte_t, 16> value; 
+    int pos;
+    Bid leftID;
+    int leftPos;
+    Bid rightID;
+    int rightPos;
+    unsigned int height;
+};
+struct Blockf {
+    Bid id;
+    block data;
+};
+
+using Bucketf = std::array<Blockf, Z>;
+
+class ORAMf {
+private:
+    RAMStore* store;
+    size_t depth;
+    size_t blockSize;
+    map<Bid, Nodef*> cache;
+    vector<int> leafList;
+    vector<int> readviewmap;
+    vector<int> writeviewmap;
+    set<Bid> modified;
+    set<Bid> deleted;
+    int readCnt = 0;
+    bytes<Key> key;
+
+    // Randomness
+    std::random_device rd;
+    std::mt19937 mt;
+    std::uniform_int_distribution<int> dis;
+
+    int RandomPath();
+    int GetNodefOnPath(int leaf, int depth);
+    std::vector<Bid> GetIntersectingBlocks(int x, int depth);
+    std::vector<Bid> GetIntersectingBlocks(int x, int depth, int node);
+
+    void FetchPath(int leaf);
+    void WritePath(int leaf, int level);
+
+    Nodef* ReadData(Bid bid);
+    void WriteData(Bid bid, Nodef* b);
+
+    block SerialiseBucket(Bucketf bucket);
+    Bucketf DeserialiseBucket(block buffer);
+
+    Bucketf ReadBucket(int pos);
+    void WriteBucket(int pos, Bucketf bucket);
+    void Access(Bid bid, Nodef*& node, int lastLeaf, int newLeaf);
+    void Access(Bid bid, Nodef*& node);
+    void AccessDelete(Bid bid, Nodef*& node); 
+    void DeleteData(Bid bid, Nodef* node);
+
+
+    size_t plaintext_size;
+    size_t bucketCount;
+    size_t clen_size;
+    bool batchWrite = false;
+
+    bool WasSerialised();
+    void Print();
+
+public:
+    int maxheight;
+    ORAMf(int maxSize, bytes<Key> key);
+    ~ORAMf();
+
+    Nodef* ReadNodef(Bid bid, int lastLeaf, int newLeaf);
+    Nodef* ReadNodef(Bid bid);
+    int WriteNodef(Bid bid, Nodef* n);
+    int DeleteNodef(Bid bid, Nodef* node);
+    void start(bool batchWrite);
+    void finilize(bool find, Bid& rootKey, int& rootPos);
+    static Nodef* convertBlockToNodef(block b);
+    void convertBlockToNodef(Nodef*& node, block b);
+    static block convertNodefToBlock(Nodef* node);
+
+
+    Nodef* setupReadNf(Bid bid, int leaf);
+    void setupReadNf(Nodef*& n,Bid bid,int leaf);
+    int setupWriteNf(Bid bid, Nodef* n, Bid rootkey, int& rootPos);
+    void setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos);
+    void setupInsert(vector<Nodef*> nodes);
+};
+
+#endif

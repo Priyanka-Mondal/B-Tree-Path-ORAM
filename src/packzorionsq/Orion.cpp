@@ -188,41 +188,57 @@ void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind)
   	 Bid firstKey(kw);
   	 int fc = 0;
 	 int sc = 0;
-	 string scfc="0-0";
+	 //string scfc="0-0";
 	 /*if(!local)
 	 {
   	 	if(fcntbids.count(firstKey) > 0)
 	   		scfc = fcntbids[firstKey];
 	 }*/
-	 if(localFCNT.count(kw)>0)
-		 scfc = localFCNT[kw];
-         auto parts = Utilities::splitData(scfc, "-");
-         sc = stoi(parts[0]);
-         fc = stoi(parts[1]);
+	 //if(localFCNT.count(kw)>0)
+	//	 scfc = localFCNT[kw];
+	 if(localFC.count(kw)>0)
+		 fc = localFC[kw];
+	 	 sc = localSC[kw];
+         //auto parts = Utilities::splitData(scfc, "-");
+         //sc = stoi(parts[0]);
+         //fc = stoi(parts[1]);
   	 fc= fc+1;
 	 //if(!local)
 	 //	fcntbids[firstKey]=to_string(sc)+"-"+to_string(fc);
 	 //else
-		localFCNT[kw]=to_string(sc)+"-"+to_string(fc);
-	 int bnum = get_block_num(fc,COM);
-	 int pos;
-	  
-	 Bid kbid = createBid(kw,fc);
-    	 int poskw = RandomSeedPath(kw,sc,fc,indexleaves);
-	 //srch->start(false);
-	 Node *kwnode = newNode(kbid,to_string(ind),poskw);
-	 //srch->WriteFnode(kbid,fnode);
-	 srchnodes.push_back(kwnode);
+		//localFCNT[kw]=to_string(sc)+"-"+to_string(fc);
+	 localFC[kw] = fc;
+	 int bnum = get_block_num(fc, COM);
+	 int pos = get_position(fc, COM);
+	 Bid kbid = createBid(kw,bnum);
+    	 int poskw = RandomSeedPath(kw,sc,bnum,indexleaves);
+	 if(pos == 1)
+	 {
+	 	Node *kwnode = newNode(kbid,toS(ind),poskw);
+	 	//srchnodes.push_back(kwnode);
+		srchmap[kbid]=kwnode;
+	 }
+	 else
+	 {
+		 Node *kwnode = srchmap[kbid];
+		 string val="";
+        	 val.assign(kwnode->value.begin(), kwnode->value.end());
+        	 val = val.c_str();
+		 val.append(toS(ind));
+		 kwnode = newNode(kbid,val,poskw);
+		 srchmap[kbid]=kwnode;
+	 }
     }
-    //srch->finalizeindex();
     string id = to_string(ind);
-    string acbc = "0-"+to_string(blocks.size());
-    localACNT[id]=acbc;
+    //string acbc = "0-"+to_string(blocks.size());
+    localAC[id]=0;
+    localBC[id]=blocks.size();
+    //localACNT[id]=acbc;
     int block_num = 1;
-    //fileoram->start(false);
     for(auto blk: blocks)
     {
 	   Fbid fbid = createFbid(id,block_num);
+	   //cout <<"size of fbid:"<<fbid.size()<<endl;
 	   int pos = RandomSeedPath(id,0,block_num,fileleaves);
 	   //cout <<"leaf for:"<<id<<"|"<<block_num<<":"<<pos<<"-"<<fbid<<endl;
 	   Fnode *fnode = newFnode(fbid,blk,pos);
@@ -237,6 +253,8 @@ void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind)
 
 void Orion::endSetup() 
 {
+	for(n:srchmap)
+		srchnodes.push_back(n.second);
 	srch->setupInsert(srchnodes);
 	fileoram->setupInsert(filenodes);
 	//if(!local)
@@ -260,23 +278,27 @@ int Orion::RandomSeedPath(string id,int cntr1, int cntr2, int leaves)
 
 vector<string> Orion::simplebatchSearch(string keyword) 
 {
-	ofstream bcfc;
 	vector<string> conts;
 	int fc = 0;
 	int sc = 0;
-	string scfc="0-0";
-        if(localFCNT.count(keyword)>0)
-        	scfc = localFCNT[keyword];
+	//string scfc="0-0";
+        if(localFC.count(keyword)>0)
+	{
+        	sc = localSC[keyword];
+        	fc = localFC[keyword];
+	}
 	else 
 	    return conts;
-        auto parts = Utilities::splitData(scfc, "-");
-        sc = stoi(parts[0]);
-        fc = stoi(parts[1]);
-	scfc = to_string(sc+1)+"-"+to_string(fc);
-	localFCNT[keyword] = scfc;
+        //auto parts = Utilities::splitData(scfc, "-");
+        //sc = stoi(parts[0]);
+        //fc = stoi(parts[1]);
+	//scfc = to_string(sc+1)+"-"+to_string(fc);
+	localSC[keyword] = sc+1;
         vector<string> result;
 	srch->start(false);
-   	for (int i = 1; i <= fc; i++) 
+	int bnum = get_block_num(fc,COM);
+	int fetched = 0;
+   	for (int i = 1; i <= bnum; i++) 
    	{
    	         Bid kbid = createBid(keyword,i);
 		 int poskw = RandomSeedPath(keyword,sc,i,indexleaves);
@@ -285,24 +307,44 @@ vector<string> Orion::simplebatchSearch(string keyword)
 		 string temp="";
         	 temp.assign(kwnode->value.begin(), kwnode->value.end());
         	 temp = temp.c_str();
-		 result.push_back(temp);
+		 if(i < bnum)
+		 {
+			 int point = 0;
+			 while(point < COM)
+			 {
+				string str = temp.substr(point*FILEID,FILEID);
+				point++;
+				fetched++;
+		 		result.push_back(to_string(stoI(str)));
+			 }
+		 }
+		 else if(i== bnum)
+		 {
+			 int point = 0;
+			 while(point <COM && fetched <fc)
+			 {
+				string str = temp.substr(point*FILEID,FILEID);
+				point++;
+				fetched++;
+		 		result.push_back(to_string(stoI(str)));
+			 }
+		 }
    	}
 	srch->finalizeindex();
 	//fcnt->incrementSrcCnt();
 	//**********************************************************
-	cout <<keyword <<" fc:"<<fc<<endl;
 	fileoram->start(false);
-	int tot=0;
    	 for(auto fID:result)
    	 {
-	 	string acbc = localACNT[fID];
-	        auto parts = Utilities::splitData(acbc, "-");
-	        int ac = stoi(parts[0]);
-	        int bc = stoi(parts[1]);
-		acbc = to_string(ac+1)+"-"+to_string(bc);
-		localACNT[fID] = acbc;
+	 	//string acbc = localACNT[fID];
+		int ac = localAC[fID];
+		int bc = localBC[fID];
+	        //auto parts = Utilities::splitData(acbc, "-");
+	        //int ac = stoi(parts[0]);
+	        //int bc = stoi(parts[1]);
+		//acbc = to_string(ac+1)+"-"+to_string(bc);
+		localAC[fID] = ac+1;
 		//cout <<fID<<" bc:"<<bc<<endl;
-		tot = tot + bc;
 		for(int i =1;i<=bc;i++)
 		{
 			Fbid fbid = createFbid(fID,i);
@@ -317,7 +359,6 @@ vector<string> Orion::simplebatchSearch(string keyword)
 	 //fileoram->finalizeindex(); -->core dump
    	  }
 	 fileoram->finalizeindex();
-	 cout <<"---------------------"<<tot<<endl;
     return conts;
 }
 /*

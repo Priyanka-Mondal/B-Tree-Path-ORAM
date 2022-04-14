@@ -7,8 +7,10 @@
 #include <set>
 #include <string>
 
+
+// The main type for passing around raw file data
 #define ID_SIZE 16
-#define FID_SIZE 12
+#define FID_SIZE 16
 #define BLOCK 64 // 128 caused seg_fault
 #define NODE_SIZE 60
 #define FILEID 6

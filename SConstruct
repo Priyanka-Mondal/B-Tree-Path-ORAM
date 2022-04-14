@@ -73,13 +73,14 @@ env.Alias('deps', [crypto_lib_target, db_parser_target])
 objects = SConscript('src/build.scons', exports='env', variant_dir='build')
 
 env.Depends(objects["zorionsq"],[crypto_lib_target , db_parser_target])
+env.Depends(objects["packzorionsq"],[crypto_lib_target , db_parser_target])
 env.Depends(objects["orionsq"],[crypto_lib_target , db_parser_target])
 env.Depends(objects["parallelORAM"],[crypto_lib_target , db_parser_target])
 env.Depends(objects["packorion"],[crypto_lib_target , db_parser_target])
 env.Depends(objects["baseline"],[crypto_lib_target , db_parser_target])
 env.Depends(objects["t111"],[crypto_lib_target , db_parser_target])
 
-Clean(objects["zorionsq"]+objects["orionsq"]+objects["parallelORAM"]+objects["packorion"]+objects["baseline"]+objects["t111"], 'build')
+Clean(objects["packzorionsq"]+objects["zorionsq"]+objects["orionsq"]+objects["parallelORAM"]+objects["packorion"]+objects["baseline"]+objects["t111"], 'build')
 
 outter_env = env.Clone()
 outter_env.Append(CPPPATH = ['build'])
@@ -88,6 +89,7 @@ outter_env.Append(CPPPATH = ['build'])
 
 parallelORAM_debug_prog   = outter_env.Program('parallelORAM_debug',    ['test_parallelORAM.cpp']     + objects["parallelORAM"])
 orionsq_debug_prog   = outter_env.Program('orionsq_debug',    ['test_orionsq.cpp']     + objects["orionsq"])
+packzorionsq_debug_prog   = outter_env.Program('packzorionsq_debug',    ['test_packzorionsq.cpp']     + objects["packzorionsq"])
 zorionsq_debug_prog   = outter_env.Program('zorionsq_debug',    ['test_zorionsq.cpp']     + objects["zorionsq"])
 packorion_debug_prog   = outter_env.Program('packorion_debug',    ['test_packorion.cpp']     + objects["packorion"])
 baseline_debug_prog   = outter_env.Program('baseline_debug',    ['test_baseline.cpp']     + objects["baseline"])
@@ -95,12 +97,14 @@ t111_debug_prog   = outter_env.Program('t111_debug',    ['t111.cpp'] +objects["t
 
 
 env.Alias('zorionsq', [zorionsq_debug_prog])
+env.Alias('packzorionsq', [packzorionsq_debug_prog])
 env.Alias('packorion', [packorion_debug_prog])
 env.Alias('parallelORAM', [parallelORAM_debug_prog])
 env.Alias('orionsq', [orionsq_debug_prog])
 env.Alias('baseline', [baseline_debug_prog])
 env.Alias('t111', [t111_debug_prog])
 
+env.Default(['packzorionsq'])
 env.Default(['zorionsq'])
 env.Default(['packorion'])
 env.Default(['orionsq'])
