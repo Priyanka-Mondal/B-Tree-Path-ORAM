@@ -221,7 +221,8 @@ void FileORAM::Access(Fbid bid, Fnode*& node, int lastLeaf, int newLeaf)
 {
     FetchPath(lastLeaf);
     node = ReadData(bid);
-    if (node != NULL) {
+    if (node != NULL) 
+    {
         node->pos = newLeaf;
         if (cache.count(bid) != 0) 
 	{
@@ -263,14 +264,16 @@ Fnode* FileORAM::ReadFnode(Fbid bid, int lastLeaf, int newLeaf)
     {
         return NULL;
     }
+    /*
     if(cache.count(bid)>0)
     {
 	Fnode* node = cache[bid];
 	node->pos = newLeaf;
 	cache[bid]=node;
+        modified.insert(bid);
 	return node;
-    }
-    if(cache.count(bid)==0||find(leafList.begin(),leafList.end(),lastLeaf)==leafList.end())
+    }*/
+    if(cache.count(bid)==0)//||find(leafList.begin(),leafList.end(),lastLeaf)==leafList.end())
     {
         Fnode* node;
         Access(bid, node, lastLeaf, newLeaf);
@@ -290,6 +293,7 @@ Fnode* FileORAM::ReadFnode(Fbid bid, int lastLeaf, int newLeaf)
         modified.insert(bid);
         Fnode* node = cache[bid];
         node->pos = newLeaf;
+	cache[bid] = node;
         return node;
     }
 }
@@ -458,9 +462,9 @@ void FileORAM::setupInsert(vector<Fnode*> nodes) {
     bool cannotInsert = false;
     while (i < nodes.size()) {
         cnt++;
-        if (cnt % 1000 == 0) {
-            cout << "i:" << i << "/" << nodes.size() << endl;
-        }
+        //if (cnt % 1000 == 0) {
+         //   cout << "i:" << i << "/" << nodes.size() << endl;
+        //}
         for (int d = depth; d >= 0 && i < nodes.size() && curPos == nodes[i]->pos; d--) {
             int nodeIndex = GetFnodeOnPath(curPos, d);
             Fbucket bucket;

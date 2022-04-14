@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ORAM_H
-#define ORAM_H
+#ifndef IndexORAM_H
+#define IndexORAM_H
 
 #include "AES.hpp"
 #include <random>
@@ -13,44 +13,18 @@
 #include <set>
 #include <bits/stdc++.h>
 #include "Bid.h"
+#include "Node.h"
 
 using namespace std;
 
-class Node {
-public:
 
-    Node() {
-    }
+using Ibucket = std::array<Iblock, Z>;
 
-    ~Node() {
-    }
-    Bid key;
-    std::array< byte_t, 64> value;
-    int pos;
-    Bid leftID;
-    int leftPos;
-    Bid rightID;
-    int rightPos;
-    unsigned int height;
-};
-
-struct Block {
-    Bid id;
-    block data;
-};
-
-using Bucket = std::array<Block, Z>;
-
-class ORAM {
+class IndexORAM {
 private:
     RAMStore* store;
-    size_t depth;
     size_t blockSize;
-    map<Bid, Node*> cache;
-    vector<int> leafList;
-    vector<int> readviewmap;
-    vector<int> writeviewmap;
-    set<Bid> modified;
+    int leaves;
     int readCnt = 0;
     bytes<Key> key;
 
@@ -61,20 +35,19 @@ private:
 
     int RandomPath();
     int GetNodeOnPath(int leaf, int depth);
-    std::vector<Bid> GetIntersectingBlocks(int x, int depth);
+    std::vector<Bid> GetIntersectingIblocks(int x, int depth);
 
     void FetchPath(int leaf);
-    void WritePath(int leaf, int level);
 
     Node* ReadData(Bid bid);
     void WriteData(Bid bid, Node* b);
     void DeleteData(Bid bid, Node* b);
 
-    block SerialiseBucket(Bucket bucket);
-    Bucket DeserialiseBucket(block buffer);
+    block SerialiseIbucket(Ibucket bucket);
+    Ibucket DeserialiseIbucket(block buffer);
 
-    Bucket ReadBucket(int pos);
-    void WriteBucket(int pos, Bucket bucket);
+    Ibucket ReadIbucket(int pos);
+    void WriteIbucket(int pos, Ibucket bucket);
     void Access(Bid bid, Node*& node, int lastLeaf, int newLeaf);
     void Access(Bid bid, Node*& node);
 
@@ -88,25 +61,37 @@ private:
     void Print();
 
 public:
-    ORAM(int maxSize, bytes<Key> key);
-    ~ORAM();
+    void WritePath(int leaf, int level);
+    size_t depth;
+    map<Bid, Node*> cache;
+    map<Bid, int> posCache;
+    vector<int> leafList;
+    vector<int> readviewmap;
+    vector<int> writeviewmap;
+    set<Bid> modified;
+    IndexORAM(int maxSize, bytes<Key> key);
+    ~IndexORAM();
     int maxheight;
+    map<Bid,pair<int,int>> localBCNT;
     Node* ReadNode(Bid bid, int lastLeaf, int newLeaf);
     Node* ReadNode(Bid bid);
     int WriteNode(Bid bid, Node* n);
     int DeleteNode(Bid bid, Node* n);
     void start(bool batchWrite);
-    void finilize(bool find, Bid& rootKey, int& rootPos);
-    static Node* convertBlockToNode(block b);
-    void convertBlockToNode(Node*& node,block b);
-    static block convertNodeToBlock(Node* node);
+    void finalizefile();
+    void finalizeindex();
+    void WriteCache();
+    static Node* convertIblockToNode(block b);
+    void convertIblockToNode(Node*& node,block b);
+    static block convertNodeToIblock(Node* node);
+    int RandomSeedPath(Bid kw,int sc, int fc, int indexleaves);
 
 
 
     Node* setupReadN(Bid bid, int leaf);
     void setupReadN(Node*& n, Bid bid, int leaf);
     int setupWriteN(Bid bid, Node* n, Bid rootkey, int& rootPos);
-    void setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos);
+    void setupWriteIbucket(Bid bid, Node* n, Bid rootKey, int& rootPos);
     void setupInsert(vector<Node*> nodes);
 };
 

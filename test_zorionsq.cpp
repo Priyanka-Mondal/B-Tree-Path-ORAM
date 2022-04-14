@@ -124,7 +124,16 @@ int main(int argc, char**argv)
 	sres.open(argv[5]);	
 	string line;
 	int l = 1;
-	
+ 	string first=argv[0];
+	int b =1 ;
+	while(b<argc)
+	{
+		first.append(" ");
+		first.append(argv[b]);
+		b++;
+	}
+	sres<<first<<endl;
+	//first.assign(argv+1,argv+argc);
 	if(local)
 	{
 		while(getline(kw,line))

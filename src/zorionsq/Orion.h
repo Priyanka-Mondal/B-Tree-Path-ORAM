@@ -1,8 +1,7 @@
 #ifndef ORION_H
 #define ORION_H
-#include "OMAP.h"
-#include "OMAPf.h"
 #include "FileORAM.hpp"
+#include "IndexORAM.hpp"
 #include<iostream>
 #include <random>
 #include "utils/Utilities.h"
@@ -12,13 +11,10 @@ class Orion {
 private:
     bool useHDD;
     bool local;
-    FileORAM* srch;
-    OMAPf *updt;
-    OMAPf *fcnt;
-    OMAP* file;
+    IndexORAM* srch;
     FileORAM *fileoram;
     map<Bid, int> UpdtCnt;
-    vector<Fnode*> srchnodes;
+    vector<Node*> srchnodes;
     vector<Fnode*> filenodes;
     map<Bid,string> fcntbids;
     map<Bid,int> updtbids;
@@ -36,7 +32,8 @@ public:
     Fbid createFbid(string keyword,int number);
     Bid createBid(string keyword,int number);
     
-    Fnode* newNode(Fbid key, string value, int pos);
+    Node* newNode(Bid key, string value, int pos);
+    Fnode* newFnode(Fbid key, string value, int pos);
     void insertWrap(string cont, int fileid, bool batch);
     void insert(vector<string> kws, vector<string> blocks, int ind);
     void setupinsert(vector<string> kws, vector<string> blocks, int ind);

@@ -7,11 +7,13 @@
 #include <set>
 #include <string>
 
+
 // The main type for passing around raw file data
 #define ID_SIZE 16
 #define FID_SIZE 8
 #define BLOCK 64 // 128 caused seg_fault
-#define FCNT 111
+#define NODE_SIZE 64
+#define COM (BLOCK/FID_SIZE)
 
 using byte_t = uint8_t;
 using block = std::vector<byte_t>;

@@ -281,6 +281,7 @@ vector<string> Orion::simplebatchSearch(string keyword)
 	int tot = 0;
    	for(auto id:result)
    	 {
+		 cout <<"["<<id<<"]";
 	 	int blocknum = localBCNT[id];
 		tot = tot + blocknum;
    	        string fID = to_string(id);

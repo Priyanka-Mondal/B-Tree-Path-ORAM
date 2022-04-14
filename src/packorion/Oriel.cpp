@@ -148,7 +148,7 @@ void Oriel::insertWrapper(vector<string> kws, string content,int ind,bool batch)
 	 for(auto kw: kws)
    	    insertkw(kw,ind); 
      } 
-     cout << "inserted keywords (total:" <<kws.size() <<")for id:"<<ind<< endl;
+     cout << "inserted keywords (total:" <<kws.size() <<")for id:"<<ind;
      insertFile(ind,content,batch); 
 }
 
@@ -211,6 +211,7 @@ void Oriel::insertFile(int ind, string content,bool batch)
 	    append(&head,ciphertext);
 	    len = len + FILEBLOCK;
     }
+    cout << (sz/FILEBLOCK)+1 <<endl;
     DictF[addr]=head;
 }
 
@@ -230,6 +231,7 @@ vector<string> Oriel::localbatchSearch(string keyword)
     Bid mapKey(keyword);
     
     string updcst = (fcnt->find(mapKey)); 
+    cout<<"UPDC:"<<updcst<<endl;
     if(updcst == "")
 	    updc = 0;
     else 
@@ -257,6 +259,7 @@ vector<string> Oriel::localbatchSearch(string keyword)
 	    while(fetched < updc && point < COM)
 	    {
 	    	string str = ids.substr(point*FID_SIZE,FID_SIZE);
+		cout <<"["<<str<<"]";
 	    	point++;
 		if(str == "######")
 			continue;
@@ -265,6 +268,7 @@ vector<string> Oriel::localbatchSearch(string keyword)
 		filind.push_back(ii);
 	     }
     }
+    cout <<endl;
     int tot = 0;
     for(int ind : filind)
     {
