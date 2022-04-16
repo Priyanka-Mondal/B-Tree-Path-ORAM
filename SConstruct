@@ -79,14 +79,16 @@ env.Depends(objects["mzorion"],[crypto_lib_target , db_parser_target])
 env.Depends(objects["packorion"],[crypto_lib_target , db_parser_target])
 env.Depends(objects["baseline"],[crypto_lib_target , db_parser_target])
 env.Depends(objects["t111"],[crypto_lib_target , db_parser_target])
+env.Depends(objects["morion"],[crypto_lib_target , db_parser_target])
 
-Clean(objects["packzorionsq"]+objects["zorionsq"]+objects["orionsq"]+objects["mzorion"]+objects["packorion"]+objects["baseline"]+objects["t111"], 'build')
+Clean(objects["morion"]+objects["packzorionsq"]+objects["zorionsq"]+objects["orionsq"]+objects["mzorion"]+objects["packorion"]+objects["baseline"]+objects["t111"], 'build')
 
 outter_env = env.Clone()
 outter_env.Append(CPPPATH = ['build'])
 
 
 
+morion_debug_prog   = outter_env.Program('morion_debug',    ['test_morion.cpp']     + objects["morion"])
 mzorion_debug_prog   = outter_env.Program('mzorion_debug',    ['test_mzorion.cpp']     + objects["mzorion"])
 orionsq_debug_prog   = outter_env.Program('orionsq_debug',    ['test_orionsq.cpp']     + objects["orionsq"])
 packzorionsq_debug_prog   = outter_env.Program('packzorionsq_debug',    ['test_packzorionsq.cpp']     + objects["packzorionsq"])
@@ -99,6 +101,7 @@ t111_debug_prog   = outter_env.Program('t111_debug',    ['t111.cpp'] +objects["t
 env.Alias('zorionsq', [zorionsq_debug_prog])
 env.Alias('packzorionsq', [packzorionsq_debug_prog])
 env.Alias('packorion', [packorion_debug_prog])
+env.Alias('morion', [morion_debug_prog])
 env.Alias('mzorion', [mzorion_debug_prog])
 env.Alias('orionsq', [orionsq_debug_prog])
 env.Alias('baseline', [baseline_debug_prog])
@@ -109,5 +112,6 @@ env.Default(['zorionsq'])
 env.Default(['packorion'])
 env.Default(['orionsq'])
 env.Default(['mzorion'])
+env.Default(['morion'])
 env.Default(['baseline'])
 env.Default(['t111'])

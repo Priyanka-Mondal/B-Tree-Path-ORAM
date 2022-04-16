@@ -176,7 +176,7 @@ void MOrion::setupinsertWrapper(vector<string>kws,vector<string>blocks,int ind)
 { 
      for (auto kw: kws) 
    	setupinsertkw(kw,ind); 
-     if(!notfile)
+     //if(!notfile)
         setupinsertFile(ind,blocks); 
      inserted= inserted+kws.size();
      cout <<"--TOTAL srch blocks used:"<< (inserted+totblocks)<<endl;
@@ -291,10 +291,9 @@ vector<string> MOrion::simplebatchSearch(string keyword)
 	    	fetched++;
 		int ii = stoI(str);
 		filind.push_back(ii);
-		cout <<"["<<fetched<<"-"<<str<<"]";
 	     }
 	     point = 0;
-    }cout <<endl;
+    }
     bids.clear();
     for(auto k :filind)
     {

@@ -108,6 +108,15 @@ int main(int argc, char**argv)
 	string line;
         ofstream sres;
 	sres.open(argv[6]);//,ios::app);	
+ 	string first=argv[0];
+	int b =1 ;
+	while(b<argc)
+	{
+		first.append(" ");
+		first.append(argv[b]);
+		b++;
+	}
+	sres<<first<<endl;
 	int l = 1;
 		if(local)
 		{
@@ -122,7 +131,7 @@ int main(int argc, char**argv)
 				l++;
 			}
 		}
-		else
+		/*else
 		{
 			cout <<"batchSearch:"<<endl;
 			while(getline(kw,line))
@@ -135,7 +144,7 @@ int main(int argc, char**argv)
 				cout <<l<<" "<< duration.count()<<" "<< s.size()<<endl;
 				l++;
 			}
-		}
+		}*/
 /*
         auto start = high_resolution_clock::now();
 	list_dir(argv[2],borion);
