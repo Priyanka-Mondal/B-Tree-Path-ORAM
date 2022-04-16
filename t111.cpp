@@ -4,6 +4,8 @@
 #include<unordered_map>
 #include<chrono>
 #include<algorithm>
+#include <boost/algorithm/string.hpp>
+#include "src/utils/Utilities.h"
 
 using namespace std::chrono;
 using namespace std;
@@ -166,29 +168,39 @@ int main(int argc, char** argv)
 	duration = duration_cast<microseconds>(stop-start);
 	cout <<"single:"<< duration.count()<<endl<<endl<<endl;
 	}*/
-	vector<int> vec;
+	vector<int> vec1;
+	vector<int> vec2;
+	vector<string> vec3;
 	for(int i =0; i<=1000; i++)
 	{
 		for(int j =0 ; j<=10000;j++)
 		{
-			vec.push_back(j+i);
+			vec1.push_back(j+i);
+			vec2.push_back(j+i);
+			vec3.push_back(to_string(j)+"-"+to_string(i));
+
 		}
 	}
-		for(int j =0 ; j<=30;j++)
-		{
-			auto start = high_resolution_clock::now();
-			if(std::find(vec.begin(), vec.end(), 100000)!=vec.end())
-			{}
-			auto stop = high_resolution_clock::now();
-			auto duration = duration_cast<microseconds>(stop-start);
-			cout <<"find:"<< duration.count()<<endl;
+	for(int k1 =1;k1<=20;k1++)
+	{
+		string k = vec3[k1+100];
+		auto start = high_resolution_clock::now();
+		auto parts = Utilities::splitData(k, "-");
+                int ac = stoi(parts[0]);
+                int bc = stoi(parts[1]);
+                string newstr = to_string(ac+1)+"-"+to_string(bc);
+		vec3[k1+100]=newstr;
+		auto stop = high_resolution_clock::now();
+		auto duration = duration_cast<microseconds>(stop-start);
+		cout <<"str:"<< duration.count()<<endl;
 
-			start = high_resolution_clock::now();
-			for(int ele : vec)
-			{if(ele == 100000) {}}
-			stop = high_resolution_clock::now();
-			duration = duration_cast<microseconds>(stop-start);
-			cout <<"contains:"<< duration.count()<<endl<<endl<<endl;
-		}
+ 		start = high_resolution_clock::now();
+		ac = vec1[k1+3000];
+		bc = vec2[k1+200];
+		vec1[k1+3000]= ac+1;
+		stop = high_resolution_clock::now();
+		duration = duration_cast<microseconds>(stop-start);
+		cout <<"vec:"<< duration.count()<<endl;
+	}
 	return 0;
 }

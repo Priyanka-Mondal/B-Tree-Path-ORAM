@@ -23,9 +23,9 @@ private:
     map<string,int> localFC;//sc-fc
     map<string,int> localSC;//sc-fc
     map<string,string> localACNT; //ac-bc
-    map<string,int> localAC;//sc-fc
-    map<string,int> localBC;//sc-fc
-    int RandomPath();
+    map<int,int> localAC;//sc-fc
+    map<int,int> localBC;//sc-fc
+    int RandomPath(int id, int ac, int bc, int leaves);
     int RandomSeedPath(string id,int fc, int sc, int leaves);
     std::random_device rd;
     std::mt19937 mt;
@@ -34,10 +34,11 @@ private:
     int indexleaves;
 public:
     void finalizeindex(int sc, int fc);
-    Fbid createFbid(string keyword,int number);
+    Fbid createFbid(int id,int number);
     Bid createBid(string keyword,int number);
     
-    Node* newNode(Bid key, string value, int pos);
+    //Node* newNode(Bid key, string value, int pos);
+    Node* newNode(Bid key, array<byte_t, NODE_SIZE>, int pos);
     Fnode* newFnode(Fbid key, string value, int pos);
     void insertWrap(string cont, int fileid, bool batch);
     void insert(vector<string> kws, vector<string> blocks, int ind);

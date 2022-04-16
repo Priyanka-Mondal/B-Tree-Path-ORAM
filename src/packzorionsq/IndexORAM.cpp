@@ -224,10 +224,10 @@ void IndexORAM::Access(Bid bid, Node*& node, int lastLeaf, int newLeaf)
     if (node != NULL) 
     {
         node->pos = newLeaf;
-        if (cache.count(bid) != 0) 
+        /*if (cache.count(bid) != 0) 
 	{
             cache.erase(bid);
-        }
+        }*/
         cache[bid] = node;
         if (find(leafList.begin(), leafList.end(), lastLeaf) == leafList.end()) {
             leafList.push_back(lastLeaf);
@@ -277,11 +277,12 @@ Node* IndexORAM::ReadNode(Bid bid, int lastLeaf, int newLeaf)
     {
         Node* node;
         Access(bid, node, lastLeaf, newLeaf);
-        if (node != NULL) 
-	{
-            modified.insert(bid);
-        }
-	else 
+        //if (node != NULL) 
+	//{
+         //   modified.insert(bid);
+        //}
+	//else 
+	if(node == NULL)
 	{
 		cout <<"Node is NULL : "<< bid << endl ;
 		cout <<"free node:" << store->GetEmptySize() << endl;
@@ -290,7 +291,7 @@ Node* IndexORAM::ReadNode(Bid bid, int lastLeaf, int newLeaf)
     } 
     else 
     {
-        modified.insert(bid);
+        //modified.insert(bid);
         Node* node = cache[bid];
         node->pos = newLeaf;
 	cache[bid] = node;

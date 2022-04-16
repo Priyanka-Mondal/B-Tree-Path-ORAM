@@ -104,7 +104,6 @@ void FileORAM::WriteFbucket(int index, Fbucket bucket) {
 // Fetches blocks along a path, adding them to the cache
 
 void FileORAM::FetchPath(int leaf) {
-    readCnt++;
     for (size_t d = 0; d <= depth; d++) {
         int node = GetFnodeOnPath(leaf, d);
 
@@ -427,7 +426,6 @@ void FileORAM::start(bool batchWrite) {
     this->batchWrite = batchWrite;
     writeviewmap.clear();
     readviewmap.clear();
-    readCnt = 0;
 }
 
 void FileORAM::Print() {

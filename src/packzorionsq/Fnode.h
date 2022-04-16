@@ -6,7 +6,7 @@ public:
     ~Fnode(){}
 
     Fbid key;
-    std::array< byte_t, 64> value;
+    std::array< byte_t, BLOCK> value;
     int pos;
 };
 

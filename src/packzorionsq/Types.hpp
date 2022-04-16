@@ -12,8 +12,8 @@
 #define ID_SIZE 16
 #define FID_SIZE 16
 #define BLOCK 64 // 128 caused seg_fault
-#define NODE_SIZE 60
-#define FILEID 6
+#define NODE_SIZE 40
+#define FILEID 4
 #define COM (NODE_SIZE/FILEID)
 
 using byte_t = uint8_t;
@@ -49,5 +49,13 @@ T& from_bytes(const std::array< byte_t, sizeof (T) >& bytes, T& object) {
 
     return object;
 }
+/*
+template< typename T >
+T& from_bytes_to_int(const std::array< byte_t, sizeof (T) >& bytes, int pos, T& object) {
+    byte_t* begin_object = reinterpret_cast<byte_t*> (std::addressof(object));
+    std::copy(std::begin(bytes)+pos, std::begin(bytes)+4, begin_object);
+
+    return object;
+}*/
 
 #endif
