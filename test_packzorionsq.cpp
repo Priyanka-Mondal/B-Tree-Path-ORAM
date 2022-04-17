@@ -122,13 +122,13 @@ cout <<"<execFile> <KwOramSize> <FileOramSize> <fileDir> <keywordFile> <outputFi
 	int sizefile = to_int(argv[2]);
 
 	string speed1 = argv[6];
-	string unit = "";
 	string speed2="";
 	speed2.assign(speed1.begin(),speed1.end()-2);
+	string unit = "";
 	unit.assign(speed1.end()-2,speed1.end());
 	if(unit != "MB")
 	{
-		cout <<"please give speed in MB"<<endl;
+		cout <<"Give speed in MB"<<endl;
 		return 0;
 	}
 	Orion orion(usehdd, sizekw,sizefile, local);  

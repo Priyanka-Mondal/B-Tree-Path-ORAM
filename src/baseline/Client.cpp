@@ -136,30 +136,31 @@ pair<int,int> Client::getfreq(string kw, int fileid)
 		addrs.emplace_back(addr);
 	}
 	vector<FileNode*> heads = server->search(addrs);
-	search_bytes = search_bytes + heads.size()*sizeof(FileNode);
+	search_bytes = search_bytes + (heads.size()*sizeof(FileNode));
 	for(auto it = heads.begin(); it != heads.end(); it++)
 	{
-		search_bytes = search_bytes+clen_size;
         	FileNode* head = *it;
-		string cont = getfile(head);
+		pair<string,int>cont = getfile(head);
+	    	search_bytes = search_bytes+(clen_size*cont.second);
 		vector<string> kws1, kws;
-	        boost::split(kws1, cont, boost::is_any_of(delimiters));
+	        boost::split(kws1, cont.first, boost::is_any_of(delimiters));
 		kws =  getUniquedWords(kws1);
 		int flag = 0;
 		for(auto it = kws.begin();it!=kws.end();it++)
 		{
 			if(*it == kw && flag == 0)
 			{
-			    res++; // 
+			    res = res+cont.second; // 
 			    flag = 1;
 			}
 		}
 	}
 	return make_pair(search_bytes, res);
 }
-string Client::getfile(FileNode* head) 
+pair<string,int> Client::getfile(FileNode* head) 
 {
 	string filedata;
+	int blocks = 0;
         while(head!=NULL)
         {
     	    fblock ciphertext;
@@ -169,9 +170,10 @@ string Client::getfile(FileNode* head)
 	    temp.assign(plaintext.begin(),plaintext.end());
     	    filedata.append(temp);
 	    head= head->next;
+	    blocks++;
         }
 	// decrypt
-    return filedata;
+    return make_pair(filedata,blocks);;
 }
 
 

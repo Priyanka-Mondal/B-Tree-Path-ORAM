@@ -102,13 +102,13 @@ int main(int argc, char**argv)
 
 	}
 	string speed1 = argv[5];
-	string unit = "";
 	string speed2="";
 	speed2.assign(speed1.begin(),speed1.end()-2);
+	string unit = "";
 	unit.assign(speed1.end()-2,speed1.end());
 	if(unit != "MB")
 	{
-		cout <<"please give speed in MB"<<endl;
+		cout <<"Give speed in MB"<<endl;
 		return 0;
 	}
 	double speed = double(to_int(speed2));
@@ -147,7 +147,7 @@ int main(int argc, char**argv)
         			auto stop = high_resolution_clock::now();
 				auto duration = duration_cast<milliseconds>(stop-start);
 				double time = double(s.first)/speed;
-				time = time*1000;
+				time = time*1000; //milliseconds
 				int totTime = time+ duration.count();
 sres<<line<<" "<< duration.count()<<" "<<totTime<<" "<<s.second.size()<<endl;
 cout<<l<<" | "<<duration.count()<<" | "<<time<<" | "<<totTime<<" | "<<s.second.size()<<endl;

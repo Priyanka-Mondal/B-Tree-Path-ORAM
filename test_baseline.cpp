@@ -140,6 +140,7 @@ int main(int argc, char** argv)
 		return 0;
 	}
 	double speed = double(stoI(speed2));
+	cout <<"SPEED:"<<speed<<endl;
 	speed = speed*1024*1024;
     Server server(false);
     Client client(&server, false, 100,1001);

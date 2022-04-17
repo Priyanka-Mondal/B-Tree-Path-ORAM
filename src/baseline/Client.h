@@ -41,7 +41,7 @@ public:
     Client(Server* server, bool deleteFiles, int keyworsSize, int filecnt);
     Client(bool deleteFiles, int keyworsSize, int filecnt);
     void insertFile(int ind, string content); 
-    string getfile(FileNode* fn);
+    pair<string,int> getfile(FileNode* fn);
     pair<int,int> getfreq(string kw, int fileid);
     virtual ~Client();
 
