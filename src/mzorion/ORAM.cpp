@@ -115,7 +115,7 @@ void ORAM::FetchPath(int leaf) {
         }
 
         Bucket bucket = ReadBucket(node);
-
+	search_bytes = search_bytes + clen_size;
         for (int z = 0; z < Z; z++) {
             Block &block = bucket[z];
 
@@ -264,15 +264,6 @@ Node* ORAM::ReadNode(Bid bid, int lastLeaf, int newLeaf)
     {
         return NULL;
     }
-    /*
-    if(cache.count(bid)>0)
-    {
-	Node* node = cache[bid];
-	node->pos = newLeaf;
-	cache[bid]=node;
-        modified.insert(bid);
-	return node;
-    }*/
     if(cache.count(bid)==0)//||find(leafList.begin(),leafList.end(),lastLeaf)==leafList.end())
     {
         Node* node;
@@ -369,7 +360,7 @@ void ORAM::WriteCache()
     modified.clear();
 }
 
-void ORAM::finalizeindex() 
+void ORAM::finalize() 
 {/*
     for (auto t : cache) 
     {

@@ -72,14 +72,14 @@ public:
     ORAM(int maxSize, bytes<Key> key);
     ~ORAM();
     int maxheight;
+    int search_bytes=0;
     map<Bid,pair<int,int>> localBCNT;
     Node* ReadNode(Bid bid, int lastLeaf, int newLeaf);
     Node* ReadNode(Bid bid);
     int WriteNode(Bid bid, Node* n);
     int DeleteNode(Bid bid, Node* n);
     void start(bool batchWrite);
-    void finalizefile();
-    void finalizeindex();
+    void finalize();
     void WriteCache();
     static Node* convertBlockToNode(block b);
     void convertBlockToNode(Node*& node,block b);

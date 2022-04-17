@@ -111,9 +111,26 @@ static void list_dir (const char * dir_name, Orion& orion)
 
 int main(int argc, char**argv) 
 {
+	if(argc <7)
+	{
+		cout <<"incorrect arguments! EXITING..."<<endl;
+cout <<"<execFile> <KwOramSize> <FileOramSize> <fileDir> <keywordFile> <outputFile> <speed>"<<endl;
+		return 0;
+
+	}
 	int sizekw = to_int(argv[1]);
 	int sizefile = to_int(argv[2]);
 
+	string speed1 = argv[6];
+	string unit = "";
+	string speed2="";
+	speed2.assign(speed1.begin(),speed1.end()-2);
+	unit.assign(speed1.end()-2,speed1.end());
+	if(unit != "MB")
+	{
+		cout <<"please give speed in MB"<<endl;
+		return 0;
+	}
 	Orion orion(usehdd, sizekw,sizefile, local);  
         ofstream sres;
         ifstream kw;
@@ -122,8 +139,11 @@ int main(int argc, char**argv)
         	  orion.endSetup();     
 	kw.open(argv[4]);
 	sres.open(argv[5]);	
+	double speed = double(to_int(speed2));
+	speed = speed*1024*1024;
 	string line;
 	int l = 1;
+///////////////////////////////////////////////////////////////////////////
  	string first=argv[0];
 	int b =1 ;
 	while(b<argc)
@@ -133,7 +153,8 @@ int main(int argc, char**argv)
 		b++;
 	}
 	sres<<first<<endl;
-	//first.assign(argv+1,argv+argc);
+///////////////////////////////////////////////////////////////////////////
+	  cout <<endl<<"# | SearchTime | TransferTime | TotalTime | resultSize"<<endl;
 	if(local)
 	{
 		while(getline(kw,line))
@@ -142,9 +163,12 @@ int main(int argc, char**argv)
 	        	auto start = high_resolution_clock::now();
 			auto s = orion.simplebatchSearch(line);
 	        	auto stop = high_resolution_clock::now();
-			auto duration = duration_cast<microseconds>(stop-start);
-			sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
-			cout <<l<<" "<< duration.count()<<" "<< s.size()<<endl;
+			auto duration = duration_cast<milliseconds>(stop-start);
+			double time = double(s.first)/speed;
+			time = time*1000;
+			int totTime = time+ duration.count();
+sres<<line<<" "<< duration.count()<<" "<<totTime<<" "<<s.second.size()<<endl;
+cout<<l<<" | "<<duration.count()<<" | "<<time<<" | "<<totTime<<" | "<<s.second.size()<<endl;
 			l++;
 		}
 	}/*
@@ -155,7 +179,7 @@ int main(int argc, char**argv)
 	        	auto start = high_resolution_clock::now();
 			auto s = orion.batchSearch(line);
 	        	auto stop = high_resolution_clock::now();
-			auto duration = duration_cast<microseconds>(stop-start);
+			auto duration = duration_cast<milliseconds>(stop-start);
 			sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
 			cout <<l<<" "<< duration.count()<<" "<< s.size()<<endl;
 			l++;

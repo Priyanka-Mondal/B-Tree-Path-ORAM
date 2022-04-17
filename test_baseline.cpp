@@ -19,7 +19,6 @@ int totentry=0;
 int ressize;
 //string delimiters("_|+#(){}[]0123456789*?&@=,:!\"><; _-./ \t\n");
 map<string,int> kwfreq;
-//std::set<std::string> neg = {"_","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","\n","\0", " ", "-","?","from","to", "in","on","so","how""me","you","this","that","ok","no","yes","him","her","they","them","not","none","an","under","below","behind","he","she","their","has","our","would","am","may","know","all","can","any","me","or","as","your","it","we","please","at","if","will","are","by","with","be","com","have","is","of","for","and","the","date","cc","up","but","do","what","which","been","where","could","who","would","did","put","done","too","get","got","yet","co","if"};
 int stoI(string updt_cnt)
 {
         int updc;
@@ -123,6 +122,25 @@ static int list_dir (const char * dir_name, Client& client)
 
 int main(int argc, char** argv) 
 {
+	if(argc <5)
+	{
+		cout <<"incorrect arguments! EXITING..."<<endl;
+	cout <<"<execFile> <fileDir> <keywordFile> <outputFile> <speed>"<<endl;
+		return 0;
+
+	}
+	string speed1 = argv[4];
+	string unit = "";
+	string speed2="";
+	speed2.assign(speed1.begin(),speed1.end()-2);
+	unit.assign(speed1.end()-2,speed1.end());
+	if(unit != "MB")
+	{
+		cout <<"please give speed in MB"<<endl;
+		return 0;
+	}
+	double speed = double(stoI(speed2));
+	speed = speed*1024*1024;
     Server server(false);
     Client client(&server, false, 100,1001);
     ifstream skw;
@@ -132,15 +150,30 @@ int main(int argc, char** argv)
     int l = 1;
     ofstream sres;
     sres.open(argv[3]);
+////////////////////////////////////////////////////////////////////////////
+ 	string first=argv[0];
+	int b =1 ;
+	while(b<argc)
+	{
+		first.append(" ");
+		first.append(argv[b]);
+		b++;
+	}
+	sres<<first<<endl;
+///////////////////////////////////////////////////////////////////////////
+	  cout <<endl<<"# | SearchTime | TransferTime | TotalTime | resultSize"<<endl;
     while(getline(skw,line))
     {
         ressize = 0;
     	auto start = high_resolution_clock::now();
-	int s = client.getfreq(line, fileid-1);
+	auto s = client.getfreq(line, fileid-1);
     	auto stop = high_resolution_clock::now();
-    	auto duration = duration_cast<microseconds>(stop-start);
-    	sres <<line<<" "<< duration.count()<<" "<< s <<endl;
-    	cout <<l<<" "<< duration.count()<<" "<< s<<endl;
+	auto duration = duration_cast<milliseconds>(stop-start);
+	double time = double(s.first)/speed;
+	time = time*1000;
+	int totTime = time+ duration.count();
+	sres<<line<<" "<< duration.count()<<" "<<totTime<<" "<<s.second<<endl;
+cout<<l<<" | "<<duration.count()<<" | "<<time<<" | "<<totTime<<" | "<<s.second<<endl;
     	l++;
     }
 return 0;

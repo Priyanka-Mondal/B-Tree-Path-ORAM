@@ -42,7 +42,7 @@ public:
     Client(bool deleteFiles, int keyworsSize, int filecnt);
     void insertFile(int ind, string content); 
     string getfile(FileNode* fn);
-    int getfreq(string kw, int fileid);
+    pair<int,int> getfreq(string kw, int fileid);
     virtual ~Client();
 
 };

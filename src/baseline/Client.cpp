@@ -8,6 +8,8 @@
 using namespace std;
 using namespace boost::algorithm;
 
+int search_bytes = 0;
+
 Client::Client(Server* server, bool deleteFiles, int keyworsSize, int fileSize) 
 {
     this->server = server;
@@ -118,8 +120,9 @@ void Client::insertFile(int ind, string content)
     }
     server->update(addr,head);
 }
-int Client::getfreq(string kw, int fileid)
+pair<int,int> Client::getfreq(string kw, int fileid)
 {
+	search_bytes = 0;
 	int res = 0;
 	vector<prf_type> addrs;
 	for(int i = 1; i<= fileid; i++)
@@ -133,8 +136,10 @@ int Client::getfreq(string kw, int fileid)
 		addrs.emplace_back(addr);
 	}
 	vector<FileNode*> heads = server->search(addrs);
+	search_bytes = search_bytes + heads.size()*sizeof(FileNode);
 	for(auto it = heads.begin(); it != heads.end(); it++)
 	{
+		search_bytes = search_bytes+clen_size;
         	FileNode* head = *it;
 		string cont = getfile(head);
 		vector<string> kws1, kws;
@@ -150,7 +155,7 @@ int Client::getfreq(string kw, int fileid)
 			}
 		}
 	}
-	return res;
+	return make_pair(search_bytes, res);
 }
 string Client::getfile(FileNode* head) 
 {

@@ -114,6 +114,7 @@ void FileORAM::FetchPath(int leaf) {
         }
 
         Fbucket bucket = ReadFbucket(node);
+	searchf_bytes = searchf_bytes+clen_size;
 
         for (int z = 0; z < Z; z++) {
             Fblock &block = bucket[z];

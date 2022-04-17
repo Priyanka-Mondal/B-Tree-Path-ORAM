@@ -101,13 +101,18 @@ int main(int argc, char**argv)
 	bool notfile = (nf == "true");
 	MOrion borion(usehdd, size,size2, local, notfile);  
 	ifstream kw;
-///*
 	list_dir(argv[4],borion);
 	borion.endSetup();
 	kw.open(argv[5]);
 	string line;
         ofstream sres;
 	sres.open(argv[6]);//,ios::app);	
+	string speed1 = argv[7];
+	string speed2;
+	speed2.assign(speed1.begin(),speed1.end()-2);
+	int speed = to_int(speed2);
+
+///////////////////////////////////////////////////////////////////////////////////
  	string first=argv[0];
 	int b =1 ;
 	while(b<argc)
@@ -117,6 +122,8 @@ int main(int argc, char**argv)
 		b++;
 	}
 	sres<<first<<endl;
+///////////////////////////////////////////////////////////////////////////////////	
+
 	int l = 1;
 		if(local)
 		{
@@ -126,8 +133,10 @@ int main(int argc, char**argv)
 				auto s = borion.simplebatchSearch(line);
         			auto stop = high_resolution_clock::now();
 				auto duration = duration_cast<microseconds>(stop-start);
-				sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
-				cout <<l<<" "<< duration.count()<<" "<< s.size()<<endl;
+				int time =0;
+				//int datasize = s.first*
+	  sres <<line<<" "<< duration.count()<<" "<<time<<" "<<s.second.size()<<endl;
+	  cout <<l<<" "<< duration.count()<<" "<<time<<" "<<s.second.size()<<endl;
 				l++;
 			}
 		}

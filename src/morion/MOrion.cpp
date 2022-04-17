@@ -214,6 +214,7 @@ void MOrion::setupinsertkw(string keyword, int ind)
            id.insert(FID_SIZE, BLOCK-FID_SIZE, '#'); // padding happpens
            //srch->setupinsert(key, make_pair(KB,id));
 	   srchmap[key]=id;
+	   uniquekw++;
     }
     else if (pos_in_block >=2 && pos_in_block <=COM)
     {
@@ -246,7 +247,8 @@ void MOrion::setupinsertFile(int id, vector<string> blocks)
 		srchmap[mk]=block;
 		i++;
 	}
-	totblocks= totblocks+blocks.size()+1;
+	totblocks= totblocks+blocks.size();
+	cout <<"BATCH inserted (kw:"<<uniquekw<<" fb:"<<totblocks<<")"<<endl;
 }
 
 void MOrion::endSetup()
@@ -256,14 +258,14 @@ void MOrion::endSetup()
 		fcnt->setupInsert(fcntmap);
 }
 
-vector<string> MOrion::simplebatchSearch(string keyword)
+pair<int,vector<string>> MOrion::simplebatchSearch(string keyword)
 {
     vector<string> result;
     int updc;
     if(localFCNT.count(keyword)>0)
         updc = localFCNT[keyword];
     else
-        return result;
+        return make_pair(0,result);
     int blocks= get_block_num(updc, COM);
     vector<Bid> bids;
     bids.reserve(blocks);
@@ -306,8 +308,9 @@ vector<string> MOrion::simplebatchSearch(string keyword)
 	}
     }
     result=srch->batchSearch(bids); 
-    return result;
+    return make_pair(0,result);
 }
+
 vector<string> MOrion::batchSearch(string keyword)
 {
     vector<string> result;

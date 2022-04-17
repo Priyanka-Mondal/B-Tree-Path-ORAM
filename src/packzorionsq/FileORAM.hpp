@@ -72,6 +72,7 @@ public:
     FileORAM(int maxSize, bytes<Key> key);
     ~FileORAM();
     int maxheight;
+    int searchf_bytes;
     map<Fbid,pair<int,int>> localBCNT;
     Fnode* ReadFnode(Fbid bid, int lastLeaf, int newLeaf);
     Fnode* ReadFnode(Fbid bid);

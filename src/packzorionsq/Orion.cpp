@@ -285,8 +285,10 @@ int Orion::RandomSeedPath(string id,int cntr1, int cntr2, int leaves)
     return pos;
 }
 
-vector<string> Orion::simplebatchSearch(string keyword) 
+pair<int,vector<string>> Orion::simplebatchSearch(string keyword) 
 {
+	srch->searchi_bytes = 0;
+	fileoram->searchf_bytes = 0;
 	vector<string> conts;
 	int fc = 0;
 	int sc = 0;
@@ -297,7 +299,7 @@ vector<string> Orion::simplebatchSearch(string keyword)
         	fc = localFC[keyword];
 	}
 	else 
-	    return conts;
+	    return make_pair(0,conts);
         //auto parts = Utilities::splitData(scfc, "-");
         //sc = stoi(parts[0]);
         //fc = stoi(parts[1]);
@@ -364,7 +366,6 @@ vector<string> Orion::simplebatchSearch(string keyword)
 			Fbid fbid = createFbid(fID,i);
 			int pos = RandomPath(fID,ac,i,fileleaves);
 			int newpos = RandomPath(fID,ac+1,i,fileleaves);
-			cout <<"pos:"<<pos<<endl;
 			Fnode* fnode = fileoram->ReadFnode(fbid,pos,newpos);
 			if(fnode != NULL)
 			{
@@ -377,7 +378,8 @@ vector<string> Orion::simplebatchSearch(string keyword)
 	 //fileoram->finalizeindex(); -->core dump
    	  }
 	 fileoram->finalizeindex();
-    return conts;
+	 int totBytes = srch->searchi_bytes + fileoram->searchf_bytes;
+    return make_pair(totBytes,conts);
 }
 
 /*

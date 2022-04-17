@@ -49,7 +49,7 @@ public:
     void removekw(vector <string> kws, int id);
     
     vector<string> batchSearch(string keyword);
-    vector<string> simplebatchSearch(string keyword);
+    pair<int,vector<string>> simplebatchSearch(string keyword);
     vector<pair<int,string>> search(string keyword);
     
     Orion(bool useHDD,int maxSize, int filesize, bool local);    

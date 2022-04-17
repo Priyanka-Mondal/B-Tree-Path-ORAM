@@ -30,25 +30,6 @@ int stoI(string updt_cnt)
 	return updc;
 }
 
-
-string toS(int id)
-{
-	string s = to_string(id);
-	string front ="";
-	if (id < 10)
-		front = "00000";
-	else if(id < 100)
-		front = "0000";
-	else if(id < 1000)
-		front = "000";
-	else if(id < 10000)
-		front = "00";
-	else if(id < 100000)
-		front = "0";
-	s=front.append(s);
-	return s;
-}
-
 int get_block_num(int updc, int com)
 {
        float bnum = ceil(updc/com); // com file-ids each block
@@ -191,6 +172,7 @@ void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind)
 		copy(arr.begin(),arr.end(),t.begin());
 	 	Node *kwnode = newNode(kbid,t,poskw);
 		indexmap[kbid]=kwnode;
+		uniquekw++;
 	 }
 	 else //if (pos >= 2)
 	 {
@@ -218,7 +200,7 @@ void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind)
 	   block_num++;
     }
     fileblks = fileblks+block_num-1;
-    cout<<"BATCH inserted keywords and blocks(kw:"<<kws.size() <<",b:"<<blocks.size()<<") of fileid: "<<ind<<" fb:"<<fileblks<< endl;
+    cout<<"BATCH inserted keywords and blocks(kw:"<<kws.size() <<",b:"<<blocks.size()<<") of fileid: "<<ind<<" kw:"<<uniquekw<<" fb:"<<fileblks<< endl;
 }
 
 void Orion::endSetup() 
@@ -247,8 +229,9 @@ int Orion::RandomIndPath(string id,int cntr1, int cntr2, int leaves)
     return pos;
 }
 
-vector<string> Orion::simplebatchSearch(string keyword) 
+pair<int,vector<string>> Orion::simplebatchSearch(string keyword) 
 {
+        oram->search_bytes = 0;
 	vector<string> conts;
 	int fc = 0;
 	int sc = 0;
@@ -258,7 +241,7 @@ vector<string> Orion::simplebatchSearch(string keyword)
         	fc = localFC[keyword];
 	}
 	else 
-	    return conts;
+	    return make_pair(0,conts);
 	localSC[keyword] = sc+1;
         vector<int> result;
 	result.reserve(fc);
@@ -302,8 +285,6 @@ vector<string> Orion::simplebatchSearch(string keyword)
 			 }
 		 }
    	}
-	//srch->finalizeindex();
-	//fileoram->start(false);
    	 for(auto fID:result)
    	 {
 		int ac = localAC[fID];
@@ -324,8 +305,8 @@ vector<string> Orion::simplebatchSearch(string keyword)
 			}
 		}
    	  }
-	 oram->finalizeindex();
-    return conts;
+	  oram->finalize();
+return make_pair(oram->search_bytes,conts);
 }
 
 /*

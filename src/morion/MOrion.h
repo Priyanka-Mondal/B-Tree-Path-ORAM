@@ -44,7 +44,7 @@ public:
     //vector<pair<string,string>> searchsimple(string keyword);
     //vector<pair<string,string>> setupsearch(string keyword);
     vector<string> batchSearch(string keyword);
-    vector<string> simplebatchSearch(string keyword);
+    pair<int,vector<string>> simplebatchSearch(string keyword);
     
     void print();
 

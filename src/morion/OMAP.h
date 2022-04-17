@@ -19,6 +19,7 @@ private:
     AVLTree* treeHandler;
 
 public:
+
     OMAP(int maxSize, bytes<Key> key);
     virtual ~OMAP();
     void insert(Bid key, string value);

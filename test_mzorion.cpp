@@ -94,18 +94,36 @@ static void list_dir ( const char * dir_name, Orion& mzorion)
 
 int main(int argc, char**argv) 
 {
+	if(argc <6)
+	{
+		cout <<"incorrect arguments! EXITING..."<<endl;
+	cout <<"<execFile> <oramSize> <fileDir> <keywordFile> <outputFile> <speed>"<<endl;
+		return 0;
+
+	}
+	string speed1 = argv[5];
+	string unit = "";
+	string speed2="";
+	speed2.assign(speed1.begin(),speed1.end()-2);
+	unit.assign(speed1.end()-2,speed1.end());
+	if(unit != "MB")
+	{
+		cout <<"please give speed in MB"<<endl;
+		return 0;
+	}
+	double speed = double(to_int(speed2));
+	speed = speed*1024*1024;
 	int size = to_int(argv[1]);
-        string nf = argv[2];
-	//bool notfile = (nf == "true");
+	
 	Orion mzorion(size,local);  
 	ifstream kw;
-///*
-	list_dir(argv[3],mzorion);
+	list_dir(argv[2],mzorion);
 	mzorion.endSetup();
-	kw.open(argv[4]);
+	kw.open(argv[3]);
 	string line;
         ofstream sres;
-	sres.open(argv[5]);//,ios::app);	
+	sres.open(argv[4]);//,ios::app);	
+////////////////////////////////////////////////////////////////////////////
  	string first=argv[0];
 	int b =1 ;
 	while(b<argc)
@@ -115,7 +133,11 @@ int main(int argc, char**argv)
 		b++;
 	}
 	sres<<first<<endl;
+///////////////////////////////////////////////////////////////////////////
+//
 	int l = 1;
+
+	  cout <<endl<<"# | SearchTime | TransferTime | TotalTime | resultSize"<<endl;
 		if(local)
 		{
 			while(getline(kw,line))
@@ -123,9 +145,12 @@ int main(int argc, char**argv)
         			auto start = high_resolution_clock::now();
 				auto s = mzorion.simplebatchSearch(line);
         			auto stop = high_resolution_clock::now();
-				auto duration = duration_cast<microseconds>(stop-start);
-				sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
-				cout <<l<<" "<< duration.count()<<" "<< s.size()<<endl;
+				auto duration = duration_cast<milliseconds>(stop-start);
+				double time = double(s.first)/speed;
+				time = time*1000;
+				int totTime = time+ duration.count();
+sres<<line<<" "<< duration.count()<<" "<<totTime<<" "<<s.second.size()<<endl;
+cout<<l<<" | "<<duration.count()<<" | "<<time<<" | "<<totTime<<" | "<<s.second.size()<<endl;
 				l++;
 			}
 		}
@@ -137,9 +162,12 @@ int main(int argc, char**argv)
         			auto start = high_resolution_clock::now();
 				//auto s = mzorion.batchSearch(line);
         			auto stop = high_resolution_clock::now();
-				auto duration = duration_cast<microseconds>(stop-start);
-				//sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
-				//cout <<l<<" "<< duration.count()<<" "<< s.size()<<endl;
+				auto duration = duration_cast<milliseconds>(stop-start);
+				//double time = double(s.first)/speed;
+				//time = time*1000;
+				//int totTime = time+ duration.count();
+//sres<<line<<" "<< duration.count()<<" "<<totTime<<" "<<s.second.size()<<endl;
+//cout<<l<<" | "<<duration.count()<<" | "<<time<<" | "<<totTime<<" | "<<s.second.size()<<endl;
 				l++;
 			}
 		}

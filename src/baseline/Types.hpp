@@ -14,7 +14,7 @@
 #include <cryptopp/modes.h>
 #include <cryptopp/aes.h>
 
-#define BLOCK 64 // 128 caused seg_fault
+#define BLOCK 64 
 
 using byte_t = uint8_t;
 using block = std::vector<byte_t>;
@@ -27,8 +27,8 @@ typedef std::vector<uint8_t> fblock;
 #ifndef AES_KEY_SIZE
 #define AES_KEY_SIZE CryptoPP::AES::DEFAULT_KEYLENGTH
 typedef std::array<uint8_t, AES_KEY_SIZE> prf_type;
-#define BLOCK_SIZE 480
-typedef std::array<uint8_t, BLOCK_SIZE> block_type;
+//#define BLOCK_SIZE 480
+//typedef std::array<uint8_t, BLOCK_SIZE> block_type;
 template< typename T >
 std::array< byte_t, sizeof (T) > to_bytes(const T& object) {
     std::array< byte_t, sizeof (T) > bytes;

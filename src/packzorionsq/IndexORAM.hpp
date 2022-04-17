@@ -72,6 +72,7 @@ public:
     IndexORAM(int maxSize, bytes<Key> key);
     ~IndexORAM();
     int maxheight;
+    int searchi_bytes;
     map<Bid,pair<int,int>> localBCNT;
     Node* ReadNode(Bid bid, int lastLeaf, int newLeaf);
     Node* ReadNode(Bid bid);

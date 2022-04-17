@@ -115,6 +115,7 @@ void IndexORAM::FetchPath(int leaf) {
         }
 
         Ibucket bucket = ReadIbucket(node);
+	searchi_bytes = searchi_bytes+clen_size;
 
         for (int z = 0; z < Z; z++) {
             Iblock &block = bucket[z];
