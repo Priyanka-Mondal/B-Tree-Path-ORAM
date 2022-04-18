@@ -136,6 +136,38 @@ void IndexORAM::FetchPath(int leaf) {
     }
 }
 
+void IndexORAM::FetchPathStash(int leaf) 
+{
+	if(leaf >= leaves)
+	{
+        	throw runtime_error("leaf OUT OF RANGE");
+	}
+    for (size_t d = 0; d <= depth; d++) {
+        int node = GetNodeOnPath(leaf, d);
+
+        if (find(readviewmap.begin(), readviewmap.end(), node) != readviewmap.end()) {
+            continue;
+        } else {
+            readviewmap.push_back(node);
+        }
+
+        Ibucket bucket = ReadIbucket(node);
+	searchi_bytes = searchi_bytes+clen_size;
+
+        for (int z = 0; z < Z; z++) {
+            Iblock &block = bucket[z];
+
+            if (block.id != 0) { // It isn't a dummy block   
+                Node* n = convertIblockToNode(block.data);
+                if (stash.count(block.id) == 0) {
+                    stash.insert(make_pair(block.id, n));
+                } else {
+                    delete n;
+                }
+            }
+        }
+    }
+}
 // Gets a list of blocks on the cache which can be placed at a specific point
 
 std::vector<Bid> IndexORAM::GetIntersectingIblocks(int x, int curDepth) {
@@ -190,11 +222,14 @@ void IndexORAM::WritePath(int leaf, int d)
 
 // Gets the data of a block in the cache
 
-Node* IndexORAM::ReadData(Bid bid) {
-    if (cache.find(bid) == cache.end()) {
+Node* IndexORAM::ReadData(Bid bid) 
+{
+    if ((cache.find(bid) == cache.end()) && stash.find(bid)==stash.end()) {
         return NULL;
     }
+    if(cache.count(bid)>0)
     return cache[bid];
+    else return stash[bid];
 }
 
 // Updates the data of a block in the cache
@@ -224,16 +259,12 @@ void IndexORAM::DeleteData(Bid bid, Node* node)
 
 void IndexORAM::Access(Bid bid, Node*& node, int lastLeaf, int newLeaf) 
 {
-    FetchPath(lastLeaf);
+    FetchPathStash(lastLeaf);
     node = ReadData(bid);
     if (node != NULL) 
     {
         node->pos = newLeaf;
-        /*if (cache.count(bid) != 0) 
-	{
-            cache.erase(bid);
-        }*/
-        cache[bid] = node;
+        stash[bid] = node;
         if (find(leafList.begin(), leafList.end(), lastLeaf) == leafList.end()) {
             leafList.push_back(lastLeaf);
         }
@@ -278,7 +309,7 @@ Node* IndexORAM::ReadNode(Bid bid, int lastLeaf, int newLeaf)
         modified.insert(bid);
 	return node;
     }*/
-    if(cache.count(bid)==0)//||find(leafList.begin(),leafList.end(),lastLeaf)==leafList.end())
+    if(cache.count(bid)==0 && stash.count(bid)==0)//||find(leafList.begin(),leafList.end(),lastLeaf)==leafList.end())
     {
         Node* node;
         Access(bid, node, lastLeaf, newLeaf);
@@ -294,12 +325,20 @@ Node* IndexORAM::ReadNode(Bid bid, int lastLeaf, int newLeaf)
 	}
         return node;
     } 
-    else 
+    else if(cache.count(bid)>0)
     {
         //modified.insert(bid);
         Node* node = cache[bid];
         node->pos = newLeaf;
 	cache[bid] = node;
+        return node;
+    }
+    else if(stash.count(bid)>0)
+    {
+        //modified.insert(bid);
+        Node* node = stash[bid];
+        node->pos = newLeaf;
+	stash[bid] = node;
         return node;
     }
 }
@@ -434,6 +473,7 @@ void IndexORAM::start(bool batchWrite) {
     this->batchWrite = batchWrite;
     writeviewmap.clear();
     readviewmap.clear();
+    stash.clear();
 }
 
 void IndexORAM::Print() {

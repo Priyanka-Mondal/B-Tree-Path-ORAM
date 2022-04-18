@@ -136,6 +136,37 @@ void FileORAM::FetchPath(int leaf) {
     }
 }
 
+void FileORAM::FetchPathStash(int leaf) {
+	if(leaf >= leaves)
+	{
+        	throw runtime_error("leaf OUT OF RANGE");
+	}
+    for (size_t d = 0; d <= depth; d++) {
+        int node = GetFnodeOnPath(leaf, d);
+
+        if (find(readviewmap.begin(), readviewmap.end(), node) != readviewmap.end()) {
+            continue;
+        } else {
+            readviewmap.push_back(node);
+        }
+
+        Fbucket bucket = ReadFbucket(node);
+	searchf_bytes = searchf_bytes+clen_size;
+
+        for (int z = 0; z < Z; z++) {
+            Fblock &block = bucket[z];
+
+            if (block.id != 0) { // It isn't a dummy block   
+                Fnode* n = convertFblockToFnode(block.data);
+                if (stash.count(block.id) == 0) {
+                    stash.insert(make_pair(block.id, n));
+                } else {
+                    delete n;
+                }
+            }
+        }
+    }
+}
 // Gets a list of blocks on the cache which can be placed at a specific point
 
 std::vector<Fbid> FileORAM::GetIntersectingFblocks(int x, int curDepth) {
@@ -191,10 +222,12 @@ void FileORAM::WritePath(int leaf, int d)
 // Gets the data of a block in the cache
 
 Fnode* FileORAM::ReadData(Fbid bid) {
-    if (cache.find(bid) == cache.end()) {
+    if ((cache.find(bid) == cache.end()) && stash.find(bid)==stash.end()) {
         return NULL;
     }
+    if(cache.count(bid)>0)
     return cache[bid];
+    else return stash[bid];
 }
 
 // Updates the data of a block in the cache
@@ -224,16 +257,12 @@ void FileORAM::DeleteData(Fbid bid, Fnode* node)
 
 void FileORAM::Access(Fbid bid, Fnode*& node, int lastLeaf, int newLeaf) 
 {
-    FetchPath(lastLeaf);
+    FetchPathStash(lastLeaf);
     node = ReadData(bid);
     if (node != NULL) 
     {
         node->pos = newLeaf;
-        if (cache.count(bid) != 0) 
-	{
-            cache.erase(bid);
-        }
-        cache[bid] = node;
+        stash[bid] = node;
         if (find(leafList.begin(), leafList.end(), lastLeaf) == leafList.end()) {
             leafList.push_back(lastLeaf);
         }
@@ -242,9 +271,7 @@ void FileORAM::Access(Fbid bid, Fnode*& node, int lastLeaf, int newLeaf)
 
 void FileORAM::Access(Fbid bid, Fnode*& node) 
 {
-    //if (!batchWrite) {
-        FetchPath(node->pos);
-   // }
+    FetchPath(node->pos);
     WriteData(bid, node);
     if (find(leafList.begin(), leafList.end(), node->pos) == leafList.end()) {
         leafList.push_back(node->pos);
@@ -278,7 +305,7 @@ Fnode* FileORAM::ReadFnode(Fbid bid, int lastLeaf, int newLeaf)
         modified.insert(bid);
 	return node;
     }*/
-    if(cache.count(bid)==0)//||find(leafList.begin(),leafList.end(),lastLeaf)==leafList.end())
+    if(cache.count(bid)==0 && stash.count(bid)==0)//||find(leafList.begin(),leafList.end(),lastLeaf)==leafList.end())
     {
         Fnode* node;
         Access(bid, node, lastLeaf, newLeaf);
@@ -293,12 +320,20 @@ Fnode* FileORAM::ReadFnode(Fbid bid, int lastLeaf, int newLeaf)
 	}
         return node;
     } 
-    else 
+    else if(cache.count(bid)>0)
     {
         modified.insert(bid);
         Fnode* node = cache[bid];
         node->pos = newLeaf;
 	cache[bid] = node;
+        return node;
+    }
+    else if(stash.count(bid)>0)
+    {
+        modified.insert(bid);
+        Fnode* node = stash[bid];
+        node->pos = newLeaf;
+	stash[bid] = node;
         return node;
     }
 }
@@ -431,6 +466,7 @@ void FileORAM::start(bool batchWrite) {
     this->batchWrite = batchWrite;
     writeviewmap.clear();
     readviewmap.clear();
+    stash.clear();
 }
 
 void FileORAM::Print() {
