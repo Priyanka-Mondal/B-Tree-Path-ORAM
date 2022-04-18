@@ -159,16 +159,14 @@ cout <<"<execFile> <KwOramSize> <FileOramSize> <fileDir> <keywordFile> <outputFi
 	{
 		while(getline(kw,line))
 		{
-			cout <<"SEARCHING..."<<line<<endl;
-	        	auto start = high_resolution_clock::now();
-			auto s = orion.simplebatchSearch(line);
-	        	auto stop = high_resolution_clock::now();
-			auto duration = duration_cast<milliseconds>(stop-start);
-			double time = double(s.first)/speed;
-			time = time*1000;
-			int totTime = time+ duration.count();
-sres<<line<<" "<< duration.count()<<" "<<totTime<<" "<<s.second.size()<<endl;
-cout<<l<<" | "<<duration.count()<<" | "<<time<<" | "<<totTime<<" | "<<s.second.size()<<endl;
+	        	//auto start = high_resolution_clock::now();
+			cout <<l;
+			auto s = orion.simplebatchSearch(line, sres,speed);
+	        	//auto stop = high_resolution_clock::now();
+			//auto duration = duration_cast<milliseconds>(stop-start);
+			//double time = double(s.first)/speed;
+			//time = time*1000;
+			//int totTime = time+ duration.count();
 			l++;
 		}
 	}/*

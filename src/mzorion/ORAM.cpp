@@ -104,7 +104,10 @@ void ORAM::WriteBucket(int index, Bucket bucket) {
 // Fetches blocks along a path, adding them to the cache
 
 void ORAM::FetchPath(int leaf) {
-    readCnt++;
+	if(leaf >= leaves)
+	{
+        	throw runtime_error("leaf OUT OF RANGE");
+	}
     for (size_t d = 0; d <= depth; d++) {
         int node = GetNodeOnPath(leaf, d);
 

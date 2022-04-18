@@ -15,7 +15,8 @@ FileORAM::FileORAM(int maxSize, bytes<Key> key)
     AES::Setup();
     depth = floor(log2(maxSize / Z));
     leaves = (pow(2, floor(log2(maxSize/Z))+1)-1)/2;
-    cout <<"depth of tree:"<<depth<<endl;
+    cout <<"depth of file tree:"<<depth<<endl;
+    cout <<"leaves of file tree:"<<leaves<<endl;
     bucketCount = pow(2, depth + 1) - 1;
     blockSize = sizeof (Fnode); // B
     size_t blockCount = Z * (pow(2, depth + 1) - 1);
@@ -104,6 +105,10 @@ void FileORAM::WriteFbucket(int index, Fbucket bucket) {
 // Fetches blocks along a path, adding them to the cache
 
 void FileORAM::FetchPath(int leaf) {
+	if(leaf >= leaves)
+	{
+        	throw runtime_error("leaf OUT OF RANGE");
+	}
     for (size_t d = 0; d <= depth; d++) {
         int node = GetFnodeOnPath(leaf, d);
 

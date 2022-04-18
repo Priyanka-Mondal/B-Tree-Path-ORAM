@@ -15,7 +15,8 @@ IndexORAM::IndexORAM(int maxSize, bytes<Key> key)
     AES::Setup();
     depth = floor(log2(maxSize / Z));
     leaves = (pow(2, floor(log2(maxSize/Z))+1)-1)/2;
-    cout <<"depth of tree:"<<depth<<endl;
+    cout <<"depth of index tree:"<<depth<<endl;
+    cout <<"total index leaves:"<< leaves<<endl;
     bucketCount = pow(2, depth + 1) - 1;
     blockSize = sizeof (Node); // B
     size_t blockCount = Z * (pow(2, depth + 1) - 1);
@@ -104,7 +105,10 @@ void IndexORAM::WriteIbucket(int index, Ibucket bucket) {
 // Fetches blocks along a path, adding them to the cache
 
 void IndexORAM::FetchPath(int leaf) {
-    readCnt++;
+	if(leaf >= leaves)
+	{
+        	throw runtime_error("leaf OUT OF RANGE");
+	}
     for (size_t d = 0; d <= depth; d++) {
         int node = GetNodeOnPath(leaf, d);
 
@@ -429,7 +433,6 @@ void IndexORAM::start(bool batchWrite) {
     this->batchWrite = batchWrite;
     writeviewmap.clear();
     readviewmap.clear();
-    readCnt = 0;
 }
 
 void IndexORAM::Print() {

@@ -4,8 +4,9 @@
 #include<iostream>
 #include <random>
 #include "utils/Utilities.h"
+#include<chrono>
 using namespace std;
-
+using namespace std::chrono;
 class Orion {
 private:
     bool local;
@@ -43,7 +44,7 @@ public:
     void removekw(vector <string> kws, int id);
     
     vector<string> batchSearch(string keyword);
-    pair<int,vector<string>> simplebatchSearch(string keyword);
+    pair<int,vector<string>> simplebatchSearch(string keyword, ofstream& sres, double speed);
     vector<pair<int,string>> search(string keyword);
     
     Orion(int size, bool local);    

@@ -1,7 +1,9 @@
 #include "Orion.h"
 #include <boost/algorithm/string.hpp>
 #include "stopword.hpp"
+#include<chrono>
 
+using namespace std::chrono;
 
 Orion::Orion(bool usehdd, int filecnt , int filesize, bool local): rd(), mt(rd()), dis(0, (pow(2, floor(log2(filesize / Z)) + 1) - 1) / 2) 
 {
@@ -271,7 +273,7 @@ void Orion::endSetup()
 int Orion::RandomPath(int id, int cntr1, int cntr2, int leaves) 
 {
     int sum = 0;
-    long int rnd = id+(cntr1+1)*(101%leaves)+((cntr2*999)%leaves);
+    long int rnd = id+(cntr1+1)*(11%leaves)+((cntr2*99)%leaves);
     int pos = rnd%leaves;
     return pos;
 }
@@ -280,12 +282,12 @@ int Orion::RandomSeedPath(string id,int cntr1, int cntr2, int leaves)
     int sum = 0;
     for(int i=0;i<id.size();i++)
 	sum +=id[i];
-    long int rnd = sum+(cntr1+1)*(101%leaves)+((cntr2*999)%leaves);
+    long int rnd = sum+(cntr1+1)*(11%leaves)+((cntr2*99)%leaves);
     int pos = rnd%leaves;
     return pos;
 }
 
-pair<int,vector<string>> Orion::simplebatchSearch(string keyword) 
+pair<int,vector<string>>Orion::simplebatchSearch(string keyword,ofstream& sres,double speed) 
 {
 	srch->searchi_bytes = 0;
 	fileoram->searchf_bytes = 0;
@@ -310,6 +312,7 @@ pair<int,vector<string>> Orion::simplebatchSearch(string keyword)
 	srch->start(false);
 	int bnum = get_block_num(fc,COM);
 	int fetched = 0;
+	auto start = high_resolution_clock::now();
    	for (int i = 1; i <= bnum; i++) 
    	{
    	         Bid kbid = createBid(keyword,i);
@@ -347,7 +350,6 @@ pair<int,vector<string>> Orion::simplebatchSearch(string keyword)
 			 }
 		 }
    	}
-	srch->finalizeindex();
 	//fcnt->incrementSrcCnt();
 	//**********************************************************
 	fileoram->start(false);
@@ -374,11 +376,20 @@ pair<int,vector<string>> Orion::simplebatchSearch(string keyword)
         			temp = temp.c_str();
 				conts.push_back(temp);
 			}
+		cout<<"contsSize:"<<conts.size()<<endl;
 		}
 	 //fileoram->finalizeindex(); -->core dump
    	  }
+	  int totBytes = srch->searchi_bytes + fileoram->searchf_bytes;
+	  auto stop = high_resolution_clock::now();
+	  auto duration = duration_cast<milliseconds>(stop-start);
+	  double time = double(totBytes)/speed;
+	  time = time*1000;
+	  int totTime = time+ duration.count();
+          sres<<keyword<<" "<< duration.count()<<" "<<totTime<<" "<<conts.size()<<endl;
+cout<<" | "<<duration.count()<<" | "<<time<<" | "<<totTime<<" | "<<conts.size()<<endl;
+	 srch->finalizeindex();
 	 fileoram->finalizeindex();
-	 int totBytes = srch->searchi_bytes + fileoram->searchf_bytes;
     return make_pair(totBytes,conts);
 }
 

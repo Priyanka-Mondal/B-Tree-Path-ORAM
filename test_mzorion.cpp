@@ -142,15 +142,16 @@ int main(int argc, char**argv)
 		{
 			while(getline(kw,line))
 			{
-        			auto start = high_resolution_clock::now();
-				auto s = mzorion.simplebatchSearch(line);
-        			auto stop = high_resolution_clock::now();
-				auto duration = duration_cast<milliseconds>(stop-start);
-				double time = double(s.first)/speed;
-				time = time*1000; //milliseconds
-				int totTime = time+ duration.count();
-sres<<line<<" "<< duration.count()<<" "<<totTime<<" "<<s.second.size()<<endl;
-cout<<l<<" | "<<duration.count()<<" | "<<time<<" | "<<totTime<<" | "<<s.second.size()<<endl;
+        			//auto start = high_resolution_clock::now();
+				cout <<l;
+				auto s = mzorion.simplebatchSearch(line, sres,speed);
+        			//auto stop = high_resolution_clock::now();
+				//auto duration = duration_cast<milliseconds>(stop-start);
+				//double time = double(s.first)/speed;
+				//time = time*1000; //milliseconds
+				//int totTime = time+ duration.count();
+//sres<<line<<" "<< duration.count()<<" "<<totTime<<" "<<s.second.size()<<endl;
+//cout<<l<<" | "<<duration.count()<<" | "<<time<<" | "<<totTime<<" | "<<s.second.size()<<endl;
 				l++;
 			}
 		}

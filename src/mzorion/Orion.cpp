@@ -229,7 +229,7 @@ int Orion::RandomIndPath(string id,int cntr1, int cntr2, int leaves)
     return pos;
 }
 
-pair<int,vector<string>> Orion::simplebatchSearch(string keyword) 
+pair<int,vector<string>> Orion::simplebatchSearch(string keyword, ofstream& sres,double speed) 
 {
         oram->search_bytes = 0;
 	vector<string> conts;
@@ -248,6 +248,7 @@ pair<int,vector<string>> Orion::simplebatchSearch(string keyword)
 	oram->start(false);
 	int bnum = get_block_num(fc,COM);
 	int fetched = 0;
+	auto start = high_resolution_clock::now();
    	for (int i = 1; i <= bnum; i++) 
    	{
    	         Bid kbid = createBid(keyword,i);
@@ -304,7 +305,15 @@ pair<int,vector<string>> Orion::simplebatchSearch(string keyword)
 				conts.push_back(temp);
 			}
 		}
+		cout<<"contSize:"<<conts.size()<<endl;
    	  }
+	  auto stop = high_resolution_clock::now();
+	  auto duration = duration_cast<milliseconds>(stop-start);
+	  double time = double(oram->search_bytes)/speed;
+	  time = time*1000;
+	  int totTime = time+ duration.count();
+          sres<<keyword<<" "<< duration.count()<<" "<<totTime<<" "<<conts.size()<<endl;
+cout<<" | "<<duration.count()<<" | "<<time<<" | "<<totTime<<" | "<<conts.size()<<endl;
 	  oram->finalize();
 return make_pair(oram->search_bytes,conts);
 }
