@@ -265,7 +265,8 @@ void IndexORAM::Access(Bid bid, Node*& node, int lastLeaf, int newLeaf)
     {
         node->pos = newLeaf;
         stash[bid] = node;
-        if (find(leafList.begin(), leafList.end(), lastLeaf) == leafList.end()) {
+        if (find(leafList.begin(), leafList.end(), lastLeaf) == leafList.end()) 
+	{
             leafList.push_back(lastLeaf);
         }
     }
@@ -300,15 +301,6 @@ Node* IndexORAM::ReadNode(Bid bid, int lastLeaf, int newLeaf)
     {
         return NULL;
     }
-    /*
-    if(cache.count(bid)>0)
-    {
-	Node* node = cache[bid];
-	node->pos = newLeaf;
-	cache[bid]=node;
-        modified.insert(bid);
-	return node;
-    }*/
     if(cache.count(bid)==0 && stash.count(bid)==0)//||find(leafList.begin(),leafList.end(),lastLeaf)==leafList.end())
     {
         Node* node;
@@ -425,50 +417,7 @@ void IndexORAM::finalize()
     leafList.clear();
     modified.clear();
 }
-void IndexORAM::finalizeI() 
-{
-    vector<Node*> nodes;
-    nodes.reserve(cache.size());
-    for (auto t : cache) 
-    {
-	    nodes.push_back(t.second);
-    }
-    setupInsert(nodes);
-    leafList.clear();
-    modified.clear();
-}
-/*
-void IndexORAM::finalizefile() 
-{
-    for (unsigned int i = maxHeight; i >= 1; i--) {
-        for (auto t : cache) {
-            if (t.second != NULL && t.second->height == i) {
-                Node* tmp = t.second;
-                if (modified.count(tmp->key)) {
-                    tmp->pos = RandomPath();
-		    if (i==1)
-			localBCNT[t.first] = make_pair(localBCNT[t.first].first,tmp->pos);
-                }
-                if (tmp->nextID != 0 && cache.count(tmp->nextID) > 0) {
-                    tmp->nextPos = cache[tmp->nextID]->pos;
-                }
-            }
-        }
-    }
-    //if (cache[rootKey] != NULL)
-      //  rootPos = cache[rootKey]->pos;
 
-    for (int d = depth; d >= 0; d--) 
-    {
-        for (unsigned int i = 0; i < leafList.size(); i++) 
-	{
-            WritePath(leafList[i], d);
-        }
-    }
-    leafList.clear();
-    modified.clear();
-}
-*/
 void IndexORAM::start(bool batchWrite) {
     this->batchWrite = batchWrite;
     writeviewmap.clear();

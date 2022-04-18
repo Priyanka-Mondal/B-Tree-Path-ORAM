@@ -366,7 +366,7 @@ pair<int,vector<string>>Orion::simplebatchSearch(string keyword,ofstream& sres,d
 			Fbid fbid = createFbid(fID,i);
 			int pos = RandomPath(fID,ac,i,fileleaves);
 			int newpos = RandomPath(fID,ac+1,i,fileleaves);
-			Fnode* fnode = fileoram->ReadFnode(fbid,pos,pos); //pos
+			Fnode* fnode = fileoram->ReadFnode(fbid,pos,pos); //newpos
 			if(fnode != NULL)
 			{
 				string temp="";

@@ -254,7 +254,7 @@ pair<int,vector<string>> Orion::simplebatchSearch(string keyword, ofstream& sres
    	         Bid kbid = createBid(keyword,i);
 		 int poskw = RandomIndPath(keyword,sc,i,leaves);
 		 int newpos = RandomIndPath(keyword,sc+1,i,leaves);
-		 Node* kwnode = oram->ReadNode(kbid,poskw,poskw);
+		 Node* kwnode = oram->ReadNode(kbid,poskw,poskw);//newpos
 		 if(i < bnum)
 		 {
 			 int point = 0;
@@ -296,7 +296,7 @@ pair<int,vector<string>> Orion::simplebatchSearch(string keyword, ofstream& sres
 			Bid fbid = createBid(fID,i);
 			int pos = RandomPath(fID,ac,i,leaves);
 			int newpos = RandomPath(fID,ac+1,i,leaves);
-			Node* fnode = oram->ReadNode(fbid,pos,pos);
+			Node* fnode = oram->ReadNode(fbid,pos,pos); //newpos
 			if(fnode != NULL)
 			{
 				string temp="";

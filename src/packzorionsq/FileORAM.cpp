@@ -296,15 +296,6 @@ Fnode* FileORAM::ReadFnode(Fbid bid, int lastLeaf, int newLeaf)
     {
         return NULL;
     }
-    /*
-    if(cache.count(bid)>0)
-    {
-	Fnode* node = cache[bid];
-	node->pos = newLeaf;
-	cache[bid]=node;
-        modified.insert(bid);
-	return node;
-    }*/
     if(cache.count(bid)==0 && stash.count(bid)==0)//||find(leafList.begin(),leafList.end(),lastLeaf)==leafList.end())
     {
         Fnode* node;

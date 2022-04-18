@@ -259,6 +259,7 @@ void ORAM::DeleteData(Bid bid, Node* node)
 void ORAM::Access(Bid bid, Node*& node, int lastLeaf, int newLeaf) 
 {
     FetchPathStash(lastLeaf);
+    //FetchPath(lastLeaf);
     node = ReadData(bid);
     if (node != NULL) 
     {
