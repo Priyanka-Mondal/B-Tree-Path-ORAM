@@ -362,31 +362,20 @@ block IndexORAM::convertNodeToIblock(Node* node) {
 
 void IndexORAM::WriteCache() 
 {
-    for (int d = depth; d >= 0; d--) 
-    {
         for (unsigned int i = 0; i < leafList.size(); i++) 
 	{
-            WritePath(leafList[i], d);
-        }
+    		for (int d = depth; d >= 0; d--) 
+    		{
+            		WritePath(leafList[i], d);
+        	}
     }
 
     leafList.clear();
     modified.clear();
 }
 
-void IndexORAM::finalizeindex() 
-{/*
-    for (auto t : cache) 
-    {
-        if (t.second != NULL ) 
-        {
-            Node* tmp = t.second;
-            if (modified.count(tmp->key)) 
-    	    {
-                tmp->pos = posCache[t.first];
-            }
-        }
-    }*/
+void IndexORAM::finalize() 
+{
     for (int d = depth; d >= 0; d--) 
     {
         for (unsigned int i = 0; i < leafList.size(); i++) 
@@ -394,6 +383,18 @@ void IndexORAM::finalizeindex()
             WritePath(leafList[i], d);
         }
     }
+    leafList.clear();
+    modified.clear();
+}
+void IndexORAM::finalizeI() 
+{
+    vector<Node*> nodes;
+    nodes.reserve(cache.size());
+    for (auto t : cache) 
+    {
+	    nodes.push_back(t.second);
+    }
+    setupInsert(nodes);
     leafList.clear();
     modified.clear();
 }

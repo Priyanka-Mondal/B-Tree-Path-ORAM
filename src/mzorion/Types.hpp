@@ -10,7 +10,7 @@
 
 #define ID_SIZE 16
 #define FID_SIZE 16
-#define BLOCK 64 
+#define BLOCK 1024
 #define FILEID 4
 #define COM (BLOCK/FILEID)
 

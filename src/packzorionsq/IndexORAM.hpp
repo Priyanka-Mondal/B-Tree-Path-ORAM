@@ -79,8 +79,8 @@ public:
     int WriteNode(Bid bid, Node* n);
     int DeleteNode(Bid bid, Node* n);
     void start(bool batchWrite);
-    void finalizefile();
-    void finalizeindex();
+    void finalize();
+    void finalizeI();
     void WriteCache();
     static Node* convertIblockToNode(block b);
     void convertIblockToNode(Node*& node,block b);

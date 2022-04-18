@@ -242,7 +242,7 @@ pair<int,vector<string>> Orion::simplebatchSearch(string keyword, ofstream& sres
 	}
 	else 
 	    return make_pair(0,conts);
-	localSC[keyword] = sc+1;
+	//localSC[keyword] = sc+1;
         vector<int> result;
 	result.reserve(fc);
 	oram->start(false);
@@ -254,7 +254,7 @@ pair<int,vector<string>> Orion::simplebatchSearch(string keyword, ofstream& sres
    	         Bid kbid = createBid(keyword,i);
 		 int poskw = RandomIndPath(keyword,sc,i,leaves);
 		 int newpos = RandomIndPath(keyword,sc+1,i,leaves);
-		 Node* kwnode = oram->ReadNode(kbid,poskw,newpos);
+		 Node* kwnode = oram->ReadNode(kbid,poskw,poskw);
 		 if(i < bnum)
 		 {
 			 int point = 0;
@@ -290,13 +290,13 @@ pair<int,vector<string>> Orion::simplebatchSearch(string keyword, ofstream& sres
    	 {
 		int ac = localAC[fID];
 		int bc = localBC[fID];
-		localAC[fID] = ac+1;
+		//localAC[fID] = ac+1;
 		for(int i =1;i<=bc;i++)
 		{
 			Bid fbid = createBid(fID,i);
 			int pos = RandomPath(fID,ac,i,leaves);
 			int newpos = RandomPath(fID,ac+1,i,leaves);
-			Node* fnode = oram->ReadNode(fbid,pos,newpos);
+			Node* fnode = oram->ReadNode(fbid,pos,pos);
 			if(fnode != NULL)
 			{
 				string temp="";
@@ -314,7 +314,7 @@ pair<int,vector<string>> Orion::simplebatchSearch(string keyword, ofstream& sres
 	  int totTime = time+ duration.count();
           sres<<keyword<<" "<< duration.count()<<" "<<totTime<<" "<<conts.size()<<endl;
 cout<<" | "<<duration.count()<<" | "<<time<<" | "<<totTime<<" | "<<conts.size()<<endl;
-	  oram->finalize();
+	  //oram->finalize();
 return make_pair(oram->search_bytes,conts);
 }
 

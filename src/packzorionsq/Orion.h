@@ -4,6 +4,7 @@
 #include "IndexORAM.hpp"
 #include<iostream>
 #include <random>
+#include <stdlib.h>
 #include "utils/Utilities.h"
 using namespace std;
 

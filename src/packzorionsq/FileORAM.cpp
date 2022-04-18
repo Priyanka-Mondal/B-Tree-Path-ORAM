@@ -361,19 +361,18 @@ block FileORAM::convertFnodeToFblock(Fnode* node) {
 
 void FileORAM::WriteCache() 
 {
-    for (int d = depth; d >= 0; d--) 
-    {
         for (unsigned int i = 0; i < leafList.size(); i++) 
 	{
-            WritePath(leafList[i], d);
-        }
+    		for (int d = depth; d >= 0; d--) 
+    		{
+            		WritePath(leafList[i], d);
+        	}
     }
 
     leafList.clear();
     modified.clear();
 }
-
-void FileORAM::finalizeindex() 
+void FileORAM::finalize() 
 {/*
     for (auto t : cache) 
     {

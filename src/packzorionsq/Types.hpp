@@ -11,7 +11,7 @@
 // The main type for passing around raw file data
 #define ID_SIZE 16
 #define FID_SIZE 16
-#define BLOCK 64 // 128 caused seg_fault
+#define BLOCK 1024 // 128 caused seg_fault
 #define NODE_SIZE 40
 #define FILEID 4
 #define COM (NODE_SIZE/FILEID)

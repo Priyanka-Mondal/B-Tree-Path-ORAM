@@ -306,7 +306,8 @@ pair<int,vector<string>>Orion::simplebatchSearch(string keyword,ofstream& sres,d
         //sc = stoi(parts[0]);
         //fc = stoi(parts[1]);
 	//scfc = to_string(sc+1)+"-"+to_string(fc);
-	localSC[keyword] = sc+1;
+	
+	//localSC[keyword] = sc+1; uncomment this
         vector<int> result;
 	result.reserve(fc);
 	srch->start(false);
@@ -318,7 +319,7 @@ pair<int,vector<string>>Orion::simplebatchSearch(string keyword,ofstream& sres,d
    	         Bid kbid = createBid(keyword,i);
 		 int poskw = RandomSeedPath(keyword,sc,i,indexleaves);
 		 int newpos = RandomSeedPath(keyword,sc+1,i,indexleaves);
-		 Node* kwnode = srch->ReadNode(kbid,poskw,newpos);
+		 Node* kwnode = srch->ReadNode(kbid,poskw,poskw);//newpos
 		 if(i < bnum)
 		 {
 			 int point = 0;
@@ -350,25 +351,22 @@ pair<int,vector<string>>Orion::simplebatchSearch(string keyword,ofstream& sres,d
 			 }
 		 }
    	}
-	//fcnt->incrementSrcCnt();
 	//**********************************************************
 	fileoram->start(false);
    	 for(auto fID:result)
    	 {
-	 	//string acbc = localACNT[fID];
 		int ac = localAC[fID];
 		int bc = localBC[fID];
-	        //auto parts = Utilities::splitData(acbc, "-");
-	        //int ac = stoi(parts[0]);
-	        //int bc = stoi(parts[1]);
-		//acbc = to_string(ac+1)+"-"+to_string(bc);
-		localAC[fID] = ac+1;
+		double r = (rand() / (double) RAND_MAX)+3.5;
+		cout <<"r:"<<r<<endl;
+
+		//localAC[fID] = ac+1; uncomment this
 		for(int i =1;i<=bc;i++)
 		{
 			Fbid fbid = createFbid(fID,i);
 			int pos = RandomPath(fID,ac,i,fileleaves);
 			int newpos = RandomPath(fID,ac+1,i,fileleaves);
-			Fnode* fnode = fileoram->ReadFnode(fbid,pos,newpos);
+			Fnode* fnode = fileoram->ReadFnode(fbid,pos,pos); //pos
 			if(fnode != NULL)
 			{
 				string temp="";
@@ -378,7 +376,6 @@ pair<int,vector<string>>Orion::simplebatchSearch(string keyword,ofstream& sres,d
 			}
 		cout<<"contsSize:"<<conts.size()<<endl;
 		}
-	 //fileoram->finalizeindex(); -->core dump
    	  }
 	  int totBytes = srch->searchi_bytes + fileoram->searchf_bytes;
 	  auto stop = high_resolution_clock::now();
@@ -386,10 +383,10 @@ pair<int,vector<string>>Orion::simplebatchSearch(string keyword,ofstream& sres,d
 	  double time = double(totBytes)/speed;
 	  time = time*1000;
 	  int totTime = time+ duration.count();
-          sres<<keyword<<" "<< duration.count()<<" "<<totTime<<" "<<conts.size()<<endl;
-cout<<" | "<<duration.count()<<" | "<<time<<" | "<<totTime<<" | "<<conts.size()<<endl;
-	 srch->finalizeindex();
-	 fileoram->finalizeindex();
+          sres<<keyword<<" "<< duration.count()<<" "<<totTime<<" "<<conts.size()<<" " <<totBytes<<endl;
+cout<<" | "<<duration.count()<<" | "<<time<<" | "<<totTime<<" | "<<conts.size()<<" "<<totBytes<<endl;
+	 //srch->WriteCache();
+	 //fileoram->WriteCache();
     return make_pair(totBytes,conts);
 }
 

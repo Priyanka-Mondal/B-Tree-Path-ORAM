@@ -526,4 +526,5 @@ void ORAM::setupInsert(vector<Node*> nodes) {
     for (; i < nodes.size(); i++) {
         cache[nodes[i]->key] = nodes[i];
     }
+    cout <<"size of cache at the end of BATCH insert:"<< cache.size()<< endl;
 }

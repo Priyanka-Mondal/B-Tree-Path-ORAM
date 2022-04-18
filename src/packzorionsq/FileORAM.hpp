@@ -79,8 +79,8 @@ public:
     int WriteFnode(Fbid bid, Fnode* n);
     int DeleteFnode(Fbid bid, Fnode* n);
     void start(bool batchWrite);
-    void finalizefile();
-    void finalizeindex();
+    void finalize();
+    void finalizeI();
     void WriteCache();
     static Fnode* convertFblockToFnode(block b);
     void convertFblockToFnode(Fnode*& node,block b);
