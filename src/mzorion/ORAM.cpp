@@ -124,9 +124,11 @@ void ORAM::FetchPath(int leaf) {
 
             if (block.id != 0) { // It isn't a dummy block   
                 Node* n = convertBlockToNode(block.data);
-                if (cache.count(block.id) == 0) {
+                if (cache.count(block.id) == 0) 
+		{
                     cache.insert(make_pair(block.id, n));
-                } else {
+                } 
+		else {
                     delete n;
                 }
             }
@@ -134,6 +136,38 @@ void ORAM::FetchPath(int leaf) {
     }
 }
 
+void ORAM::FetchPathStash(int leaf) {
+	if(leaf >= leaves)
+	{
+        	throw runtime_error("leaf OUT OF RANGE");
+	}
+    for (size_t d = 0; d <= depth; d++) {
+        int node = GetNodeOnPath(leaf, d);
+
+        if (find(readviewmap.begin(), readviewmap.end(), node) != readviewmap.end()) {
+            continue;
+        } else {
+            readviewmap.push_back(node);
+        }
+
+        Bucket bucket = ReadBucket(node);
+	search_bytes = search_bytes + clen_size;
+        for (int z = 0; z < Z; z++) {
+            Block &block = bucket[z];
+
+            if (block.id != 0) { // It isn't a dummy block   
+                Node* n = convertBlockToNode(block.data);
+                if (stash.count(block.id) == 0) 
+		{
+                    stash.insert(make_pair(block.id, n));
+                } 
+		else {
+                    delete n;
+                }
+            }
+        }
+    }
+}
 // Gets a list of blocks on the cache which can be placed at a specific point
 
 std::vector<Bid> ORAM::GetIntersectingBlocks(int x, int curDepth) {
@@ -189,10 +223,12 @@ void ORAM::WritePath(int leaf, int d)
 // Gets the data of a block in the cache
 
 Node* ORAM::ReadData(Bid bid) {
-    if (cache.find(bid) == cache.end()) {
+    if ((cache.find(bid) == cache.end())&& (stash.find(bid) == stash.end())) {
         return NULL;
     }
+    if(cache.count(bid)>0)
     return cache[bid];
+    else return stash[bid];
 }
 
 // Updates the data of a block in the cache
@@ -222,16 +258,12 @@ void ORAM::DeleteData(Bid bid, Node* node)
 
 void ORAM::Access(Bid bid, Node*& node, int lastLeaf, int newLeaf) 
 {
-    FetchPath(lastLeaf);
+    FetchPathStash(lastLeaf);
     node = ReadData(bid);
     if (node != NULL) 
     {
         node->pos = newLeaf;
-        /*if (cache.count(bid) != 0) 
-	{
-            cache.erase(bid);
-        }*/
-        cache[bid] = node;
+        stash[bid] = node;
         if (find(leafList.begin(), leafList.end(), lastLeaf) == leafList.end()) {
             leafList.push_back(lastLeaf);
         }
@@ -267,15 +299,10 @@ Node* ORAM::ReadNode(Bid bid, int lastLeaf, int newLeaf)
     {
         return NULL;
     }
-    if(cache.count(bid)==0)//||find(leafList.begin(),leafList.end(),lastLeaf)==leafList.end())
+    if(cache.count(bid)==0 && stash.count(bid)==0)
     {
         Node* node;
         Access(bid, node, lastLeaf, newLeaf);
-        //if (node != NULL) 
-	//{
-         //   modified.insert(bid);
-        //}
-	//else 
 	if(node == NULL)
 	{
 		cout <<"Node is NULL : "<< bid << endl ;
@@ -283,9 +310,15 @@ Node* ORAM::ReadNode(Bid bid, int lastLeaf, int newLeaf)
 	}
         return node;
     } 
-    else 
+    else if(stash.count(bid)>0)
     {
-        //modified.insert(bid);
+        Node* node = stash[bid];
+        node->pos = newLeaf;
+	stash[bid] = node;
+        return node;
+    }
+    else if(cache.count(bid)>0)
+    {
         Node* node = cache[bid];
         node->pos = newLeaf;
 	cache[bid] = node;
@@ -364,49 +397,7 @@ void ORAM::WriteCache()
 }
 
 void ORAM::finalize() 
-{/*
-    for (auto t : cache) 
-    {
-        if (t.second != NULL ) 
-        {
-            Node* tmp = t.second;
-            if (modified.count(tmp->key)) 
-    	    {
-                tmp->pos = posCache[t.first];
-            }
-        }
-    }*/
-    for (int d = depth; d >= 0; d--) 
-    {
-        for (unsigned int i = 0; i < leafList.size(); i++) 
-	{
-            WritePath(leafList[i], d);
-        }
-    }
-    leafList.clear();
-    modified.clear();
-}
-/*
-void ORAM::finalizefile() 
 {
-    for (unsigned int i = maxHeight; i >= 1; i--) {
-        for (auto t : cache) {
-            if (t.second != NULL && t.second->height == i) {
-                Node* tmp = t.second;
-                if (modified.count(tmp->key)) {
-                    tmp->pos = RandomPath();
-		    if (i==1)
-			localBCNT[t.first] = make_pair(localBCNT[t.first].first,tmp->pos);
-                }
-                if (tmp->nextID != 0 && cache.count(tmp->nextID) > 0) {
-                    tmp->nextPos = cache[tmp->nextID]->pos;
-                }
-            }
-        }
-    }
-    //if (cache[rootKey] != NULL)
-      //  rootPos = cache[rootKey]->pos;
-
     for (int d = depth; d >= 0; d--) 
     {
         for (unsigned int i = 0; i < leafList.size(); i++) 
@@ -417,12 +408,11 @@ void ORAM::finalizefile()
     leafList.clear();
     modified.clear();
 }
-*/
 void ORAM::start(bool batchWrite) {
     this->batchWrite = batchWrite;
     writeviewmap.clear();
     readviewmap.clear();
-    readCnt = 0;
+    stash.clear();
 }
 
 void ORAM::Print() {

@@ -38,6 +38,7 @@ private:
     std::vector<Bid> GetIntersectingBlocks(int x, int depth);
 
     void FetchPath(int leaf);
+    void FetchPathStash(int leaf);
 
     Node* ReadData(Bid bid);
     void WriteData(Bid bid, Node* b);
@@ -64,6 +65,7 @@ public:
     void WritePath(int leaf, int level);
     size_t depth;
     map<Bid, Node*> cache;
+    map<Bid, Node*> stash;
     map<Bid, int> posCache;
     vector<int> leafList;
     vector<int> readviewmap;
