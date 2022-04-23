@@ -31,6 +31,7 @@ BTreeNode* BTree::newBTreeNode(bool leaf1)
     node->n = 0;
     node->leaf=leaf1;
     node->t=T;
+    node->height = 1;
     return node;
 }
 
@@ -45,28 +46,37 @@ int BTree::insert(string kw, int rootBid, int &rootPos)
 		rootPos = root->pos;
 		brootKey = root->bid;
 		int newrootBid = bram->WriteBTreeNode(brootKey, root);
+		cout <<"kw at root:"<<kw<<endl;
 		return newrootBid;
 	}
 	
 	else // If tree is not empty
 	{
 		BTreeNode *root = bram->ReadBTreeNode(brootKey);
-		cout <<"root:"<<root->bid<<endl;
-		/*if (root->n == 2*t-1)
+		cout <<"root:"<<root->bid<<" n:"<<root->n<<endl;
+		if (root->n == 2*T-1)
 		{
-			BTreeNode *s = new BTreeNode(false);
+			cout <<"root is full"<<root->n<<endl;
+			BTreeNode *s = newBTreeNode(false);
 			s->cbids[0] = root->bid;
 			s->cpos[0] = root->pos;
 			s->height = root->height+1;
-			s->splitChild(0, root);
+			BTreeNode* z = s->splitChild(0, root);
+			bram->WriteBTreeNode(z->bid,z);
+			
 			int i = 0;
-			if (s->keys[0] < k)
+			BTreeNode *sc = newBTreeNode(true);
+			if (s->keys[0] < kw)
+			{
 				i++;
-			s->cbids[i]->insertNonFull(k);
+			}
+			sc = bram->ReadBTreeNode(s->cbid[i]);
+			sc->insertNonFull(kw);
 			brootKey = s->bid;
 			brootPos = s->pos;
+			
 		}
-		else*/ 
+		else
 			root->insertNonFull(kw);
 	}
 }
@@ -75,6 +85,7 @@ void BTreeNode::insertNonFull(string k)
 {
 	cout <<"insertNonFull"<<endl;
 	int i = n-1;
+	cout <<"i:"<<i<<endl;
 	if (leaf == true)
 	{
 		while (i >= 0 && keys[i] > k)
@@ -100,27 +111,28 @@ void BTreeNode::insertNonFull(string k)
 	}*/
 }
 
-void BTreeNode::splitChild(int i, BTreeNode *y)
+BTreeNode* BTreeNode::splitChild(int i, BTreeNode *y)
 {
-	/*
-	BTreeNode *z = new BTreeNode(y->t, y->leaf);
+	
+	BTreeNode *z = new BTreeNode(y->leaf);
 	z->n = t - 1;
 	for (int j = 0; j < t-1; j++)
 		z->keys[j] = y->keys[j+t];
 	if (y->leaf == false)
 	{
 		for (int j = 0; j < t; j++)
-			z->C[j] = y->C[j+t];
+			z->cbids[j] = y->cbids[j+t];
 	}
 	y->n = t - 1;
 	for (int j = n; j >= i+1; j--)
-		C[j+1] = C[j];
-	C[i+1] = z;
+		cbids[j+1] = cbids[j];
+	cbids[i+1] = z->bid;
 	for (int j = n-1; j >= i; j--)
 		keys[j+1] = keys[j];
 	keys[i] = y->keys[t-1];
 	n = n + 1;
-	*/
+	return z;
+	
 }
 
 void BTree::startOperation(bool batchWrite) 
