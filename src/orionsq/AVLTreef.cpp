@@ -5,6 +5,7 @@ AVLTreef::AVLTreef(int maxSize, bytes<Key> key) : rd(), mt(rd()), dis(0, (pow(2,
     totalleaves = (pow(2, floor(log2(maxSize/Z))+1)-1)/2;
     cout <<"total leaves in treef:(0.."<< totalleaves<<")"<<totalleaves+1<<endl;
     cout <<"--------------------------------------------"<<endl;
+    this->insertread = oram->insertread;
 }
 
 AVLTreef::~AVLTreef() {
@@ -301,9 +302,12 @@ Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, int value) {
         return nnode->key;
     }
     Nodef* node = oram->ReadNodef(rootKey, pos, pos);
-    if (key < node->key) {
+    if (key < node->key) 
+    {
         node->leftID = insert(node->leftID, node->leftPos, key, value);
-    } else if (key > node->key) {
+    } 
+    else if (key > node->key) 
+    {
         node->rightID = insert(node->rightID, node->rightPos, key, value);
     } 
     else 
@@ -315,18 +319,15 @@ Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, int value) {
         return node->key;
     }
 
-    /* 2. Update height of this ancestor node */
     node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
     oram->maxheight= max(node->height,oram->maxheight);
 
-    /* 3. Get the balance factor of this ancestor node to check whether
-       this node became unbalanced */
     int balance = getBalance(node);
 
-    // If this node becomes unbalanced, then there are 4 cases
 
     // Left Left Case
     if (balance > 1 && key < oram->ReadNodef(node->leftID)->key) {
+	//    cout <<"left left"<<endl;
         Nodef* res = rightRotate(node);
         pos = res->pos;
         return res->key;
@@ -334,6 +335,7 @@ Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, int value) {
 
     // Right Right Case
     if (balance < -1 && key > oram->ReadNodef(node->rightID)->key) {
+	  //  cout <<"right right"<<endl;
         Nodef* res = leftRotate(node);
         pos = res->pos;
         return res->key;
@@ -341,6 +343,7 @@ Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, int value) {
 
     // Left Right Case
     if (balance > 1 && key > oram->ReadNodef(node->leftID)->key) {
+	   // cout <<"left right"<<endl;
         Nodef* res = leftRotate(oram->ReadNodef(node->leftID));
         node->leftID = res->key;
         node->leftPos = res->pos;
@@ -352,6 +355,7 @@ Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, int value) {
 
     // Right Left Case
     if (balance < -1 && key < oram->ReadNodef(node->rightID)->key) {
+	    //cout <<"right left"<<endl;
         auto res = rightRotate(oram->ReadNodef(node->rightID));
         node->rightID = res->key;
         node->rightPos = res->pos;
@@ -361,7 +365,6 @@ Bid AVLTreef::insert(Bid rootKey, int& pos, Bid key, int value) {
         return res2->key;
     }
 
-    /* return the (unchanged) node pointer */
     oram->WriteNodef(node->key, node);
     return node->key;
 }
@@ -470,7 +473,9 @@ void AVLTreef::printTree(Nodef* root, int indent) {
 /*
  * before executing each operation, this function should be called with proper arguments
  */
-void AVLTreef::startOperation(bool batchWrite) {
+void AVLTreef::startOperation(bool batchWrite) 
+{
+    oram->insertread = 0;
     oram->start(batchWrite);
 }
 
@@ -600,7 +605,8 @@ int AVLTreef::deleteNode(Nodef* nodef)
 Bid AVLTreef:: removeMain(Bid rootKey,int& pos, Bid delKey)
 {
 	if(rootKey != delKey || rootKey <delKey || rootKey > delKey)
-	{// it does not work without these 3 checks ??
+	{
+		// it does not work without these 3 checks ??
 		//cout<<"rootKey != delKey(removeMain)"<<endl;
 		Nodef* paren = parentOf(rootKey,pos,rootKey,pos,delKey);
 		int delPos;

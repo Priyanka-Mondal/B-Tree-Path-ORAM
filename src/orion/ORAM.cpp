@@ -98,7 +98,8 @@ void ORAM::WriteBucket(int index, Bucket bucket) {
 
 // Fetches blocks along a path, adding them to the cache
 
-void ORAM::FetchPath(int leaf) {
+void ORAM::FetchPath(int leaf) 
+{
     readCnt++;
     for (size_t d = 0; d <= depth; d++) {
         int node = GetNodeOnPath(leaf, d);
@@ -112,13 +113,17 @@ void ORAM::FetchPath(int leaf) {
         Bucket bucket = ReadBucket(node);
 
         for (int z = 0; z < Z; z++) {
-            Block &block = bucket[z];
+            block &blk = bucket[z];
 
-            if (block.id != 0) { // It isn't a dummy block   
-                Node* n = convertBlockToNode(block.data);
-                if (cache.count(block.id) == 0) {
-                    cache.insert(make_pair(block.id, n));
-                } else {
+            if (blk != NULL) 
+	    { // It isn't a dummy block   
+                Node* n = convertBlockToNode(blk);
+                if (!count(cache.begin(),cache.end(),n)) 
+		{
+                    cache.push_back(n);
+                } 
+		else 
+		{
                     delete n;
                 }
             }
@@ -126,11 +131,9 @@ void ORAM::FetchPath(int leaf) {
     }
 }
 
-// Gets a list of blocks on the cache which can be placed at a specific point
-
-std::vector<Bid> ORAM::GetIntersectingBlocks(int x, int curDepth) {
+std::vector<Bid> ORAM::GetIntersectingBlocks(int x, int curDepth) 
+{
     std::vector<Bid> validBlocks;
-
     int node = GetNodeOnPath(x, curDepth);
     for (auto b : cache) {
         Bid bid = b.first;

@@ -1,4 +1,4 @@
-#include "ORAMf.hpp"
+#include "ORAM.hpp"
 #include "../utils/Utilities.h"
 #include <algorithm>
 #include <iomanip>
@@ -10,22 +10,22 @@
 #include <map>
 #include <stdexcept>
 
-ORAMf::ORAMf(int maxSize, bytes<Key> key)
+ORAM::ORAM(int maxSize, bytes<Key> key)
 : key(key), rd(), mt(rd()), dis(0, (pow(2, floor(log2(maxSize / Z)) + 1) - 1) / 2) {
     AES::Setup();
     depth = floor(log2(maxSize / Z));
-    cout <<"depth of tree ORAMf is:"<< depth<<endl;
+    cout <<"depth of tree:"<<depth<<endl;
     bucketCount = pow(2, depth + 1) - 1;
-    blockSize = sizeof (Nodef); // B
+    blockSize = sizeof (Node); // B
     size_t blockCount = Z * (pow(2, depth + 1) - 1);
     size_t storeBlockSize = IV + AES::GetCiphertextLength(Z * (blockSize));
     size_t storeBlockCount = blockCount;
     clen_size = AES::GetCiphertextLength((blockSize) * Z);
     plaintext_size = (blockSize) * Z;
-    cout << "Buckets:"<<bucketCount<<" block count in ORAMf:"<<blockCount<<endl;
     store = new RAMStore(storeBlockCount, storeBlockSize);
+    cout << "Buckets:"<<bucketCount<<" block count in ORAM:"<<blockCount<<endl;
     for (size_t i = 0; i < bucketCount; i++) {
-        Bucketf bucket;
+        Bucket bucket;
         for (int z = 0; z < Z; z++) {
             bucket[z].id = 0;
             bucket[z].data.resize(blockSize, 0);
@@ -34,15 +34,13 @@ ORAMf::ORAMf(int maxSize, bytes<Key> key)
     }
 }
 
-ORAMf::~ORAMf() {
+ORAM::~ORAM() {
     AES::Cleanup();
     delete store;
 }
 
-// Fetches the array index a bucket
-// that lise on a specific path
 
-int ORAMf::GetNodefOnPath(int leaf, int curDepth) {
+int ORAM::GetNodeOnPath(int leaf, int curDepth) {
     leaf += bucketCount / 2;
     for (int d = depth - 1; d >= curDepth; d--) {
         leaf = (leaf + 1) / 2 - 1;
@@ -53,31 +51,30 @@ int ORAMf::GetNodefOnPath(int leaf, int curDepth) {
 
 // Write bucket to a single block
 
-block ORAMf::SerialiseBucket(Bucketf bucket) {
+block ORAM::SerialiseBucket(Bucket bucket) {
     block buffer;
 
     for (int z = 0; z < Z; z++) {
-        Blockf b = bucket[z];
-
-        // Write block data
+        Block b = bucket[z];
         buffer.insert(buffer.end(), b.data.begin(), b.data.end());
+    //delete b;
     }
 
     assert(buffer.size() == Z * (blockSize));
-
+    
     return buffer;
 }
 
-Bucketf ORAMf::DeserialiseBucket(block buffer) {
+Bucket ORAM::DeserialiseBucket(block buffer) {
     assert(buffer.size() == Z * (blockSize));
 
-    Bucketf bucket;
+    Bucket bucket;
 
     for (int z = 0; z < Z; z++) {
-        Blockf &block = bucket[z];
+        Block &block = bucket[z];
 
         block.data.assign(buffer.begin(), buffer.begin() + blockSize);
-        Nodef* node = convertBlockToNodef(block.data);
+        Node* node = convertBlockToNode(block.data);
         block.id = node->key;
         delete node;
         buffer.erase(buffer.begin(), buffer.begin() + blockSize);
@@ -86,16 +83,16 @@ Bucketf ORAMf::DeserialiseBucket(block buffer) {
     return bucket;
 }
 
-Bucketf ORAMf::ReadBucket(int index) {
+Bucket ORAM::ReadBucket(int index) {
     block ciphertext = store->Read(index);
     block buffer = AES::Decrypt(key, ciphertext, clen_size);
-    Bucketf bucket = DeserialiseBucket(buffer);
+    Bucket bucket = DeserialiseBucket(buffer);
     ciphertext.clear();
     buffer.clear();
     return bucket;
 }
 
-void ORAMf::WriteBucket(int index, Bucketf bucket) {
+void ORAM::WriteBucket(int index, Bucket bucket) {
     block b = SerialiseBucket(bucket);
     block ciphertext = AES::Encrypt(key, b, clen_size, plaintext_size);
     store->Write(index, ciphertext);
@@ -105,10 +102,10 @@ void ORAMf::WriteBucket(int index, Bucketf bucket) {
 
 // Fetches blocks along a path, adding them to the cache
 
-void ORAMf::FetchPath(int leaf) {
+void ORAM::FetchPath(int leaf) {
     readCnt++;
     for (size_t d = 0; d <= depth; d++) {
-        int node = GetNodefOnPath(leaf, d);
+        int node = GetNodeOnPath(leaf, d);
 
         if (find(readviewmap.begin(), readviewmap.end(), node) != readviewmap.end()) {
             continue;
@@ -116,57 +113,32 @@ void ORAMf::FetchPath(int leaf) {
             readviewmap.push_back(node);
         }
 
-        Bucketf bucket = ReadBucket(node);
+        Bucket bucket = ReadBucket(node);
 
         for (int z = 0; z < Z; z++) {
-            Blockf &block = bucket[z];
+            Block &block = bucket[z];
 
             if (block.id != 0) { // It isn't a dummy block   
-                Nodef* n = convertBlockToNodef(block.data);
-                if (cache.count(block.id) == 0 ) {
+                Node* n = convertBlockToNode(block.data);
+                if (cache.count(block.id) == 0) {
                     cache.insert(make_pair(block.id, n));
                 } else {
                     delete n;
                 }
             }
         }
-        //cout<<"LEAF FETCHED:"<<leaf<<endl;
     }
-    /*
-    cout <<"CACHE SIZE IS:"<< cache.size()<<endl;
-    for(auto c:cache)
-    {
-	    Bid c1=c.first;
-	    //cout<<c1<<" ";
-	    if(cache[c1]==NULL)
-		    cout<<"<--NULL"<<"   ";
-    }*/
-
 }
 
 // Gets a list of blocks on the cache which can be placed at a specific point
 
-std::vector<Bid> ORAMf::GetIntersectingBlocks(int x, int curDepth) {
+std::vector<Bid> ORAM::GetIntersectingBlocks(int x, int curDepth) {
     std::vector<Bid> validBlocks;
 
-    int node = GetNodefOnPath(x, curDepth);
+    int node = GetNodeOnPath(x, curDepth);
     for (auto b : cache) {
         Bid bid = b.first;
-        if (b.second != NULL && GetNodefOnPath(b.second->pos, curDepth) == node) {
-            validBlocks.push_back(bid);
-            if (validBlocks.size() >= Z) {
-                return validBlocks;
-            }
-        }
-    }
-    return validBlocks;
-}
-std::vector<Bid> ORAMf::GetIntersectingBlocks(int x, int curDepth, int node) {
-    std::vector<Bid> validBlocks;
-
-    for (auto b : cache) {
-        Bid bid = b.first;
-        if (b.second != NULL && GetNodefOnPath(b.second->pos, curDepth) == node) {
+        if (b.second != NULL && GetNodeOnPath(b.second->pos, curDepth) == node) {
             validBlocks.push_back(bid);
             if (validBlocks.size() >= Z) {
                 return validBlocks;
@@ -177,20 +149,20 @@ std::vector<Bid> ORAMf::GetIntersectingBlocks(int x, int curDepth, int node) {
 }
 
 
-void ORAMf::WritePath(int leaf, int d) 
+void ORAM::WritePath(int leaf, int d) 
 {
-    int node = GetNodefOnPath(leaf, d);
-    if (find(writeviewmap.begin(), writeviewmap.end(), node) == writeviewmap.end()) {
-
-        auto validBlocks = GetIntersectingBlocks(leaf, d, node);
-        // Write blocks to tree
-        Bucketf bucket;
-        for (int z = 0; z < std::min((int) validBlocks.size(), Z); z++) {
-            Blockf &block = bucket[z];
+    int node = GetNodeOnPath(leaf, d);
+    if (find(writeviewmap.begin(), writeviewmap.end(), node) == writeviewmap.end()) 
+    {
+        auto validBlocks = GetIntersectingBlocks(leaf, d);
+        Bucket bucket;
+        for (int z = 0; z < std::min((int) validBlocks.size(), Z); z++) 
+	{
+            Block &block = bucket[z];
             block.id = validBlocks[z];
 	    Bid temp = block.id;
-            Nodef* curnode = cache[block.id];
-            block.data = convertNodefToBlock(curnode);
+            Node* curnode = cache[block.id];
+            block.data = convertNodeToBlock(curnode);
 	    if(curnode->key != block.id)
 	    {
 		    block.id = 0; // curnode->key;
@@ -199,218 +171,215 @@ void ORAMf::WritePath(int leaf, int d)
             delete curnode;
             cache.erase(temp);
         }
-        // Fill any empty spaces with dummy blocks
-        for (int z = validBlocks.size(); z < Z; z++) {
-            Blockf &block = bucket[z];
+        for (int z = validBlocks.size(); z < Z; z++) 
+	{
+            Block &block = bucket[z];
             block.id = 0;
             block.data.resize(blockSize, 0);
         }
-
-        // Write bucket to tree
         writeviewmap.push_back(node);
         WriteBucket(node, bucket);
     }
 }
 
+// Gets the data of a block in the cache
 
-Nodef* ORAMf::ReadData(Bid bid) {
+Node* ORAM::ReadData(Bid bid) {
     if (cache.find(bid) == cache.end()) {
         return NULL;
     }
     return cache[bid];
 }
 
+// Updates the data of a block in the cache
 
-void ORAMf::WriteData(Bid bid, Nodef* node) {
+void ORAM::WriteData(Bid bid, Node* node) 
+{
     if (store->GetEmptySize() > 0) {
         cache[bid] = node;
         store->ReduceEmptyNumbers();
-	//cout<<"freeF:"<<store->GetEmptySize()<<endl;
+	cout <<"FREE:"<<store->GetEmptySize()<<endl;
     } else {
-        throw runtime_error("There is no more space in ORAMf");
+        throw runtime_error("There is no more space in ORAM-WriteData");
     }
 }
 
-void ORAMf::DeleteData(Bid bid, Nodef* node) 
+void ORAM::DeleteData(Bid bid, Node* node) 
 {
 	if(bid != node->key)
 	{
         	cache[bid]=node; 
         	store->IncreaseEmptyNumbers();
 		int ret = store->GetEmptySize();
-		cout <<bid<<"empty nodes in ORAMf:"<< ret <<endl;
+		cout <<bid<<"empty nodes:"<< ret <<endl;
 	}
 }
 
-
 // Fetches a block, allowing you to read and write in a block
 
-void ORAMf::Access(Bid bid, Nodef*& node, int lastLeaf, int newLeaf) {
+void ORAM::Access(Bid bid, Node*& node, int lastLeaf, int newLeaf) {
     FetchPath(lastLeaf);
     node = ReadData(bid);
-	   
     if (node != NULL) {
         node->pos = newLeaf;
         if (cache.count(bid) != 0) {
             cache.erase(bid);
         }
         cache[bid] = node;
-       if (find(leafList.begin(), leafList.end(), lastLeaf) == leafList.end()) 
-       {
+        if (find(leafList.begin(), leafList.end(), lastLeaf) == leafList.end()) {
             leafList.push_back(lastLeaf);
-       }
+        }
     }
 }
 
-void ORAMf::Access(Bid bid, Nodef*& node) {
+void ORAM::Access(Bid bid, Node*& node) {
     //if (!batchWrite) {
         FetchPath(node->pos);
-    //}
+   // }
     WriteData(bid, node);
     if (find(leafList.begin(), leafList.end(), node->pos) == leafList.end()) {
         leafList.push_back(node->pos);
     }
 }
 
-
-Nodef* ORAMf::setupReadNf(Bid bid,int leaf)
+Node* ORAM::setupReadN(Bid bid,int leaf)
 {
     if (bid == 0) {
-	    //cout <<"Heyyyy setupReadNf is 0"<<endl;
         return NULL;
     }
-    //Nodef* n;
-    for (size_t d =depth; d >= 0; d--) 
+    for (size_t d = depth; d >= 0; d--) 
     {
-        int node = GetNodefOnPath(leaf, d);
-        Bucketf bucket = ReadBucket(node);
+        int node = GetNodeOnPath(leaf, d);
+        Bucket bucket = ReadBucket(node);
         for (int z = 0; z < Z; z++) 
 	{
-            Blockf &block = bucket[z];
+            Block &block = bucket[z];
             if (block.id == bid) 
 	    {    
-                //Nodef* n = convertBlockToNodef(block.data);
-                Nodef* n = new Nodef();
-	       	convertBlockToNodef(n,block.data);
+                Node* n = new Node();
+    std::array<byte_t, sizeof (Node) > arr;
+    std::copy(block.data.begin(), block.data.begin() + sizeof (Node), arr.begin());
+    from_bytes(arr, *n);
 		return n;
             }
         }
+
      }
     if(cache.count(bid)>0)
     {
-    	cout <<"found "<<bid<<" in CACHE , leaf:"<<cache[bid]->pos<<" free node:"<<store->GetEmptySize()<<endl;
+    	cout <<"found "<<bid<<" in cache ORAM"<<endl;
     	return cache[bid];
     }
     else
-	    cout<<"leaf:"<<leaf<<"/"<<bid<<"NOT FOUND at ALL in setupReadNf "<<store->GetEmptySize()<<endl;
+	    cout<<bid<<"NOT FOUND at ALL in setupRead"<<endl;
     return NULL;
 }
-
-void ORAMf::setupReadNf(Nodef*& n,Bid bid,int leaf)
+void ORAM::setupReadN(Node*& n, Bid bid,int leaf)
 {
     if (bid == 0) {
-	    //cout <<"Heyyyy setupReadNf is 0"<<endl;
-        return;
+        return ;
     }
-    //Nodef* n;
-    for (size_t d =depth; d >= 0; d--) 
+    for (size_t d = depth; d >= 0; d--) 
     {
-        int node = GetNodefOnPath(leaf, d);
-        Bucketf bucket = ReadBucket(node);
+        int node = GetNodeOnPath(leaf, d);
+        Bucket bucket = ReadBucket(node);
         for (int z = 0; z < Z; z++) 
 	{
-            Blockf &block = bucket[z];
+            Block &block = bucket[z];
             if (block.id == bid) 
 	    {    
-    std::array<byte_t, sizeof (Nodef) > arr;
-    std::copy(block.data.begin(), block.data.begin() + sizeof (Nodef), arr.begin());
+                //Node* n = new Node();
+	       	//convertBlockToNode(n,block.data);
+		//return n;
+
+    std::array<byte_t, sizeof (Node) > arr;
+    std::copy(block.data.begin(), block.data.begin() + sizeof (Node), arr.begin());
     from_bytes(arr, *n);
-		return;
+    return;
             }
         }
+
      }
     if(cache.count(bid)>0)
     {
-    	cout <<"found "<<bid<<" in CACHE , leaf:"<<cache[bid]->pos<<" free node:"<<store->GetEmptySize()<<endl;
-    	n= cache[bid];
+    	cout <<"found "<<bid<<" in cache ORAM"<<endl;
+    	n = cache[bid];
     }
     else
-	    cout<<"leaf:"<<leaf<<"/"<<bid<<"NOT FOUND at ALL in setupReadNf "<<store->GetEmptySize()<<endl;
+	    cout<<bid<<"NOT FOUND at ALL in setupRead"<<endl;
+    //return NULL;
 }
-Nodef* ORAMf::ReadNodef(Bid bid) {
+Node* ORAM::ReadNode(Bid bid) {
     if (bid == 0) {
-        throw runtime_error("Nodef id is not set");
+        throw runtime_error("Node id is not set ReadNode");
     }
     if (cache.count(bid) == 0) {
-        throw runtime_error("Nodef not found in the cache");
+        throw runtime_error("Node not found in the cache ReadNode");
     } else {
-        Nodef* node = cache[bid];
+        Node* node = cache[bid];
         return node;
     }
 }
 
-Nodef* ORAMf::ReadNodef(Bid bid, int lastLeaf, int newLeaf) {
-    if (bid == 0) 
-    {
+Node* ORAM::ReadNode(Bid bid, int lastLeaf, int newLeaf) {
+    if (bid == 0) {
         return NULL;
     }
-    if(cache.count(bid)==0||find(leafList.begin(),leafList.end(),lastLeaf)==leafList.end()) 
-    {
-        insertread++;
-        cout <<bid<<"oram read:: "<< insertread<<endl;
-        Nodef* node;
+    if (cache.count(bid) == 0 || find(leafList.begin(), leafList.end(), lastLeaf) == leafList.end()) {
+        Node* node;
         Access(bid, node, lastLeaf, newLeaf);
-        if (node != NULL) 
-	{
+        if (node != NULL) {
             modified.insert(bid);
         }
 	else 
 	{
-		cout <<"nodef is NULL : "<< bid << endl ;
-		cout <<"free nodefs:" << store->GetEmptySize() << endl;
+		cout <<"Node is NULL : "<< bid << endl ;
+		cout <<"free node:" << store->GetEmptySize() << endl;
 	}
         return node;
-    } else 
-    {
+    } else {
         modified.insert(bid);
-        Nodef* node = cache[bid];
+        Node* node = cache[bid];
         node->pos = newLeaf;
         return node;
     }
 }
 
-void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
+void ORAM::setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos)
 {
+	int oramsz = store->GetEmptySize();
+	 if (oramsz>0) {
     int flag = 0;
-    int oramsz= store->GetEmptySize();
-  if (oramsz > 0) 
-  {
     for (size_t d = depth; d >= 0; d--) 
     {
-        int node = GetNodefOnPath(n->pos, d);
-        Bucketf bucket = ReadBucket(node);
-        Bucketf newbucket;
+        int node = GetNodeOnPath(n->pos, d);
+        Bucket bucket = ReadBucket(node);
         for (int z = 0; z < Z; z++) 
 	{
-	    Blockf &block = bucket[z];
+	    Block &block = bucket[z];
 	    int pos ;
-            if (flag==0 && block.id == 0) 
+            if (flag==0 &&  block.id == 0) 
 	    {    
-            	//Nodef* curnode = n;
+            	//Node* curnode = n;
 		block.id = bid;
-                block.data = convertNodefToBlock(n);
+                //block.data = convertNodeToBlock(curnode);
+                block.data = convertNodeToBlock(n);
 		flag = 1;
 		store->ReduceEmptyNumbers();
+		//pos = curnode->pos;
 		pos = n->pos;
-    //cout <<pos<<endl;//" Empty nodes in ORAMf:"<<oramsz<<endl;
+		 //cout<<pos<<endl;//" Empty Nodes in ORAM:"<<oramsz<<endl;
 		//delete curnode;
             }
-	    else if(flag ==0 && block.id == bid)
+	    else if (flag==0 && block.id == bid ) 
 	    {    
-            	//Nodef* curnode = n;
+            	//Node* curnode = n;
 		block.id = bid;
-                block.data = convertNodefToBlock(n);
+                //block.data = convertNodeToBlock(curnode);
+                block.data = convertNodeToBlock(n);
 		flag = 1;
+		//store->ReduceEmptyNumbers();
+		//pos = curnode->pos;
 		pos = n->pos;
 		//delete curnode;
             }
@@ -421,14 +390,15 @@ void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
 	    }
 	    else
 	    {
-                Nodef* curnode = convertBlockToNodef(block.data);
-		block.id = curnode->key;
+                Node* curnode = convertBlockToNode(block.data);
+		//Bid kk = curnode->key;
+		block.id = curnode->key;//kk
 		//cout <<"full blocks setupWriting:"<<block.id<<endl;
-		block.data = convertNodefToBlock(curnode);
+		//block.data = convertNodeToBlock(block.data);
+		block.data = convertNodeToBlock(curnode);
 		pos = curnode->pos;
 		delete curnode;
 	    }
-
 	    if(rootKey == block.id)
 	    {
 		    rootPos = pos;
@@ -441,32 +411,31 @@ void ORAMf::setupWriteBucket(Bid bid, Nodef* n, Bid rootKey, int& rootPos)
 	if(flag == 1)
 		break;
      }
-    if(flag==0)
+    if(flag == 0)
     {
 	    cache[bid] = n;
-	    cout <<"WRITING INCACHEf===========>"<<bid<<"  leaf:"<<n->pos<<endl;
+	    cout <<"Writing in CACHE!!!!!!"<<endl;
     }
-  }
-  else {
-        throw runtime_error("NO more space in ORAMf");
-    }
+ }
+    else
+	 throw runtime_error("No more spaCe in ORAM");
 }
 
-int ORAMf::setupWriteNf(Bid bid, Nodef* node, Bid rootKey, int& rootPos) {
-    if (bid == 0) {
-        throw runtime_error("Nodef id is not set in WriteNode");
-    }
+
+int ORAM::setupWriteN(Bid bid, Node* node, Bid rootKey, int& rootPos) 
+{
+    if (bid == 0) 
+        throw runtime_error("Node id is not set in WriteNode");
     else
-    {
-	    setupWriteBucket(bid,node,rootKey,rootPos);
-    }
-    //cout <<"returning rootPOs ------"<< node->key << endl;
-    //return rootPos;
-    return node->pos;
+	setupWriteBucket(bid,node,rootKey,rootPos);
+    return rootPos;
 }
-int ORAMf::WriteNodef(Bid bid, Nodef* node) {
-    if (bid == 0) {
-        throw runtime_error("Nodef id is not set in WriteNode");
+int ORAM::WriteNode(Bid bid, Node* node) {
+    
+    if (bid == 0) 
+    {
+	cout <<bid<<endl;
+        throw runtime_error("Node id is not set WriteNode");
     }
     if (cache.count(bid) == 0) {
         modified.insert(bid);
@@ -478,7 +447,8 @@ int ORAMf::WriteNodef(Bid bid, Nodef* node) {
     }
 }
 
-int ORAMf::DeleteNodef(Bid bid, Nodef* node) {
+
+int ORAM::DeleteNode(Bid bid, Node* node) {
     if (bid == 0) 
     {
        throw runtime_error("Nodef id is not set in DeleteNode");
@@ -494,28 +464,30 @@ int ORAMf::DeleteNodef(Bid bid, Nodef* node) {
     DeleteData(bid, node);
         return node->pos;
 }
-Nodef* ORAMf::convertBlockToNodef(block b) {
-    Nodef* node = new Nodef();
-    std::array<byte_t, sizeof (Nodef) > arr;
-    std::copy(b.begin(), b.begin() + sizeof (Nodef), arr.begin());
+
+Node* ORAM::convertBlockToNode(block b) {
+    Node* node = new Node();
+    std::array<byte_t, sizeof (Node) > arr;
+    std::copy(b.begin(), b.begin() + sizeof (Node), arr.begin());
     from_bytes(arr, *node);
     return node;
 }
 
-void ORAMf::convertBlockToNodef(Nodef*& node, block b) {
-    //Nodef* node = new Nodef();
-    std::array<byte_t, sizeof (Nodef) > arr;
-    std::copy(b.begin(), b.begin() + sizeof (Nodef), arr.begin());
+void ORAM::convertBlockToNode(Node*& node, block b) {
+    //Node* node = new Node();
+    std::array<byte_t, sizeof (Node) > arr;
+    std::copy(b.begin(), b.begin() + sizeof (Node), arr.begin());
     from_bytes(arr, *node);
     //return node;
 }
-block ORAMf::convertNodefToBlock(Nodef* node) {
-    std::array<byte_t, sizeof (Nodef) > data = to_bytes(*node);
+
+block ORAM::convertNodeToBlock(Node* node) {
+    std::array<byte_t, sizeof (Node) > data = to_bytes(*node);
     block b(data.begin(), data.end());
     return b;
 }
 
-void ORAMf::finilize(bool find, Bid& rootKey, int& rootPos) {
+void ORAM::finilize(bool find, Bid& rootKey, int& rootPos) {
     //fake read for padding     
     if (!batchWrite) {
         if (find) {
@@ -526,55 +498,49 @@ void ORAMf::finilize(bool find, Bid& rootKey, int& rootPos) {
                 }
                 FetchPath(rnd);
             }
-        } /*else {
-            for (int i = readCnt; i < 4.35 * depth; i++) {//4.35
+        } else {
+            for (int i = readCnt; i < 1.45 * depth; i++) {//4.35
                 int rnd = RandomPath();
                 if (std::find(leafList.begin(), leafList.end(), rnd) == leafList.end()) {
                     leafList.push_back(rnd);
                 }
                 FetchPath(rnd);
             }
-        }*/
+        }
     }
-
         int maxHeight = 1;
         for (auto t : cache) {
             if (t.second != NULL && t.second->height > maxHeight) {
                 maxHeight = t.second->height;
             }
         }
-    //updating the binary tree positions
-    //cout <<"MAXHEIGHT:"<<maxheight<<endl;
-    for (unsigned int i = 1; i <= maxHeight; i++) {
     //for (unsigned int i = 0; i <= depth + 2; i++) {
+    for (unsigned int i = 1; i <= maxHeight; i++) {
         for (auto t : cache) {
-            if (t.second != NULL && t.second->height == i) 
-	     {  //Bid temp = t.first;
-                Nodef* tmp = t.second;
+            if (t.second != NULL && t.second->height == i) {
+                Node* tmp = t.second;
                 if (modified.count(tmp->key)) {
-		    //cout <<tmp->pos<<"new pos of"<<tmp->key;
                     tmp->pos = RandomPath();
-		    //cout <<tmp->pos<<endl;
                 }
                 if (tmp->leftID != 0 && cache.count(tmp->leftID) > 0) {
-		    //cout <<tmp->leftPos<<"new leftpos of"<<tmp->key;
                     tmp->leftPos = cache[tmp->leftID]->pos;
-		    //cout <<tmp->leftPos<<endl;
                 }
                 if (tmp->rightID != 0 && cache.count(tmp->rightID) > 0) {
-		    //cout <<tmp->rightPos<<"new rightpos of"<<tmp->key;
                     tmp->rightPos = cache[tmp->rightID]->pos;
-		    //cout <<tmp->rightPos<<endl;
                 }
-		//cache[temp]=tmp;
             }
         }
     }
     if (cache[rootKey] != NULL)
         rootPos = cache[rootKey]->pos;
 
+    int cnt = 0;
     for (int d = depth; d >= 0; d--) {
         for (unsigned int i = 0; i < leafList.size(); i++) {
+            cnt++;
+            if (cnt % 1000 == 0 && batchWrite) {
+                cout << "OMAP:" << cnt << "/" << (depth+1) * leafList.size() << " inserted" << endl;
+            }
             WritePath(leafList[i], d);
         }
     }
@@ -583,37 +549,37 @@ void ORAMf::finilize(bool find, Bid& rootKey, int& rootPos) {
     modified.clear();
 }
 
-void ORAMf::start(bool batchWrite) {
+void ORAM::start(bool batchWrite) {
     this->batchWrite = batchWrite;
     writeviewmap.clear();
     readviewmap.clear();
     readCnt = 0;
 }
 
-void ORAMf::Print() {
+void ORAM::Print() {
     for (unsigned int i = 0; i < bucketCount; i++) {
         block ciphertext = store->Read(i);
         block buffer = AES::Decrypt(key, ciphertext, clen_size);
-        Bucketf bucket = DeserialiseBucket(buffer);
-        Nodef* node = convertBlockToNodef(bucket[0].data);
+        Bucket bucket = DeserialiseBucket(buffer);
+        Node* node = convertBlockToNode(bucket[0].data);
         cout << node->key << " ";
         delete node;
     }
 }
 
-int ORAMf::RandomPath() {
+int ORAM::RandomPath() {
     int val = dis(mt);
     return val;
 }
-void ORAMf::setupInsert(vector<Nodef*> nodes) {
-    sort(nodes.begin(), nodes.end(), [ ](const Nodef* lhs, const Nodef * rhs) {
+void ORAM::setupInsert(vector<Node*> nodes) {
+    sort(nodes.begin(), nodes.end(), [ ](const Node* lhs, const Node * rhs) {
         return lhs->pos < rhs->pos;
     });
     int curPos = 0;
     if (nodes.size() > 0) {
         curPos = nodes[0]->pos;
     }
-    map<int, Bucketf> buckets;
+    map<int, Bucket> buckets;
     map<int, int> bucketsCnt;
     int cnt = 0;
     unsigned int i = 0;
@@ -624,15 +590,15 @@ void ORAMf::setupInsert(vector<Nodef*> nodes) {
             cout << "i:" << i << "/" << nodes.size() << endl;
         }
         for (int d = depth; d >= 0 && i < nodes.size() && curPos == nodes[i]->pos; d--) {
-            int nodeIndex = GetNodefOnPath(curPos, d);
-            Bucketf bucket;
+            int nodeIndex = GetNodeOnPath(curPos, d);
+            Bucket bucket;
             if (bucketsCnt.count(nodeIndex) == 0) {
                 bucketsCnt[nodeIndex] = 0;
                 for (int z = 0; z < Z; z++) {
                     if (i < nodes.size() && nodes[i]->pos == curPos) {
-                        Blockf &curBlock = bucket[z];
+                        Block &curBlock = bucket[z];
                         curBlock.id = nodes[i]->key;
-                        curBlock.data = convertNodefToBlock(nodes[i]);
+                        curBlock.data = convertNodeToBlock(nodes[i]);
                         delete nodes[i];
                         bucketsCnt[nodeIndex]++;
                         i++;
@@ -644,9 +610,9 @@ void ORAMf::setupInsert(vector<Nodef*> nodes) {
                     bucket = buckets[nodeIndex];
                     for (int z = bucketsCnt[nodeIndex]; z < Z; z++) {
                         if (i < nodes.size() && nodes[i]->pos == curPos) {
-                            Blockf &curBlock = bucket[z];
+                            Block &curBlock = bucket[z];
                             curBlock.id = nodes[i]->key;
-                            curBlock.data = convertNodefToBlock(nodes[i]);
+                            curBlock.data = convertNodeToBlock(nodes[i]);
                             delete nodes[i];
                             bucketsCnt[nodeIndex]++;
                             i++;
@@ -655,7 +621,7 @@ void ORAMf::setupInsert(vector<Nodef*> nodes) {
                     buckets[nodeIndex] = bucket;
                 } else {
                     cannotInsert = true;
-		}
+                }
             }
 
         }
@@ -678,7 +644,7 @@ void ORAMf::setupInsert(vector<Nodef*> nodes) {
             WriteBucket(buk.first, buk.second);
         } else {
             for (long unsigned int z = bucketsCnt[buk.first]; z < Z; z++) {
-                Blockf &curBlock = buk.second[z];
+                Block &curBlock = buk.second[z];
                 curBlock.id = 0;
                 curBlock.data.resize(blockSize, 0);
             }

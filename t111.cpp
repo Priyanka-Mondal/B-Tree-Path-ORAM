@@ -1,4 +1,5 @@
 #include<iostream>
+#include<string.h>
 #include<vector>
 #include<map>
 #include<unordered_map>
@@ -167,7 +168,7 @@ int main(int argc, char** argv)
 	stop = high_resolution_clock::now();
 	duration = duration_cast<microseconds>(stop-start);
 	cout <<"single:"<< duration.count()<<endl<<endl<<endl;
-	}*/
+	}
 	vector<int> vec1;
 	vector<int> vec2;
 	vector<string> vec3;
@@ -201,6 +202,11 @@ int main(int argc, char** argv)
 		stop = high_resolution_clock::now();
 		duration = duration_cast<microseconds>(stop-start);
 		cout <<"vec:"<< duration.count()<<endl;
-	}
+	}*/
+
+	std::array<std::string,1> t;
+	t[0]="qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq";
+	t[0].c_str();
+	cout <<sizeof(t[0]);
 	return 0;
 }

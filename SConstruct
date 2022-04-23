@@ -72,46 +72,26 @@ env.Alias('deps', [crypto_lib_target, db_parser_target])
 
 objects = SConscript('src/build.scons', exports='env', variant_dir='build')
 
-env.Depends(objects["zorionsq"],[crypto_lib_target , db_parser_target])
-env.Depends(objects["packzorionsq"],[crypto_lib_target , db_parser_target])
 env.Depends(objects["orionsq"],[crypto_lib_target , db_parser_target])
-env.Depends(objects["mzorion"],[crypto_lib_target , db_parser_target])
-env.Depends(objects["packorion"],[crypto_lib_target , db_parser_target])
-env.Depends(objects["baseline"],[crypto_lib_target , db_parser_target])
+env.Depends(objects["btree"],[crypto_lib_target , db_parser_target])
 env.Depends(objects["t111"],[crypto_lib_target , db_parser_target])
-env.Depends(objects["morion"],[crypto_lib_target , db_parser_target])
 
-Clean(objects["morion"]+objects["packzorionsq"]+objects["zorionsq"]+objects["orionsq"]+objects["mzorion"]+objects["packorion"]+objects["baseline"]+objects["t111"], 'build')
+Clean(objects["orionsq"]+objects["t111"]+objects["btree"], 'build')
 
 outter_env = env.Clone()
 outter_env.Append(CPPPATH = ['build'])
 
 
 
-morion_debug_prog   = outter_env.Program('morion_debug',    ['test_morion.cpp']     + objects["morion"])
-mzorion_debug_prog   = outter_env.Program('mzorion_debug',    ['test_mzorion.cpp']     + objects["mzorion"])
 orionsq_debug_prog   = outter_env.Program('orionsq_debug',    ['test_orionsq.cpp']     + objects["orionsq"])
-packzorionsq_debug_prog   = outter_env.Program('packzorionsq_debug',    ['test_packzorionsq.cpp']     + objects["packzorionsq"])
-zorionsq_debug_prog   = outter_env.Program('zorionsq_debug',    ['test_zorionsq.cpp']     + objects["zorionsq"])
-packorion_debug_prog   = outter_env.Program('packorion_debug',    ['test_packorion.cpp']     + objects["packorion"])
-baseline_debug_prog   = outter_env.Program('baseline_debug',    ['test_baseline.cpp']     + objects["baseline"])
-t111_debug_prog   = outter_env.Program('t111_debug',    ['t111.cpp'] +objects["t111"])
+btree_debug_prog   = outter_env.Program('btree_debug',    ['test_btree.cpp']     + objects["btree"])
+t111_debug_prog   = outter_env.Program('t111_debug',['t111.cpp']+objects["t111"])
 
 
-env.Alias('zorionsq', [zorionsq_debug_prog])
-env.Alias('packzorionsq', [packzorionsq_debug_prog])
-env.Alias('packorion', [packorion_debug_prog])
-env.Alias('morion', [morion_debug_prog])
-env.Alias('mzorion', [mzorion_debug_prog])
 env.Alias('orionsq', [orionsq_debug_prog])
-env.Alias('baseline', [baseline_debug_prog])
+env.Alias('btree', [btree_debug_prog])
 env.Alias('t111', [t111_debug_prog])
 
-env.Default(['packzorionsq'])
-env.Default(['zorionsq'])
-env.Default(['packorion'])
 env.Default(['orionsq'])
-env.Default(['mzorion'])
-env.Default(['morion'])
-env.Default(['baseline'])
+env.Default(['btree'])
 env.Default(['t111'])

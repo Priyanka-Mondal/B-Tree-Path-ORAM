@@ -357,7 +357,6 @@ Nodef* ORAMf::ReadNodef(Bid bid, int lastLeaf, int newLeaf) {
     if(cache.count(bid)==0||find(leafList.begin(),leafList.end(),lastLeaf)==leafList.end()) 
     {
         insertread++;
-        cout <<bid<<"oram read:: "<< insertread<<endl;
         Nodef* node;
         Access(bid, node, lastLeaf, newLeaf);
         if (node != NULL) 

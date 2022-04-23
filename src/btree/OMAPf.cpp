@@ -1,10 +1,10 @@
 #include "OMAPf.h"
 using namespace std;
 
-OMAPf::OMAPf(int maxSize, bytes<Key> key) {
+OMAPf::OMAPf(int maxSize, bytes<Key> key) 
+{
     treeHandler = new AVLTreef(maxSize, key);
     rootKey = 0;
-    this->insertread = treeHandler->insertread;
 }
 
 OMAPf::~OMAPf() {
@@ -99,17 +99,6 @@ void OMAPf::remove(Bid delKey)
     treeHandler->finishOperation(false, rootKey, rootPos);
 }
 
-void OMAPf::setupinsert(Bid key, int value)
-{
-    //treeHandler->startOperation();
-    if (rootKey == 0) {
-        rootKey = treeHandler->setupinsert(0, rootPos, key, value);
-//	cout <<rootPos<<"root at OMAP fis :"<< rootKey<<endl;
-    } else {
-        rootKey = treeHandler->setupinsert(rootKey, rootPos, key, value);
-	//cout <<rootPos<<":root:"<< rootKey<<endl;
-    }
-}
 void OMAPf::insert(Bid key, int value) {
     treeHandler->startOperation();
     if (rootKey == 0) {

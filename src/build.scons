@@ -21,6 +21,7 @@ foram_files = Glob('foram/*.cpp')
 orion2_files = Glob('orion2/*.cpp')
 baseline_files = Glob('baseline/*.cpp')
 t111_files = Glob('t111/*.cpp')
+btree_files = Glob('btree/*.cpp')
 
 protos = env.SConscript('protos/build.scons', exports='env')
 
@@ -38,6 +39,7 @@ foram_objs = env.Object(foram_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 orion2_objs = env.Object(orion2_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 t111_objs = env.Object(t111_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 baseline_objs = env.Object(baseline_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
+btree_objs = env.Object(btree_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 
 objs = {}
 objs["mzorion"] = mzorion_objs + common_objs
@@ -53,4 +55,5 @@ objs["foram"] = foram_objs + common_objs
 objs["t111"] = t111_objs + common_objs
 objs["orion2"] = orion2_objs + common_objs
 objs["baseline"] = baseline_objs + common_objs
+objs["btree"] = btree_objs + common_objs
 Return('objs')

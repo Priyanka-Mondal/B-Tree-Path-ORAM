@@ -357,9 +357,6 @@ pair<int,vector<string>>Orion::simplebatchSearch(string keyword,ofstream& sres,d
    	 {
 		int ac = localAC[fID];
 		int bc = localBC[fID];
-		double r = (rand() / (double) RAND_MAX)+3.5;
-		cout <<"r:"<<r<<endl;
-
 		//localAC[fID] = ac+1; uncomment this
 		for(int i =1;i<=bc;i++)
 		{
@@ -374,7 +371,6 @@ pair<int,vector<string>>Orion::simplebatchSearch(string keyword,ofstream& sres,d
         			temp = temp.c_str();
 				conts.push_back(temp);
 			}
-		cout<<"contsSize:"<<conts.size()<<endl;
 		}
    	  }
 	  int totBytes = srch->searchi_bytes + fileoram->searchf_bytes;

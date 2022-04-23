@@ -10,17 +10,15 @@ Orion::Orion(bool usehdd, int filecnt , int filesize, bool local)
     bytes<Key> key1{0};
     bytes<Key> key2{1};
     srch = new OMAPf(filecnt*10, key1);
-   fcnt = new OMAPf(filecnt, key1);
-    //updt = new OMAPf(filecnt, key1);
-    file = new OMAP(filesize,key2);
+    btreeHandler = new BTree(filecnt, key1);
+    btreeHandler->brootKey = 0;
+    btreeHandler->brootPos = 0;
 }
 
 Orion::~Orion() 
 {
     delete srch;
-    delete file;
-    delete fcnt;
-    UpdtCnt.clear();
+    delete btreeHandler;
 }
 
 
@@ -119,60 +117,10 @@ void Orion::insertWrap(string cont, int fileid, bool batch)
       }
       vector<string> blocks;
       blocks = divideString(cont,BLOCK);
-      //if(batch)
-	//  batchInsert(kws,blocks,fileid);
-      //else
-          insert(kws, blocks, fileid);
+      insert(kws, blocks, fileid);
 }
 
 
-void Orion::batchInsert(vector<string> kws, vector<string> blocks, int ind) 
-{
-    for(auto kw: kws)
-    {		
-  	 Bid firstKey(kw);
-  	 int fc = 0;
-	 if(!local)
-	 {
-  	 	if(fcntbids.count(firstKey) > 0)
-	   		fc = fcntbids[firstKey];
-	 }
-	 else if(localFCNT.count(kw)>0)
-		 fc = localFCNT[kw];
-  	 fc= fc+1;
-	 if(!local)
-	 	fcntbids[firstKey]=fc;
-	 else
-		 localFCNT[kw]=fc;
-  	 //Bid updKey = createBid(kw, ind);
-  	 //updtbids[updKey]=fc;
-  	 Bid srchKey = createBid(kw, fc);
-  	 srchbids[srchKey]= ind;
-    }
-    string id = to_string(ind);
-    Bid blkcnt(id);
-    if(!local)
-    	fcntbids[blkcnt]=blocks.size();
-    else
-	localBCNT[ind]=blocks.size();
-    int block_num = 1;
-    for(auto blk: blocks)
-    {
-         Bid fb = createBid(id,block_num);
-         filebids[fb]=blk;
-         block_num++;
-    }
-    fileblks = fileblks+block_num;
-    cout<<"BATCH inserted keywords and blocks(kw:"<<kws.size() <<",b:"<<blocks.size()<<") of:"<<ind<<" fb:"<<fileblks<< endl;
-}
-void Orion::endSetup() 
-{
-        srch->setupInsert(srchbids);
-	//updt->setupInsert(updtbids);
-	//file->setupInsert(filebids);
-	if(!local)
-         fcnt->setupInsert(fcntbids);
-}
 
 void Orion::insert(vector<string> kws, vector<string> blocks, int ind) 
 {
@@ -182,31 +130,23 @@ void Orion::insert(vector<string> kws, vector<string> blocks, int ind)
   	      int fc = fcntbids[firstKey];
   	      fc++;
   	      Bid mapKey = createBid(kw, ind);
-  	      //updt->insert(mapKey, fc);
-	      UpdtCnt[mapKey]=fc;
   	      fcntbids[firstKey]=fc;
 	      Bid key = createBid(kw, fc);
   	      srch->insert(key, ind);
-	      cout <<endl<<endl;
+	      cout <<kw<<":"<<endl;
+	      btreeHandler->insert(kw,btreeHandler->brootKey,btreeHandler->brootPos);
+	      cout <<"--------------------------"<<endl;
     }
-      string id = to_string(ind);
-      Bid blkcnt(id);
-//      srch->insert(blkcnt,blocks.size());
-      localBCNT[ind]=blocks.size();
-      int block_num = 1;
-      for(auto blk: blocks)
-      {
-	      Bid fb = createBid(id,block_num);
-	      file->insert(fb,blk);
-	      cout <<block_num<<blk<<endl;
-	      block_num++;
-      }
-      inserted = inserted+kws.size();
-      fileblks = fileblks+block_num-1;
-      cout << "INSERTED keywords and blocks(kw:"<<kws.size() <<",b:"<<blocks.size()<<") of:"<<ind<<" uk:"<<uniquekw<<" fb:"<<fileblks<< endl;
-      
 }
 
+Bid Orion::createBid(string keyword, int number) 
+{
+    Bid bid(keyword);
+    auto arr = to_bytes(number);
+    std::copy(arr.begin(), arr.end(), bid.id.end() - 4);
+    return bid;
+}
+/*
 vector<pair<int,string>> Orion::search(string keyword) 
 {
     vector<pair<int,string>> fileblocks;
@@ -384,20 +324,15 @@ void Orion::removekw(vector <string> kws, int id)
 		}
 	}
 }
-
-Bid Orion::createBid(string keyword, int number) 
-{
-    Bid bid(keyword);
-    auto arr = to_bytes(number);
-    std::copy(arr.begin(), arr.end(), bid.id.end() - 4);
-    return bid;
-}
+*/
 
 void Orion::print()
 {
 	srch->printTree();
-	//updt->printTree();
-	//srch->printTree();
+}
+void Orion::endSetup() 
+{
+        srch->setupInsert(srchbids);
 }
 /*
 void Orion::setupinsert(vector<string> kws, vector<string> blocks, int ind) 

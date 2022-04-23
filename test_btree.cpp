@@ -1,4 +1,4 @@
-#include "orionsq/Orion.h"
+#include "btree/Orion.h"
 #include<string.h>
 #include<utility>
 #include <dirent.h>
@@ -92,13 +92,12 @@ int main(int argc, char**argv)
 {
 	int sizekw = to_int(argv[1]);
 	int sizefile = to_int(argv[2]);
-
 	Orion orion(usehdd, sizekw, sizefile, local);  
-/*
-        ofstream sres;
+
         ifstream kw;
 	list_dir(argv[3],orion);
-        	  orion.endSetup();     
+	cout <<"------------------"<<endl;
+	/*
 	kw.open(argv[4]);
 	sres.open(argv[5]);	
 	string line;
@@ -174,8 +173,9 @@ return 0;
 	sres <<(fileid-1)<<" "<<duration.count()<<" "<< s.size()<<endl;
 
 	return 0;
+
 */
-	
+/*	
 	cout <<"== TOTAL files inserted :"<<fileid-1<<" =="<<endl;
 	cout << endl<<" SETUP INSERT DONE!"<< endl;
 	cout <<"=================================="<< endl;
@@ -216,17 +216,6 @@ return 0;
 			//}
 			//sres<<duration.count()<<" "<< files.size()<<endl;
 		}
-		/*else if(c=='d'|| c=='D')
-		{
-			cout <<"Enter file id to be deleted: ";
-			int fid;
-			cin>>fid;
-			start = high_resolution_clock::now();
-			orion.remove(fid);
-			stop = high_resolution_clock::now();
-			duration = duration_cast<microseconds>(stop-start);
-			cout << "Deletion time: "<< duration.count()<<endl;  
-		}*/
 		else if(c=='i' || c=='I')
 		{
 			cout << "Enter file name to be inserted:";
@@ -264,6 +253,6 @@ return 0;
 		}
 		else
 			cout <<"invalid choice!"<<endl;
-	}    
+	}   */ 
         return 0;
 }
