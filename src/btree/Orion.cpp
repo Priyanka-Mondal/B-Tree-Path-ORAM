@@ -133,7 +133,7 @@ void Orion::insert(vector<string> kws, vector<string> blocks, int ind)
   	      fcntbids[firstKey]=fc;
 	      Bid key = createBid(kw, fc);
   	      srch->insert(key, ind);
-	      cout <<kw<<":"<<endl;
+	      cout <<kw<<":-----------------"<<endl;
 	      btreeHandler->insert(kw,btreeHandler->brootKey,btreeHandler->brootPos);
 	      cout <<"--------------------------"<<endl;
     }

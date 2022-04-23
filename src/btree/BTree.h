@@ -13,33 +13,33 @@
 #include <iomanip>
 #include <bits/stdc++.h>
 #include "BRAM.hpp"
-#include <random>
 
 using namespace std;
-
 class BTree 
 {
 private:
-    BRAM *bram;
     std::random_device rd;
     std::mt19937 mt;
     std::uniform_int_distribution<int> dis;
     int totleaves;
-    int nextbid = 0;
     int setupleaf= -1;
     int setupProgress = 0;
 
+    BRAM *bram;
     int max(int a, int b);
-    BTreeNode* newBTreeNode(bool leaf);
+    //BTreeNode* newBTreeNode(bool leaf);
     int RandomPath();
     int nextBid();
+    int nextbid = 0;
     //vector<BTreeNode*> setupBTreeNodes;
 
 public:
     int brootKey;
     int brootPos;
     int insert(string kw, int rootBid, int &rootPos);
+    void insertNFull(string kw, BTreeNode* bt ); 
     BTree(int maxSize, bytes<Key> key);
+    BTree();
     virtual ~BTree();
     void startOperation(bool batchWrite = false);
     void finishOperation(bool find, int& rootKey, int& rootPos);

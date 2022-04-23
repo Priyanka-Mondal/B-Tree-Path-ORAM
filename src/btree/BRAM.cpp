@@ -229,6 +229,7 @@ BTreeNode* BRAM::ReadBTreeNode(int bid) {
     if (bid == 0) {
         throw runtime_error("BTreeNode id is not set ReadBTreeNode");
     }
+    cout <<"bid searching:"<<bid<<endl;
     if (cache.count(bid) == 0) {
         throw runtime_error("BTreeNode not found in the cache ReadBTreeNode");
     } else {

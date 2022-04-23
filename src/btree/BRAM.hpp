@@ -9,30 +9,13 @@
 #include <string>
 #include <iostream>
 #include "RAMStore.hpp"
+#include "BTreeNode.h"
 #include <map>
 #include <set>
 #include <bits/stdc++.h>
 
 using namespace std;
 
-class BTreeNode 
-{
-public:
-        BTreeNode() { }
-       ~BTreeNode() { }
-        int bid;
-        int pos; // position of this node
-	array<string, D-1>keys;
-        array<int,D> cbids; // An array of ints
-	array<int,D> cpos;
-        int n;   // Current number of keys
-        bool leaf; // Is true when node is leaf. Otherwise false
-	int height;
-	int t;
-        void insertNonFull(string kw);
-        void splitChild(int i, BTreeNode *y);
-friend class BTree;
-};
 
 struct Blockb 
 {

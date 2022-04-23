@@ -39,7 +39,8 @@ int AVLTree::max(int a, int b) {
 
 /* Helper function that allocates a new node with the given key and
    NULL left and right pointers. */
-Node* AVLTree::newNode(Bid key, string value) {
+Node* AVLTree::newNode(Bid key, string value) 
+{
     Node* node = new Node();
     node->key = key;
     std::fill(node->value.begin(), node->value.end(), 0);
