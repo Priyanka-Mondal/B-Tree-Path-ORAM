@@ -2,7 +2,6 @@
 #ifndef BTREENODE_H
 #define BTREENODE_H
 
-#include <random>
 #include <string>
 #include <iostream>
 #include <bits/stdc++.h>
@@ -12,7 +11,7 @@ using namespace std;
 class BTreeNode 
 {
 public:
-        BTreeNode();
+        BTreeNode() {}
         BTreeNode(bool leaf, int nextBid, int pos);
        ~BTreeNode() { }
 
@@ -21,22 +20,10 @@ public:
 	array<string, D-1>keys;
         array<int,D> cbids; // An array of ints
 	array<int,D> cpos;
-        int n;   // Current number of keys
-        bool leaf; // Is true when node is leaf. Otherwise false
+        int knum;   // Current number of keys
+        bool isleaf; // Is true when node is leaf. Otherwise false
 	int height;
-	int t;
 
-
-	//int nextbid = 0;
-        //int nextBid();
-        int RandomPath();
-        std::random_device rd;
-        std::mt19937 mt;
-        std::uniform_int_distribution<int> dis;
-        int BRAMleaves = 0;
-
-
-        void insertNonFull(string kw,BTreeNode *node);
         void splitChild(int i, BTreeNode *y, BTreeNode *&z);
 friend class BTree;
 };

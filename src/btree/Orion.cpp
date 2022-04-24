@@ -11,8 +11,6 @@ Orion::Orion(bool usehdd, int filecnt , int filesize, bool local)
     bytes<Key> key2{1};
     srch = new OMAPf(filecnt*10, key1);
     btreeHandler = new BTree(filecnt, key1);
-    btreeHandler->brootKey = 0;
-    btreeHandler->brootPos = 0;
 }
 
 Orion::~Orion() 
@@ -134,7 +132,7 @@ void Orion::insert(vector<string> kws, vector<string> blocks, int ind)
 	      Bid key = createBid(kw, fc);
   	      srch->insert(key, ind);
 	      cout <<kw<<":-----------------"<<endl;
-	      btreeHandler->insert(kw,btreeHandler->brootKey,btreeHandler->brootPos);
+	      btreeHandler->insert(kw);
 	      cout <<"--------------------------"<<endl;
     }
 }
