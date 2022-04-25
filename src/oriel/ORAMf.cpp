@@ -462,6 +462,7 @@ block ORAMf::convertNodefToBlock(Nodef* node) {
 
 void ORAMf::finilize(bool find, Bid& rootKey, int& rootPos) {
     //fake read for padding     
+    /*
     if (!batchWrite) {
         if (find) {
             for (unsigned int i = readCnt; i < depth * 1.45; i++) {
@@ -481,7 +482,7 @@ void ORAMf::finilize(bool find, Bid& rootKey, int& rootPos) {
             }
         }
     }
-
+*/
     //updating the binary tree positions
     for (unsigned int i = 1; i <= maxheight; i++) {
         for (auto t : cache) {

@@ -1,29 +1,46 @@
 #ifndef ORION_H
 #define ORION_H
 #include "OMAP.h"
+#include "OMAPf.h"
 #include<iostream>
 using namespace std;
 
 class Orion {
 private:
     bool useHDD;
-    map<Bid,string > setupPairs1;
-    map<Bid,string > setupPairs2;
-    OMAP* srch,*updt, *fcnt;
-    map<string, int> UpdtCnt;
-    map<string, int> LastIND;        
-    
+    bool local;
+    OMAPf* srch;
+    OMAPf *updt;
+    OMAPf *fcnt;
+    OMAP* file;
+    map<Bid, int> UpdtCnt;
+    map<Bid,int> srchbids;
+    map<string,int> fcntbids;
+    map<Bid,int> updtbids;
+    map<Bid,string> filebids;
+    map<string,int> localFCNT;
+    map<int,int> localBCNT;
 public:
     Bid createBid(string keyword,int number);
-    void insert(string keyword, int ind);
-    void setupInsert(string keyword, int ind);
-    void remove(string keyword, int ind);
-    void setupRemove(string keyword, int ind);
-    vector<int> search(string keyword);
-    Orion(bool useHDD,int maxSize);    
+    
+    void insertWrap(string cont, int fileid, bool batch);
+    void insert(vector<string> kws,  int ind);
+    void setupinsert(vector<string> kws, vector<string> blocks, int ind);
+    void batchInsert(vector<string> kws, vector<string> blocks, int ind) ;
+    
+    void remove(int ind);
+    void removekw(vector <string> kws, int id);
+    
+    vector<string> batchSearch(string keyword);
+    vector<string> simplebatchSearch(string keyword);
+    int search(string keyword);
+    
+    Orion(bool useHDD,int maxSize, int filesize, bool local);    
+    
     virtual ~Orion();
-    void beginSetup();
     void endSetup();
+    void print();
+
 
 };
 

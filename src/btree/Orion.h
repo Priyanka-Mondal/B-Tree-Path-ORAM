@@ -20,6 +20,7 @@ private:
     map<Bid, int> UpdtCnt;
     map<Bid,int> srchbids;
     map<Bid,int> fcntbids;
+    map<string,int> fcntbtree;
     map<Bid,int> updtbids;
     map<Bid,string> filebids;
     map<string,int> localFCNT;
@@ -37,9 +38,9 @@ public:
     
     vector<string> batchSearch(string keyword);
     vector<string> simplebatchSearch(string keyword);
-    vector<pair<int,string>> search(string keyword);
+    int search(string keyword);
     
-    Orion(bool useHDD,int maxSize, int filesize, bool local);    
+    Orion(bool useHDD,int maxSize, bool local);    
     
     virtual ~Orion();
     void endSetup();

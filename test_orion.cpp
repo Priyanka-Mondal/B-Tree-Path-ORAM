@@ -1,142 +1,44 @@
 #include "orion/Orion.h"
-//#include "utils/Utilities.h"
 #include<string.h>
 #include<utility>
 #include <dirent.h>
 #include <boost/algorithm/string.hpp>
 #include<limits.h>
 #include<set>
+#include<chrono>
 
 using namespace std;
-
+using namespace std::chrono;
 
 int fileid = 1;
-bool usehdd = false;
-Orion orion(usehdd, 1000000);  
-set<string> neg;
-int totk = 0;
-vector<string> getUniquedWords(vector<string> kws, string fileid)
+bool usehdd = true;
+bool batch = false;
+bool local = true;
+
+int to_int(string updt_cnt)
 {
-    // Open a file stream
-    vector<string> kw;
-    // Create a map to store count of all words
-    map<string, int> mp;
-  
-    // Keep reading words while there are words to read
-    string word;
-    for(auto word : kws)
-    {
-        // If this is first occurrence of word
-        if (!mp.count(word))
-            mp.insert(make_pair(word, 1));
-        else
-            mp[word]++;
-    }
-    mp.erase(fileid);
-  
-  
-    // Traverse map and print all words whose count
-    //is 1
-    for (map<string, int> :: iterator p = mp.begin();
-         p != mp.end(); p++)
-    {
-        if (p->second >= 1)
-            kw.push_back(p->first) ;
-    }
-return kw;
-}
-
-vector<string> divideString(string filename, int sz, string id)
-    {
-	 fstream fs(filename); 
-         string str((istreambuf_iterator<char>(fs)),
-                       (istreambuf_iterator<char>()));
-
-        int str_size = str.length();
-
-	
-	if (str_size% sz !=0)
-	{
-		int pad = ceil(str_size/sz)+1;
-		//cout << filename<< " pad:" << pad << endl;
-		pad = pad*sz-str_size;
-		//cout << "again pad:" << pad << endl; 
-	        str.insert(str.size(), pad, '#');
-	}/*
-	else if (str_size <= MEDIUM)
-	{
-		cout << "Its a MEDIUM file:" << MEDIUM;
-        str.insert(str.size(), MEDIUM - str.size(), '#');
-	}
-	else 
-	{
-		cout << "Its a LARGE file:" << LARGE;
-        str.insert(str.size(), LARGE - str.size(), '#');
-	} */
-         
-	str_size = str.length();
-	//cout << "the new size of the file:" <<str_size << endl;
-	//cout << str << endl << endl ;
-  	int i;
-        vector<string> result;
-        string temp="";
-        
-	for (i = 0; i < str_size; i++) {
-            if (i % sz == 0) {
-		  if(i!=0)
-                  {
-		     string ttemp =id;
-		     ttemp.append(temp); 
-                     result.push_back(ttemp);    
-		     //cout << "New Node:[" << ttemp << "]\n";
-                  }
-                  temp="";
-            }
-	    temp +=str[i];
-	}
-        string ttemp = id;
-	ttemp.append(temp);	
-	    //cout << "New Node::"<< ttemp << endl; 
-	result.push_back(ttemp); 
-	
-	return result;
-    }
-
-
-string toS(int id)
-{
-	string s = to_string(id);
-	string front ="";
-	if (id < 10)
-		front = "000";
-	else if(id < 100)
-		front = "00";
-	else if(id < 1000)
-		front = "0";
-	s=front.append(s);
-
-	return s;
+        int updc;
+        stringstream convstoi(updt_cnt);
+        convstoi >> updc;
+        return updc;
 }
 
 string getFileContent(string path)
 {
-	  ifstream file(path);
-	  string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-
-	      return content;
+    ifstream file(path);
+    string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    return content;
 }
 
 
-static void list_dir (const char * dir_name)
+static void list_dir (const char * dir_name, Orion& orion)
 {
-    string delimiters("|?@,:!\">; -./  \n");
     DIR * d;
     d = opendir (dir_name);
 
    if (! d) 
    {
-      fprintf (stderr, "Cannot open directory '%s': %s\n",
-         dir_name, strerror (errno));
+       fprintf (stderr, "Cant open '%s': %s\n", dir_name, strerror (errno));
        exit (EXIT_FAILURE);
    }
    while (1) 
@@ -149,99 +51,133 @@ static void list_dir (const char * dir_name)
             break;
       }
       d_name = entry->d_name;
-            if (! (entry->d_type & DT_DIR)) {
-              printf ("%s/%s\n", dir_name, d_name);
-	      string file = dir_name;
-	      file = file.append("/");
-	      file = file.append(d_name);
-	      vector<string> kws1, kws;
-	      string id = toS(fileid);
-	      string cont = getFileContent(file);
-	      cout <<"=====================================" << endl;
-
-	      boost::split(kws1, cont, boost::is_any_of(delimiters));
-	      kws =  getUniquedWords(kws1, id);
-	      for (auto it = kws.begin(); it != kws.end(); it++)
-	      {
-		      if(neg.find(*it)!=neg.end())
-		      {
-			 kws.erase(it--);
-		      }
-	      }
-	      cout << endl <<file<< " " << id <<endl << endl;
-	      cout << "============================" << endl;
-    		vector<string> blocks;
-				orion.beginSetup();
-		for(auto k: kws)
-		{
-			int lenn = k.length();
-			if(lenn <= 12)
-			{
-				orion.setupInsert(k, fileid);
-	        		totk++;
-			}
-			else
-			{
-				cout << "GREATER THAN 12"<< endl;
-			}
-		}
-		orion.endSetup();
-                fileid++;
-               }
-             if (entry->d_type & DT_DIR) {
-                if (strcmp (d_name, "..") != 0 &&
-                  strcmp (d_name, ".") != 0) {
-			cout <<"HERE 1: " << d_name<< endl ;
-                 int path_length;
-                   char path[PATH_MAX];
-                     
-                     path_length = snprintf (path, PATH_MAX,
-                         "%s/%s", dir_name, d_name);
-                         if (path_length >= PATH_MAX) {
-                             fprintf (stderr, "Path length has got too long.\n");
-                               exit (EXIT_FAILURE);
-                                 }
-                           list_dir (path);
-                            }
-                }
+          //printf ("%s/%s\n", dir_name, d_name);
+            if (! (entry->d_type & DT_DIR)) 
+	    {
+	          string file = dir_name;
+	          file = file.append("/");
+	          file = file.append(d_name);
+	          string cont = getFileContent(file);
+	          cout <<"============================================================" << endl;
+                  cout << file<< " " << fileid <<endl ;
+	     
+	     	  orion.insertWrap(cont,fileid, batch);
+	     	  fileid++;
              }
-    if (closedir (d)) {
-       fprintf (stderr, "Could not close '%s': %s\n",
-          dir_name, strerror (errno));
+             if (entry->d_type & DT_DIR) 
+	     {
+                if (strcmp (d_name, "..") != 0 &&   strcmp (d_name, ".") != 0) 
+		{
+                        int path_length;
+                        char path[PATH_MAX];
+                  path_length=snprintf(path,PATH_MAX,"%s/%s", dir_name, d_name);
+                         if (path_length >= PATH_MAX) 
+			 {
+                                 fprintf (stderr, "Path length too long.\n");
+                                 exit (EXIT_FAILURE);
+                         }
+                         list_dir (path, orion);
+                 }
+              }
+     }
+    if (closedir (d)) 
+    {
+    	fprintf (stderr, "Couldnt close '%s': %s\n",dir_name, strerror(errno));
         exit (EXIT_FAILURE);
-        }
+    }
 }
 
 
-int main(int, char**) {
-neg.insert("and");
-neg.insert("the");
-neg.insert("The");
-neg.insert("a");
-neg.insert("A");
-neg.insert("an");
-neg.insert("An");
-neg.insert("to");
-neg.insert("To");
-neg.insert("in");
-neg.insert("of");
-neg.insert("or");
-neg.insert("as");
-neg.insert("for");
-neg.insert("on");
-neg.insert(",");
-neg.insert(" ");
-neg.insert("\n");
-neg.insert("\0");
-neg.insert("?");
-neg.insert("by");
-neg.insert("\t");
-neg.insert("from");
+int main(int argc, char**argv) 
+{
+	int sizekw = to_int(argv[1]);
+	int sizefile = to_int(argv[2]);
 
+	Orion orion(usehdd, sizekw, sizefile, local);  
 
-	//list_dir("allen-p/deleted_items");
-	//list_dir("allen-p");
-	list_dir("tiny");
+        ofstream sres;
+        ifstream kw;
+	list_dir(argv[3],orion);
+       // 	  orion.endSetup();     
+	kw.open(argv[4]);
+	sres.open(argv[5]);	
+	string line;
+	int l = 1;
+	if(local)
+	{
+		while(getline(kw,line))
+		{
+	        	auto start = high_resolution_clock::now();
+			auto s = orion.search(line);
+	        	auto stop = high_resolution_clock::now();
+			auto duration = duration_cast<microseconds>(stop-start);
+			sres <<line<<" "<< duration.count()<<" "<< s<<endl;
+			cout <<l<<" "<< duration.count()<<" "<< s<<endl;
+			l++;
+		}
+	}
+/*	
+	else
+	{
+		while(getline(kw,line))
+		{
+	        	auto start = high_resolution_clock::now();
+			auto s = orion.batchSearch(line);
+	        	auto stop = high_resolution_clock::now();
+			auto duration = duration_cast<microseconds>(stop-start);
+			sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+			cout <<l<<" "<< duration.count()<<" "<< s.size()<<endl;
+			l++;
+		}
+	}
+*/
+	return 0;
+	/*
+	
+	list_dir("allen-p/deleted_items",orion);
+	list_dir("allen-p/sent_items",orion);
+	//list_dir("allen-p/sent",orion);
+	//list_dir("allen-p/all_documents",orion);
+	//list_dir("allen-p/discussion_threads",orion);
+	cout <<"SEARCHING..."<<endl;
+        auto start = high_resolution_clock::now();
+	auto s = orion.search("borion");
+        auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<microseconds>(stop-start);
+	sres <<(fileid-1)<<" "<< duration.count()<<" "<< s.size()<<endl;
+return 0;
+	list_dir("allen-p/sent_items",orion);
+        start = high_resolution_clock::now();
+	s = orion.search("borion");
+        stop = high_resolution_clock::now();
+	duration = duration_cast<microseconds>(stop-start);
+	sres <<(fileid-1)<<" "<<duration.count() <<" "<< s.size()<<endl;
+
+	list_dir("allen-p/sent",orion);
+        start = high_resolution_clock::now();
+	s = orion.searchsimple("borion");
+        stop = high_resolution_clock::now();
+	duration = duration_cast<microseconds>(stop-start);
+	sres <<(fileid-1)<<" "<<duration.count()<<" "<< s.size()<<endl;
+
+	list_dir("allen-p/all_documents",orion);
+        start = high_resolution_clock::now();
+	s = orion.searchsimple("borion");
+        stop = high_resolution_clock::now();
+	duration = duration_cast<microseconds>(stop-start);
+	sres <<(fileid-1)<<" "<<duration.count()<<" "<< s.size()<<endl;
+
+	list_dir("allen-p/discussion_threads",orion);
+        start = high_resolution_clock::now();
+	s = orion.searchsimple("borion");
+        stop = high_resolution_clock::now();
+	duration = duration_cast<microseconds>(stop-start);
+	sres <<(fileid-1)<<" "<<duration.count()<<" "<< s.size()<<endl;
+
+	return 0;
+*/
+/*	
+	cout <<"== TOTAL files inserted :"<<fileid-1<<" =="<<endl;
 	cout << endl<<" SETUP INSERT DONE!"<< endl;
 	cout <<"=================================="<< endl;
 	cout <<"READY TO PERFORM QUERIES!" << endl;
@@ -267,45 +203,69 @@ neg.insert("from");
 			cout << "Enter the keyword to be searched: ";
 			string keyword;
 			cin>> keyword;
-	    		vector<int> files = orion.searchsimple(keyword);
-			cout <<"--------Search result---------"<<endl;
-	    		for(auto file:files)
-			{
-	    			cout << "["<<file<<"] ";
+			cout <<"SEARCHING ..."<<endl;
+			//start = high_resolution_clock::now();
+			auto s = orion.search(keyword);
+			cout <<"search size:"<<s.size()<<endl;
+			//stop = high_resolution_clock::now();
+			//duration = duration_cast<microseconds>(stop-start);
+			//sres<<fileid-1<<" "<<duration.count()<<" "<<files.size();
+	    		//for(auto file:files)
+			//{
+	    		//	cout << "["<<file.first<<"] ";
 				//cout << file.second<< endl<<endl;
-			}
-	    		cout <<endl<<endl;
-			cout << "RESULT size: " << files.size() << endl<<endl;
+			//}
+			//sres<<duration.count()<<" "<< files.size()<<endl;
 		}
 		else if(c=='d'|| c=='D')
 		{
 			cout <<"Enter file id to be deleted: ";
 			int fid;
 			cin>>fid;
-			//orion.remove(fid);
+			start = high_resolution_clock::now();
+			orion.remove(fid);
+			stop = high_resolution_clock::now();
+			duration = duration_cast<microseconds>(stop-start);
+			cout << "Deletion time: "<< duration.count()<<endl;  
 		}
 		else if(c=='i' || c=='I')
 		{
-			cout << "Enter keyword to be inserted:";
-			string kw;
-			cin>> kw;
-			cout << "Enter id to be inserted:";
-			int id;
-			cin>> id;
-			orion.beginSetup();
-			orion.setupInsert(kw,id);
-			orion.endSetup();
+			cout << "Enter file name to be inserted:";
+			string file;
+			cin>> file;
+	          	string cont = getFileContent(file);
+			//start = high_resolution_clock::now();
+			orion.insertWrap(cont,fileid, false);
+			//stop = high_resolution_clock::now();
+			//duration = duration_cast<microseconds>(stop-start);
+		cout <<"--TOTAL files inserted so far:"<<fileid<<endl;
+			//cout << "Insertion time: "<< duration.count()<<endl;  
+			fileid++;
 			cout <<endl;
+		}
+		else if(c=='d' || c=='D')
+		{
+			cout <<"insert KEYWORD and FILEID"<<endl;
+			string kw;
+			int id;
+			//cin>>kw;
+			cin>>id;
+			//vector<string> kws;
+			//kws.push_back(kw);
+			orion.remove(id);
 		}
 		else if(c=='p' || c=='P')
 		{
-			//orion.print();
+			orion.print();
 		}
-		else //if(c=='q'||c=='Q')
+		else if(c=='q'||c=='Q')
 		{
 			cout <<"QUITTING..."<<endl<<endl;
 			break;
 		}
+		else
+			cout <<"invalid choice!"<<endl;
 	}    
         return 0;
+	*/
 }

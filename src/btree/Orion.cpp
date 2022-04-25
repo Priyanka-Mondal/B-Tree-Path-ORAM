@@ -3,19 +3,17 @@
 #include "stopword.hpp"
 #include<unordered_map>
 
-Orion::Orion(bool usehdd, int filecnt , int filesize, bool local) 
+Orion::Orion(bool usehdd, int size, bool local) 
 {
     this->useHDD = false;//usehdd;
     this->local= local;
     bytes<Key> key1{0};
     bytes<Key> key2{1};
-    srch = new OMAPf(filecnt*10, key1);
-    btreeHandler = new BTree(filecnt, key1);
+    btreeHandler = new BTree(size, key1);
 }
 
 Orion::~Orion() 
 {
-    delete srch;
     delete btreeHandler;
 }
 
@@ -124,6 +122,7 @@ void Orion::insert(vector<string> kws, vector<string> blocks, int ind)
 {
     for(auto kw: kws)
     {		
+	    /*
   	      Bid firstKey(kw);
   	      int fc = fcntbids[firstKey];
   	      fc++;
@@ -131,9 +130,14 @@ void Orion::insert(vector<string> kws, vector<string> blocks, int ind)
   	      fcntbids[firstKey]=fc;
 	      Bid key = createBid(kw, fc);
   	      srch->insert(key, ind);
-	      cout <<kw<<":-----------------"<<endl;
-	      btreeHandler->insert(kw);
-	      cout <<"--------------------------"<<endl;
+	      */
+	    int fc = 0;
+	    if(fcntbtree.count(kw)!=0)
+  	      fc = fcntbtree[kw];
+	    fc++;
+	    fcntbtree[kw] = fc;
+	    Bid key = createBid(kw,fc);
+	    btreeHandler->insert(key,ind);
     }
 }
 
@@ -144,19 +148,21 @@ Bid Orion::createBid(string keyword, int number)
     std::copy(arr.begin(), arr.end(), bid.id.end() - 4);
     return bid;
 }
-/*
-vector<pair<int,string>> Orion::search(string keyword) 
+
+int Orion::search(string keyword) 
 {
-    vector<pair<int,string>> fileblocks;
+    /*
     Bid firstKey(keyword);
     int fc = fcntbids[firstKey];
     if (fc == 0) 
+    {
+    	btreeHandler->search(keyword);
 	return fileblocks;
+    }
     for (int i = 1; i <= fc; i++) 
     {
 	Bid bid = createBid(keyword, i);
         int id = srch->find(bid);
-	cout <<"["<<id<<"] ";
 	
 	string fileid = to_string(id);
 	Bid blkcnt(fileid);
@@ -166,13 +172,26 @@ vector<pair<int,string>> Orion::search(string keyword)
 		Bid block = createBid(fileid,j);
 		string cont = file->find(block);
 		fileblocks.push_back(make_pair(id,cont));
-		cout <<"cont:"<< cont<<endl;
 	}
+    }*/
+    int fc = 0; 
+    if(fcntbtree.count(keyword)>0)
+	    fc = fcntbtree[keyword];
+    if(fc == 0)
+	    cout <<"NOT FOUND"<<endl;
+    else
+    {
+	    for(int i = 1; i<=fc; i++)
+	    { 
+    		Bid key = createBid(keyword,i);
+    		int res = btreeHandler->search(key);
+		cout <<"["<<res<<"]";
+	    }
     }
-    cout <<endl;
-    return fileblocks;
+    cout<<endl;
+    return fc;
 }
-
+/*
 vector<string> Orion::simplebatchSearch(string keyword) 
 {
 	ofstream bcfc;
@@ -322,7 +341,6 @@ void Orion::removekw(vector <string> kws, int id)
 		}
 	}
 }
-*/
 
 void Orion::print()
 {
@@ -332,7 +350,6 @@ void Orion::endSetup()
 {
         srch->setupInsert(srchbids);
 }
-/*
 void Orion::setupinsert(vector<string> kws, vector<string> blocks, int ind) 
 {
     for(auto kw: kws)

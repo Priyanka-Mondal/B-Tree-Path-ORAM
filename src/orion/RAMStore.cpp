@@ -20,6 +20,7 @@ void RAMStore::Write(int pos, block b)
 	store[pos] = b;
 }
 
+
 size_t RAMStore::GetBlockCount()
 {
 	return store.size();
@@ -37,6 +38,9 @@ bool RAMStore::WasSerialised()
 
 void RAMStore::ReduceEmptyNumbers() {
     emptyNodes--;
+}
+void RAMStore::IncreaseEmptyNumbers() {
+    emptyNodes++;
 }
 
 size_t RAMStore::GetEmptySize() {

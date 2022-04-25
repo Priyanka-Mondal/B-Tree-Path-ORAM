@@ -115,11 +115,11 @@ int main(int argc, char**argv)
 		while(getline(kw,line))
 		{
         		auto start = high_resolution_clock::now();
-			auto s = oriel.simplebatchSearch(line);
+			auto s = oriel.search(line);
         		auto stop = high_resolution_clock::now();
 			auto duration = duration_cast<microseconds>(stop-start);
-			sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
-			cout <<l<<" "<< duration.count()<<" "<< s.size()<<endl;
+			sres <<line<<" "<< duration.count()<<" "<< s.front()<<endl;
+			cout <<line<<" "<< duration.count()<<" "<< s.front()<<endl;
 			l++;
 		}
 	}

@@ -69,40 +69,32 @@ Bucketb BRAM::DeserialiseBucketb(block buffer)
 {
     assert(buffer.size() == Z * (blockSize));
     Bucketb bucket;
-    cout <<"assert worked"<<endl;
     for (int z = 0; z < Z; z++) 
     {
         Blockb &block = bucket[z];
         block.data.assign(buffer.begin(), buffer.begin() + blockSize);
         BTreeNode* node = convertBlockbToBTreeNode(block.data);
-	cout <<"block data assigned to node"<<endl;
         block.id = node->bid;
-	cout <<"block.id is:"<<block.id<<endl;
-        //delete node;
+        //delete node; //why cant I delete this
         buffer.erase(buffer.begin(), buffer.begin() + blockSize);
     }
-cout <<"returning to read:"<<endl;
     return bucket;
 }
 
 Bucketb BRAM::ReadBucketb(int index) {
-	cout <<"bucket reading:"<< index<<endl;
     block ciphertext = store->Read(index);
-	cout <<"bucket READ:"<< index<<endl;
     block buffer = AES::Decrypt(key, ciphertext, clen_size);
-	cout <<"bucket decrypted:"<< buffer.size()<<endl;
     Bucketb bucket = DeserialiseBucketb(buffer);
-	cout <<"bucket deserialized:"<< bucket.size()<<endl;
     return bucket;
 }
 
-void BRAM::WriteBucketb(int index, Bucketb bucket) {
+void BRAM::WriteBucketb(int index, Bucketb bucket) 
+{
     block b = SerialiseBucketb(bucket);
     block ciphertext = AES::Encrypt(key, b, clen_size, plaintext_size);
     store->Write(index, ciphertext);
 }
 
-// Fetches blocks along a path, adding them to the cache
 
 void BRAM::FetchPath(int leaf) 
 {
@@ -110,8 +102,6 @@ void BRAM::FetchPath(int leaf)
     for (size_t d = 0; d <= depth; d++) 
     {
         int node = GetBTreeNodeOnPath(leaf, d);
-	cout <<"The leaf and node is:"<<leaf<<" "<< node<<endl;
-
         if (find(readviewmap.begin(), readviewmap.end(), node) != readviewmap.end()) 
 	{
             continue;
@@ -121,18 +111,12 @@ void BRAM::FetchPath(int leaf)
             readviewmap.push_back(node);
         }
 
-	    cout <<"one 5"<<endl;
         Bucketb bucket = ReadBucketb(node); //<<-- here
-	    cout <<"one 6"<<endl;
         for (int z = 0; z < Z; z++) {
-	    cout <<"one 7"<<endl;
             Blockb &block = bucket[z];
 
-	    cout <<"one 8"<<endl;
             if (block.id != 0) { // 0 is root right ? or maybe makeit 1
-	    cout <<"one here 9**"<<endl;
                 BTreeNode* n = convertBlockbToBTreeNode(block.data);
-	    cout <<"one after 10**"<<endl;
                 if (cache.count(block.id) == 0) {
                     cache.insert(make_pair(block.id, n));
                 } else {
@@ -140,21 +124,20 @@ void BRAM::FetchPath(int leaf)
                 }
             }
         }
-	cout <<"at pos:"<<leaf<<" cache size:"<< cache.size()<<" at depth:"<<d<<endl;
     }
 }
 
-// Gets a list of blocks on the cache which can be placed at a specific point
 
 std::vector<int> BRAM::GetIntersectingBlockbs(int x, int curDepth) {
     std::vector<int> validBlockbs;
-
     int node = GetBTreeNodeOnPath(x, curDepth);
     for (auto b : cache) {
         int bid = b.first;
-        if (b.second != NULL && GetBTreeNodeOnPath(b.second->pos, curDepth) == node) {
+        if (b.second != NULL && GetBTreeNodeOnPath(b.second->pos, curDepth) == node) 
+	{
             validBlockbs.push_back(bid);
-            if (validBlockbs.size() >= Z) {
+            if (validBlockbs.size() >= Z) 
+	    {
                 return validBlockbs;
             }
         }
@@ -213,7 +196,7 @@ void BRAM::WriteData(int bid, BTreeNode* node)
     {
         cache[bid] = node;
         store->ReduceEmptyNumbers();
-	cout <<"FREE:"<<store->GetEmptySize()<<endl;
+	//cout <<"FREE:"<<store->GetEmptySize()<<endl;
     } 
     else 
     {
@@ -226,7 +209,6 @@ void BRAM::WriteData(int bid, BTreeNode* node)
 
 void BRAM::Access(int bid, BTreeNode*& node, int lastLeaf, int newLeaf) {
     FetchPath(lastLeaf);
-    cout <<"lastleaf fetched"<<endl;
     node = ReadData(bid);
     if (node != NULL) {
         node->pos = newLeaf;
@@ -244,7 +226,6 @@ void BRAM::Access(int bid, BTreeNode*& node)
 {
     FetchPath(node->pos);
     WriteData(bid, node);
-    cout <<"CACHE SIZE:"<<cache.size()<<endl;
     if (find(leafList.begin(), leafList.end(), node->pos) == leafList.end()) 
     {
         leafList.push_back(node->pos);
@@ -255,11 +236,9 @@ BTreeNode* BRAM::ReadBTreeNode(int bid) {
     if (bid == 0) {
         throw runtime_error("BTreeNode id is not set ReadBTreeNode");
     }
-    cout <<"bid searching:"<<bid<<endl;
     if (cache.count(bid) == 0) {
         throw runtime_error("BTreeNode not found in the cache ReadBTreeNode");
     } else {
-	    cout <<"bid found"<<endl;
         BTreeNode* node = cache[bid];
         return node;
     }
@@ -271,7 +250,6 @@ BTreeNode* BRAM::ReadBTreeNode(int bid, int lastLeaf, int newLeaf) {
         throw runtime_error("BTreeNode id is not set ReadBTreeNode");
         return NULL;
     }
-    cout <<"going to read:"<<endl;
     if (cache.count(bid) == 0) 
     {
         BTreeNode* node;
@@ -302,7 +280,6 @@ int BRAM::WriteBTreeNode(int bid, BTreeNode* node)
     }
     if (cache.count(bid) == 0) 
     {
-	//cout <<"going to write: "<< bid<<" knum:"<<node->knum<<endl;
         modified.insert(bid);
         Access(bid, node);
         return node->pos;
@@ -369,20 +346,13 @@ void BRAM::finalize(int& brootKey, int& brootPos)
     if (cache.count(brootKey) != 0)
         brootPos = cache[brootKey]->pos;
 
-    int cnt = 0;
-    cout <<"WRITE PATH starts"<<endl;
-    for (int d = depth; d >= 0; d--) {
-        for (unsigned int i = 0; i < leafList.size(); i++) {
-            cnt++;
-            if (cnt % 1000 == 0 && batchWrite) 
-	    {
-                cout<<"OMAP:"<<cnt<<"/"<<(depth+1)*leafList.size()<<" inserted"<<endl;
-            }
+    for (int d = depth; d >= 0; d--) 
+    {
+        for (unsigned int i = 0; i < leafList.size(); i++) 
+	{
             WritePath(leafList[i], d);
         }
     }
-
-    cout <<"WRITE PATH ends"<<endl;
     leafList.clear();
     modified.clear();
 }

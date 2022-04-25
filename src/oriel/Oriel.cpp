@@ -279,6 +279,13 @@ vector <string> Oriel::search(string keyword)
 	bids.push_back(mapKey);
     }
     vector<int> ids = I->batchSearch(bids); // add y^m - updc fake accesses
+
+    //////////
+    files.push_back(to_string(updc)); //comment this
+    return files; // comment this 
+    /////////////
+    
+/*
     for(int ind : ids)
     {
         //int ind = I->find(mapKey);
@@ -324,6 +331,7 @@ vector <string> Oriel::search(string keyword)
     }
 //cout <<"size of files:"<<files.size()<<endl;
     return files;
+    */
 }
 
 /*

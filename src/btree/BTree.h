@@ -36,9 +36,12 @@ private:
 public:
     int brootKey;
     int brootPos;
-    int insert(string kw);
-    int insertkw(string kw, int rootBid, int &rootPos);
-    void insertNFull(string kw, BTreeNode*& bt ); 
+    int insert(Bid kw, int id);
+    int insertkw(Bid kw, int id, int rootBid, int &rootPos);
+    void insertNFull(Bid kw,int id, BTreeNode*& bt ); 
+    int search(Bid kw);
+    void searchkw(int brootKey, int brootPos, Bid kw, int &res);
+    
     BTree(int maxSize, bytes<Key> key);
     BTree();
     virtual ~BTree();

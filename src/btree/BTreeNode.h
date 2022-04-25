@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 #include <bits/stdc++.h>
+#include "Bid.h"
 
 using namespace std;
 
@@ -17,14 +18,15 @@ public:
 
         int bid;
 	int pos; // position of this node
-	array<string, D-1>keys;
+	array<Bid, D-1>keys;
+	array<int, D-1>values;
         array<int,D> cbids; // An array of ints
 	array<int,D> cpos;
         int knum;   // Current number of keys
         bool isleaf; // Is true when node is leaf. Otherwise false
 	int height;
 
-        void splitChild(int i, BTreeNode *y, BTreeNode *&z);
+        void splitChild(int i, BTreeNode *&y, BTreeNode *&z);
 friend class BTree;
 };
 #endif

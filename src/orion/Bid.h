@@ -1,6 +1,7 @@
+#pragma once
 #ifndef BID_H
 #define BID_H
-#include "Types.hpp"
+#include "../borion/Types.hpp"
 #include <iostream>
 #include <array>
 using namespace std;

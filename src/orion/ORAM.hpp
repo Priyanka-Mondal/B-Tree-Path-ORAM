@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ORAM_H
 #define ORAM_H
 
@@ -24,7 +25,7 @@ public:
     ~Node() {
     }
     Bid key;
-    std::array< byte_t, 16> value;
+    std::array< byte_t, 64> value;
     int pos;
     Bid leftID;
     int leftPos;
@@ -43,7 +44,6 @@ using Bucket = std::array<Block, Z>;
 class ORAM {
 private:
     RAMStore* store;
-    using Stash = std::unordered_map<Bid, block>;
     size_t depth;
     size_t blockSize;
     map<Bid, Node*> cache;
@@ -68,6 +68,7 @@ private:
 
     Node* ReadData(Bid bid);
     void WriteData(Bid bid, Node* b);
+    void DeleteData(Bid bid, Node* b);
 
     block SerialiseBucket(Bucket bucket);
     Bucket DeserialiseBucket(block buffer);
@@ -89,14 +90,24 @@ private:
 public:
     ORAM(int maxSize, bytes<Key> key);
     ~ORAM();
-
+    int maxheight;
     Node* ReadNode(Bid bid, int lastLeaf, int newLeaf);
     Node* ReadNode(Bid bid);
     int WriteNode(Bid bid, Node* n);
+    int DeleteNode(Bid bid, Node* n);
     void start(bool batchWrite);
     void finilize(bool find, Bid& rootKey, int& rootPos);
     static Node* convertBlockToNode(block b);
+    void convertBlockToNode(Node*& node,block b);
     static block convertNodeToBlock(Node* node);
+
+
+
+    Node* setupReadN(Bid bid, int leaf);
+    void setupReadN(Node*& n, Bid bid, int leaf);
+    int setupWriteN(Bid bid, Node* n, Bid rootkey, int& rootPos);
+    void setupWriteBucket(Bid bid, Node* n, Bid rootKey, int& rootPos);
+    void setupInsert(vector<Node*> nodes);
 };
 
 #endif

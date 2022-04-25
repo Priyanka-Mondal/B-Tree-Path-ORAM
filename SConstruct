@@ -72,26 +72,26 @@ env.Alias('deps', [crypto_lib_target, db_parser_target])
 
 objects = SConscript('src/build.scons', exports='env', variant_dir='build')
 
-env.Depends(objects["orionsq"],[crypto_lib_target , db_parser_target])
+env.Depends(objects["oriel"],[crypto_lib_target , db_parser_target])
 env.Depends(objects["btree"],[crypto_lib_target , db_parser_target])
 env.Depends(objects["t111"],[crypto_lib_target , db_parser_target])
 
-Clean(objects["orionsq"]+objects["t111"]+objects["btree"], 'build')
+Clean(objects["oriel"]+objects["t111"]+objects["btree"], 'build')
 
 outter_env = env.Clone()
 outter_env.Append(CPPPATH = ['build'])
 
 
 
-orionsq_debug_prog   = outter_env.Program('orionsq_debug',    ['test_orionsq.cpp']     + objects["orionsq"])
+oriel_debug_prog   = outter_env.Program('oriel_debug',    ['test_oriel.cpp']     + objects["oriel"])
 btree_debug_prog   = outter_env.Program('btree_debug',    ['test_btree.cpp']     + objects["btree"])
 t111_debug_prog   = outter_env.Program('t111_debug',['t111.cpp']+objects["t111"])
 
 
-env.Alias('orionsq', [orionsq_debug_prog])
+env.Alias('oriel', [oriel_debug_prog])
 env.Alias('btree', [btree_debug_prog])
 env.Alias('t111', [t111_debug_prog])
 
-env.Default(['orionsq'])
+env.Default(['oriel'])
 env.Default(['btree'])
 env.Default(['t111'])

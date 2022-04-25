@@ -17,89 +17,96 @@ BTree::~BTree()
 
 BTreeNode::BTreeNode(bool leaf, int nextbid, int leafpos) 
 {
+
     bid = nextbid;
     pos = leafpos;
     knum = 0;
     isleaf=leaf;
     height = 1;
-    //keys = new string[2*t-1]
-    //cbids = new int[2*t];
-    //cpos = newint *[2*t];
+    for(int i =0;i<D-1;i++)
+    {
+	    Bid(keys[i]);
+	    cbids[i]=0;
+	    cpos[i]=-1;
+    }
+    cbids[D-1]=0;
+    cpos[D-1]=-1;
 }
+
 int BTree::nextBid()
 {
 	nextbid++;
 	return nextbid;
 }
-int BTree::insert(string kw)
+int BTree::insert(Bid kw, int id)
 {
 	bram->start(false);
-	brootKey = insertkw(kw,brootKey,brootPos);
+	brootKey = insertkw(kw,id,brootKey,brootPos);
 	bram->finalize(brootKey,brootPos);
 }
-int BTree::insertkw(string kw, int rootBid, int &rootPos)
+int BTree::insertkw(Bid kw, int id, int brootKey, int &brootPos)
 {
-	//bram->start(false);
 	if (brootKey == 0)
 	{
 		BTreeNode *root = new BTreeNode(true, nextBid(),RandomPath());
-		root->keys[0] = kw; 
+		root->keys[0] = kw;
+		root->values[0] = id;
 		root->knum = 1; 
 		brootPos = root->pos;
 		brootKey = root->bid;
 		brootPos = bram->WriteBTreeNode(root->bid, root);
-		cout <<"brootKey:"<<brootKey<<" brootPos:"<< brootPos<<endl;
+		//cout <<"brootKey:"<<brootKey<<" brootPos:"<< brootPos<<endl;
 		return brootKey;
 	}
 	else 
 	{
-		cout <<"Else brootKey:"<<brootKey<<" brootPos:"<< brootPos<<endl;
+		//cout <<"Else brootKey:"<<brootKey<<" brootPos:"<< brootPos<<endl;
 		BTreeNode *root = bram->ReadBTreeNode(brootKey,brootPos,brootPos);
+		
 		if (root->knum == 2*T-1)
 		{
-			cout <<"root Full"<<endl;
 			BTreeNode *s = new BTreeNode(false,nextBid(),RandomPath());
 			s->cbids[0] = root->bid;
 			s->cpos[0] = root->pos;
 			s->height = root->height+1;
+			cout <<"BTree height is:"<<s->height<<endl;
 			BTreeNode *z = new BTreeNode(root->isleaf, nextBid(),RandomPath());
 			s->splitChild(0, root, z);
 			bram->WriteBTreeNode(z->bid,z);
 			bram->WriteBTreeNode(s->bid,s);
 			bram->WriteBTreeNode(root->bid,root);
 			int i = 0;
+			BTreeNode *sc;
 			if (s->keys[0] < kw)
-			{
-				i++;
-			}
-		      BTreeNode *sc=bram->ReadBTreeNode(s->cbids[i],s->cpos[i],s->cpos[i]);
-			insertNFull(kw,sc);
+				sc = s;
+			else
+				sc = root;
+			insertNFull(kw,id,sc);
 			brootKey = s->bid;
 			brootPos = s->pos;
 		}
 		else 
 		{
-			cout <<"root nonfull"<<root->bid<<" pos:"<<root->pos<<endl;
-			insertNFull(kw,root);
+			//cout <<"root nonfull:"<<root->bid<<" pos:"<<root->pos<<endl;
+			//cout<<"key:"<<root->keys[0]<<endl;
+			insertNFull(kw,id,root);
 		}
 	}
-	//bram->finalize(brootKey,brootPos);
 return brootKey;
 }
-void BTree::insertNFull(string kw, BTreeNode*& node)
+void BTree::insertNFull(Bid kw,int id, BTreeNode*& node)
 {
 	int i = node->knum-1;
-		cout <<"before writing:"<<node->keys[0]<<"/";
 	if(node->isleaf == true)
 	{
-		cout <<"before writing:"<<i<<"/";
-		cout<<node->keys[i]<<endl;
 		while(i>=0 && node->keys[i]>kw)
 		{
 			node->keys[i+1] = node->keys[i];
+			node->values[i+1] = node->values[i];
 			i--;
 		}
 		node->keys[i+1] = kw;
+		node->values[i+1] = id;
 		node->knum = node->knum+1;
 		bram->WriteBTreeNode(node->bid,node);
 	}
@@ -110,24 +117,29 @@ void BTree::insertNFull(string kw, BTreeNode*& node)
       BTreeNode *ci = bram->ReadBTreeNode(node->cbids[i+1],node->cpos[i+1],node->cpos[i+1]);
 		if (ci->knum == 2*T-1)
 		{
-			BTreeNode *z = new BTreeNode(true, nextBid(),RandomPath());
+			BTreeNode *z = new BTreeNode(ci->isleaf, nextBid(),RandomPath());
 			node->splitChild(i+1, ci, z);
 			bram->WriteBTreeNode(z->bid,z);
 			bram->WriteBTreeNode(ci->bid,ci);
 			bram->WriteBTreeNode(node->bid,node);
 			if (node->keys[i+1] < kw)
-				i++;
+			{
+				ci = z;
+			}
 		}
-		insertNFull(kw,ci);
+		insertNFull(kw,id,ci);
 	}
 }
 
-void BTreeNode::splitChild(int i, BTreeNode *y, BTreeNode *&z)
+void BTreeNode::splitChild(int i, BTreeNode *&y, BTreeNode *&z)
 {
+	cout<<"SPLITTING:"<< y->bid<<endl;
 	z->knum = T - 1;
+	z->height = y->height;
 	for (int j = 0; j < T-1; j++)
 	{
 		z->keys[j] = y->keys[j+T];
+		z->values[j] = y->values[j+T];
 	}
 	if (y->isleaf == false)
 	{
@@ -146,10 +158,48 @@ void BTreeNode::splitChild(int i, BTreeNode *y, BTreeNode *&z)
 	cbids[i+1] = z->bid;
 	cpos[i+1]=z->pos;
 	for (int j = knum-1; j >= i; j--)
+	{
 		keys[j+1] = keys[j];
+		values[j+1] = values[j];
+	}
 	keys[i] = y->keys[T-1];
+	values[i] = y->values[T-1];
 	knum = knum + 1;
+	
 }
+
+int BTree::search(Bid kw)
+{
+	bram->start(false);
+	int res = 0;
+	searchkw(brootKey,brootPos,kw,res);
+	bram->finalize(brootKey,brootPos);
+	return res;
+}
+
+void BTree::searchkw(int rootKey, int rootPos, Bid kw, int &res)
+{
+	if(res != 0)
+		return;
+	BTreeNode* node = bram->ReadBTreeNode(rootKey,rootPos,rootPos);
+        int i = 0;
+        while (i < node->knum && kw > node->keys[i])
+	{
+                i++;
+	}
+        if (node->keys[i] == kw)
+	{
+		res = node->values[i];
+                return ;//node->values[i];
+	}
+	else if (node->isleaf == true)
+	{
+		cout <<"NOT Found in BTree"<<endl;
+                return; //0;
+	}
+        searchkw(node->cbids[i],node->cpos[i],kw,res);
+}
+
 
 void BTree::startOperation(bool batchWrite) 
 {
