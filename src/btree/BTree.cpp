@@ -14,7 +14,7 @@ BTree::~BTree()
 {
     delete bram;
 }
-
+/*
 BTreeNode::BTreeNode(bool leaf, int nextbid, int leafpos) 
 {
 
@@ -25,14 +25,37 @@ BTreeNode::BTreeNode(bool leaf, int nextbid, int leafpos)
     height = 1;
     for(int i =0;i<D-1;i++)
     {
-	    Bid(keys[i]);
+	    array<byte_t,16> arr;
+	    fill(arr.begin(),arr.end(),0);
+	    keys[i] = Bid(arr); 
 	    cbids[i]=0;
 	    cpos[i]=-1;
     }
     cbids[D-1]=0;
     cpos[D-1]=-1;
 }
-
+*/
+BTreeNode* BTree::newBTreeNode(bool leaf, int nextbid, int leafpos) 
+{
+    BTreeNode* node = new BTreeNode();
+    node->isleaf=leaf;
+    node->bid = nextbid;
+    node->pos = leafpos;
+    node->knum = 0;
+    node->height = 1;
+    for(int i =0;i<D-1;i++)
+    {
+	    array<byte_t,16> arr;
+	    fill(arr.begin(),arr.end(),0);
+	    node->keys[i] = Bid(arr); 
+	    node->values[i]=0;
+	    node->cbids[i]=0;
+	    node->cpos[i]=-1;
+    }
+    node->cbids[D-1]=0;
+    node->cpos[D-1]=-1;
+    return node;
+}
 int BTree::nextBid()
 {
 	nextbid++;
@@ -48,7 +71,7 @@ int BTree::insertkw(Bid kw, int id, int brootKey, int &brootPos)
 {
 	if (brootKey == 0)
 	{
-		BTreeNode *root = new BTreeNode(true, nextBid(),RandomPath());
+		BTreeNode *root = newBTreeNode(true, nextBid(),RandomPath());
 		root->keys[0] = kw;
 		root->values[0] = id;
 		root->knum = 1; 
@@ -65,13 +88,14 @@ int BTree::insertkw(Bid kw, int id, int brootKey, int &brootPos)
 		
 		if (root->knum == 2*T-1)
 		{
-			BTreeNode *s = new BTreeNode(false,nextBid(),RandomPath());
+			BTreeNode *s = newBTreeNode(false,nextBid(),RandomPath());
 			s->cbids[0] = root->bid;
 			s->cpos[0] = root->pos;
 			s->height = root->height+1;
 			cout <<"BTree height is:"<<s->height<<endl;
-			BTreeNode *z = new BTreeNode(root->isleaf, nextBid(),RandomPath());
-			s->splitChild(0, root, z);
+			BTreeNode *z = newBTreeNode(root->isleaf, nextBid(),RandomPath());
+			//s->splitChild(0, root, z);
+			splitChild(s,0, root, z);
 			bram->WriteBTreeNode(z->bid,z);
 			bram->WriteBTreeNode(s->bid,s);
 			bram->WriteBTreeNode(root->bid,root);
@@ -117,8 +141,9 @@ void BTree::insertNFull(Bid kw,int id, BTreeNode*& node)
       BTreeNode *ci = bram->ReadBTreeNode(node->cbids[i+1],node->cpos[i+1],node->cpos[i+1]);
 		if (ci->knum == 2*T-1)
 		{
-			BTreeNode *z = new BTreeNode(ci->isleaf, nextBid(),RandomPath());
-			node->splitChild(i+1, ci, z);
+			BTreeNode *z = newBTreeNode(ci->isleaf, nextBid(),RandomPath());
+			//node->splitChild(i+1, ci, z);
+			splitChild(node,i+1, ci, z);
 			bram->WriteBTreeNode(z->bid,z);
 			bram->WriteBTreeNode(ci->bid,ci);
 			bram->WriteBTreeNode(node->bid,node);
@@ -131,9 +156,46 @@ void BTree::insertNFull(Bid kw,int id, BTreeNode*& node)
 	}
 }
 
+void BTree::splitChild(BTreeNode *&par, int i, BTreeNode *&y, BTreeNode *&z)
+{
+	//cout<<"SPLITTING:"<< y->bid<<endl;
+	z->knum = T - 1;
+	z->height = y->height;
+	for (int j = 0; j < T-1; j++)
+	{
+		z->keys[j] = y->keys[j+T];
+		z->values[j] = y->values[j+T];
+	}
+	if (y->isleaf == false)
+	{
+		for (int j = 0; j < T; j++)
+		{
+			z->cbids[j] = y->cbids[j+T];
+			z->cpos[j] = y->cpos[j+T];
+		}
+	}
+	y->knum = T - 1;
+	for (int j = par->knum; j >= i+1; j--)
+	{
+		par->cbids[j+1] = par->cbids[j];
+		par->cpos[j+1]=par->cpos[j];
+	}
+	par->cbids[i+1] = z->bid;
+	par->cpos[i+1]=z->pos;
+	for (int j = par->knum-1; j >= i; j--)
+	{
+		par->keys[j+1] = par->keys[j];
+		par->values[j+1] = par->values[j];
+	}
+	par->keys[i] = y->keys[T-1];
+	par->values[i] = y->values[T-1];
+	par->knum = par->knum + 1;
+}
+
+/*
 void BTreeNode::splitChild(int i, BTreeNode *&y, BTreeNode *&z)
 {
-	cout<<"SPLITTING:"<< y->bid<<endl;
+	//cout<<"SPLITTING:"<< y->bid<<endl;
 	z->knum = T - 1;
 	z->height = y->height;
 	for (int j = 0; j < T-1; j++)
@@ -167,6 +229,7 @@ void BTreeNode::splitChild(int i, BTreeNode *&y, BTreeNode *&z)
 	knum = knum + 1;
 	
 }
+*/
 
 int BTree::search(Bid kw)
 {

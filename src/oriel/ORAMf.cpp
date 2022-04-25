@@ -462,10 +462,10 @@ block ORAMf::convertNodefToBlock(Nodef* node) {
 
 void ORAMf::finilize(bool find, Bid& rootKey, int& rootPos) {
     //fake read for padding     
-    /*
+    
     if (!batchWrite) {
         if (find) {
-            for (unsigned int i = readCnt; i < depth * 1.45; i++) {
+            for (unsigned int i = readCnt; i < depth * 4.35; i++) {
                 int rnd = RandomPath();
                 if (std::find(leafList.begin(), leafList.end(), rnd) == leafList.end()) {
                     leafList.push_back(rnd);
@@ -482,7 +482,7 @@ void ORAMf::finilize(bool find, Bid& rootKey, int& rootPos) {
             }
         }
     }
-*/
+
     //updating the binary tree positions
     for (unsigned int i = 1; i <= maxheight; i++) {
         for (auto t : cache) {

@@ -19,11 +19,8 @@ using namespace std;
 class Node {
 public:
 
-    Node() {
-    }
-
-    ~Node() {
-    }
+    Node() { }
+   ~Node() {}
     Bid key;
     std::array< byte_t, 64> value;
     int pos;
@@ -78,7 +75,6 @@ private:
     void Access(Bid bid, Node*& node, int lastLeaf, int newLeaf);
     void Access(Bid bid, Node*& node);
 
-
     size_t plaintext_size;
     size_t bucketCount;
     size_t clen_size;
@@ -100,8 +96,6 @@ public:
     static Node* convertBlockToNode(block b);
     void convertBlockToNode(Node*& node,block b);
     static block convertNodeToBlock(Node* node);
-
-
 
     Node* setupReadN(Bid bid, int leaf);
     void setupReadN(Node*& n, Bid bid, int leaf);

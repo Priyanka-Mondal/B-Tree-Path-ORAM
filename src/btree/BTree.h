@@ -28,6 +28,7 @@ private:
     BRAM *bram;
     int max(int a, int b);
     //BTreeNode* newBTreeNode(bool leaf);
+    BTreeNode* newBTreeNode(bool leaf, int nextBid, int pos);
     int RandomPath();
     int nextBid();
     int nextbid = 0;
@@ -39,6 +40,7 @@ public:
     int insert(Bid kw, int id);
     int insertkw(Bid kw, int id, int rootBid, int &rootPos);
     void insertNFull(Bid kw,int id, BTreeNode*& bt ); 
+    void splitChild(BTreeNode *&par, int i, BTreeNode *&y, BTreeNode *&z);
     int search(Bid kw);
     void searchkw(int brootKey, int brootPos, Bid kw, int &res);
     

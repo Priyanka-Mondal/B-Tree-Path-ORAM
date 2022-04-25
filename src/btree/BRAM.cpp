@@ -16,8 +16,10 @@ BRAM::BRAM(int maxSize, bytes<Key> key)
     AES::Setup();
     depth = floor(log2(maxSize / Z));
     cout <<"depth of tree:"<<depth<<endl;
+    pad = floor((log2((maxSize+1)/(2*Z)))/(log2(T)));
+    cout <<"worst case height of BTree:"<<pad<<endl;
     bucketCount = pow(2, depth + 1) - 1;
-    blockSize = sizeof (BTreeNode); // how do I get this
+    blockSize = sizeof (BTreeNode); //??
     size_t blockCount = Z * (pow(2, depth + 1) - 1);
     size_t storeBlockbSize = IV + AES::GetCiphertextLength(Z * (blockSize));
     size_t storeBlockbCount = blockCount;
@@ -42,16 +44,13 @@ BRAM::~BRAM() {
     delete store;
 }
 
-
 int BRAM::GetBTreeNodeOnPath(int leaf, int curDepth) {
     leaf += bucketCount / 2;
     for (int d = depth - 1; d >= curDepth; d--) {
         leaf = (leaf + 1) / 2 - 1;
     }
-
     return leaf;
 }
-
 
 block BRAM::SerialiseBucketb(Bucketb bucket) 
 {
@@ -73,9 +72,12 @@ Bucketb BRAM::DeserialiseBucketb(block buffer)
     {
         Blockb &block = bucket[z];
         block.data.assign(buffer.begin(), buffer.begin() + blockSize);
-        BTreeNode* node = convertBlockbToBTreeNode(block.data);
-        block.id = node->bid;
+        //BTreeNode* node = convertBlockbToBTreeNode(block.data);
+        //block.id = node->bid;
         //delete node; //why cant I delete this
+	int bID;
+	getbid(block.data,bID);
+	block.id = bID;
         buffer.erase(buffer.begin(), buffer.begin() + blockSize);
     }
     return bucket;
@@ -195,7 +197,8 @@ void BRAM::WriteData(int bid, BTreeNode* node)
     if (store->GetEmptySize() > 0) 
     {
         cache[bid] = node;
-        store->ReduceEmptyNumbers();
+	if(node->knum==2*T-1) // still not correct
+        	store->ReduceEmptyNumbers();
 	//cout <<"FREE:"<<store->GetEmptySize()<<endl;
     } 
     else 
@@ -245,8 +248,8 @@ BTreeNode* BRAM::ReadBTreeNode(int bid) {
 }
 
 BTreeNode* BRAM::ReadBTreeNode(int bid, int lastLeaf, int newLeaf) {
-    if (bid == 0) {
-
+    if (bid == 0) 
+    {
         throw runtime_error("BTreeNode id is not set ReadBTreeNode");
         return NULL;
     }
@@ -301,6 +304,15 @@ BTreeNode* BRAM::convertBlockbToBTreeNode(block b)
     return node;
 }
 
+void BRAM::getbid(block b, int &bID) 
+{
+    BTreeNode* node = new BTreeNode();
+    std::array<byte_t, sizeof (BTreeNode) > arr;
+    std::copy(b.begin(), b.begin() + sizeof (BTreeNode), arr.begin());
+    from_bytes(arr, *node);
+    bID = node->bid;
+    //delete node;
+}
 
 block BRAM::convertBTreeNodeToBlockb(BTreeNode* node) 
 {
@@ -311,10 +323,10 @@ block BRAM::convertBTreeNodeToBlockb(BTreeNode* node)
 
 void BRAM::finalize(int& brootKey, int& brootPos) 
 {
-	/*
+	//cout <<"readCnt:"<<readCnt<<" pad is:"<<pad<<endl;	
     if (!batchWrite) 
     {
-            for (int i = readCnt; i < 1.45 * depth; i++) //log_d(N+1/2)
+            for (int i = readCnt; i < pad; i++)
 	    {
                 int rnd = RandomPath();
                 if (std::find(leafList.begin(), leafList.end(), rnd) == leafList.end()) 
@@ -323,26 +335,35 @@ void BRAM::finalize(int& brootKey, int& brootPos)
                 }
                 FetchPath(rnd);
         }
-    }*/
-	/*
+    }
+	
         int maxHeight = 1;
         for (auto t : cache) {
             if (t.second != NULL && t.second->height > maxHeight) {
                 maxHeight = t.second->height;
             }
         }
-    for (unsigned int i = 1; i <= maxHeight; i++) {
-        for (auto t : cache) {
+    for (unsigned int i = 1; i <= maxHeight; i++) 
+    {
+        for (auto t : cache) 
+	{
             if (t.second != NULL && t.second->height == i) 
 	    {
                 BTreeNode* tmp = t.second;
-                if (modified.count(tmp->key)) 
+                if (modified.count(tmp->bid)) 
 		{
                     tmp->pos = RandomPath();
                 }
+		for(int k = 0;k<=tmp->knum;k++)
+		{
+			if (tmp->cbids[k] != 0 && cache.count(tmp->cbids[k]) > 0) 
+			{
+		    		tmp->cpos[k] = cache[tmp->cbids[k]]->pos;
+                	}
+		}
             }
         }
-    }*/
+    }
     if (cache.count(brootKey) != 0)
         brootPos = cache[brootKey]->pos;
 

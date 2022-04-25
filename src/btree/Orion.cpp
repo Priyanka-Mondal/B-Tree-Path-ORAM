@@ -185,7 +185,7 @@ int Orion::search(string keyword)
 	    { 
     		Bid key = createBid(keyword,i);
     		int res = btreeHandler->search(key);
-		cout <<"["<<res<<"]";
+		//cout <<"["<<res<<"]";
 	    }
     }
     cout<<endl;

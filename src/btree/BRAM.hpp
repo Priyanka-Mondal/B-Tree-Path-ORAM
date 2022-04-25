@@ -16,7 +16,6 @@
 
 using namespace std;
 
-
 struct Blockb 
 {
     int id;
@@ -29,6 +28,7 @@ class BRAM {
 private:
     RAMStore* store;
     size_t depth;
+    int pad;
     size_t blockSize;
     map<int, BTreeNode*> cache;
     vector<int> leafList;
@@ -84,6 +84,7 @@ public:
     static BTreeNode* convertBlockbToBTreeNode(block b);
     void convertBlockbToBTreeNode(BTreeNode*& node,block b);
     static block convertBTreeNodeToBlockb(BTreeNode* node);
+    void getbid(block b, int &bID) ;
 
     //void setupInsert(vector<BTreeNode*> nodes);
 };

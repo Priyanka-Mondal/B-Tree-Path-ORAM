@@ -51,17 +51,15 @@ int ORAM::GetNodeOnPath(int leaf, int curDepth) {
 
 // Write bucket to a single block
 
-block ORAM::SerialiseBucket(Bucket bucket) {
+block ORAM::SerialiseBucket(Bucket bucket) 
+{
     block buffer;
-
     for (int z = 0; z < Z; z++) {
         Block b = bucket[z];
         buffer.insert(buffer.end(), b.data.begin(), b.data.end());
     //delete b;
     }
-
     assert(buffer.size() == Z * (blockSize));
-    
     return buffer;
 }
 
@@ -464,14 +462,15 @@ int ORAM::DeleteNode(Bid bid, Node* node) {
         return node->pos;
 }
 
-Node* ORAM::convertBlockToNode(block b) {
+Node* ORAM::convertBlockToNode(block b) 
+{
     Node* node = new Node();
     std::array<byte_t, sizeof (Node) > arr;
     std::copy(b.begin(), b.begin() + sizeof (Node), arr.begin());
     from_bytes(arr, *node);
     return node;
 }
-
+/*
 void ORAM::convertBlockToNode(Node*& node, block b) {
     //Node* node = new Node();
     std::array<byte_t, sizeof (Node) > arr;
@@ -479,7 +478,7 @@ void ORAM::convertBlockToNode(Node*& node, block b) {
     from_bytes(arr, *node);
     //return node;
 }
-
+*/
 block ORAM::convertNodeToBlock(Node* node) {
     std::array<byte_t, sizeof (Node) > data = to_bytes(*node);
     block b(data.begin(), data.end());
