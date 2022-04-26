@@ -111,7 +111,7 @@ int main(int argc, char**argv)
 	        	auto stop = high_resolution_clock::now();
 			auto duration = duration_cast<microseconds>(stop-start);
 			sres <<line<<" "<< duration.count()<<" "<< s<<endl;
-			cout <<l<<" "<< duration.count()<<" "<< s<<endl;
+			cout <<line<<" "<< duration.count()<<" "<< s<<endl;
 			l++;
 		}
 	}

@@ -54,7 +54,7 @@ public:
     int sortedArrayToBST(int start, int end, int& pos, int& node);
 };
 
-#endif /* AVLTREE_H */
+#endif /* BTREE_H */
 
 
 

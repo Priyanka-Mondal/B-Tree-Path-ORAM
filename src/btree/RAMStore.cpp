@@ -1,7 +1,6 @@
 #include "RAMStore.hpp"
 #include <iostream>
 #include "BRAM.hpp"
-#include "ORAM.hpp"
 using namespace std;
 
 RAMStore::RAMStore(size_t count, size_t size)

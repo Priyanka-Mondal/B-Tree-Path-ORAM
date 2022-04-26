@@ -323,7 +323,6 @@ block BRAM::convertBTreeNodeToBlockb(BTreeNode* node)
 
 void BRAM::finalize(int& brootKey, int& brootPos) 
 {
-	//cout <<"readCnt:"<<readCnt<<" pad is:"<<pad<<endl;	
     if (!batchWrite) 
     {
             for (int i = readCnt; i < pad; i++)

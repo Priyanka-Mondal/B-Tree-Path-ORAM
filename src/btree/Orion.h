@@ -1,7 +1,5 @@
 #ifndef ORION_H
 #define ORION_H
-#include "OMAP.h"
-#include "OMAPf.h"
 #include "BTree.h"
 #include<iostream>
 using namespace std;
@@ -12,10 +10,6 @@ private:
     
     bool useHDD;
     bool local;
-    OMAPf* srch;
-    OMAPf *updt;
-    OMAPf *fcnt;
-    OMAP* file;
     BTree* btreeHandler;
     map<Bid, int> UpdtCnt;
     map<Bid,int> srchbids;

@@ -116,8 +116,6 @@ void Orion::insertWrap(string cont, int fileid, bool batch)
       insert(kws, blocks, fileid);
 }
 
-
-
 void Orion::insert(vector<string> kws, vector<string> blocks, int ind) 
 {
     for(auto kw: kws)
@@ -188,7 +186,6 @@ int Orion::search(string keyword)
 		//cout <<"["<<res<<"]";
 	    }
     }
-    cout<<endl;
     return fc;
 }
 /*
