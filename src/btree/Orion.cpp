@@ -147,7 +147,7 @@ Bid Orion::createBid(string keyword, int number)
     return bid;
 }
 
-int Orion::search(string keyword) 
+vector<int> Orion::search(string keyword) 
 {
     /*
     Bid firstKey(keyword);
@@ -173,6 +173,7 @@ int Orion::search(string keyword)
 	}
     }*/
     int fc = 0; 
+    vector<int> files;
     if(fcntbtree.count(keyword)>0)
 	    fc = fcntbtree[keyword];
     if(fc == 0)
@@ -183,10 +184,11 @@ int Orion::search(string keyword)
 	    { 
     		Bid key = createBid(keyword,i);
     		int res = btreeHandler->search(key);
+		files.push_back(res);
 		//cout <<"["<<res<<"]";
 	    }
     }
-    return fc;
+    return files;
 }
 /*
 vector<string> Orion::simplebatchSearch(string keyword) 

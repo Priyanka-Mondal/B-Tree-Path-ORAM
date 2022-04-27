@@ -119,9 +119,13 @@ void BRAM::FetchPath(int leaf)
 
             if (block.id != 0) { // 0 is root right ? or maybe makeit 1
                 BTreeNode* n = convertBlockbToBTreeNode(block.data);
-                if (cache.count(block.id) == 0) {
+                if (cache.count(block.id) == 0) 
+		{
                     cache.insert(make_pair(block.id, n));
-                } else {
+                } 
+		else 
+		{
+		//	cout <<"DELETING n----------------------"<<endl;
                     delete n;
                 }
             }

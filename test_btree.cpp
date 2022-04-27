@@ -110,8 +110,8 @@ int main(int argc, char**argv)
 			auto s = orion.search(line);
 	        	auto stop = high_resolution_clock::now();
 			auto duration = duration_cast<microseconds>(stop-start);
-			sres <<line<<" "<< duration.count()<<" "<< s<<endl;
-			cout <<line<<" "<< duration.count()<<" "<< s<<endl;
+			sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+			cout <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
 			l++;
 		}
 	}

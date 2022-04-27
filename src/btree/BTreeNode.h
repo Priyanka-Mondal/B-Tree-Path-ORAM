@@ -25,6 +25,10 @@ public:
         array<int,D> cbids;
 	array<int,D> cpos;
 
+	int findKey(int k);
+	void deletion(int k);
+	void removeFromLeaf(int idx);
+
 friend class BTree;
 };
 #endif

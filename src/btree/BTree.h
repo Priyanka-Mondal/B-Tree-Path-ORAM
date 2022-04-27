@@ -44,11 +44,10 @@ public:
     int search(Bid kw);
     void searchkw(int brootKey, int brootPos, Bid kw, int &res);
     
+    void deletion(int k);
     BTree(int maxSize, bytes<Key> key);
     BTree();
-    virtual ~BTree();
-    void startOperation(bool batchWrite = false);
-    void finishOperation(bool find, int& rootKey, int& rootPos);
+   ~BTree();
     
     void setupInsert(int& rootKey, int& rootPos, map<int, string> pairs);
     int sortedArrayToBST(int start, int end, int& pos, int& node);

@@ -7,7 +7,7 @@ BTree::BTree(int maxSize, bytes<Key> key) : rd(), mt(rd()), dis(0, (pow(2, floor
     cout <<"total leaves in Btree:(0.."<< totleaves<<")"<<totleaves+1<<endl;
     cout <<maxSize<<"--------------------------------------------"<<endl;
     brootKey = 0;
-    brootPos = 0;
+    brootPos = -1;
 
 }
 BTree::~BTree() 
@@ -225,502 +225,204 @@ int BTree::RandomPath()
     return val;
 }
 
-
-/*
-//delete functions
-BTreeNode* BTree::minValueBTreeNode(int rootKey, int rootPos, BTreeNode* rootroot)
+void BTree::remove(int k) 
 {
-	BTreeNode* curBTreeNode = oram->ReadBTreeNode(rootKey,rootPos,rootPos);
-	if(curBTreeNode == NULL || curBTreeNode->key ==0)
-		return rootroot;
-	else
-		return minValueBTreeNode(curBTreeNode->leftID,curBTreeNode->leftPos, curBTreeNode);
-}
-
-
-BTreeNode* BTree::parentOf(int parentKey, int ppos, int childKey, int cpos, int key)
-{
-	BTreeNode* parBTreeNode = oram->ReadBTreeNode(parentKey,ppos,ppos);
-	//cout <<"parent key of child key is"<<parBTreeNode->key<<childKey<<endl;
-	if(key == parBTreeNode->key)
-		return NULL;
-	else
-	{
-		BTreeNode* cBTreeNode = oram->ReadBTreeNode(childKey,cpos,cpos);
-		if(key == cBTreeNode->key)
-		{
-			return parBTreeNode;
-		}
-		else if(key<cBTreeNode->key)
-		{
-		return parentOf(cBTreeNode->key,cBTreeNode->pos,cBTreeNode->leftID,cBTreeNode->leftPos,key);
-		}
-		else if(key>cBTreeNode->key)
-		{
-		return parentOf(cBTreeNode->key,cBTreeNode->pos,cBTreeNode->rightID,cBTreeNode->rightPos,key);
-		}
-	}
-}
-
-
-
-
-int BTree::balance(BTreeNode* node, int &pos)
-{
-    int key = node->key;
-    int balance = getBalance(node);
-    //cout <<"balance is:"<<balance<<endl;
-    if (balance > 1 )
+  if (brootKey==0) 
+  {
+    cout << "The tree is empty\n";
+    return;
+  }
+  BTreeNode* root = bram->ReadBTreeNode(brootKey,brootPos,brootPos);
+  root->deletion(k);
+  if (root->knum == 0) 
+  {
+    //BTreeNode *tmp = root;
+    if (root->isleaf)
     {
-	    BTreeNode* leftChild = oram->ReadBTreeNode(node->leftID,node->leftPos,node->leftPos);
-    	    if(getBalance(leftChild)>=0)
-	    {
-	    	//cout <<"Left Left Case" <<endl;
-        	BTreeNode* res = rightRotate(node);
-        	pos = res->pos;
-        	return res->key;
-	    }
-	    if(getBalance(leftChild)<0)
-	    {
-	    	 //cout <<"Left Right Case" <<endl;
-		 BTreeNode* res = leftRotate(leftChild);
-        	 node->leftID = res->key;
-        	 node->leftPos = res->pos;
-        	 oram->WriteBTreeNode(node->key, node);
-		 BTreeNode* res2 = rightRotate(node);
-		 pos = res2->pos;
-		 return res2->key;
-	    }
+      brootKey = 0;
+      brootPos = -1;
     }
-    if(balance < -1)
+    else
     {
-	    BTreeNode* rightChild=oram->ReadBTreeNode(node->rightID,node->rightPos,node->rightPos);
-	    if(getBalance(rightChild)<=0)
-	    {
-	    	//cout <<"Right Right Case" <<endl;
-		BTreeNode* res = leftRotate(node);
-		pos = res->pos;
-		return res->key;
-	    }
-	    if(getBalance(rightChild)>0)
-	    {
-	    	    //cout <<"Right Left Case" <<endl;
-		    BTreeNode* res = rightRotate(rightChild);
-		    node->rightID = res->key;
-		    node->rightPos = res->pos;
-		    oram->WriteBTreeNode(node->key,node);
-		    BTreeNode* res2 = leftRotate(node);
-		    pos = res2->pos;
-		    return res2->key;
-	    }
+     brootKey = root->cbids[0];
+     brootPos = root->cpos[0];
     }
-    //oram->WriteBTreeNode(node->key, node);
-    return node->key;
+    //delete tmp;
+    //delete root;
+  }
+  return;
 }
 
-
-
-int BTree::deleteBTreeNode(BTreeNode* nodef)
+int BTreeNode::findKey(Bid k) 
 {
-	BTreeNode* free = newBTreeNode(0,"");
-	oram->DeleteBTreeNode(nodef->key,free);
-	return 0;
+  int idx = 0;
+  while (idx < knum && keys[idx] < k)
+    ++idx;
+  return idx;
 }
 
-
-int BTree:: removeMain(int rootKey,int& pos, int delKey)
+void BTree::deletion(Bid k, BTreeNode *&node) 
 {
-	if(rootKey != delKey || rootKey <delKey || rootKey > delKey)
-	{// it does not work without these 3 checks ??
-		//cout<<"rootKey != delKey(removeMain)"<<endl;
-		BTreeNode* paren = parentOf(rootKey,pos,rootKey,pos,delKey);
-		int delPos;
-		if(delKey == paren->leftID)
-			delPos = paren->leftPos;
-		else if(delKey == paren->rightID)
-			delPos = paren->rightPos;
-		rootKey = removeDel(rootKey,pos,delKey,delPos,paren);
-		return rootKey;
-	}
-	else if(rootKey == delKey)
-	{
-		//cout<<"rootKey == delKey (removeMain)"<<endl;
-		rootKey = removeRoot(rootKey, pos);
-		return rootKey;
-	}
-	else
-	{
-		cout<<"WHY this (removeMain)"<<endl;
-		return rootKey;
-	}
-}
-
-
-int BTree::removeRoot(int rootKey, int& pos)
-{
-	BTreeNode* delnode =oram->ReadBTreeNode(rootKey,pos,pos); 
-	int delKey = rootKey;
-BTreeNode* b=oram->ReadBTreeNode(delnode->rightID,delnode->rightPos,delnode->rightPos);
-	BTreeNode* minnode;
-	if(b == NULL || b->key == 0)
-	{
-		//cout << "the min value node is->"<< delnode->key<<endl;
-		minnode = delnode;
-	}
-	else
-	{
-		BTreeNode* mn = minValueBTreeNode(b->key,b->pos,b);
-		//cout << "the min value node is:"<< mn->key<<endl;
-		minnode = oram->ReadBTreeNode(mn->key,mn->pos,mn->pos);
-	}
-	
-	if(delKey == minnode->key)
-	{//no right child of delKey
-		//cout <<"FIRST CASE:rootKey == minnode->key"<< endl;
-BTreeNode* lc = oram->ReadBTreeNode(delnode->leftID,delnode->leftPos,delnode->leftPos);
-		if(lc == NULL || lc->key ==0)
-			lc = newBTreeNode(0,"");
-		pos = lc->pos;
-		deleteBTreeNode(delnode);
-		return lc->key;
-	}
-	else
-	{
-
-		BTreeNode* pm=parentOf(rootKey,pos,rootKey,pos,minnode->key);
-		BTreeNode* parmin = oram->ReadBTreeNode(pm->key,pm->pos,pm->pos);
-		//cout << "parent of minnode is:"<< parmin->key<<endl;
-		if(delKey == parmin->key)
-		{//no leftchild of minnode //minnode is delKey's right child
-		//	cout <<"SECOND CASE: rootKey == parmin->key"<< endl;
-	BTreeNode* lc = oram->ReadBTreeNode(delnode->leftID,delnode->leftPos,delnode->leftPos);
-			if(lc == NULL || lc->key ==0)
-				lc = newBTreeNode(0,"");
-			minnode->leftID = lc->key;
-			minnode->leftPos = lc->pos;
-			minnode->height =  max(height(minnode->leftID,minnode->leftPos), height(minnode->rightID, minnode->rightPos)) + 1;
-    			//oram->maxheight = max(minnode->height,oram->maxheight);
-			oram->WriteBTreeNode(minnode->key,minnode);
-			int minPos = minnode->pos;
-			int minKey = balance(minnode,minnode->pos);
-			minnode = oram->ReadBTreeNode(minKey,minPos,minPos);
-			pos = minnode->pos;
-			deleteBTreeNode(delnode);
-			return minnode->key;
-		}
-		else //minnode does not have leftID in general
-		{//in this case minnode is parmin's left child always
-		//	cout <<"THIRD case"<< endl;	
-	BTreeNode* rc = oram->ReadBTreeNode(minnode->rightID,minnode->rightPos,minnode->rightPos);
-			if(rc == NULL || rc->key ==0)
-				rc = newBTreeNode(0,"");
-			parmin->leftID = rc->key;
-			parmin->leftPos = rc->pos;
-			parmin->height = max(height(parmin->leftID,parmin->leftPos), height(parmin->rightID, parmin->rightPos)) + 1;
-    			//oram->maxheight = max(parmin->height,oram->maxheight);
-			oram->WriteBTreeNode(parmin->key,parmin);
-			minnode->leftID = delnode->leftID;
-			minnode->leftPos = delnode->leftPos;
-			minnode->rightID = delnode->rightID;
-			minnode->rightPos = delnode->rightPos;
-			minnode->height = max(height(minnode->leftID,minnode->leftPos), height(minnode->rightID, minnode->rightPos)) + 1;
-    			//oram->maxheight = max(minnode->height,oram->maxheight);
-			oram->WriteBTreeNode(minnode->key,minnode);
-			int minPos = minnode->pos;
-			int minKey = balanceDel(minnode->key,minnode->pos, parmin);
-			minnode = oram->ReadBTreeNode(minKey,minPos,minPos);
-			pos = minnode->pos;
-			deleteBTreeNode(delnode);
-			return minnode->key;
-		}	
-	}
-}
-
-
-int BTree::removeDel(int rootKey,int& pos,int delKey,int delPos,BTreeNode* paren)
-{
-	BTreeNode* node = oram->ReadBTreeNode(rootKey, pos, pos);
-	if(node->key > paren->key)
-	{
-		node->leftID=removeDel(node->leftID,node->leftPos,delKey,delPos,paren);
-	}
-	else if(node->key < paren->key)
-	{
-	     node->rightID=removeDel(node->rightID,node->rightPos,delKey,delPos,paren);
-	}
-	else if(node->key == paren->key)
-	{
-		node->key = realDelete(node,delKey,delPos);// int& node->pos
-		//paren->key
-	}
-//BALANCE:
-    node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
-    //oram->maxheight = max(node->height,oram->maxheight);
-    int balance = getBalance(node);
-    //cout << "Balance is:"<<balance<<endl;
-    int key = node->key;
-    if (balance > 1 )
+  int idx = node->findKey(k);
+  if (idx < knum && keys[idx] == k) 
+  {
+    if (node->isleaf)
+      node->removeFromLeaf(idx);
+    else
+      removeFromNonLeaf(idx,node);
+  } 
+  else 
+  {
+    if (node->isleaf) 
     {
-	    BTreeNode* leftChild = oram->ReadBTreeNode(node->leftID,node->leftPos,node->leftPos);
-    	    if(getBalance(leftChild)>=0)
-	    {
-	    	//cout <<"Left Left Case" <<endl;
-        	BTreeNode* res = rightRotate(node);
-        	pos = res->pos;
-        	return res->key;
-	    }
-	    if(getBalance(leftChild)<0)
-	    {
-	    	 //cout <<"Left Right Case" <<endl;
-		 BTreeNode* res = leftRotate(leftChild);
-        	 node->leftID = res->key;
-        	 node->leftPos = res->pos;
-        	 oram->WriteBTreeNode(node->key, node);
-		 BTreeNode* res2 = rightRotate(node);
-		 pos = res2->pos;
-		 return res2->key;
-	    }
+      cout << "The key " << k << " does not exist in the tree\n";
+      return;
     }
-    if(balance < -1)
-    {
-	    BTreeNode* rightChild=oram->ReadBTreeNode(node->rightID,node->rightPos,node->rightPos);
-	    if(getBalance(rightChild)<=0)
-	    {
-	        //cout <<"Right Right Case" <<endl;
-		BTreeNode* res = leftRotate(node);
-		pos = res->pos;
-		return res->key;
-	    }
-	    if(getBalance(rightChild)>0)
-	    {
-	            //cout <<"Right Left Case" <<endl;
-		    BTreeNode* res = rightRotate(rightChild);
-		    node->rightID = res->key;
-		    node->rightPos = res->pos;
-		    oram->WriteBTreeNode(node->key,node);
-		    BTreeNode* res2 = leftRotate(node);
-		    pos = res2->pos;
-		    return res2->key;
-	    }
-    }
+    bool flag = ((idx == node->knum) ? true : false);
+    BTreeNode* ci = bram->ReadBTreeNode(node->cbids[idx],node->cpos[idx],node->cpos[idx]);
 
-    oram->WriteBTreeNode(node->key, node);
-    return node->key;
+    if (ci->knum < T)
+      fill(idx);
+    if (flag && (idx > knum))
+    {
+    BTreeNode* ci1 = bram->ReadBTreeNode(node->cbids[idx-1],node->cpos[idx-1],node->cpos[idx-1]);
+      deletion(k,ci1);
+    }
+    else
+      deletion(k,ci);
+  }
+  return;
 }
 
-
-
-int BTree::realDelete(BTreeNode* paren,int delKey,int delPos)
+// Remove from the leaf
+void BTreeNode::removeFromLeaf(int idx) 
 {
-	BTreeNode* delnode =oram->ReadBTreeNode(delKey,delPos,delPos); 
-BTreeNode* b=oram->ReadBTreeNode(delnode->rightID,delnode->rightPos,delnode->rightPos);
-	BTreeNode* minnode;
-	if(b == NULL || b->key == 0)
-	{
-		//cout << "the min value node is->"<< delnode->key<<endl;
-	minnode = oram->ReadBTreeNode(delnode->key,delnode->pos,delnode->pos);
-	}
-	else
-	{
-		BTreeNode* mn = minValueBTreeNode(b->key,b->pos,b);
-		//cout << "the min value node is:"<< mn->key<<endl;
-		minnode = oram->ReadBTreeNode(mn->key,mn->pos,mn->pos);
-	}
-BTreeNode* pm=parentOf(paren->key,paren->pos,paren->key,paren->pos,minnode->key);
-	BTreeNode* parmin = oram->ReadBTreeNode(pm->key,pm->pos,pm->pos);
-	//cout << "parent of minnode is:"<< parmin->key<<endl;
-	if(delKey == minnode->key)//paren->key == parmin->key
-	{//no right child of delKey
-	//	cout <<"FIRST CASE:delKey == minnode->key"<< endl;
-BTreeNode* lc = oram->ReadBTreeNode(delnode->leftID,delnode->leftPos,delnode->leftPos);
-		if(lc == NULL || lc->key ==0)
-			lc = newBTreeNode(0,"");
-		if(paren->leftID == minnode->key)
-		{
-			paren->leftID = lc->key;
-			paren->leftPos = lc->pos;
-		}
-		else if(paren->rightID == minnode->key)
-		{
-			paren->rightID = lc->key;
-			paren->rightPos = lc->pos;
-		}
-		paren->height=max(height(paren->leftID,paren->leftPos), height(paren->rightID, paren->rightPos)) + 1;
-    		//oram->maxheight = max(paren->height,oram->maxheight);
-		oram->WriteBTreeNode(paren->key,paren);
-		deleteBTreeNode(delnode);
-		return paren->key;
-	}
-	else if(delKey == parmin->key)
-	{//no leftchild of minnode //minnode is delKey right child
-	//	cout <<"SECOND CASE: delKey == parmin->key"<< endl;
-BTreeNode* lc = oram->ReadBTreeNode(delnode->leftID,delnode->leftPos,delnode->leftPos);
-		if(lc == NULL || lc->key ==0)
-			lc = newBTreeNode(0,"");
-		minnode->leftID = lc->key;
-		minnode->leftPos = lc->pos;
-		minnode->height =  max(height(minnode->leftID,minnode->leftPos), height(minnode->rightID, minnode->rightPos)) + 1;
-    		//oram->maxheight = max(minnode->height,oram->maxheight);
-		oram->WriteBTreeNode(minnode->key,minnode);
-		int minPos = minnode->pos;
-		int minKey = balance(minnode,minnode->pos);
-		minnode = oram->ReadBTreeNode(minKey,minPos,minPos);
-		if(paren->leftID == delKey)
-		{
-			paren->leftID = minnode->key;
-			paren->leftPos = minnode->pos;
-		}
-		else if(paren->rightID == delKey)
-		{
-			paren->rightID = minnode->key;
-			paren->rightPos = minnode->pos;
-		}
-		paren->height=max(height(paren->leftID,paren->leftPos), height(paren->rightID, paren->rightPos)) + 1;
-    		//oram->maxheight = max(paren->height,oram->maxheight);
-		oram->WriteBTreeNode(paren->key,paren);
-		deleteBTreeNode(delnode);
-		return paren->key;
-	}
-	else //minnode does not have leftID in general
-	{//in this case minnode is parmin's left child always
-		//cout <<"THIRD case"<< endl;	
-BTreeNode* rc = oram->ReadBTreeNode(minnode->rightID,minnode->rightPos,minnode->rightPos);
-		if(rc == NULL || rc->key ==0)
-			rc = newBTreeNode(0,"");
-		parmin->leftID = rc->key;
-		parmin->leftPos = rc->pos;
-		parmin->height = max(height(parmin->leftID,parmin->leftPos), height(parmin->rightID, parmin->rightPos)) + 1;
-    		//oram->maxheight = max(parmin->height,oram->maxheight);
-		oram->WriteBTreeNode(parmin->key,parmin);
-		minnode->leftID = delnode->leftID;
-		minnode->leftPos = delnode->leftPos;
-		minnode->rightID = delnode->rightID;
-		minnode->rightPos = delnode->rightPos;
-		minnode->height = max(height(minnode->leftID,minnode->leftPos), height(minnode->rightID, minnode->rightPos)) + 1;
-    		//oram->maxheight = max(minnode->height,oram->maxheight);
-		oram->WriteBTreeNode(minnode->key,minnode);
-		int minPos = minnode->pos;
-		int minKey = balanceDel(minnode->key,minnode->pos, parmin);
-		minnode = oram->ReadBTreeNode(minKey,minPos,minPos);
-		if(paren->leftID == delKey)
-		{
-			paren->leftID = minnode->key;
-			paren->leftPos = minnode->pos;
-		}
-		else if(paren->rightID == delKey)
-		{
-			paren->rightID = minnode->key;
-			paren->rightPos = minnode->pos;
-		}
-		paren->height=max(height(paren->leftID,paren->leftPos), height(paren->rightID, paren->rightPos)) + 1;
-    		//oram->maxheight = max(paren->height,oram->maxheight);
-		oram->WriteBTreeNode(paren->key,paren);
-		deleteBTreeNode(delnode);
-		return paren->key;
-	}	
+  for (int i = idx + 1; i < knum; ++i)
+    keys[i - 1] = keys[i];
+  knum--;
+  return;
 }
-
-
-int BTree::balanceDel(int key, int& pos, BTreeNode* parmin)
+void BTreeNode::removeFromNonLeaf(int idx, BTreeNode *&node)
 {
-	BTreeNode* node = oram->ReadBTreeNode(key,pos,pos);
-	//cout <<"IN BALANCEDEL:"<< node->key<<endl;
-	if(node->key < parmin->key)
-	{
-		node->rightID = balanceDel(node->rightID,node->rightPos,parmin);
-	}
-	else if(node->key > parmin->key)
-	{
-		node->leftID = balanceDel(node->leftID,node->leftPos,parmin);
-	}
-	//else if(node->key == parmin->key)
-	//{
-
-    node->height = max(height(node->leftID, node->leftPos), height(node->rightID, node->rightPos)) + 1;
-    //oram->maxheight = max(node->height,oram->maxheight);
-    int balance = getBalance(node);
-    //cout <<"balance is:"<<balance<<endl;
-    if (balance > 1 )
-    {
-	    BTreeNode* leftChild = oram->ReadBTreeNode(node->leftID,node->leftPos,node->leftPos);
-    	    if(getBalance(leftChild)>=0)
-	    {
-	    	//cout <<"Left Left Case" <<endl;
-        	BTreeNode* res = rightRotate(node);
-        	pos = res->pos;
-        	return res->key;
-	    }
-	    if(getBalance(leftChild)<0)
-	    {
-	    	 //cout <<"Left Right Case" <<endl;
-		 BTreeNode* res = leftRotate(leftChild);
-        	 node->leftID = res->key;
-        	 node->leftPos = res->pos;
-        	 oram->WriteBTreeNode(node->key, node);
-		 BTreeNode* res2 = rightRotate(node);
-		 pos = res2->pos;
-		 return res2->key;
-	    }
-    }
-    if(balance < -1)
-    {
-	    BTreeNode* rightChild=oram->ReadBTreeNode(node->rightID,node->rightPos,node->rightPos);
-	    if(getBalance(rightChild)<=0)
-	    {
-	    	//cout <<"Right Right Case" <<endl;
-		BTreeNode* res = leftRotate(node);
-		pos = res->pos;
-		return res->key;
-	    }
-	    if(getBalance(rightChild)>0)
-	    {
-	    	    //cout <<"Right Left Case" <<endl;
-		    BTreeNode* res = rightRotate(rightChild);
-		    node->rightID = res->key;
-		    node->rightPos = res->pos;
-		    oram->WriteBTreeNode(node->key,node);
-		    BTreeNode* res2 = leftRotate(node);
-		    pos = res2->pos;
-		    return res2->key;
-	    }
-    }
-
-  //}
-    oram->WriteBTreeNode(node->key, node);
-    return node->key;
-}
-void BTree::setupInsert(int& rootKey, int& rootPos, map<int, string> pairs) {
-    for (auto pair : pairs) {
-        BTreeNode* node = newBTreeNode(pair.first, pair.second);
-        setupBTreeNodes.push_back(node);
-    }
-    cout << "Creating BST" << endl;
-    sortedArrayToBST(0, setupBTreeNodes.size() - 1, rootPos, rootKey);
-    cout << "Inserting in ORAM" << endl;
-    oram->setupInsert(setupBTreeNodes);
+  int k = keys[idx];
+  if (node->cbids[idx]->knum >= T) ////
+  {
+    int pred = getPredecessor(idx);
+    keys[idx] = pred;
+    C[idx]->deletion(pred);
+  }
+  else if (C[idx + 1]->n >= t) 
+  {
+    int succ = getSuccessor(idx);
+    keys[idx] = succ;
+    C[idx + 1]->deletion(succ);
+  }
+  else 
+  {
+    merge(idx);
+    C[idx]->deletion(k);
+  }
+  return;
 }
 
-int BTree::sortedArrayToBST(int start, int end, int& pos, int& node) {
-    setupProgress++;
-    if (setupProgress % 100000 == 0) {
-        cout << setupProgress << "/" << setupBTreeNodes.size()*2 << " of AVL tree constructed" << endl;
-    }
-    if (start > end) {
-        pos = -1;
-        node = 0;
-        return 0;
-    }
+int BTreeNode::getPredecessor(int idx) 
+{
+  BTreeNode *cur = C[idx];
+  while (!cur->leaf)
+    cur = cur->C[cur->n];
 
-    int mid = (start + end) / 2;
-    BTreeNode *root = setupBTreeNodes[mid];
-
-    int leftHeight = sortedArrayToBST(start, mid - 1, root->leftPos, root->leftID);
-
-    int rightHeight = sortedArrayToBST(mid + 1, end, root->rightPos, root->rightID);
-    root->pos = RandomPath();
-    root->height = max(leftHeight, rightHeight) + 1;
-    pos = root->pos;
-    node = root->key;
-    return root->height;
+  return cur->keys[cur->n - 1];
 }
-*/
+
+void BTreeNode::fill(int idx) 
+{
+  if (idx != 0 && C[idx - 1]->n >= t)
+    borrowFromPrev(idx);
+
+  else if (idx != n && C[idx + 1]->n >= t)
+    borrowFromNext(idx);
+
+  else {
+    if (idx != n)
+      merge(idx);
+    else
+      merge(idx - 1);
+  }
+  return;
+}
+
+// Borrow from previous
+void BTreeNode::borrowFromPrev(int idx) 
+{
+  BTreeNode *child = C[idx];
+  BTreeNode *sibling = C[idx - 1];
+
+  for (int i = child->n - 1; i >= 0; --i)
+    child->keys[i + 1] = child->keys[i];
+
+  if (!child->leaf) 
+  {
+    for (int i = child->n; i >= 0; --i)
+      child->C[i + 1] = child->C[i];
+  }
+
+  child->keys[0] = keys[idx - 1];
+
+  if (!child->leaf)
+    child->C[0] = sibling->C[sibling->n];
+
+  keys[idx - 1] = sibling->keys[sibling->n - 1];
+
+  child->n += 1;
+  sibling->n -= 1;
+
+  return;
+}
+
+void BTreeNode::borrowFromPrev(int idx) 
+{
+  BTreeNode *child = C[idx];
+  BTreeNode *sibling = C[idx - 1];
+  for (int i = child->n - 1; i >= 0; --i)
+    child->keys[i + 1] = child->keys[i];
+  if (!child->leaf) 
+  {
+    for (int i = child->n; i >= 0; --i)
+      child->C[i + 1] = child->C[i];
+  }
+  child->keys[0] = keys[idx - 1];
+  if (!child->leaf)
+    child->C[0] = sibling->C[sibling->n];
+  keys[idx - 1] = sibling->keys[sibling->n - 1];
+  child->n += 1;
+  sibling->n -= 1;
+  return;
+}
+
+// Borrow from the next
+void BTreeNode::borrowFromNext(int idx) 
+{
+  BTreeNode *child = C[idx];
+  BTreeNode *sibling = C[idx + 1];
+
+  child->keys[(child->n)] = keys[idx];
+
+  if (!(child->leaf))
+    child->C[(child->n) + 1] = sibling->C[0];
+
+  keys[idx] = sibling->keys[0];
+
+  for (int i = 1; i < sibling->n; ++i)
+    sibling->keys[i - 1] = sibling->keys[i];
+
+  if (!sibling->leaf) 
+  {
+    for (int i = 1; i <= sibling->n; ++i)
+      sibling->C[i - 1] = sibling->C[i];
+  }
+
+  child->n += 1;
+  sibling->n -= 1;
+
+  return;
+}

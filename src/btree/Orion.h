@@ -32,7 +32,7 @@ public:
     
     vector<string> batchSearch(string keyword);
     vector<string> simplebatchSearch(string keyword);
-    int search(string keyword);
+    vector<int> search(string keyword);
     
     Orion(bool useHDD,int maxSize, bool local);    
     

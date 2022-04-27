@@ -587,9 +587,7 @@ void ORAMf::setupInsert(vector<Nodef*> nodes) {
                     cannotInsert = true;
 		}
             }
-
         }
-
         if (i < nodes.size()) {
             if (cannotInsert) {
                 cache[nodes[i]->key] = nodes[i];
