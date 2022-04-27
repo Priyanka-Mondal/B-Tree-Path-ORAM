@@ -233,7 +233,7 @@ void BTree::remove(int k)
     return;
   }
   BTreeNode* root = bram->ReadBTreeNode(brootKey,brootPos,brootPos);
-  root->deletion(k);
+  deletion(k,root);
   if (root->knum == 0) 
   {
     if (root->isleaf)
@@ -265,9 +265,14 @@ void BTree::deletion(Bid k, BTreeNode *&node)
   if (idx < node->knum && node->keys[idx] == k) 
   {
     if (node->isleaf)
+    {
       node->removeFromLeaf(idx);
+      bram->WriteBTreeNode(node->bid, node);
+    }
     else
+    {
       removeFromNonLeaf(idx,node);
+    }
   } 
   else 
   {
@@ -280,8 +285,8 @@ void BTree::deletion(Bid k, BTreeNode *&node)
     BTreeNode* ci = bram->ReadBTreeNode(node->cbids[idx],node->cpos[idx],node->cpos[idx]);
 
     if (ci->knum < T)
-      fill(idx);
-    if (flag && (idx > knum))
+      fill(idx,node);
+    if (flag && (idx > node->knum))
     {
     BTreeNode* ci1 = bram->ReadBTreeNode(node->cbids[idx-1],node->cpos[idx-1],node->cpos[idx-1]);
       deletion(k,ci1);
@@ -302,29 +307,32 @@ void BTreeNode::removeFromLeaf(int idx)
 }
 void BTree::removeFromNonLeaf(int idx, BTreeNode *&node)
 {
-  int k = node->keys[idx];
-  if (node->cbids[idx]->knum >= T) ////
+  Bid k = node->keys[idx];
+  BTreeNode* ci = bram->ReadBTreeNode(node->cbids[idx],node->cpos[idx],node->cpos[idx]);
+  BTreeNode* ci1 = bram->ReadBTreeNode(node->cbids[idx+1],node->cpos[idx+1],node->cpos[idx+1]);
+  if (ci->knum >= T) ////
   {
-    int pred = getPredecessor(idx,node);
+    Bid pred = getPredecessor(idx,node);
     node->keys[idx] = pred;
-    node->cbids[idx]->deletion(pred);
+    bram->WriteBTreeNode(node->bid,node);
+    deletion(pred,ci);
   }
-  else if (node->cbids[idx + 1]->n >= T) 
+  else if (ci1->knum >= T) 
   {
-    int succ = getSuccessor(idx,node);
+    Bid succ = getSuccessor(idx,node);
     node->keys[idx] = succ;
-    node->cbids[idx + 1]->deletion(succ);
+    bram->WriteBTreeNode(node->bid,node);
+    deletion(succ,ci1);
   }
   else 
   {
-    merge(idx);
-    BTreeNode *ci = bram->ReadBTreeNode(node->cbids[idx],node->cpos[idx],node->cpos[idx])
+    merge(idx,node);
     deletion(k,ci);
   }
   return;
 }
 
-int BTree::getPredecessor(int idx, BTreeNode* node) 
+Bid BTree::getPredecessor(int idx, BTreeNode* node) 
 {
   BTreeNode *cur = bram->ReadBTreeNode(node->cbids[idx],node->cpos[idx],node->cpos[idx]);
   while (!cur->isleaf)
@@ -333,10 +341,9 @@ int BTree::getPredecessor(int idx, BTreeNode* node)
   return cur->keys[cur->knum-1];
 }
 
-int BTreeNode::getSuccessor(int idx, BTreeNode* node)
+Bid BTree::getSuccessor(int idx, BTreeNode* node)
 {
-
-BTreeNode *cur=bram->ReadBtreeNode(node->cbids[idx+1],node->cpos[idx+1],node->cpos[idx+1]);
+BTreeNode *cur=bram->ReadBTreeNode(node->cbids[idx+1],node->cpos[idx+1],node->cpos[idx+1]);
     while (!cur->isleaf)
        cur=bram->ReadBTreeNode(cur->cbids[0],cur->cpos[0],cur->cpos[0]);
     return cur->keys[0];
@@ -347,11 +354,11 @@ void BTree::fill(int idx, BTreeNode *&node)
 if(idx!=0 && bram->ReadBTreeNode(node->cbids[idx-1],node->cpos[idx-1],node->cpos[idx-1])->knum >= T)
     borrowFromPrev(idx,node);
 
-  else if (idx != n && bram->ReadBTreeNode(node->cbids[idx-1],node->cpos[idx-1],node->cpos[idx-1])->knum >= T)
+  else if (idx != node->knum && bram->ReadBTreeNode(node->cbids[idx-1],node->cpos[idx-1],node->cpos[idx-1])->knum >= T)
     borrowFromNext(idx,node);
 
   else {
-    if (idx != n)
+    if (idx != node->knum)
       merge(idx,node);
     else
       merge(idx-1,node);
@@ -360,7 +367,7 @@ if(idx!=0 && bram->ReadBTreeNode(node->cbids[idx-1],node->cpos[idx-1],node->cpos
 }
 
 // Borrow from previous
-void BTreeNode::borrowFromPrev(int idx, BTreeNode *&node) 
+void BTree::borrowFromPrev(int idx, BTreeNode *&node) 
 {
   BTreeNode *child = bram->ReadBTreeNode(node->cbids[idx],node->cpos[idx],node->cpos[idx]);
   BTreeNode *sibling = bram->ReadBTreeNode(node->cbids[idx-1],node->cpos[idx-1],node->cpos[idx-1]);
@@ -381,14 +388,14 @@ void BTreeNode::borrowFromPrev(int idx, BTreeNode *&node)
 
   if (!child->isleaf)
   {
-    child->cbids[0] = sibling->cbids[sibling->n];
-    child->cpos[0] = sibling->cpos[sibling->n];
+    child->cbids[0] = sibling->cbids[sibling->knum];
+    child->cpos[0] = sibling->cpos[sibling->knum];
   }
 
-  node->keys[idx-1] = sibling->keys[sibling->n-1];
+  node->keys[idx-1] = sibling->keys[sibling->knum-1];
 
-  child->n += 1;
-  sibling->n -= 1;
+  child->knum += 1;
+  sibling->knum -= 1;
   bram->WriteBTreeNode(child->bid,child);
   bram->WriteBTreeNode(sibling->bid,sibling);
   bram->WriteBTreeNode(node->bid,node);
@@ -403,32 +410,32 @@ void BTree::borrowFromNext(int idx, BTreeNode *&node)
   BTreeNode *child = bram->ReadBTreeNode(node->cbids[idx],node->cpos[idx],node->cpos[idx]);
   BTreeNode *sibling = bram->ReadBTreeNode(node->cbids[idx+1],node->cpos[idx+1],node->cpos[idx+1]);
 
-  child->keys[(child->n)] = node->keys[idx];
+  child->keys[(child->knum)] = node->keys[idx];
 
   if (!(child->isleaf))
   {
-    child->cbids[(child->n) + 1] = sibling->cbids[0];
-    child->cposs[(child->n) + 1] = sibling->cpos[0];
+    child->cbids[(child->knum) + 1] = sibling->cbids[0];
+    child->cpos[(child->knum) + 1] = sibling->cpos[0];
   }
 
   node->keys[idx] = sibling->keys[0];
 
-  for (int i = 1; i < sibling->n; ++i)
+  for (int i = 1; i < sibling->knum; ++i)
   {
     sibling->keys[i - 1] = sibling->keys[i];
   }
 
   if (!sibling->isleaf) 
   {
-    for (int i = 1; i <= sibling->n; ++i)
+    for (int i = 1; i <= sibling->knum; ++i)
     {
       sibling->cbids[i - 1] = sibling->cbids[i];
       sibling->cpos[i - 1] = sibling->cpos[i];
     }
   }
 
-  child->n += 1;
-  sibling->n -= 1;
+  child->knum += 1;
+  sibling->knum -= 1;
   bram->WriteBTreeNode(child->bid,child);
   bram->WriteBTreeNode(sibling->bid,sibling);
   bram->WriteBTreeNode(node->bid,node);
@@ -443,18 +450,20 @@ void BTree::merge(int idx, BTreeNode *&node)
 
     // Pulling a key from the current node and inserting it into (t-1)th
     // position of C[idx]
-    child->keys[t-1] = node->keys[idx];
+    child->keys[T-1] = node->keys[idx];
 
     // Copying the keys from C[idx+1] to C[idx] at the end
     for (int i=0; i<sibling->knum; ++i)
-        child->keys[i+t] = sibling->keys[i];
+        child->keys[i+T] = sibling->keys[i];
 
     // Copying the child pointers from C[idx+1] to C[idx]
-    if (!child->leaf)
+    if (!child->isleaf)
     {
         for(int i=0; i<=sibling->knum; ++i)
-            child->cbids[i+t] = sibling->cbids[i];
-            child->cpos[i+t] = sibling->cposs[i];
+	{
+            child->cbids[i+T] = sibling->cbids[i];
+            child->cpos[i+T] = sibling->cpos[i];
+	}
     }
 
     // Moving all keys after idx in the current node one step before -

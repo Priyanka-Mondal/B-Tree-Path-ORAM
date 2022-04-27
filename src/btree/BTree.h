@@ -44,7 +44,16 @@ public:
     int search(Bid kw);
     void searchkw(int brootKey, int brootPos, Bid kw, int &res);
     
-    void deletion(int k);
+    void deletion(Bid k, BTreeNode *&node);
+    void remove(int);
+    void removeFromNonLeaf(int, BTreeNode*&);
+    Bid getPredecessor(int, BTreeNode*);
+    Bid getSuccessor(int, BTreeNode*);
+    void fill(int, BTreeNode*&);
+    void borrowFromPrev(int, BTreeNode*&);
+    void borrowFromNext(int, BTreeNode*&);
+    void merge(int, BTreeNode*&);
+
     BTree(int maxSize, bytes<Key> key);
     BTree();
    ~BTree();
