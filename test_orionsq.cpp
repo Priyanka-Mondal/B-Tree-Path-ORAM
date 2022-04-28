@@ -118,7 +118,7 @@ int main(int argc, char**argv)
 	}
 	double speed = double(to_int(speed2));
 	speed = speed*1024*1024;
-	double latency = to_int(argv[7])/1000;
+	double latency = double(to_int(argv[7]))/double(1000);
 	cout <<"latency:"<<latency;
 	
 	Orion orion(usehdd, sizekw, sizefile, local);  
@@ -146,6 +146,7 @@ int main(int argc, char**argv)
 		{
 	        	//auto start = high_resolution_clock::now();
 			auto s = orion.simplebatchSearch(line,sres,speed,latency);
+			//auto s = orion.search(line,sres,speed,latency);
 	        	//auto stop = high_resolution_clock::now();
 			//auto duration = duration_cast<microseconds>(stop-start);
 			//sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;

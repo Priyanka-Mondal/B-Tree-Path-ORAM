@@ -500,7 +500,7 @@ void ORAM::finilize(bool find, Bid& rootKey, int& rootPos) {
                 FetchPath(rnd);
             }
         } else {
-            for (int i = readCnt; i < 1.45 * depth; i++) {//4.35
+            for (int i = readCnt; i < 4.45 * depth; i++) {//4.35
                 int rnd = RandomPath();
                 if (std::find(leafList.begin(), leafList.end(), rnd) == leafList.end()) {
                     leafList.push_back(rnd);
@@ -555,6 +555,8 @@ void ORAM::start(bool batchWrite) {
     writeviewmap.clear();
     readviewmap.clear();
     readCnt = 0;
+    searchf_bytes =0;
+
 }
 
 void ORAM::Print() {

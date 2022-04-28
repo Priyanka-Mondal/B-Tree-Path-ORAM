@@ -413,14 +413,22 @@ Nodef* AVLTreef::setupsearch(Nodef* head, Bid key) {
 }
 Nodef* AVLTreef::search(Nodef* head, Bid key) {
     if (head == NULL || head->key == 0)
+    {
+	searchi_bytes = oram->searchi_bytes;
         return head;
+    }
     head = oram->ReadNodef(head->key, head->pos, head->pos);
     if (head->key > key) {
+	searchi_bytes = oram->searchi_bytes;
         return search(oram->ReadNodef(head->leftID, head->leftPos, head->leftPos), key);
     } else if (head->key < key) {
+	searchi_bytes = oram->searchi_bytes;
         return search(oram->ReadNodef(head->rightID, head->rightPos, head->rightPos), key);
     } else
+    {
+	searchi_bytes = oram->searchi_bytes;
         return head;
+    }
 }
 
 /**
@@ -486,6 +494,7 @@ void AVLTreef::startOperation(bool batchWrite)
  * after executing each operation, this function should be called with proper arguments
  */
 void AVLTreef::finishOperation(bool find, Bid& rootKey, int& rootPos) {
+    searchi_bytes = 0;
     oram->finilize(find, rootKey, rootPos);
 }
 

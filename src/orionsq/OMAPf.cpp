@@ -81,6 +81,7 @@ int OMAPf::find(Bid key) {
         res2 = res2.c_str();
 	res = stoint(res2);
     }
+    searchi_bytes = treeHandler->searchi_bytes;
     treeHandler->finishOperation(true, rootKey, rootPos);
 delete node;	    
 //delete resNode;
@@ -152,7 +153,7 @@ void OMAPf::batchInsert(map<Bid, int> pairs)
 vector<int> OMAPf::batchSearch(vector<Bid> keys) 
 {
     vector<int> result;
-    treeHandler->startOperation(false);
+    treeHandler->startOperation(true);
     Nodef* node = new Nodef();
     node->key = rootKey;
     node->pos = rootPos;

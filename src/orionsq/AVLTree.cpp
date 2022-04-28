@@ -411,14 +411,23 @@ string AVLTree::setupsimplesearch(Bid rkey, int rpos, Bid key) {
 }
 Node* AVLTree::search(Node* head, Bid key) {
     if (head == NULL || head->key == 0)
+    {
+
+    	searchf_bytes = oram->searchf_bytes;
         return head;
+    }
     head = oram->ReadNode(head->key, head->pos, head->pos);
     if (head->key > key) {
+    	searchf_bytes = oram->searchf_bytes;
         return search(oram->ReadNode(head->leftID, head->leftPos, head->leftPos), key);
     } else if (head->key < key) {
+    	searchf_bytes = oram->searchf_bytes;
         return search(oram->ReadNode(head->rightID, head->rightPos, head->rightPos), key);
     } else
+    {
+    	searchf_bytes = oram->searchf_bytes;
         return head;
+    }
 }
 
 /**
@@ -481,6 +490,7 @@ void AVLTree::startOperation(bool batchWrite) {
  * after executing each operation, this function should be called with proper arguments
  */
 void AVLTree::finishOperation(bool find, Bid& rootKey, int& rootPos) {
+    searchf_bytes = 0;
     oram->finilize(find, rootKey, rootPos);
 }
 
