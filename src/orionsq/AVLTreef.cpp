@@ -486,7 +486,7 @@ void AVLTreef::printTree(Nodef* root, int indent) {
 void AVLTreef::startOperation(bool batchWrite) 
 {
     oram->insertread = 0;
-    searchi_bytes = 0;
+    oram->searchi_bytes = 0;
     oram->start(batchWrite);
 }
 
@@ -494,7 +494,6 @@ void AVLTreef::startOperation(bool batchWrite)
  * after executing each operation, this function should be called with proper arguments
  */
 void AVLTreef::finishOperation(bool find, Bid& rootKey, int& rootPos) {
-    searchi_bytes = 0;
     oram->finilize(find, rootKey, rootPos);
 }
 

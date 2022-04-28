@@ -115,7 +115,6 @@ int main(int argc, char**argv)
 			l++;
 		}
 	}
-	orion.remove("bbbb");
 	cout <<"-------------------------------"<<endl;
 	auto s = orion.search("bbbb");
 	cout <<line<<" "<< s.size()<<endl;

@@ -593,7 +593,7 @@ void ORAMf::start(bool batchWrite) {
     writeviewmap.clear();
     readviewmap.clear();
     readCnt = 0;
-    searchi_bytes = 0;
+    //searchi_bytes = 0;
 }
 
 void ORAMf::Print() {

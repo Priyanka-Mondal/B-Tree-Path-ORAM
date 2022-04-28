@@ -483,14 +483,13 @@ void AVLTree::printTree(Node* root, int indent) {
  */
 void AVLTree::startOperation(bool batchWrite) {
     oram->start(batchWrite);
-    searchf_bytes = 0;
+    oram->searchf_bytes = 0;
 }
 
 /*
  * after executing each operation, this function should be called with proper arguments
  */
 void AVLTree::finishOperation(bool find, Bid& rootKey, int& rootPos) {
-    searchf_bytes = 0;
     oram->finilize(find, rootKey, rootPos);
 }
 

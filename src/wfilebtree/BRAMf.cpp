@@ -1,4 +1,4 @@
-#include "BRAM.hpp"
+#include "BRAMf.hpp"
 #include "../utils/Utilities.h"
 #include <algorithm>
 #include <iomanip>
@@ -10,7 +10,7 @@
 #include <map>
 #include <stdexcept>
 
-BRAM::BRAM(int maxSize, bytes<Key> key)
+BRAMf::BRAMf(int maxSize, bytes<Key> key)
 : key(key), rd(), mt(rd()), dis(0, (pow(2, floor(log2(maxSize / Z)) + 1) - 1) / 2) 
 {
     AES::Setup();
@@ -19,32 +19,32 @@ BRAM::BRAM(int maxSize, bytes<Key> key)
     pad = floor((log2((maxSize+1)/(2*Z)))/(log2(T)));
     cout <<"worst case height of BTree:"<<pad<<endl;
     bucketCount = pow(2, depth + 1) - 1;
-    blockSize = sizeof (BTreeNode); //??
+    blockSize = sizeof (BTreeNodef); //??
     size_t blockCount = Z * (pow(2, depth + 1) - 1);
-    size_t storeBlockbSize = IV + AES::GetCiphertextLength(Z * (blockSize));
-    size_t storeBlockbCount = blockCount;
+    size_t storeBlockSize = IV + AES::GetCiphertextLength(Z * (blockSize));
+    size_t storeBlockCount = blockCount;
     clen_size = AES::GetCiphertextLength((blockSize) * Z);
     plaintext_size = (blockSize) * Z;
-    store = new RAMStore(storeBlockbCount, storeBlockbSize);
-    cout << "Bucketbs:"<<bucketCount<<" block count in BRAM:"<<blockCount<<endl;
+    store = new RAMStore(storeBlockCount, storeBlockSize);
+    cout << "Buckets:"<<bucketCount<<" block count in BRAMf:"<<blockCount<<endl;
     for (size_t i = 0; i < bucketCount; i++) 
     {
-        Bucketb bucket;
+        Bucket bucket;
         for (int z = 0; z < Z; z++) 
 	{
             bucket[z].id = 0;
             bucket[z].data.resize(blockSize, 0);
         }
-        WriteBucketb(i, bucket);
+        WriteBucket(i, bucket);
     }
 }
 
-BRAM::~BRAM() {
+BRAMf::~BRAMf() {
     AES::Cleanup();
     delete store;
 }
 
-int BRAM::GetBTreeNodeOnPath(int leaf, int curDepth) {
+int BRAMf::GetBTreeNodefOnPath(int leaf, int curDepth) {
     leaf += bucketCount / 2;
     for (int d = depth - 1; d >= curDepth; d--) {
         leaf = (leaf + 1) / 2 - 1;
@@ -52,27 +52,27 @@ int BRAM::GetBTreeNodeOnPath(int leaf, int curDepth) {
     return leaf;
 }
 
-block BRAM::SerialiseBucketb(Bucketb bucket) 
+block BRAMf::SerialiseBucket(Bucket bucket) 
 {
     block buffer;
     for (int z = 0; z < Z; z++) 
     {
-        Blockb b = bucket[z];
+        Block b = bucket[z];
         buffer.insert(buffer.end(), b.data.begin(), b.data.end());
     }
     assert(buffer.size() == Z * (blockSize));
     return buffer;
 }
 
-Bucketb BRAM::DeserialiseBucketb(block buffer) 
+Bucket BRAMf::DeserialiseBucket(block buffer) 
 {
     assert(buffer.size() == Z * (blockSize));
-    Bucketb bucket;
+    Bucket bucket;
     for (int z = 0; z < Z; z++) 
     {
-        Blockb &block = bucket[z];
+        Block &block = bucket[z];
         block.data.assign(buffer.begin(), buffer.begin() + blockSize);
-        //BTreeNode* node = convertBlockbToBTreeNode(block.data);
+        //BTreeNodef* node = convertBlockToBTreeNodef(block.data);
         //block.id = node->bid;
         //delete node; //why cant I delete this
 	int bID;
@@ -83,27 +83,27 @@ Bucketb BRAM::DeserialiseBucketb(block buffer)
     return bucket;
 }
 
-Bucketb BRAM::ReadBucketb(int index) {
+Bucket BRAMf::ReadBucket(int index) {
     block ciphertext = store->Read(index);
     block buffer = AES::Decrypt(key, ciphertext, clen_size);
-    Bucketb bucket = DeserialiseBucketb(buffer);
+    Bucket bucket = DeserialiseBucket(buffer);
     return bucket;
 }
 
-void BRAM::WriteBucketb(int index, Bucketb bucket) 
+void BRAMf::WriteBucket(int index, Bucket bucket) 
 {
-    block b = SerialiseBucketb(bucket);
+    block b = SerialiseBucket(bucket);
     block ciphertext = AES::Encrypt(key, b, clen_size, plaintext_size);
     store->Write(index, ciphertext);
 }
 
 
-void BRAM::FetchPath(int leaf) 
+void BRAMf::FetchPath(int leaf) 
 {
     readCnt++;
     for (size_t d = 0; d <= depth; d++) 
     {
-        int node = GetBTreeNodeOnPath(leaf, d);
+        int node = GetBTreeNodefOnPath(leaf, d);
         if (find(readviewmap.begin(), readviewmap.end(), node) != readviewmap.end()) 
 	{
             continue;
@@ -113,13 +113,14 @@ void BRAM::FetchPath(int leaf)
             readviewmap.push_back(node);
         }
 
-        Bucketb bucket = ReadBucketb(node); //<<-- here
-	searchi_bytes = searchi_bytes+clen_size;
+        Bucket bucket = ReadBucket(node); //<<-- here
+	searchf_bytes = searchf_bytes + clen_size;
+	cout <<"searchf:"<<searchf_bytes<<endl;
         for (int z = 0; z < Z; z++) {
-            Blockb &block = bucket[z];
+            Block &block = bucket[z];
 
             if (block.id != 0) { // 0 is root right ? or maybe makeit 1
-                BTreeNode* n = convertBlockbToBTreeNode(block.data);
+                BTreeNodef* n = convertBlockToBTreeNodef(block.data);
                 if (cache.count(block.id) == 0) 
 		{
                     cache.insert(make_pair(block.id, n));
@@ -135,38 +136,38 @@ void BRAM::FetchPath(int leaf)
 }
 
 
-std::vector<int> BRAM::GetIntersectingBlockbs(int x, int curDepth) {
-    std::vector<int> validBlockbs;
-    int node = GetBTreeNodeOnPath(x, curDepth);
+std::vector<int> BRAMf::GetIntersectingBlocks(int x, int curDepth) {
+    std::vector<int> validBlocks;
+    int node = GetBTreeNodefOnPath(x, curDepth);
     for (auto b : cache) {
         int bid = b.first;
-        if (b.second != NULL && GetBTreeNodeOnPath(b.second->pos, curDepth) == node) 
+        if (b.second != NULL && GetBTreeNodefOnPath(b.second->pos, curDepth) == node) 
 	{
-            validBlockbs.push_back(bid);
-            if (validBlockbs.size() >= Z) 
+            validBlocks.push_back(bid);
+            if (validBlocks.size() >= Z) 
 	    {
-                return validBlockbs;
+                return validBlocks;
             }
         }
     }
-    return validBlockbs;
+    return validBlocks;
 }
 
 
-void BRAM::WritePath(int leaf, int d) 
+void BRAMf::WritePath(int leaf, int d) 
 {
-    int node = GetBTreeNodeOnPath(leaf, d);
+    int node = GetBTreeNodefOnPath(leaf, d);
     if (find(writeviewmap.begin(), writeviewmap.end(), node) == writeviewmap.end()) 
     {
-        auto validBlockbs = GetIntersectingBlockbs(leaf, d);
-        Bucketb bucket;
-        for (int z = 0; z < std::min((int) validBlockbs.size(), Z); z++) 
+        auto validBlocks = GetIntersectingBlocks(leaf, d);
+        Bucket bucket;
+        for (int z = 0; z < std::min((int) validBlocks.size(), Z); z++) 
 	{
-            Blockb &block = bucket[z];
-            block.id = validBlockbs[z];
+            Block &block = bucket[z];
+            block.id = validBlocks[z];
 	    //int temp = block.id;
-            BTreeNode* curnode = cache[block.id];
-            block.data = convertBTreeNodeToBlockb(curnode);
+            BTreeNodef* curnode = cache[block.id];
+            block.data = convertBTreeNodefToBlock(curnode);
 	    /*if(curnode->bid != block.id)
 	    {
 		    block.id = 0; // curnode->key;
@@ -175,20 +176,20 @@ void BRAM::WritePath(int leaf, int d)
             delete curnode;
             cache.erase(block.id);
         }
-        for (int z = validBlockbs.size(); z < Z; z++) 
+        for (int z = validBlocks.size(); z < Z; z++) 
 	{
-            Blockb &block = bucket[z];
+            Block &block = bucket[z];
             block.id = 0;
             block.data.resize(blockSize, 0);
         }
         writeviewmap.push_back(node);
-        WriteBucketb(node, bucket);
+        WriteBucket(node, bucket);
     }
 }
 
 // Gets the data of a block in the cache
 
-BTreeNode* BRAM::ReadData(int bid) {
+BTreeNodef* BRAMf::ReadData(int bid) {
     if (cache.find(bid) == cache.end()) {
         return NULL;
     }
@@ -197,7 +198,7 @@ BTreeNode* BRAM::ReadData(int bid) {
 
 // Updates the data of a block in the cache
 
-void BRAM::WriteData(int bid, BTreeNode* node) 
+void BRAMf::WriteData(int bid, BTreeNodef* node) 
 {
     if (store->GetEmptySize() > 0) 
     {
@@ -208,14 +209,14 @@ void BRAM::WriteData(int bid, BTreeNode* node)
     } 
     else 
     {
-        throw runtime_error("There is no more space in BRAM-WriteData");
+        throw runtime_error("There is no more space in BRAMf-WriteData");
     }
 }
 
 
 // Fetches a block, allowing you to read and write in a block
 
-void BRAM::Access(int bid, BTreeNode*& node, int lastLeaf, int newLeaf) {
+void BRAMf::Access(int bid, BTreeNodef*& node, int lastLeaf, int newLeaf) {
     FetchPath(lastLeaf);
     node = ReadData(bid);
     if (node != NULL) {
@@ -230,7 +231,7 @@ void BRAM::Access(int bid, BTreeNode*& node, int lastLeaf, int newLeaf) {
     }
 }
 
-void BRAM::Access(int bid, BTreeNode*& node) 
+void BRAMf::Access(int bid, BTreeNodef*& node) 
 {
     FetchPath(node->pos);
     WriteData(bid, node);
@@ -240,51 +241,51 @@ void BRAM::Access(int bid, BTreeNode*& node)
     }
 }
 
-BTreeNode* BRAM::ReadBTreeNode(int bid) {
+BTreeNodef* BRAMf::ReadBTreeNodef(int bid) {
     if (bid == 0) {
-        throw runtime_error("BTreeNode id is not set ReadBTreeNode");
+        throw runtime_error("BTreeNodef id is not set ReadBTreeNodef");
     }
     if (cache.count(bid) == 0) {
-        throw runtime_error("BTreeNode not found in the cache ReadBTreeNode");
+        throw runtime_error("BTreeNodef not found in the cache ReadBTreeNodef");
     } else {
-        BTreeNode* node = cache[bid];
+        BTreeNodef* node = cache[bid];
         return node;
     }
 }
 
-BTreeNode* BRAM::ReadBTreeNode(int bid, int lastLeaf) {
+BTreeNodef* BRAMf::ReadBTreeNodef(int bid, int lastLeaf) {
     if (bid == 0) 
     {
-        throw runtime_error("BTreeNode id is not set ReadBTreeNode");
+        throw runtime_error("BTreeNodef id is not set ReadBTreeNodef");
         return NULL;
     }
     if (cache.count(bid) == 0) 
     {
-        BTreeNode* node;
+        BTreeNodef* node;
         Access(bid, node, lastLeaf, lastLeaf);
         if (node != NULL) {
             modified.insert(bid);
         }
 	else 
 	{
-		cout <<"BTreeNode is NULL : "<< bid << endl ;
+		cout <<"BTreeNodef is NULL : "<< bid << endl ;
 		cout <<"free node:" << store->GetEmptySize() << endl;
-        throw runtime_error("BTreeNode id is not set ReadBTreeNode");
+        throw runtime_error("BTreeNodef id is not set ReadBTreeNodef");
 	}
         return node;
     } else {
         modified.insert(bid);
-        BTreeNode* node = cache[bid];
+        BTreeNodef* node = cache[bid];
         node->pos = lastLeaf;
         return node;
     }
 }
 
-int BRAM::WriteBTreeNode(int bid, BTreeNode* node) 
+int BRAMf::WriteBTreeNodef(int bid, BTreeNodef* node) 
 {
     if (bid == 0) 
     {
-        throw runtime_error("Node id is not set WriteBTreeNode");
+        throw runtime_error("Node id is not set WriteBTreeNodef");
     }
     if (cache.count(bid) == 0) 
     {
@@ -300,33 +301,33 @@ int BRAM::WriteBTreeNode(int bid, BTreeNode* node)
     }
 }
 
-BTreeNode* BRAM::convertBlockbToBTreeNode(block b) 
+BTreeNodef* BRAMf::convertBlockToBTreeNodef(block b) 
 {
-    BTreeNode* node = new BTreeNode();
-    std::array<byte_t, sizeof (BTreeNode) > arr;
-    std::copy(b.begin(), b.begin() + sizeof (BTreeNode), arr.begin());
+    BTreeNodef* node = new BTreeNodef();
+    std::array<byte_t, sizeof (BTreeNodef) > arr;
+    std::copy(b.begin(), b.begin() + sizeof (BTreeNodef), arr.begin());
     from_bytes(arr, *node);
     return node;
 }
 
-void BRAM::getbid(block b, int &bID) 
+void BRAMf::getbid(block b, int &bID) 
 {
-    BTreeNode* node = new BTreeNode();
-    std::array<byte_t, sizeof (BTreeNode) > arr;
-    std::copy(b.begin(), b.begin() + sizeof (BTreeNode), arr.begin());
+    BTreeNodef* node = new BTreeNodef();
+    std::array<byte_t, sizeof (BTreeNodef) > arr;
+    std::copy(b.begin(), b.begin() + sizeof (BTreeNodef), arr.begin());
     from_bytes(arr, *node);
     bID = node->bid;
     //delete node;
 }
 
-block BRAM::convertBTreeNodeToBlockb(BTreeNode* node) 
+block BRAMf::convertBTreeNodefToBlock(BTreeNodef* node) 
 {
-    std::array<byte_t, sizeof (BTreeNode) > data = to_bytes(*node);
+    std::array<byte_t, sizeof (BTreeNodef) > data = to_bytes(*node);
     block b(data.begin(), data.end());
     return b;
 }
 
-void BRAM::finalize(int& brootKey, int& brootPos) 
+void BRAMf::finalize(int& brootKey, int& brootPos) 
 {
     if (!batchWrite) 
     {
@@ -353,7 +354,7 @@ void BRAM::finalize(int& brootKey, int& brootPos)
 	{
             if (t.second != NULL && t.second->height == i) 
 	    {
-                BTreeNode* tmp = t.second;
+                BTreeNodef* tmp = t.second;
                 if (modified.count(tmp->bid)) 
 		{
                     tmp->pos = RandomPath();
@@ -382,7 +383,7 @@ void BRAM::finalize(int& brootKey, int& brootPos)
     modified.clear();
 }
 
-void BRAM::finalizedel(int& brootKey, int& brootPos) 
+void BRAMf::finalizedel(int& brootKey, int& brootPos) 
 {
 	
     if (cache.count(brootKey) != 0)
@@ -398,44 +399,44 @@ void BRAM::finalizedel(int& brootKey, int& brootPos)
     leafList.clear();
     modified.clear();
 }
-void BRAM::start(bool batchWrite) 
+void BRAMf::start(bool batchWrite) 
 {
     this->batchWrite = batchWrite;
     writeviewmap.clear();
     readviewmap.clear();
     readCnt = 0;
-    //searchi_bytes = 0;
+    //searchf_bytes=0;
 }
 
-void BRAM::Print() 
+void BRAMf::Print() 
 {
     for (unsigned int i = 0; i < bucketCount; i++) 
     {
         block ciphertext = store->Read(i);
         block buffer = AES::Decrypt(key, ciphertext, clen_size);
-        Bucketb bucket = DeserialiseBucketb(buffer);
-        BTreeNode* node = convertBlockbToBTreeNode(bucket[0].data);
+        Bucket bucket = DeserialiseBucket(buffer);
+        BTreeNodef* node = convertBlockToBTreeNodef(bucket[0].data);
         cout << node->bid << " ";
         delete node;
     }
 }
 
-int BRAM::RandomPath() 
+int BRAMf::RandomPath() 
 {
     int val = dis(mt);
     return val;
 }
 
 /*
-void BRAM::setupInsert(vector<BTreeNode*> nodes) {
-    sort(nodes.begin(), nodes.end(), [ ](const BTreeNode* lhs, const BTreeNode * rhs) {
+void BRAMf::setupInsert(vector<BTreeNodef*> nodes) {
+    sort(nodes.begin(), nodes.end(), [ ](const BTreeNodef* lhs, const BTreeNodef * rhs) {
         return lhs->pos < rhs->pos;
     });
     int curPos = 0;
     if (nodes.size() > 0) {
         curPos = nodes[0]->pos;
     }
-    map<int, Bucketb> buckets;
+    map<int, Bucket> buckets;
     map<int, int> bucketsCnt;
     int cnt = 0;
     unsigned int i = 0;
@@ -446,15 +447,15 @@ void BRAM::setupInsert(vector<BTreeNode*> nodes) {
             cout << "i:" << i << "/" << nodes.size() << endl;
         }
         for (int d = depth; d >= 0 && i < nodes.size() && curPos == nodes[i]->pos; d--) {
-            int nodeIndex = GetBTreeNodeOnPath(curPos, d);
-            Bucketb bucket;
+            int nodeIndex = GetBTreeNodefOnPath(curPos, d);
+            Bucket bucket;
             if (bucketsCnt.count(nodeIndex) == 0) {
                 bucketsCnt[nodeIndex] = 0;
                 for (int z = 0; z < Z; z++) {
                     if (i < nodes.size() && nodes[i]->pos == curPos) {
-                        Blockb &curBlockb = bucket[z];
-                        curBlockb.id = nodes[i]->key;
-                        curBlockb.data = convertBTreeNodeToBlockb(nodes[i]);
+                        Block &curBlock = bucket[z];
+                        curBlock.id = nodes[i]->key;
+                        curBlock.data = convertBTreeNodefToBlock(nodes[i]);
                         delete nodes[i];
                         bucketsCnt[nodeIndex]++;
                         i++;
@@ -466,9 +467,9 @@ void BRAM::setupInsert(vector<BTreeNode*> nodes) {
                     bucket = buckets[nodeIndex];
                     for (int z = bucketsCnt[nodeIndex]; z < Z; z++) {
                         if (i < nodes.size() && nodes[i]->pos == curPos) {
-                            Blockb &curBlockb = bucket[z];
-                            curBlockb.id = nodes[i]->key;
-                            curBlockb.data = convertBTreeNodeToBlockb(nodes[i]);
+                            Block &curBlock = bucket[z];
+                            curBlock.id = nodes[i]->key;
+                            curBlock.data = convertBTreeNodefToBlock(nodes[i]);
                             delete nodes[i];
                             bucketsCnt[nodeIndex]++;
                             i++;
@@ -497,14 +498,14 @@ void BRAM::setupInsert(vector<BTreeNode*> nodes) {
 
     for (auto buk : buckets) {
         if (bucketsCnt[buk.first] == Z) {
-            WriteBucketb(buk.first, buk.second);
+            WriteBucket(buk.first, buk.second);
         } else {
             for (long unsigned int z = bucketsCnt[buk.first]; z < Z; z++) {
-                Blockb &curBlockb = buk.second[z];
-                curBlockb.id = 0;
-                curBlockb.data.resize(blockSize, 0);
+                Block &curBlock = buk.second[z];
+                curBlock.id = 0;
+                curBlock.data.resize(blockSize, 0);
             }
-            WriteBucketb(buk.first, buk.second);
+            WriteBucket(buk.first, buk.second);
         }
     }
 

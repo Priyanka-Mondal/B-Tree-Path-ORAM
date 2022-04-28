@@ -37,6 +37,7 @@ private:
 public:
     int brootKey;
     int brootPos;
+    int searchi_bytes;
     int insert(Bid kw, int id);
     int insertkw(Bid kw, int id, int rootBid, int &rootPos);
     void insertNFull(Bid kw,int id, BTreeNode*& bt ); 

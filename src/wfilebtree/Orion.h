@@ -1,6 +1,7 @@
 #ifndef ORION_H
 #define ORION_H
 #include "BTree.h"
+#include "BTreef.h"
 #include<iostream>
 using namespace std;
 
@@ -11,6 +12,7 @@ private:
     bool useHDD;
     bool local;
     BTree* btreeHandler;
+    BTreef* fileHandler;
     map<Bid, int> UpdtCnt;
     map<Bid,int> srchbids;
     map<Bid,int> fcntbids;
@@ -32,9 +34,9 @@ public:
     
     vector<string> batchSearch(string keyword);
     vector<string> simplebatchSearch(string keyword);
-    vector<int> search(string keyword);
+    vector<string> search(string keyword,ofstream &sres, double speed, double latency);
     
-    Orion(bool useHDD,int maxSize, bool local);    
+    Orion(bool useHDD,int maxSize, int fileSize, bool local);    
     
     virtual ~Orion();
     void endSetup();

@@ -145,8 +145,8 @@ int main(int argc, char**argv)
 		while(getline(kw,line))
 		{
 	        	//auto start = high_resolution_clock::now();
-			auto s = orion.simplebatchSearch(line,sres,speed,latency);
-			//auto s = orion.search(line,sres,speed,latency);
+			//auto s = orion.simplebatchSearch(line,sres,speed,latency);
+			auto s = orion.search(line,sres,speed,latency);
 	        	//auto stop = high_resolution_clock::now();
 			//auto duration = duration_cast<microseconds>(stop-start);
 			//sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;

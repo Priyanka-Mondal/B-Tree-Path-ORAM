@@ -90,35 +90,62 @@ static void list_dir (const char * dir_name, Orion& orion)
 
 int main(int argc, char**argv) 
 {
+	if(argc <8)
+	{
+		cout <<"incorrect arguments! EXITING..."<<endl;
+		cout <<"<execFile> <KwOramSize> <FileOramSize> " <<
+		"<fileDir> <keywordFile> <outputFile> <speed> <latency-micro>"<<endl;
+		return 0;
+	}
+
 	int sizekw = to_int(argv[1]);
-	Orion orion(usehdd, sizekw, local);  
+	int sizefile = to_int(argv[2]);
+	Orion orion(usehdd, sizekw,sizefile, local);  
 
         ifstream kw;
 	ofstream sres;
-	list_dir(argv[2],orion);
+	list_dir(argv[3],orion);
 	//cout <<"------------------"<<endl;
 	
-	kw.open(argv[3]);
-	sres.open(argv[4]);	
+	kw.open(argv[4]);
+	sres.open(argv[5]);	
+	string speed1 = argv[6];
+	string speed2="";
+	speed2.assign(speed1.begin(),speed1.end()-2);
+	string unit = "";
+	unit.assign(speed1.end()-2,speed1.end());
+	if(unit != "MB")
+	{
+		cout <<"Give speed in MB"<<endl;
+		return 0;
+	}
+	double speed = double(to_int(speed2));
+	speed = speed*1024*1024;
+	double latency = double(to_int(argv[7]))/double(1000);
+	cout <<"latency:"<<latency;
+///////////////////////////////////////////////////////////////////////////
+ 	string first=argv[0];
+	int b =1 ;
+	while(b<argc)
+	{
+		first.append(" ");
+		first.append(argv[b]);
+		b++;
+	}
+	sres<<first<<endl;
+///////////////////////////////////////////////////////////////////////////
+
+cout <<endl<<"keyword||SearchTime||TotalTime||resultSize||indexBytes||fileBytes"<<endl;
 	string line;
-	int l = 1;
 	if(local)
 	{
 		while(getline(kw,line))
 		{
-	        	auto start = high_resolution_clock::now();
-			auto s = orion.search(line);
-	        	auto stop = high_resolution_clock::now();
-			auto duration = duration_cast<microseconds>(stop-start);
-			sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
-			cout <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
-			l++;
+			auto s = orion.search(line,sres,speed,latency);
 		}
 	}
 	//orion.remove("bbbb");
 	cout <<"-------------------------------"<<endl;
-	auto s = orion.search("bbbb");
-	cout <<line<<" "<< s.size()<<endl;
 /*	else
 	{
 		while(getline(kw,line))

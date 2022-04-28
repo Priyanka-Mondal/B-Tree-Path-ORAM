@@ -555,7 +555,7 @@ void ORAM::start(bool batchWrite) {
     writeviewmap.clear();
     readviewmap.clear();
     readCnt = 0;
-    searchf_bytes =0;
+    //searchf_bytes =0;
 
 }
 

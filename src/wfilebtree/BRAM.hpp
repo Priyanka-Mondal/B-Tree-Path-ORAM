@@ -72,6 +72,7 @@ private:
     void Print();
 
 public:
+    int searchi_bytes;
     BRAM(int maxSize, bytes<Key> key);
     ~BRAM();
     int maxheight;

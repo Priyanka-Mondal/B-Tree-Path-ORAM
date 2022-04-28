@@ -2,14 +2,18 @@
 #include <boost/algorithm/string.hpp>
 #include "stopword.hpp"
 #include<unordered_map>
+#include<chrono>
 
-Orion::Orion(bool usehdd, int size, bool local) 
+using namespace std::chrono;
+
+Orion::Orion(bool usehdd, int size, int filesize, bool local) 
 {
     this->useHDD = false;//usehdd;
     this->local= local;
     bytes<Key> key1{0};
     bytes<Key> key2{1};
     btreeHandler = new BTree(size, key1);
+    fileHandler = new BTreef(filesize, key1);
 }
 
 Orion::~Orion() 
@@ -137,6 +141,16 @@ void Orion::insert(vector<string> kws, vector<string> blocks, int ind)
 	    Bid key = createBid(kw,fc);
 	    btreeHandler->insert(key,ind);
     }
+    localBCNT[ind]=blocks.size();
+    string id = to_string(ind);
+    int i = 1;
+    for(auto blk : blocks)
+    {
+	    Bid b = createBid(id,i);
+	    fileHandler->insert(b,blk);
+	    i++;
+    }
+
 }
 
 Bid Orion::createBid(string keyword, int number) 
@@ -147,35 +161,14 @@ Bid Orion::createBid(string keyword, int number)
     return bid;
 }
 
-vector<int> Orion::search(string keyword) 
+vector<string> Orion::search(string keyword,ofstream& sres, double speed, double latency) 
 {
-    /*
-    Bid firstKey(keyword);
-    int fc = fcntbids[firstKey];
-    if (fc == 0) 
-    {
-    	btreeHandler->search(keyword);
-	return fileblocks;
-    }
-    for (int i = 1; i <= fc; i++) 
-    {
-	Bid bid = createBid(keyword, i);
-        int id = srch->find(bid);
-	
-	string fileid = to_string(id);
-	Bid blkcnt(fileid);
-        int blocknum = localBCNT[id];//srch->find(blkcnt);
-	for (int j= 1;j<=blocknum;j++)
-	{
-		Bid block = createBid(fileid,j);
-		string cont = file->find(block);
-		fileblocks.push_back(make_pair(id,cont));
-	}
-    }*/
     int fc = 0; 
+    vector<string>fbs;
     vector<int> files;
     if(fcntbtree.count(keyword)>0)
 	    fc = fcntbtree[keyword];
+    auto start = high_resolution_clock::now();
     if(fc == 0)
 	    cout <<"NOT FOUND"<<endl;
     else
@@ -187,11 +180,30 @@ vector<int> Orion::search(string keyword)
 		if(res!=0)
 		{
 		   files.push_back(res);
-		   cout <<"["<<res<<"]";
 		}
 	    }
+	    for(auto fid:files)
+	    {
+		    int bc = localBCNT[fid];
+		    string fID = to_string(fid);
+		    for(int j = 1;j<=bc;j++)
+		    {
+		    	Bid fbid = createBid(fID,j);
+		    	string res = fileHandler->search(fbid);
+			fbs.push_back(res);
+		    }
+	    }
     }
-    return files;
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(stop-start);
+    int totBytes = fileHandler->searchf_bytes+btreeHandler->searchi_bytes;
+    double time = double(totBytes)/speed;
+    time = time*1000;
+    int totTime = time+ duration.count()+latency; //mili
+    sres<<keyword<<" "<< duration.count()<<" "<<totTime<<" "<<fbs.size()<<" " <<btreeHandler->searchi_bytes <<" "<< fileHandler->searchf_bytes<<endl;
+
+    cout<<keyword<<" | "<<duration.count()<<" | "<<totTime<<" | "<<fbs.size()<<" | "<<btreeHandler->searchi_bytes<<" | "<< fileHandler->searchf_bytes<<endl;
+    return fbs;
 }
 /*
 void Orion::remove(string kw)
