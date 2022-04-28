@@ -117,6 +117,7 @@ void ORAMf::FetchPath(int leaf) {
         }
 
         Bucketf bucket = ReadBucket(node);
+	searchi_bytes = searchi_bytes+clen_size;
 
         for (int z = 0; z < Z; z++) {
             Blockf &block = bucket[z];
@@ -144,7 +145,12 @@ void ORAMf::FetchPath(int leaf) {
 
 }
 
+int ORAMf::getBytes()
+{
+	return searchi_bytes;
+}
 // Gets a list of blocks on the cache which can be placed at a specific point
+
 
 std::vector<Bid> ORAMf::GetIntersectingBlocks(int x, int curDepth) {
     std::vector<Bid> validBlocks;
@@ -525,7 +531,7 @@ void ORAMf::finilize(bool find, Bid& rootKey, int& rootPos) {
                 }
                 FetchPath(rnd);
             }
-        } /*else {
+        } else {
             for (int i = readCnt; i < 4.35 * depth; i++) {//4.35
                 int rnd = RandomPath();
                 if (std::find(leafList.begin(), leafList.end(), rnd) == leafList.end()) {
@@ -533,7 +539,7 @@ void ORAMf::finilize(bool find, Bid& rootKey, int& rootPos) {
                 }
                 FetchPath(rnd);
             }
-        }*/
+        }
     }
 
         int maxHeight = 1;
@@ -587,6 +593,7 @@ void ORAMf::start(bool batchWrite) {
     writeviewmap.clear();
     readviewmap.clear();
     readCnt = 0;
+    searchi_bytes = 0;
 }
 
 void ORAMf::Print() {

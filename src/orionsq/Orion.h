@@ -32,7 +32,7 @@ public:
     void removekw(vector <string> kws, int id);
     
     vector<string> batchSearch(string keyword);
-    vector<string> simplebatchSearch(string keyword);
+    vector<string> simplebatchSearch(string keyword,ofstream&s,double speed,double latency);
     vector<pair<int,string>> search(string keyword);
     
     Orion(bool useHDD,int maxSize, int filesize, bool local);    

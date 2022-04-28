@@ -1,4 +1,4 @@
-#include "btree/Orion.h"
+#include "wfilebtree/Orion.h"
 #include<string.h>
 #include<utility>
 #include <dirent.h>
@@ -115,7 +115,7 @@ int main(int argc, char**argv)
 			l++;
 		}
 	}
-	orion.remove("bbbb");
+	//orion.remove("bbbb");
 	cout <<"-------------------------------"<<endl;
 	auto s = orion.search("bbbb");
 	cout <<line<<" "<< s.size()<<endl;

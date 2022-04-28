@@ -28,6 +28,7 @@ public:
     void printTree();
     void batchInsert(map<Bid, string> pairs);
     vector<string> batchSearch(vector<Bid> keys);
+    int searchf_bytes;
 
 
     void setupinsert(Bid key, string value);

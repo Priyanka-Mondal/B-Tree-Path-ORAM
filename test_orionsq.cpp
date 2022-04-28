@@ -12,7 +12,7 @@ using namespace std::chrono;
 
 int fileid = 1;
 bool usehdd = true;
-bool batch = false;
+bool batch = true;
 bool local = true;
 
 int to_int(string updt_cnt)
@@ -90,30 +90,66 @@ static void list_dir (const char * dir_name, Orion& orion)
 
 int main(int argc, char**argv) 
 {
+	if(argc <8)
+	{
+		cout <<"incorrect arguments! EXITING..."<<endl;
+		cout <<"<execFile> <KwOramSize> <FileOramSize> " <<
+		"<fileDir> <keywordFile> <outputFile> <speed> <latency-micro>"<<endl;
+		return 0;
+	}
 	int sizekw = to_int(argv[1]);
 	int sizefile = to_int(argv[2]);
-
-	Orion orion(usehdd, sizekw, sizefile, local);  
-/*
-        ofstream sres;
-        ifstream kw;
-	list_dir(argv[3],orion);
-        	  orion.endSetup();     
+        
+	ifstream kw;
 	kw.open(argv[4]);
+        
+	ofstream sres;
 	sres.open(argv[5]);	
+
+	string speed1 = argv[6];
+	string speed2="";
+	speed2.assign(speed1.begin(),speed1.end()-2);
+	string unit = "";
+	unit.assign(speed1.end()-2,speed1.end());
+	if(unit != "MB")
+	{
+		cout <<"Give speed in MB"<<endl;
+		return 0;
+	}
+	double speed = double(to_int(speed2));
+	speed = speed*1024*1024;
+	double latency = to_int(argv[7])/1000;
+	cout <<"latency:"<<latency;
+	
+	Orion orion(usehdd, sizekw, sizefile, local);  
+	list_dir(argv[3],orion);
+        orion.endSetup();     
+
+///////////////////////////////////////////////////////////////////////////
+ 	string first=argv[0];
+	int b =1 ;
+	while(b<argc)
+	{
+		first.append(" ");
+		first.append(argv[b]);
+		b++;
+	}
+	sres<<first<<endl;
+///////////////////////////////////////////////////////////////////////////
+
 	string line;
 	int l = 1;
+	cout <<endl<<"keyword||SearchTime||TotalTime||resultSize||indexBytes||fileBytes"<<endl;
 	if(local)
 	{
 		while(getline(kw,line))
 		{
-	        	auto start = high_resolution_clock::now();
-			auto s = orion.simplebatchSearch(line);
-	        	auto stop = high_resolution_clock::now();
-			auto duration = duration_cast<microseconds>(stop-start);
-			sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
-			cout <<l<<" "<< duration.count()<<" "<< s.size()<<endl;
-			l++;
+	        	//auto start = high_resolution_clock::now();
+			auto s = orion.simplebatchSearch(line,sres,speed,latency);
+	        	//auto stop = high_resolution_clock::now();
+			//auto duration = duration_cast<microseconds>(stop-start);
+			//sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+			//cout <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
 		}
 	}
 	else
@@ -130,51 +166,7 @@ int main(int argc, char**argv)
 		}
 	}
 	return 0;
-*/	
-	/*
-	
-	list_dir("allen-p/deleted_items",orion);
-	list_dir("allen-p/sent_items",orion);
-	//list_dir("allen-p/sent",orion);
-	//list_dir("allen-p/all_documents",orion);
-	//list_dir("allen-p/discussion_threads",orion);
-	cout <<"SEARCHING..."<<endl;
-        auto start = high_resolution_clock::now();
-	auto s = orion.search("borion");
-        auto stop = high_resolution_clock::now();
-	auto duration = duration_cast<microseconds>(stop-start);
-	sres <<(fileid-1)<<" "<< duration.count()<<" "<< s.size()<<endl;
-return 0;
-	list_dir("allen-p/sent_items",orion);
-        start = high_resolution_clock::now();
-	s = orion.search("borion");
-        stop = high_resolution_clock::now();
-	duration = duration_cast<microseconds>(stop-start);
-	sres <<(fileid-1)<<" "<<duration.count() <<" "<< s.size()<<endl;
-
-	list_dir("allen-p/sent",orion);
-        start = high_resolution_clock::now();
-	s = orion.searchsimple("borion");
-        stop = high_resolution_clock::now();
-	duration = duration_cast<microseconds>(stop-start);
-	sres <<(fileid-1)<<" "<<duration.count()<<" "<< s.size()<<endl;
-
-	list_dir("allen-p/all_documents",orion);
-        start = high_resolution_clock::now();
-	s = orion.searchsimple("borion");
-        stop = high_resolution_clock::now();
-	duration = duration_cast<microseconds>(stop-start);
-	sres <<(fileid-1)<<" "<<duration.count()<<" "<< s.size()<<endl;
-
-	list_dir("allen-p/discussion_threads",orion);
-        start = high_resolution_clock::now();
-	s = orion.searchsimple("borion");
-        stop = high_resolution_clock::now();
-	duration = duration_cast<microseconds>(stop-start);
-	sres <<(fileid-1)<<" "<<duration.count()<<" "<< s.size()<<endl;
-
-	return 0;
-*/
+/*	
 	
 	cout <<"== TOTAL files inserted :"<<fileid-1<<" =="<<endl;
 	cout << endl<<" SETUP INSERT DONE!"<< endl;
@@ -216,7 +208,7 @@ return 0;
 			//}
 			//sres<<duration.count()<<" "<< files.size()<<endl;
 		}
-		/*else if(c=='d'|| c=='D')
+		else if(c=='d'|| c=='D')
 		{
 			cout <<"Enter file id to be deleted: ";
 			int fid;
@@ -226,7 +218,7 @@ return 0;
 			stop = high_resolution_clock::now();
 			duration = duration_cast<microseconds>(stop-start);
 			cout << "Deletion time: "<< duration.count()<<endl;  
-		}*/
+		}
 		else if(c=='i' || c=='I')
 		{
 			cout << "Enter file name to be inserted:";
@@ -266,4 +258,5 @@ return 0;
 			cout <<"invalid choice!"<<endl;
 	}    
         return 0;
+*/
 }

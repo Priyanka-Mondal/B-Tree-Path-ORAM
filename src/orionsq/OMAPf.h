@@ -20,6 +20,7 @@ private:
 
 
 public:
+    int searchi_bytes;
     int insertread;
     OMAPf(int maxSize, bytes<Key> key);
     virtual ~OMAPf();

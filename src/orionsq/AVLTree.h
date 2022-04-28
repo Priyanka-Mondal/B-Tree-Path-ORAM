@@ -44,6 +44,7 @@ private:
     vector<Node*> setupNodes;
 
 public:
+    int searchf_bytes;
     int insertread;
     AVLTree(int maxSize, bytes<Key> key);
     virtual ~AVLTree();

@@ -44,6 +44,7 @@ private:
     int setupgetBalance(Nodef* N);
 
 public:
+    int searchi_bytes;
     int insertread;
     AVLTreef(int maxSize, bytes<Key> key);
     virtual ~AVLTreef();

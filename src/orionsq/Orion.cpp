@@ -2,16 +2,18 @@
 #include <boost/algorithm/string.hpp>
 #include "stopword.hpp"
 #include<unordered_map>
+#include<chrono>
 
-Orion::Orion(bool usehdd, int filecnt , int filesize, bool local) 
+using namespace std::chrono;
+
+Orion::Orion(bool usehdd,int filecnt,int filesize, bool local) 
 {
     this->useHDD = false;//usehdd;
     this->local= local;
     bytes<Key> key1{0};
     bytes<Key> key2{1};
-    srch = new OMAPf(filecnt*10, key1);
-   fcnt = new OMAPf(filecnt, key1);
-    //updt = new OMAPf(filecnt, key1);
+    srch = new OMAPf(filecnt, key1);
+    fcnt = new OMAPf(filecnt, key1);
     file = new OMAP(filesize,key2);
 }
 
@@ -28,7 +30,6 @@ int inserted = 0;
 int uniquekw = 0;
 int fileblks = 0;
 string delimiters("|+#(){}[]0123456789*?&@=,:!\"><; _-./  \n");
-//string delimiters(" \n");
 
 int stoI(string updt_cnt)
 {
@@ -37,7 +38,6 @@ int stoI(string updt_cnt)
 	convstoi >> updc;
 	return updc;
 }
-
 
 vector<string> getUniquedWords(vector<string> kws)
 {
@@ -63,7 +63,7 @@ vector<string> getUniquedWords(vector<string> kws)
             kw.push_back(p->first) ;
     }
     mp.clear();
-return kw;
+    return kw;
 }
 
 vector<string> divideString(string str, int sz)
@@ -119,9 +119,9 @@ void Orion::insertWrap(string cont, int fileid, bool batch)
       }
       vector<string> blocks;
       blocks = divideString(cont,BLOCK);
-      //if(batch)
-	//  batchInsert(kws,blocks,fileid);
-      //else
+      if(batch)
+	  batchInsert(kws,blocks,fileid);
+      else
           insert(kws, blocks, fileid);
 }
 
@@ -169,7 +169,7 @@ void Orion::endSetup()
 {
         srch->setupInsert(srchbids);
 	//updt->setupInsert(updtbids);
-	//file->setupInsert(filebids);
+	file->setupInsert(filebids);
 	if(!local)
          fcnt->setupInsert(fcntbids);
 }
@@ -191,7 +191,7 @@ void Orion::insert(vector<string> kws, vector<string> blocks, int ind)
     }
       string id = to_string(ind);
       Bid blkcnt(id);
-//      srch->insert(blkcnt,blocks.size());
+      srch->insert(blkcnt,blocks.size());
       localBCNT[ind]=blocks.size();
       int block_num = 1;
       for(auto blk: blocks)
@@ -235,17 +235,14 @@ vector<pair<int,string>> Orion::search(string keyword)
     return fileblocks;
 }
 
-vector<string> Orion::simplebatchSearch(string keyword) 
+vector<string> Orion::simplebatchSearch(string keyword,ofstream& sres,double speed,double latency) 
 {
-	ofstream bcfc;
-	bcfc.open("bcfc.txt",ios::app);
 	vector<string> conts;
 	int fc = 0;
         if(localFCNT.count(keyword)>0)
         	fc = localFCNT[keyword];
 	else 
 	    return conts;
-        bcfc<< fc <<" ";
     	vector<Bid> bids;
     	bids.reserve(fc);
    	for (int i = 1; i <= fc; i++) 
@@ -255,12 +252,12 @@ vector<string> Orion::simplebatchSearch(string keyword)
    	}
    	vector<int> result;
    	result.reserve(fc); 
+	auto start = high_resolution_clock::now();
    	result = srch->batchSearch(bids);
    	bids.clear();
 	int tot = 0;
    	for(auto id:result)
-   	 {
-		cout <<"["<<id<<"]";
+   	{
 	 	int blocknum = localBCNT[id];
 		tot = tot + blocknum;
    	        string fID = to_string(id);
@@ -269,12 +266,21 @@ vector<string> Orion::simplebatchSearch(string keyword)
    	     		Bid block = createBid(fID,j);
    	     		bids.push_back(block);
    	     	}
-   	  }
-	bcfc << tot <<endl;
-   	conts = file->batchSearch(bids);
-   	  //cout <<bids.size()<<"/"<< conts.size()<<endl;
+   	 }
+   	 conts = file->batchSearch(bids);
+	 auto stop = high_resolution_clock::now();
+	 int totBytes = srch->searchi_bytes + file->searchf_bytes;
+	 auto duration = duration_cast<milliseconds>(stop-start);
+	 double time = double(totBytes)/speed;
+	 time = time*1000;
+	 int totTime = time+ duration.count()+latency; //mili
+
+         sres<<keyword<<" "<< duration.count()<<" "<<totTime<<" "<<conts.size()<<" " <<srch->searchi_bytes <<" "<< file->searchf_bytes<<endl;
+
+cout<<keyword<<" | "<<duration.count()<<" | "<<totTime<<" | "<<conts.size()<<" | "<<srch->searchi_bytes<<" | "<< file->searchf_bytes<<endl;
     return conts;
 }
+
 vector<string> Orion::batchSearch(string keyword) 
 {
     vector<string> conts;

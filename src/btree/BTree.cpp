@@ -83,7 +83,7 @@ int BTree::insertkw(Bid kw, int id, int brootKey, int &brootPos)
 	}
 	else 
 	{
-		BTreeNode *root = bram->ReadBTreeNode(brootKey,brootPos,brootPos);
+		BTreeNode *root = bram->ReadBTreeNode(brootKey,brootPos);
 		if (root->knum == 2*T-1)
 		{
 			BTreeNode *s = newBTreeNode(false,nextBid(),RandomPath());
@@ -134,7 +134,7 @@ void BTree::insertNFull(Bid kw,int id, BTreeNode*& node)
 	{
 		while(i>=0 && node->keys[i] > kw)
 			i--;
-      BTreeNode *ci = bram->ReadBTreeNode(node->cbids[i+1],node->cpos[i+1],node->cpos[i+1]);
+      BTreeNode *ci = bram->ReadBTreeNode(node->cbids[i+1],node->cpos[i+1]);
 		if (ci->knum == 2*T-1)
 		{
 			BTreeNode *z = newBTreeNode(ci->isleaf, nextBid(),RandomPath());
@@ -200,7 +200,7 @@ void BTree::searchkw(int rootKey, int rootPos, Bid kw, int &res)
 {
 	if(res != 0)
 	     return;
-	BTreeNode* node = bram->ReadBTreeNode(rootKey,rootPos,rootPos);
+	BTreeNode* node = bram->ReadBTreeNode(rootKey,rootPos);
         int i = 0;
         while (i < node->knum && kw > node->keys[i])
 	{
@@ -225,14 +225,18 @@ int BTree::RandomPath()
     return val;
 }
 
-void BTree::remove(int k) 
+void BTree::remove(Bid k) 
 {
+  bram->start(false);
+
   if (brootKey==0) 
   {
     cout << "The tree is empty\n";
     return;
   }
-  BTreeNode* root = bram->ReadBTreeNode(brootKey,brootPos,brootPos);
+  cout <<"before read"<<endl;
+  BTreeNode* root = bram->ReadBTreeNode(brootKey,brootPos);
+  cout <<"after read"<<endl;
   deletion(k,root);
   if (root->knum == 0) 
   {
@@ -246,8 +250,12 @@ void BTree::remove(int k)
      brootKey = root->cbids[0];
      brootPos = root->cpos[0];
     }
+    int rootbid = root->bid;
+    root->knum = 0;
+    bram->WriteBTreeNode(rootbid,root);
     //delete root;
   }
+  bram->finalizedel(brootKey,brootPos);
   return;
 }
 
@@ -259,15 +267,22 @@ int BTreeNode::findKey(Bid k)
   return idx;
 }
 
-void BTree::deletion(Bid k, BTreeNode *&node) 
+void BTree::deletion(Bid kw, BTreeNode *&node) 
 {
-  int idx = node->findKey(k);
-  if (idx < node->knum && node->keys[idx] == k) 
+  int idx = node->findKey(kw);
+  cout << "node found:" <<idx<<endl;
+  if (idx < node->knum && node->keys[idx] == kw) 
   {
     if (node->isleaf)
     {
-      node->removeFromLeaf(idx);
-      bram->WriteBTreeNode(node->bid, node);
+	  cout <<"of course leaf"<<endl;
+	  cout <<node->knum<<endl;
+      	  node->removeFromLeaf(idx);
+	  cout <<node->knum<<endl;
+	  //if(node->knum!=0)
+	 //{	
+	      bram->WriteBTreeNode(node->bid, node);
+	 //}
     }
     else
     {
@@ -278,26 +293,31 @@ void BTree::deletion(Bid k, BTreeNode *&node)
   {
     if (node->isleaf) 
     {
-      cout << "The key " << k << " does not exist in the tree\n";
+      cout << "The key " << kw << " does not exist in the tree\n";
       return;
     }
     bool flag = ((idx == node->knum) ? true : false);
-    BTreeNode* ci = bram->ReadBTreeNode(node->cbids[idx],node->cpos[idx],node->cpos[idx]);
+    BTreeNode* ci = bram->ReadBTreeNode(node->cbids[idx],node->cpos[idx]);
 
     if (ci->knum < T)
-      fill(idx,node);
+    {
+      	fill(idx,node);
+    }
     if (flag && (idx > node->knum))
     {
-    BTreeNode* ci1 = bram->ReadBTreeNode(node->cbids[idx-1],node->cpos[idx-1],node->cpos[idx-1]);
-      deletion(k,ci1);
+	cout <<"flag:"<<flag << " " << idx <<" " << node->knum<<endl;
+    	BTreeNode* ci1 = bram->ReadBTreeNode(node->cbids[idx-1],node->cpos[idx-1]);
+      	deletion(kw,ci1);
     }
     else
-      deletion(k,ci);
+    {
+	cout <<"!flag:"<<flag << " " << idx <<" " << node->knum<<endl;
+      	deletion(kw,ci);
+    }
   }
   return;
 }
 
-// Remove from the leaf
 void BTreeNode::removeFromLeaf(int idx) 
 {
   for (int i = idx + 1; i < knum; ++i)
@@ -305,11 +325,12 @@ void BTreeNode::removeFromLeaf(int idx)
   knum--;
   return;
 }
+
 void BTree::removeFromNonLeaf(int idx, BTreeNode *&node)
 {
   Bid k = node->keys[idx];
-  BTreeNode* ci = bram->ReadBTreeNode(node->cbids[idx],node->cpos[idx],node->cpos[idx]);
-  BTreeNode* ci1 = bram->ReadBTreeNode(node->cbids[idx+1],node->cpos[idx+1],node->cpos[idx+1]);
+  BTreeNode* ci = bram->ReadBTreeNode(node->cbids[idx],node->cpos[idx]);
+  BTreeNode* ci1 = bram->ReadBTreeNode(node->cbids[idx+1],node->cpos[idx+1]);
   if (ci->knum >= T) ////
   {
     Bid pred = getPredecessor(idx,node);
@@ -334,43 +355,62 @@ void BTree::removeFromNonLeaf(int idx, BTreeNode *&node)
 
 Bid BTree::getPredecessor(int idx, BTreeNode* node) 
 {
-  BTreeNode *cur = bram->ReadBTreeNode(node->cbids[idx],node->cpos[idx],node->cpos[idx]);
-  while (!cur->isleaf)
-   cur=bram->ReadBTreeNode(cur->cbids[cur->knum],cur->cpos[cur->knum],cur->cpos[cur->knum]);
-
-  return cur->keys[cur->knum-1];
+	BTreeNode *cur = bram->ReadBTreeNode(node->cbids[idx],node->cpos[idx]);
+  	while (!cur->isleaf)
+   		cur=bram->ReadBTreeNode(cur->cbids[cur->knum],cur->cpos[cur->knum]);
+  	return cur->keys[cur->knum-1];
 }
 
 Bid BTree::getSuccessor(int idx, BTreeNode* node)
 {
-BTreeNode *cur=bram->ReadBTreeNode(node->cbids[idx+1],node->cpos[idx+1],node->cpos[idx+1]);
-    while (!cur->isleaf)
-       cur=bram->ReadBTreeNode(cur->cbids[0],cur->cpos[0],cur->cpos[0]);
-    return cur->keys[0];
+	BTreeNode *cur=bram->ReadBTreeNode(node->cbids[idx+1],node->cpos[idx+1]);
+    	while (!cur->isleaf)
+       		cur=bram->ReadBTreeNode(cur->cbids[0],cur->cpos[0]);
+   	return cur->keys[0];
 }
 
 void BTree::fill(int idx, BTreeNode *&node) 
 {
-if(idx!=0 && bram->ReadBTreeNode(node->cbids[idx-1],node->cpos[idx-1],node->cpos[idx-1])->knum >= T)
-    borrowFromPrev(idx,node);
+	if(idx!=0)
+	{
+		BTreeNode *ci = bram->ReadBTreeNode(node->cbids[idx-1],node->cpos[idx-1]);
+		if(ci->knum >= T)
+		{
+			cout <<"borro prev"<<endl;
+    			borrowFromPrev(idx,node);
+		}
+	}
+  	else if (idx != node->knum)
+	{
+		BTreeNode *ci = bram->ReadBTreeNode(node->cbids[idx+1],node->cpos[idx+1]);
 
-  else if (idx != node->knum && bram->ReadBTreeNode(node->cbids[idx-1],node->cpos[idx-1],node->cpos[idx-1])->knum >= T)
-    borrowFromNext(idx,node);
-
-  else {
-    if (idx != node->knum)
-      merge(idx,node);
-    else
-      merge(idx-1,node);
-  }
+		if(ci->knum>=T)
+		{
+			cout <<"borro next"<<endl;
+    			borrowFromNext(idx,node);
+		}
+	}
+  	else 
+	{
+    		if (idx != node->knum)
+    		{
+		cout <<"merge idx:"<<node->knum<<endl;
+      			merge(idx,node);
+   		}
+    		else
+    		{
+		cout <<"merge idx-1:"<<node->knum<<endl;
+      			merge(idx-1,node);
+    		}
+  	}
   return;
 }
 
 // Borrow from previous
 void BTree::borrowFromPrev(int idx, BTreeNode *&node) 
 {
-  BTreeNode *child = bram->ReadBTreeNode(node->cbids[idx],node->cpos[idx],node->cpos[idx]);
-  BTreeNode *sibling = bram->ReadBTreeNode(node->cbids[idx-1],node->cpos[idx-1],node->cpos[idx-1]);
+  BTreeNode *child = bram->ReadBTreeNode(node->cbids[idx],node->cpos[idx]);
+  BTreeNode *sibling = bram->ReadBTreeNode(node->cbids[idx-1],node->cpos[idx-1]);
 
   for (int i = child->knum-1; i >= 0; --i)
     child->keys[i + 1] = child->keys[i];
@@ -407,8 +447,8 @@ void BTree::borrowFromPrev(int idx, BTreeNode *&node)
 // Borrow from the next
 void BTree::borrowFromNext(int idx, BTreeNode *&node) 
 {
-  BTreeNode *child = bram->ReadBTreeNode(node->cbids[idx],node->cpos[idx],node->cpos[idx]);
-  BTreeNode *sibling = bram->ReadBTreeNode(node->cbids[idx+1],node->cpos[idx+1],node->cpos[idx+1]);
+  BTreeNode *child = bram->ReadBTreeNode(node->cbids[idx],node->cpos[idx]);
+  BTreeNode *sibling = bram->ReadBTreeNode(node->cbids[idx+1],node->cpos[idx+1]);
 
   child->keys[(child->knum)] = node->keys[idx];
 
@@ -445,8 +485,8 @@ void BTree::borrowFromNext(int idx, BTreeNode *&node)
 
 void BTree::merge(int idx, BTreeNode *&node)
 {
-  BTreeNode *child = bram->ReadBTreeNode(node->cbids[idx],node->cpos[idx],node->cpos[idx]);
-  BTreeNode *sibling = bram->ReadBTreeNode(node->cbids[idx+1],node->cpos[idx+1],node->cpos[idx+1]);
+  BTreeNode *child = bram->ReadBTreeNode(node->cbids[idx],node->cpos[idx]);
+  BTreeNode *sibling = bram->ReadBTreeNode(node->cbids[idx+1],node->cpos[idx+1]);
 
     // Pulling a key from the current node and inserting it into (t-1)th
     // position of C[idx]
@@ -485,10 +525,11 @@ void BTree::merge(int idx, BTreeNode *&node)
 
     // Freeing the memory occupied by sibling
     //delete(sibling); //??
+    int sbid = sibling->bid;
     sibling->bid = 0;
     sibling->knum = 0;
   bram->WriteBTreeNode(child->bid,child);
-  bram->WriteBTreeNode(sibling->bid,sibling);
+  bram->WriteBTreeNode(sbid,sibling);
   bram->WriteBTreeNode(node->bid,node);
     return;
 }

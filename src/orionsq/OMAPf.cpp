@@ -149,7 +149,8 @@ void OMAPf::batchInsert(map<Bid, int> pairs)
     treeHandler->finishOperation(false, rootKey, rootPos);
 }
 
-vector<int> OMAPf::batchSearch(vector<Bid> keys) {
+vector<int> OMAPf::batchSearch(vector<Bid> keys) 
+{
     vector<int> result;
     treeHandler->startOperation(false);
     Nodef* node = new Nodef();
@@ -170,6 +171,7 @@ vector<int> OMAPf::batchSearch(vector<Bid> keys) {
             result.push_back(0); // in oriel it is commented
         }
     }
+    searchi_bytes = treeHandler->searchi_bytes;
     treeHandler->finishOperation(true, rootKey, rootPos);
     delete node;
     resNodes.clear();

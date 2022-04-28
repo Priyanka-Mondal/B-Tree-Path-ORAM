@@ -25,7 +25,7 @@ public:
     ~Node() {
     }
     Bid key;
-    std::array< byte_t, 64> value;
+    std::array< byte_t, 256> value;
     int pos;
     Bid leftID;
     int leftPos;
@@ -59,6 +59,7 @@ private:
     std::mt19937 mt;
     std::uniform_int_distribution<int> dis;
 
+
     int RandomPath();
     int GetNodeOnPath(int leaf, int depth);
     std::vector<Bid> GetIntersectingBlocks(int x, int depth);
@@ -90,6 +91,7 @@ private:
 public:
     ORAM(int maxSize, bytes<Key> key);
     ~ORAM();
+    int searchf_bytes;
     int maxheight;
     Node* ReadNode(Bid bid, int lastLeaf, int newLeaf);
     Node* ReadNode(Bid bid);

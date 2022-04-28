@@ -426,7 +426,8 @@ Nodef* AVLTreef::search(Nodef* head, Bid key) {
 /**
  * a recursive search function which traverse binary tree to find the target node
  */
-void AVLTreef::batchSearch(Nodef* head, vector<Bid> keys, vector<Nodef*>* results) {
+void AVLTreef::batchSearch(Nodef* head, vector<Bid> keys, vector<Nodef*>* results) 
+{
     if (head == NULL || head->key == 0) {
         return;
     }
@@ -452,6 +453,7 @@ void AVLTreef::batchSearch(Nodef* head, vector<Bid> keys, vector<Nodef*>* result
     if (getRight) {
         batchSearch(oram->ReadNodef(head->rightID, head->rightPos, head->rightPos), rightkeys, results);
     }
+	searchi_bytes = oram->searchi_bytes;
 }
 
 void AVLTreef::printTree(Nodef* root, int indent) {
@@ -476,6 +478,7 @@ void AVLTreef::printTree(Nodef* root, int indent) {
 void AVLTreef::startOperation(bool batchWrite) 
 {
     oram->insertread = 0;
+    searchi_bytes = 0;
     oram->start(batchWrite);
 }
 

@@ -89,6 +89,7 @@ private:
     void Print();
 
 public:
+    int searchi_bytes;
     int insertread;
     int maxheight;
     ORAMf(int maxSize, bytes<Key> key);
@@ -96,6 +97,7 @@ public:
 
     Nodef* ReadNodef(Bid bid, int lastLeaf, int newLeaf);
     Nodef* ReadNodef(Bid bid);
+    int getBytes();
     int WriteNodef(Bid bid, Nodef* n);
     int DeleteNodef(Bid bid, Nodef* node);
     void start(bool batchWrite);

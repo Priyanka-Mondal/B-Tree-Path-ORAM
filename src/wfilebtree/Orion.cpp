@@ -193,6 +193,7 @@ vector<int> Orion::search(string keyword)
     }
     return files;
 }
+/*
 void Orion::remove(string kw)
 {
 	int fc = fcntbtree[kw];
@@ -204,6 +205,7 @@ void Orion::remove(string kw)
 		btreeHandler->remove(key);
 	}
 }
+*/
 /*
 vector<string> Orion::simplebatchSearch(string keyword) 
 {

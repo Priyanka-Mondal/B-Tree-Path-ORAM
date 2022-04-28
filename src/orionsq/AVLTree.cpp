@@ -450,6 +450,7 @@ void AVLTree::batchSearch(Node* head, vector<Bid> keys, vector<Node*>* results) 
     if (getRight) {
         batchSearch(oram->ReadNode(head->rightID, head->rightPos, head->rightPos), rightkeys, results);
     }
+    searchf_bytes = oram->searchf_bytes;
 }
 
 void AVLTree::printTree(Node* root, int indent) {
@@ -473,6 +474,7 @@ void AVLTree::printTree(Node* root, int indent) {
  */
 void AVLTree::startOperation(bool batchWrite) {
     oram->start(batchWrite);
+    searchf_bytes = 0;
 }
 
 /*
