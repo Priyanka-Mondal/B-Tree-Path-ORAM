@@ -330,7 +330,7 @@ void BRAM::finalize(int& brootKey, int& brootPos)
 {
     if (!batchWrite) 
     {
-            for (int i = readCnt; i < pad; i++)
+            for (int i = readCnt; i <= pad; i++)
 	    {
                 int rnd = RandomPath();
                 if (std::find(leafList.begin(), leafList.end(), rnd) == leafList.end()) 
@@ -384,6 +384,33 @@ void BRAM::finalize(int& brootKey, int& brootPos)
 
 void BRAM::finalizedel(int& brootKey, int& brootPos) 
 {
+        int maxHeight = 1;
+        for (auto t : cache) {
+            if (t.second != NULL && t.second->height > maxHeight) {
+                maxHeight = t.second->height;
+            }
+        }
+    for (unsigned int i = 1; i <= maxHeight; i++) 
+    {
+        for (auto t : cache) 
+	{
+            if (t.second != NULL && t.second->height == i) 
+	    {
+                BTreeNode* tmp = t.second;
+                if (modified.count(tmp->bid)) 
+		{
+                    tmp->pos = RandomPath();
+                }
+		for(int k = 0;k<=tmp->knum;k++)
+		{
+			if (tmp->cbids[k] != 0 && cache.count(tmp->cbids[k]) > 0) 
+			{
+		    		tmp->cpos[k] = cache[tmp->cbids[k]]->pos;
+                	}
+		}
+            }
+        }
+    }
 	
     if (cache.count(brootKey) != 0)
         brootPos = cache[brootKey]->pos;

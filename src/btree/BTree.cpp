@@ -260,7 +260,16 @@ void BTree::deletion(Bid kw, BTreeNode *&node)
     if (node->isleaf)
     {
 	  node->removeFromLeaf(idx);
-	  bram->WriteBTreeNode(node->bid, node);
+	  if(node->knum != 0)
+	  	bram->WriteBTreeNode(node->bid, node);
+	  else
+	  {
+		  cout <<"node->knum:"<<node->knum<<endl;
+		  int nodebid = node->bid;
+		  //node->bid = 0;
+		  bram->WriteBTreeNode(nodebid,node);
+		  cout <<"written 0"<<endl;
+	  }
     }
     else
       removeFromNonLeaf(idx,node);
@@ -496,6 +505,7 @@ void BTree::merge(int idx, BTreeNode *&node)
     int sbid = sibling->bid;
     sibling->bid = 0;
     sibling->knum = 0;
+    cout <<"child->bid:["<<child->bid<<"]"<<endl<<endl;
     bram->WriteBTreeNode(child->bid,child);
     bram->WriteBTreeNode(sbid,sibling);
     bram->WriteBTreeNode(node->bid,node);
