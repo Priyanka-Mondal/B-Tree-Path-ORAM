@@ -328,7 +328,7 @@ block BRAM::convertBTreeNodeToBlockb(BTreeNode* node)
 
 void BRAM::finalize(int& brootKey, int& brootPos) 
 {
-    if (!batchWrite) 
+/*    if (!batchWrite) 
     {
             for (int i = readCnt; i <= pad; i++)
 	    {
@@ -340,7 +340,7 @@ void BRAM::finalize(int& brootKey, int& brootPos)
                 FetchPath(rnd);
         }
     }
-	
+*/	
         int maxHeight = 1;
         for (auto t : cache) {
             if (t.second != NULL && t.second->height > maxHeight) {

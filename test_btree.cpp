@@ -96,26 +96,37 @@ int main(int argc, char**argv)
         ifstream kw;
 	ofstream sres;
 	list_dir(argv[2],orion);
+	list_dir(argv[2],orion);
 	//cout <<"------------------"<<endl;
 	
 	kw.open(argv[3]);
 	sres.open(argv[4]);	
 	string line;
-	/*
+	
 	int l = 1;
 	if(local)
 	{
 		while(getline(kw,line))
 		{
 	        	auto start = high_resolution_clock::now();
+			cout <<"before--------"<<endl;
 			auto s = orion.search(line);
 	        	auto stop = high_resolution_clock::now();
 			auto duration = duration_cast<microseconds>(stop-start);
+			cout <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+			orion.remove(line);
+			cout <<"after--------"<<endl;
+	        	start = high_resolution_clock::now();
+			s = orion.search(line);
+	        	stop = high_resolution_clock::now();
+			duration = duration_cast<microseconds>(stop-start);
 			sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
 			cout <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
 			l++;
 		}
 	}
+	
+	/*
 	else
 	{
 		while(getline(kw,line))
@@ -132,7 +143,7 @@ int main(int argc, char**argv)
 	return 0;
 	
 */
-
+return 0;
 	
 	cout <<"== TOTAL files inserted :"<<fileid-1<<" =="<<endl;
 	cout << endl<<" SETUP INSERT DONE!"<< endl;

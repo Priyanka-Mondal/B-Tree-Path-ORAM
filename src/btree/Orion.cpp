@@ -187,7 +187,7 @@ vector<int> Orion::search(string keyword)
 		if(res!=0)
 		{
 		   files.push_back(res);
-		   cout <<"["<<res<<"]";
+		  // cout <<"["<<res<<"]";
 		}
 	    }
     }
@@ -196,11 +196,10 @@ vector<int> Orion::search(string keyword)
 void Orion::remove(string kw)
 {
 	int fc = fcntbtree[kw];
-	cout <<"FC:"<<fc<<endl;
+	//cout <<"FC:"<<fc<<endl;
 	for(int i = 1 ; i<= fc ; i++)
 	{
-		cout <<"removing:"<<kw<<" FC:["<<i<<"]"<<endl;
-		cout <<"----------------------------------------"<<endl;
+		//cout <<"removing:"<<kw<<" FC:["<<i<<"]"<<endl;
 		Bid key = createBid(kw,i);
 		btreeHandler->remove(key);
 	}

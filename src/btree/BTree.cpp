@@ -190,6 +190,7 @@ void BTree::searchkw(int rootKey, int rootPos, Bid kw, int &res)
         if (node->keys[i] == kw)
 	{
 		res = node->values[i];
+		cout <<node->keys[i]<<" FOUND in BTree:"<<res<<endl;
                 return ;//node->values[i];
 	}
 	else if (node->isleaf == true)
@@ -208,7 +209,8 @@ int BTree::RandomPath()
 
 void BTree::remove(Bid k)
 {
-
+ search(k);
+ cout <<"search in delete"<<endl;
   bram->start(false);
   removekw(k);
   bram->finalizedel(brootKey,brootPos);
@@ -264,11 +266,9 @@ void BTree::deletion(Bid kw, BTreeNode *&node)
 	  	bram->WriteBTreeNode(node->bid, node);
 	  else
 	  {
-		  cout <<"node->knum:"<<node->knum<<endl;
 		  int nodebid = node->bid;
-		  //node->bid = 0;
+		  node->bid = 0;
 		  bram->WriteBTreeNode(nodebid,node);
-		  cout <<"written 0"<<endl;
 	  }
     }
     else
@@ -373,20 +373,16 @@ void BTree::fill(int idx, BTreeNode *&node)
 	if (idx != node->knum)
 	{
 		BTreeNode *ci = bram->ReadBTreeNode(node->cbids[idx+1],node->cpos[idx+1]);
-
 		if(ci->knum>=T)
 		{
 			borrowFromNext(idx,node);
 			return;
 		}
 	}
-	else 
-	{
-		if (idx != node->knum)
-			merge(idx,node);
-		else
-			merge(idx-1,node);
-	}
+	if (idx != node->knum)
+		merge(idx,node);
+	else //if(idx==node->knum)//if (idx !=0)
+		merge(idx-1,node);
   return;
 }
 
@@ -428,7 +424,6 @@ void BTree::borrowFromPrev(int idx, BTreeNode *&node)
   bram->WriteBTreeNode(node->bid,node);
   return;
 }
-
 
 // Borrow from the next
 void BTree::borrowFromNext(int idx, BTreeNode *&node) 
@@ -505,7 +500,6 @@ void BTree::merge(int idx, BTreeNode *&node)
     int sbid = sibling->bid;
     sibling->bid = 0;
     sibling->knum = 0;
-    cout <<"child->bid:["<<child->bid<<"]"<<endl<<endl;
     bram->WriteBTreeNode(child->bid,child);
     bram->WriteBTreeNode(sbid,sibling);
     bram->WriteBTreeNode(node->bid,node);
