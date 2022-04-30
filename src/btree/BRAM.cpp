@@ -163,16 +163,16 @@ void BRAM::WritePath(int leaf, int d)
 	{
             Blockb &block = bucket[z];
             block.id = validBlockbs[z];
-	    //int temp = block.id;
+	    int temp = block.id;
             BTreeNode* curnode = cache[block.id];
             block.data = convertBTreeNodeToBlockb(curnode);
-	    /*if(curnode->bid != block.id)
+	    if(curnode->bid != block.id)
 	    {
 		    block.id = 0; // curnode->key;
 		    block.data.resize(blockSize, 0);
-	    }*/
+	    }
             delete curnode;
-            cache.erase(block.id);
+            cache.erase(temp);
         }
         for (int z = validBlockbs.size(); z < Z; z++) 
 	{
@@ -203,7 +203,8 @@ void BRAM::WriteData(int bid, BTreeNode* node)
         cache[bid] = node;
 	if(node->knum==2*T-1) // still not correct
         	store->ReduceEmptyNumbers();
-	//cout <<"FREE:"<<store->GetEmptySize()<<endl;
+	else if(bid != node->bid)
+		store->IncreaseEmptyNumbers(); // will be deleted in WritePath()
     } 
     else 
     {

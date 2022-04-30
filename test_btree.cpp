@@ -101,6 +101,7 @@ int main(int argc, char**argv)
 	kw.open(argv[3]);
 	sres.open(argv[4]);	
 	string line;
+	/*
 	int l = 1;
 	if(local)
 	{
@@ -115,10 +116,7 @@ int main(int argc, char**argv)
 			l++;
 		}
 	}
-	cout <<"-------------------------------"<<endl;
-	auto s = orion.search("bbbb");
-	cout <<line<<" "<< s.size()<<endl;
-/*	else
+	else
 	{
 		while(getline(kw,line))
 		{
@@ -131,55 +129,11 @@ int main(int argc, char**argv)
 			l++;
 		}
 	}
-*/
 	return 0;
 	
-	/*
-	
-	list_dir("allen-p/deleted_items",orion);
-	list_dir("allen-p/sent_items",orion);
-	//list_dir("allen-p/sent",orion);
-	//list_dir("allen-p/all_documents",orion);
-	//list_dir("allen-p/discussion_threads",orion);
-	cout <<"SEARCHING..."<<endl;
-        auto start = high_resolution_clock::now();
-	auto s = orion.search("borion");
-        auto stop = high_resolution_clock::now();
-	auto duration = duration_cast<microseconds>(stop-start);
-	sres <<(fileid-1)<<" "<< duration.count()<<" "<< s.size()<<endl;
-return 0;
-	list_dir("allen-p/sent_items",orion);
-        start = high_resolution_clock::now();
-	s = orion.search("borion");
-        stop = high_resolution_clock::now();
-	duration = duration_cast<microseconds>(stop-start);
-	sres <<(fileid-1)<<" "<<duration.count() <<" "<< s.size()<<endl;
-
-	list_dir("allen-p/sent",orion);
-        start = high_resolution_clock::now();
-	s = orion.searchsimple("borion");
-        stop = high_resolution_clock::now();
-	duration = duration_cast<microseconds>(stop-start);
-	sres <<(fileid-1)<<" "<<duration.count()<<" "<< s.size()<<endl;
-
-	list_dir("allen-p/all_documents",orion);
-        start = high_resolution_clock::now();
-	s = orion.searchsimple("borion");
-        stop = high_resolution_clock::now();
-	duration = duration_cast<microseconds>(stop-start);
-	sres <<(fileid-1)<<" "<<duration.count()<<" "<< s.size()<<endl;
-
-	list_dir("allen-p/discussion_threads",orion);
-        start = high_resolution_clock::now();
-	s = orion.searchsimple("borion");
-        stop = high_resolution_clock::now();
-	duration = duration_cast<microseconds>(stop-start);
-	sres <<(fileid-1)<<" "<<duration.count()<<" "<< s.size()<<endl;
-
-	return 0;
-
 */
-/*	
+
+	
 	cout <<"== TOTAL files inserted :"<<fileid-1<<" =="<<endl;
 	cout << endl<<" SETUP INSERT DONE!"<< endl;
 	cout <<"=================================="<< endl;
@@ -209,7 +163,7 @@ return 0;
 			cout <<"SEARCHING ..."<<endl;
 			//start = high_resolution_clock::now();
 			auto s = orion.search(keyword);
-			cout <<"search size:"<<s<<endl;
+			cout <<"search size:"<<s.size()<<endl;
 			//stop = high_resolution_clock::now();
 			//duration = duration_cast<microseconds>(stop-start);
 			//sres<<fileid-1<<" "<<duration.count()<<" "<<files.size();
@@ -240,12 +194,12 @@ return 0;
 		{
 			cout <<"insert KEYWORD and FILEID"<<endl;
 			string kw;
-			int id;
-			//cin>>kw;
-			cin>>id;
+			//int id;
+			cin>>kw;
+			//cin>>id;
 			//vector<string> kws;
 			//kws.push_back(kw);
-			orion.remove(id);
+			orion.remove(kw);
 		}
 		else if(c=='p' || c=='P')
 		{
@@ -260,5 +214,4 @@ return 0;
 			cout <<"invalid choice!"<<endl;
 	}   
         return 0;
-	*/
 }

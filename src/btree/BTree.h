@@ -47,9 +47,10 @@ public:
 
     void deletion(Bid k, BTreeNode *&node);
     void remove(Bid);
+    void removekw(Bid);
     void removeFromNonLeaf(int, BTreeNode*&);
-    Bid getPredecessor(int, BTreeNode*);
-    Bid getSuccessor(int, BTreeNode*);
+    pair<Bid,int> getPredecessor(int, BTreeNode*);
+    pair<Bid,int> getSuccessor(int, BTreeNode*);
     void fill(int, BTreeNode*&);
     void borrowFromPrev(int, BTreeNode*&);
     void borrowFromNext(int, BTreeNode*&);
