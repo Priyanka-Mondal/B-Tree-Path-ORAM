@@ -96,7 +96,6 @@ int main(int argc, char**argv)
         ifstream kw;
 	ofstream sres;
 	list_dir(argv[2],orion);
-	list_dir(argv[2],orion);
 	//cout <<"------------------"<<endl;
 	
 	kw.open(argv[3]);
@@ -109,19 +108,23 @@ int main(int argc, char**argv)
 		while(getline(kw,line))
 		{
 	        	auto start = high_resolution_clock::now();
-			cout <<"before--------"<<endl;
+			cout <<"before-----------------"<<endl;
 			auto s = orion.search(line);
 	        	auto stop = high_resolution_clock::now();
 			auto duration = duration_cast<microseconds>(stop-start);
 			cout <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+			cout<<"..........................................."<<endl;
 			orion.remove(line);
-			cout <<"after--------"<<endl;
+			cout <<endl;
+			cout <<"after-----------------"<<endl;
 	        	start = high_resolution_clock::now();
 			s = orion.search(line);
 	        	stop = high_resolution_clock::now();
 			duration = duration_cast<microseconds>(stop-start);
 			sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
 			cout <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+			cout <<"====================================="<<endl;
+			cout <<"====================================="<<endl;
 			l++;
 		}
 	}

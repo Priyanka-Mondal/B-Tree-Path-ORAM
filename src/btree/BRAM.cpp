@@ -114,10 +114,11 @@ void BRAM::FetchPath(int leaf)
         }
 
         Bucketb bucket = ReadBucketb(node); //<<-- here
-        for (int z = 0; z < Z; z++) {
+        for (int z = 0; z < Z; z++) 
+	{
             Blockb &block = bucket[z];
-
-            if (block.id != 0) { // 0 is root right ? or maybe makeit 1
+            if (block.id != 0) 
+	    { 
                 BTreeNode* n = convertBlockbToBTreeNode(block.data);
                 if (cache.count(block.id) == 0) 
 		{
@@ -215,16 +216,20 @@ void BRAM::WriteData(int bid, BTreeNode* node)
 
 // Fetches a block, allowing you to read and write in a block
 
-void BRAM::Access(int bid, BTreeNode*& node, int lastLeaf, int newLeaf) {
+void BRAM::Access(int bid, BTreeNode*& node, int lastLeaf) 
+{
     FetchPath(lastLeaf);
     node = ReadData(bid);
-    if (node != NULL) {
-        node->pos = newLeaf;
-        if (cache.count(bid) != 0) {
+    if (node != NULL) 
+    {
+        //node->pos = newLeaf;
+        if (cache.count(bid) != 0) 
+	{
             cache.erase(bid);
         }
         cache[bid] = node;
-        if (find(leafList.begin(), leafList.end(), lastLeaf) == leafList.end()) {
+        if (find(leafList.begin(), leafList.end(), lastLeaf) == leafList.end()) 
+	{
             leafList.push_back(lastLeaf);
         }
     }
@@ -261,7 +266,7 @@ BTreeNode* BRAM::ReadBTreeNode(int bid, int lastLeaf) {
     if (cache.count(bid) == 0) 
     {
         BTreeNode* node;
-        Access(bid, node, lastLeaf, lastLeaf);
+        Access(bid, node, lastLeaf);
         if (node != NULL) {
             modified.insert(bid);
         }
@@ -269,13 +274,13 @@ BTreeNode* BRAM::ReadBTreeNode(int bid, int lastLeaf) {
 	{
 		cout <<"BTreeNode is NULL : "<< bid << endl ;
 		cout <<"free node:" << store->GetEmptySize() << endl;
-        throw runtime_error("BTreeNode id is not set ReadBTreeNode");
+        	throw runtime_error("BTreeNode id is not set ReadBTreeNode");
 	}
         return node;
     } else {
         modified.insert(bid);
         BTreeNode* node = cache[bid];
-        node->pos = lastLeaf;
+        //node->pos = lastLeaf;
         return node;
     }
 }

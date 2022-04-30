@@ -199,8 +199,8 @@ void Orion::remove(string kw)
 	//cout <<"FC:"<<fc<<endl;
 	for(int i = 1 ; i<= fc ; i++)
 	{
-		//cout <<"removing:"<<kw<<" FC:["<<i<<"]"<<endl;
 		Bid key = createBid(kw,i);
+		cout <<"removing:"<<kw<<" FC:["<<i<<"]"<<endl;
 		btreeHandler->remove(key);
 	}
 }

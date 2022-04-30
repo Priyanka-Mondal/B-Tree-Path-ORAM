@@ -48,6 +48,7 @@ public:
     void deletion(Bid k, BTreeNode *&node);
     void remove(Bid);
     void removekw(Bid);
+    void removeFromLeaf(int idx, BTreeNode *&node) ;
     void removeFromNonLeaf(int, BTreeNode*&);
     pair<Bid,int> getPredecessor(int, BTreeNode*);
     pair<Bid,int> getSuccessor(int, BTreeNode*);

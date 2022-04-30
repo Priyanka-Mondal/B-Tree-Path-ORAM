@@ -59,7 +59,7 @@ private:
 
     Bucketb ReadBucketb(int pos);
     void WriteBucketb(int pos, Bucketb bucket);
-    void Access(int bid, BTreeNode*& node, int lastLeaf, int newLeaf);
+    void Access(int bid, BTreeNode*& node, int lastLeaf);
     void Access(int bid, BTreeNode*& node);
 
 

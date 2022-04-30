@@ -187,7 +187,7 @@ void BTree::searchkw(int rootKey, int rootPos, Bid kw, int &res)
 	{
                 i++;
 	}
-        if (node->keys[i] == kw)
+        if (i<node->knum && node->keys[i] == kw)
 	{
 		res = node->values[i];
 		cout <<node->keys[i]<<" FOUND in BTree:"<<res<<endl;
@@ -209,8 +209,6 @@ int BTree::RandomPath()
 
 void BTree::remove(Bid k)
 {
- search(k);
- cout <<"search in delete"<<endl;
   bram->start(false);
   removekw(k);
   bram->finalizedel(brootKey,brootPos);
@@ -239,7 +237,6 @@ void BTree::removekw(Bid k)
     }
     int rootbid = root->bid;
     root->bid = 0;
-    root->knum = 0;
     bram->WriteBTreeNode(rootbid,root);
     //delete root;
   }
@@ -261,7 +258,7 @@ void BTree::deletion(Bid kw, BTreeNode *&node)
   {
     if (node->isleaf)
     {
-	  node->removeFromLeaf(idx);
+	  removeFromLeaf(idx,node);
 	  if(node->knum != 0)
 	  	bram->WriteBTreeNode(node->bid, node);
 	  else
@@ -295,20 +292,23 @@ void BTree::deletion(Bid kw, BTreeNode *&node)
     }
     else
     {
+    BTreeNode* ci = bram->ReadBTreeNode(node->cbids[idx],node->cpos[idx]);//??
 	deletion(kw,ci);
     }
   }
   return;
 }
 
-void BTreeNode::removeFromLeaf(int idx) 
+void BTree::removeFromLeaf(int idx, BTreeNode *&node) 
 {
-  for (int i = idx + 1; i < knum; ++i)
+  for (int i = idx + 1; i < node->knum; ++i)
   {
-    keys[i-1] = keys[i];
-    values[i-1] = values[i-1];
+    node->keys[i-1] = node->keys[i];
+    node->values[i-1] = node->values[i];
   }
-  knum--;
+  node->keys[node->knum-1]=Bid(0);
+  node->values[node->knum-1]=0;
+  node->knum=node->knum-1;
   return;
 }
 
@@ -495,7 +495,7 @@ void BTree::merge(int idx, BTreeNode *&node)
         node->cpos[i-1] = node->cpos[i];
     }
     child->knum += sibling->knum+1;
-    node->knum--;
+    node->knum=node->knum-1;
     //delete(sibling); //??
     int sbid = sibling->bid;
     sibling->bid = 0;
