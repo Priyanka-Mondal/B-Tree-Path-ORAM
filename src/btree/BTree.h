@@ -43,6 +43,7 @@ public:
     void splitChild(BTreeNode *&par, int i, BTreeNode *&y, BTreeNode *&z);
     int search(Bid kw);
     void searchkw(int brootKey, int brootPos, Bid kw, int &res);
+    vector<int> batchSearch(vector<Bid> bids);
    
 
     void deletion(Bid k, BTreeNode *&node);

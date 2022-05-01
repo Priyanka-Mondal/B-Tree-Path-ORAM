@@ -168,6 +168,20 @@ void BTree::splitChild(BTreeNode *&par, int i, BTreeNode *&y, BTreeNode *&z)
 	par->knum = par->knum + 1;
 }
 
+vector<int> BTree::batchSearch(vector<Bid> bids)
+{
+	vector<int> results;
+	bram->start(false);
+	for(auto b:bids)
+	{
+		int res = 0;
+		searchkw(brootKey,brootPos,b,res);
+		results.push_back(res);
+	}
+	bram->finalize(brootKey,brootPos);
+	return results;
+}
+
 int BTree::search(Bid kw)
 {
 	bram->start(false);
@@ -190,7 +204,7 @@ void BTree::searchkw(int rootKey, int rootPos, Bid kw, int &res)
         if (i<node->knum && node->keys[i] == kw)
 	{
 		res = node->values[i];
-		cout <<node->keys[i]<<" FOUND in BTree:"<<res<<endl;
+		//cout <<node->keys[i]<<" FOUND in BTree:"<<res<<endl;
                 return ;//node->values[i];
 	}
 	else if (node->isleaf == true)

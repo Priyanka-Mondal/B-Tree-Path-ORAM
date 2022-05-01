@@ -970,8 +970,10 @@ Bid AVLTree::balanceDel(Bid key, int& pos, Node* parmin)
     oram->WriteNode(node->key, node);
     return node->key;
 }
-void AVLTree::setupInsert(Bid& rootKey, int& rootPos, map<Bid, string> pairs) {
-    for (auto pair : pairs) {
+void AVLTree::setupInsert(Bid& rootKey, int& rootPos, map<Bid, string> pairs) 
+{
+    for (auto pair : pairs) 
+    {
         Node* node = newNode(pair.first, pair.second);
         setupNodes.push_back(node);
     }
@@ -981,12 +983,15 @@ void AVLTree::setupInsert(Bid& rootKey, int& rootPos, map<Bid, string> pairs) {
     oram->setupInsert(setupNodes);
 }
 
-int AVLTree::sortedArrayToBST(int start, int end, int& pos, Bid& node) {
+int AVLTree::sortedArrayToBST(int start, int end, int& pos, Bid& node) 
+{
     setupProgress++;
-    if (setupProgress % 100000 == 0) {
+    if (setupProgress % 100000 == 0) 
+    {
         cout << setupProgress << "/" << setupNodes.size()*2 << " of AVL tree constructed" << endl;
     }
-    if (start > end) {
+    if (start > end) 
+    {
         pos = -1;
         node = 0;
         return 0;

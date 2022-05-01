@@ -30,7 +30,7 @@ public:
     void remove(string kw);
     void removekw(vector <string> kws, int id);
     
-    vector<string> batchSearch(string keyword);
+    vector<int> batchSearch(string keyword);
     vector<string> simplebatchSearch(string keyword);
     vector<int> search(string keyword);
     
