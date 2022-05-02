@@ -29,6 +29,7 @@ private:
     int max(int a, int b);
     //BTreeNode* newBTreeNode(bool leaf);
     BTreeNode* newBTreeNode(bool leaf, int nextBid, int pos);
+    BTreeNode* newBTreeNode(int nextBid, int pos);
     int RandomPath();
     int nextBid();
     int nextbid = 0;
