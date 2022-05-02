@@ -37,6 +37,9 @@ private:
 public:
     int brootKey;
     int brootPos;
+    bool get_isleaf(BTreeNode* node);
+    int get_knum(BTreeNode* node);
+
     int insert(Bid kw, int id);
     int insertkw(Bid kw, int id, int rootBid, int &rootPos);
     void insertNFull(Bid kw,int id, BTreeNode*& bt ); 

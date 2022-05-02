@@ -16,9 +16,9 @@ public:
        ~BTreeNode() { }
 
         int bid; 
-	int pos; // position of this node
-        int knum;   // Current number of keys
-        bool isleaf; // Is true when node is leaf. Otherwise false
+	int pos; 
+        int knum;  
+        bool isleaf;
 	int height;
 	array<Bid, D-1>keys;
 	array<int, D-1>values;
@@ -26,8 +26,6 @@ public:
 	array<int,D> cpos;
 
 	int findKey(Bid k);
-//	void deletion(int k);
-	void removeFromLeaf(int idx);
 
 friend class BTree;
 };
