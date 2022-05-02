@@ -77,6 +77,7 @@ public:
     int maxheight;
     BTreeNode* ReadBTreeNode(int bid, int lastLeaf);
     BTreeNode* ReadBTreeNode(int bid);
+    int get_knumbn(BTreeNode* bn);
     int WriteBTreeNode(int bid, BTreeNode* n);
     int DeleteBTreeNode(int bid, BTreeNode* n);
     void start(bool batchWrite);

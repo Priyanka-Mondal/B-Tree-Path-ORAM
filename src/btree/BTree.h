@@ -51,6 +51,7 @@ public:
 
     void deletion(Bid k, BTreeNode *&node);
     void remove(Bid);
+    int findKey(Bid k, BTreeNode* node);
     void removekw(Bid);
     void removeFromLeaf(int idx, BTreeNode *&node) ;
     void removeFromNonLeaf(int, BTreeNode*&);

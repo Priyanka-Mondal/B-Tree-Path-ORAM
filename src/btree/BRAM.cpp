@@ -43,6 +43,17 @@ BRAM::~BRAM() {
     AES::Cleanup();
     delete store;
 }
+int BRAM::get_knumbn(BTreeNode* bn)
+{
+	int knum = 0;
+	int i = 0;
+	while(i<D-1 && bn->values[i]!=0)
+	{
+		i++;
+		knum++;
+	}
+	return knum;
+}
 
 int BRAM::GetBTreeNodeOnPath(int leaf, int curDepth) {
     leaf += bucketCount / 2;
@@ -202,7 +213,7 @@ void BRAM::WriteData(int bid, BTreeNode* node)
     if (store->GetEmptySize() > 0) 
     {
         cache[bid] = node;
-	if(node->knum==2*T-1) // still not correct
+	if(get_knumbn(node)==2*T-1) // still not correct
         	store->ReduceEmptyNumbers();
 	else if(bid != node->bid)
 		store->IncreaseEmptyNumbers(); // will be deleted in WritePath()
@@ -363,7 +374,7 @@ void BRAM::finalize(int& brootKey, int& brootPos)
 		{
                     tmp->pos = RandomPath();
                 }
-		for(int k = 0;k<=tmp->knum;k++)
+		for(int k = 0;k<=get_knumbn(tmp);k++)
 		{
 			if (tmp->cbids[k] != 0 && cache.count(tmp->cbids[k]) > 0) 
 			{
@@ -406,7 +417,7 @@ void BRAM::finalizedel(int& brootKey, int& brootPos)
 		{
                     tmp->pos = RandomPath();
                 }
-		for(int k = 0;k<=tmp->knum;k++)
+		for(int k = 0;k<=get_knumbn(tmp);k++)
 		{
 			if (tmp->cbids[k] != 0 && cache.count(tmp->cbids[k]) > 0) 
 			{
