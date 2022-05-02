@@ -8,7 +8,7 @@ Orion::Orion(bool usehdd, int size, bool local)
     this->useHDD = false;//usehdd;
     this->local= local;
     bytes<Key> key1{0};
-    bytes<Key> key2{1};
+    //bytes<Key> key2{1};
     btreeHandler = new BTree(size, key1);
 }
 
