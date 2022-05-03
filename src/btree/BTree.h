@@ -33,7 +33,7 @@ private:
     int RandomPath();
     int nextBid();
     int nextbid = 0;
-    //vector<BTreeNode*> setupBTreeNodes;
+    map<int,BTreeNode*> setupNodes;
 
 public:
     int brootKey;
@@ -67,7 +67,10 @@ public:
     BTree();
    ~BTree();
     
-    void setupInsert(int& rootKey, int& rootPos, map<int, string> pairs);
+    void setupInsert(map<Bid,int> pairs);
+    void create_node(int nextbid, int leafpos, map<Bid,int> input, int maxHeight);
+    void endSetup();
+    //void setupInsert(int& rootKey, int& rootPos, map<int, string> pairs);
     int sortedArrayToBST(int start, int end, int& pos, int& node);
 };
 

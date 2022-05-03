@@ -113,7 +113,7 @@ void Orion::insertWrap(string cont, int fileid, bool batch)
       }
       vector<string> blocks;
       blocks = divideString(cont,BLOCK);
-      insert(kws, blocks, fileid);
+      setupInsert(kws, fileid);
 }
 
 void Orion::insert(vector<string> kws, vector<string> blocks, int ind) 
@@ -149,11 +149,9 @@ Bid Orion::createBid(string keyword, int number)
 
 vector<int> Orion::batchSearch(string keyword)
 {
-
     int fc = 0; 
     vector<int> files;
     vector<Bid> bids;
-
     if(fcntbtree.count(keyword)>0)
 	    fc = fcntbtree[keyword];
     if(fc == 0)
@@ -227,6 +225,25 @@ void Orion::remove(string kw)
 		btreeHandler->remove(key);
 	}
 }
+void Orion::setupInsert(vector<string> kws, int ind) 
+{
+    for(auto kw: kws)
+    {	
+	    //cout <<"in setup insert"<<endl;
+	  int fc = 0;
+	  if(fcntbtree.count(kw)>0)
+		fc = fcntbtree[kw];
+  	  fc++;
+	  fcntbtree[kw]= fc;
+  	  Bid mapKey = createBid(kw,fc);
+	  setup[mapKey]=ind;
+    }
+}
+void Orion::endSetup() 
+{
+        btreeHandler->setupInsert(setup);
+}
+
 /*
 vector<string> Orion::simplebatchSearch(string keyword) 
 {
@@ -381,38 +398,5 @@ void Orion::removekw(vector <string> kws, int id)
 void Orion::print()
 {
 	srch->printTree();
-}
-void Orion::endSetup() 
-{
-        srch->setupInsert(srchbids);
-}
-void Orion::setupinsert(vector<string> kws, vector<string> blocks, int ind) 
-{
-    for(auto kw: kws)
-    {	
-  	      Bid firstKey(kw);
-	      int fc = fcnt->setupfind(firstKey);
-  	      fc++;
-  	      Bid mapKey = createBid(kw, ind);
-  	      //updt->setupinsert(mapKey, fc); 
-	      //UpdtCnt[mapKey]=fc;
-  	      fcnt->setupinsert(firstKey, fc); 
-  	      Bid key = createBid(kw, fc);
-  	      srch->setupinsert(key, ind);
-    }
-      string id = to_string(ind);
-      Bid blkcnt(id);
-      fcnt->setupinsert(blkcnt,blocks.size());
-      int block_num = 1;
-      
-      for(auto blk: blocks)
-      {
-	      Bid fb = createBid(id,block_num);
-	      file->setupinsert(fb,blk);
-	      block_num++;
-      }
-      fileblks = fileblks+blocks.size();
-      inserted = inserted+kws.size();
-      cout << "SETUP inserted (kw:"<<kws.size() <<",fb:"<<blocks.size()<<")  ukw:"<<inserted<<" tfb:"<<fileblks<< endl;
 }
 */

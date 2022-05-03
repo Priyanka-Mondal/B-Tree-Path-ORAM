@@ -96,6 +96,7 @@ int main(int argc, char**argv)
         ifstream kw;
 	ofstream sres;
 	list_dir(argv[2],orion);
+	orion.endSetup();
 	//cout <<"------------------"<<endl;
 	
 	kw.open(argv[3]);
