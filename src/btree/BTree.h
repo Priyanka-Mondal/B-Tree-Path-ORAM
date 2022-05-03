@@ -69,7 +69,7 @@ public:
    ~BTree();
     
     void setupInsert(map<Bid,int> pairs);
-    void create_node(int nextbid, int leafpos, map<Bid,int> input, int maxHeight);
+    int create_node(int nextbid, int &leafpos, map<Bid,int> input, int maxHeight);
     void endSetup();
     //void setupInsert(int& rootKey, int& rootPos, map<int, string> pairs);
     int sortedArrayToBST(int start, int end, int& pos, int& node);

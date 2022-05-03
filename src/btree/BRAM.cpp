@@ -283,6 +283,7 @@ BTreeNode* BRAM::ReadBTreeNode(int bid, int lastLeaf) {
         }
 	else 
 	{
+		cout <<"lastLeaf: "<<lastLeaf<<endl;
 		cout <<"BTreeNode is NULL : "<< bid << endl ;
 		cout <<"free node:" << store->GetEmptySize() << endl;
         	throw runtime_error("BTreeNode id is not set ReadBTreeNode");
@@ -357,6 +358,7 @@ void BRAM::finalize(int& brootKey, int& brootPos)
         }
     }
 */	
+	/*
         int maxHeight = 1;
         for (auto t : cache) {
             if (t.second != NULL && t.second->height > maxHeight) {
@@ -383,7 +385,7 @@ void BRAM::finalize(int& brootKey, int& brootPos)
 		}
             }
         }
-    }
+    }*/
     if (cache.count(brootKey) != 0)
         brootPos = cache[brootKey]->pos;
 
@@ -480,38 +482,38 @@ void BRAM::setupInsert(vector<BTreeNode*> nodes)
 		leaf = (*el)->pos;
 	if(el != nodes.end())
 	{
-	for (size_t d = depth; d >= 0; d--) 
-	{
-		if(leaf == (*el)->pos)
+		for (size_t d = depth; d >= 0; d--) 
 		{
-	        	int node = GetBTreeNodeOnPath(leaf, d);
-	       		Bucketb bucket = ReadBucketb(node);
-			int z = 0;
-			while(el != nodes.end() && z<Z && leaf == (*el)->pos)
-	        	{
-				assert(leaf == (*el)->pos);
-				Blockb &block = bucket[z];
-				block.id = (*el)->bid;
-				block.data = convertBTreeNodeToBlockb(*el);
-				z++;
-				el++;
-				//cout <<"z:"<<z<<" leaf:"<<leaf<<" ";
-			}
-			if(z>0)
+			if(leaf == (*el)->pos)
 			{
-				//cout <<"going to write bucket"<<endl;
-			      WriteBucketb(node,bucket);
-				//cout <<"written bucket"<<endl;
+		        	int node = GetBTreeNodeOnPath(leaf, d);
+		       		Bucketb bucket = ReadBucketb(node);
+				int z = 0;
+				while(el != nodes.end() && z<Z && leaf == (*el)->pos)
+		        	{
+					assert(leaf == (*el)->pos);
+					Blockb &block = bucket[z];
+					block.id = (*el)->bid;
+					block.data = convertBTreeNodeToBlockb(*el);
+					z++;
+					el++;
+					//cout <<"z:"<<z<<" leaf:"<<leaf<<" ";
+				}
+				//if(z>0)
+				//{
+					//cout <<"going to write bucket"<<endl;
+				      WriteBucketb(node,bucket);
+					//cout <<"written bucket"<<endl;
+				//}
+				if(el != nodes.end() && leaf != (*el)->pos)
+					goto LEAF;
+				else if(el == nodes.end())
+					goto DONE;
 			}
-			if(el != nodes.end() && leaf != (*el)->pos)
+			else if(el != nodes.end())
 				goto LEAF;
-			else if(el == nodes.end())
-				goto DONE;
+			else goto DONE;
 		}
-		else if(el != nodes.end())
-			goto LEAF;
-		else goto DONE;
-	}
 	}
 DONE: cout <<"done setup"<<endl;
 }
