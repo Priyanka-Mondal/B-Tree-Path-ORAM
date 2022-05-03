@@ -88,7 +88,7 @@ public:
     static block convertBTreeNodeToBlockb(BTreeNode* node);
     void getbid(block b, int &bID) ;
 
-    //void setupInsert(vector<BTreeNode*> nodes);
+    void setupInsert(vector<BTreeNode*> nodes);
 };
 
 #endif

@@ -102,7 +102,6 @@ int main(int argc, char**argv)
 	kw.open(argv[3]);
 	sres.open(argv[4]);	
 	string line;
-	
 	int l = 1;
 	if(local)
 	{
@@ -116,7 +115,7 @@ int main(int argc, char**argv)
 			cout <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
 			sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
 			cout<<"..........................................."<<endl;
-			orion.remove(line);
+			//orion.remove(line);
 			cout <<endl;
 			cout <<"after-----------------"<<endl;
 	        	start = high_resolution_clock::now();

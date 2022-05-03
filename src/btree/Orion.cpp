@@ -242,6 +242,7 @@ void Orion::setupInsert(vector<string> kws, int ind)
 void Orion::endSetup() 
 {
         btreeHandler->setupInsert(setup);
+	btreeHandler->endSetup();
 }
 
 /*

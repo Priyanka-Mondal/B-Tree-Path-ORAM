@@ -34,6 +34,7 @@ private:
     int nextBid();
     int nextbid = 0;
     map<int,BTreeNode*> setupNodes;
+    vector<BTreeNode*> sn;
 
 public:
     int brootKey;

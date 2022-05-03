@@ -468,90 +468,51 @@ int BRAM::RandomPath()
     return val;
 }
 
-/*
-void BRAM::setupInsert(vector<BTreeNode*> nodes) {
-    sort(nodes.begin(), nodes.end(), [ ](const BTreeNode* lhs, const BTreeNode * rhs) {
-        return lhs->pos < rhs->pos;
-    });
-    int curPos = 0;
-    if (nodes.size() > 0) {
-        curPos = nodes[0]->pos;
-    }
-    map<int, Bucketb> buckets;
-    map<int, int> bucketsCnt;
-    int cnt = 0;
-    unsigned int i = 0;
-    bool cannotInsert = false;
-    while (i < nodes.size()) {
-        cnt++;
-        if (cnt % 1000 == 0) {
-            cout << "i:" << i << "/" << nodes.size() << endl;
-        }
-        for (int d = depth; d >= 0 && i < nodes.size() && curPos == nodes[i]->pos; d--) {
-            int nodeIndex = GetBTreeNodeOnPath(curPos, d);
-            Bucketb bucket;
-            if (bucketsCnt.count(nodeIndex) == 0) {
-                bucketsCnt[nodeIndex] = 0;
-                for (int z = 0; z < Z; z++) {
-                    if (i < nodes.size() && nodes[i]->pos == curPos) {
-                        Blockb &curBlockb = bucket[z];
-                        curBlockb.id = nodes[i]->key;
-                        curBlockb.data = convertBTreeNodeToBlockb(nodes[i]);
-                        delete nodes[i];
-                        bucketsCnt[nodeIndex]++;
-                        i++;
-                    }
-                }
-                buckets[nodeIndex] = bucket;
-            } else {
-                if (bucketsCnt[nodeIndex] < Z) {
-                    bucket = buckets[nodeIndex];
-                    for (int z = bucketsCnt[nodeIndex]; z < Z; z++) {
-                        if (i < nodes.size() && nodes[i]->pos == curPos) {
-                            Blockb &curBlockb = bucket[z];
-                            curBlockb.id = nodes[i]->key;
-                            curBlockb.data = convertBTreeNodeToBlockb(nodes[i]);
-                            delete nodes[i];
-                            bucketsCnt[nodeIndex]++;
-                            i++;
-                        }
-                    }
-                    buckets[nodeIndex] = bucket;
-                } else {
-                    cannotInsert = true;
-                }
-            }
-
-        }
-
-        if (i < nodes.size()) {
-            if (cannotInsert) {
-                cache[nodes[i]->key] = nodes[i];
-                i++;
-                cannotInsert = false;
-            }
-            if (i < nodes.size()) {
-                curPos = nodes[i]->pos;
-            }
-        }
-    }
-
-
-    for (auto buk : buckets) {
-        if (bucketsCnt[buk.first] == Z) {
-            WriteBucketb(buk.first, buk.second);
-        } else {
-            for (long unsigned int z = bucketsCnt[buk.first]; z < Z; z++) {
-                Blockb &curBlockb = buk.second[z];
-                curBlockb.id = 0;
-                curBlockb.data.resize(blockSize, 0);
-            }
-            WriteBucketb(buk.first, buk.second);
-        }
-    }
-
-    for (; i < nodes.size(); i++) {
-        cache[nodes[i]->key] = nodes[i];
-    }
+void BRAM::setupInsert(vector<BTreeNode*> nodes) 
+{
+//    sort(nodes.begin(), nodes.end(), [ ](const BTreeNode* lhs, const BTreeNode * rhs) {
+//       return lhs->pos < rhs->pos;
+//   });
+//leaf 1, leaf 2 ..   
+	auto el = nodes.begin();
+	int leaf;
+	LEAF: if(el != nodes.end())
+		leaf = (*el)->pos;
+	if(el != nodes.end())
+	{
+	for (size_t d = depth; d >= 0; d--) 
+	{
+		if(leaf == (*el)->pos)
+		{
+	        	int node = GetBTreeNodeOnPath(leaf, d);
+	       		Bucketb bucket = ReadBucketb(node);
+			int z = 0;
+			while(el != nodes.end() && z<Z && leaf == (*el)->pos)
+	        	{
+				assert(leaf == (*el)->pos);
+				Blockb &block = bucket[z];
+				block.id = (*el)->bid;
+				block.data = convertBTreeNodeToBlockb(*el);
+				z++;
+				el++;
+				//cout <<"z:"<<z<<" leaf:"<<leaf<<" ";
+			}
+			if(z>0)
+			{
+				//cout <<"going to write bucket"<<endl;
+			      WriteBucketb(node,bucket);
+				//cout <<"written bucket"<<endl;
+			}
+			if(el != nodes.end() && leaf != (*el)->pos)
+				goto LEAF;
+			else if(el == nodes.end())
+				goto DONE;
+		}
+		else if(el != nodes.end())
+			goto LEAF;
+		else goto DONE;
+	}
+	}
+DONE: cout <<"done setup"<<endl;
 }
-*/
+
