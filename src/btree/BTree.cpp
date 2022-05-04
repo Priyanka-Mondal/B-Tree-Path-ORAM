@@ -645,7 +645,7 @@ void BTree::setupInsert(map<Bid,int>input)
 	*/
 	brootPos = RandomPath();
 	brootKey = nextBid();
-	brootKey = create_node(brootKey,brootPos,input,minHeight);
+	brootKey = create_node(brootKey,brootPos,input,minHeight+1);
 }
 
 vector<map<Bid,int>> createGroups(map<Bid,int> mp)
@@ -686,6 +686,7 @@ int BTree::create_node(int nextbid, int &leafpos, map<Bid,int> input, int minHei
 {
 	BTreeNode* node = newBTreeNode(nextbid,leafpos);
 	node->height = minHeight;
+	cout <<"MIN HEIGHT:"<<minHeight<<endl;
 	vector<map<Bid,int>> groups;
 	groups.reserve(D);
 	groups = createGroups(input);
