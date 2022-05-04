@@ -268,7 +268,8 @@ BTreeNode* BRAM::ReadBTreeNode(int bid) {
     }
 }
 
-BTreeNode* BRAM::ReadBTreeNode(int bid, int lastLeaf) {
+BTreeNode* BRAM::ReadBTreeNode(int bid, int lastLeaf) 
+{
     if (bid == 0) 
     {
         throw runtime_error("BTreeNode id is not set ReadBTreeNode");
@@ -278,7 +279,39 @@ BTreeNode* BRAM::ReadBTreeNode(int bid, int lastLeaf) {
     {
         BTreeNode* node;
         Access(bid, node, lastLeaf);
-        if (node != NULL) {
+        if (node != NULL) 
+	{
+            modified.insert(bid);
+        }
+	else 
+	{
+		cout <<"lastLeaf: "<<lastLeaf<<endl;
+		cout <<"BTreeNode is NULL : "<< bid << endl ;
+		cout <<"free node:" << store->GetEmptySize() << endl;
+        	throw runtime_error("BTreeNode id is not set ReadBTreeNode");
+	}
+        return node;
+    } else {
+        modified.insert(bid);
+        BTreeNode* node = cache[bid];
+        //node->pos = lastLeaf;
+        return node;
+    }
+}
+BTreeNode* BRAM::ReadBTreeNode(int bid, int lastLeaf, int mh) 
+{
+    if (bid == 0) 
+    {
+        throw runtime_error("BTreeNode id is not set ReadBTreeNode");
+        return NULL;
+    }
+    if (cache.count(bid) == 0) 
+    {
+        BTreeNode* node;
+        Access(bid, node, lastLeaf);
+        if (node != NULL) 
+	{
+	    hstash[bid]=mh;
             modified.insert(bid);
         }
 	else 
@@ -345,7 +378,7 @@ block BRAM::convertBTreeNodeToBlockb(BTreeNode* node)
 
 void BRAM::finalize(int& brootKey, int& brootPos) 
 {
-/*    if (!batchWrite) 
+    if (!batchWrite) 
     {
             for (int i = readCnt; i <= pad; i++)
 	    {
@@ -357,20 +390,28 @@ void BRAM::finalize(int& brootKey, int& brootPos)
                 FetchPath(rnd);
         }
     }
-*/	
-	/*
         int maxHeight = 1;
-        for (auto t : cache) {
+        /*for (auto t : cache) {
             if (t.second != NULL && t.second->height > maxHeight) {
                 maxHeight = t.second->height;
             }
+        }*/
+        for (auto t : cache) 
+	{
+            if (t.second != NULL && hstash[t.first] > maxHeight) 
+	    {
+                maxHeight = hstash[t.first];
+            }
         }
+
     for (unsigned int i = 1; i <= maxHeight; i++) 
     {
         for (auto t : cache) 
 	{
             if (t.second != NULL && t.second->height == i) 
 	    {
+		cout <<"hstash[t.first]:"<<hstash[t.first]<<" "<<t.second->height<<endl;
+		assert(hstash[t.first] == t.second->height);
                 BTreeNode* tmp = t.second;
                 if (modified.count(tmp->bid)) 
 		{
@@ -385,7 +426,8 @@ void BRAM::finalize(int& brootKey, int& brootPos)
 		}
             }
         }
-    }*/
+	cout <<"--------------------------------"<<endl;
+    }
     if (cache.count(brootKey) != 0)
         brootPos = cache[brootKey]->pos;
 
@@ -403,16 +445,24 @@ void BRAM::finalize(int& brootKey, int& brootPos)
 void BRAM::finalizedel(int& brootKey, int& brootPos) 
 {
         int maxHeight = 1;
-        for (auto t : cache) {
+        /*for (auto t : cache) {
             if (t.second != NULL && t.second->height > maxHeight) {
                 maxHeight = t.second->height;
             }
+        }*/
+        for (auto t : cache) 
+	{
+            if (t.second != NULL && hstash[t.first] > maxHeight) 
+	    {
+                maxHeight = hstash[t.first];
+            }
         }
+
     for (unsigned int i = 1; i <= maxHeight; i++) 
     {
         for (auto t : cache) 
 	{
-            if (t.second != NULL && t.second->height == i) 
+            if (t.second != NULL && hstash[t.first]==i)//t.second->height == i) 
 	    {
                 BTreeNode* tmp = t.second;
                 if (modified.count(tmp->bid)) 
@@ -449,6 +499,7 @@ void BRAM::start(bool batchWrite)
     writeviewmap.clear();
     readviewmap.clear();
     readCnt = 0;
+    hstash.clear();
 }
 
 void BRAM::Print() 

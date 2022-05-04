@@ -35,34 +35,35 @@ private:
     int nextbid = 0;
     map<int,BTreeNode*> setupNodes;
     vector<BTreeNode*> sn;
+    int minHeight;
 
 public:
     int brootKey;
     int brootPos;
     bool isleaf(BTreeNode* node);
-    int get_knum(BTreeNode* node);
+    int keynum(BTreeNode* node);
 
     void insert(Bid kw, int id);
     int insertkw(Bid kw, int id, int rootBid, int &rootPos);
     void insertNFull(Bid kw,int id, BTreeNode*& bt ); 
     void splitChild(BTreeNode *&par, int i, BTreeNode *&y, BTreeNode *&z);
     int search(Bid kw);
-    void searchkw(int brootKey, int brootPos, Bid kw, int &res);
+    void searchkw(int brootKey, int brootPos, Bid kw, int &res, int &mh);
     vector<int> batchSearch(vector<Bid> bids);
    
 
-    void deletion(Bid k, BTreeNode *&node);
+    void deletion(Bid k, BTreeNode *&node, int mh);
     void remove(Bid);
     int findKey(Bid k, BTreeNode* node);
     void removekw(Bid);
     void removeFromLeaf(int idx, BTreeNode *&node) ;
-    void removeFromNonLeaf(int, BTreeNode*&);
-    pair<Bid,int> getPredecessor(int, BTreeNode*);
-    pair<Bid,int> getSuccessor(int, BTreeNode*);
-    void fill(int, BTreeNode*&);
-    void borrowFromPrev(int, BTreeNode*&);
-    void borrowFromNext(int, BTreeNode*&);
-    void merge(int, BTreeNode*&);
+    void removeFromNonLeaf(int, BTreeNode*&, int mh);
+    pair<Bid,int> getPredecessor(int, BTreeNode*, int mh);
+    pair<Bid,int> getSuccessor(int, BTreeNode*, int mh);
+    void fill(int, BTreeNode*&, int mh);
+    void borrowFromPrev(int, BTreeNode*&, int mh);
+    void borrowFromNext(int, BTreeNode*&, int mh);
+    void merge(int, BTreeNode*&, int mh);
 
     BTree(int maxSize, bytes<Key> key);
     BTree();

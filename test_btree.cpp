@@ -112,6 +112,8 @@ int main(int argc, char**argv)
 			cout <<"before-----------------"<<endl;
 			auto s = orion.batchSearch(line);
 	        	auto stop = high_resolution_clock::now();
+			auto ss = orion.search(line);
+			assert(s.size() == ss.size());
 			auto duration = duration_cast<microseconds>(stop-start);
 			cout <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
 			sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;

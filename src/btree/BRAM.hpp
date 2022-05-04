@@ -31,6 +31,7 @@ private:
     int pad;
     size_t blockSize;
     map<int, BTreeNode*> cache;
+    map<int, int> hstash;
     vector<int> leafList;
     vector<int> readviewmap;
     vector<int> writeviewmap;
@@ -75,6 +76,7 @@ public:
     BRAM(int maxSize, bytes<Key> key);
     ~BRAM();
     int maxheight;
+    BTreeNode* ReadBTreeNode(int bid, int lastLeaf, int mh);
     BTreeNode* ReadBTreeNode(int bid, int lastLeaf);
     BTreeNode* ReadBTreeNode(int bid);
     int get_knumbn(BTreeNode* bn);
