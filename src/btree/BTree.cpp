@@ -206,10 +206,9 @@ vector<int> BTree::batchSearch(vector<Bid> bids)
 		int res = 0;
 		int mh = minHeight;
 		searchkw(brootKey,brootPos,b,res,mh);
-		cout <<"["<<res<<"] ";
+		//cout <<"["<<res<<"] ";
 		results.push_back(res);
 	}
-	cout <<endl<<results.size()<< "end os batchSearch"<<endl;
 	bram->finalize(brootKey,brootPos);
 	return results;
 }
@@ -226,7 +225,6 @@ int BTree::search(Bid kw)
 
 void BTree::searchkw(int rootKey, int rootPos, Bid kw, int &res, int mh)
 {
-	//cout <<"search ms is:"<<mh << endl;
 	if(res != 0)
 	     return;
 	BTreeNode* node = bram->ReadBTreeNode(rootKey,rootPos,mh);
@@ -239,10 +237,9 @@ void BTree::searchkw(int rootKey, int rootPos, Bid kw, int &res, int mh)
         if (i<nodeknum && node->keys[i] == kw)
 	{
 		res = node->values[i];
-		//cout <<node->keys[i]<<" FOUND in BTree:"<<res<<endl;
+		//cout <<node->keys[i]<<" FOUND in BTree at height:"<<mh<<endl;
                 return ;
 	}
-	//else if (node->isleaf == true)
 	else if (isleaf(node) == true)
 	{
 		//cout <<"NOT Found in BTree"<<endl;
@@ -613,13 +610,18 @@ int getMaxNodes(int h)
 
 void BTree::setupInsert(map<Bid,int>input)
 {
-	//map<Bid,int> sortedInput = sort(input);
-	//FROM HERE
-	minHeight = (ceil(log2(input.size()+1))/log2(D))-1;
+	int inputSize = input.size();
+	cout <<"input size:"<<inputSize<<endl;
+	minHeight = (ceil(log(input.size()+1))/log(D))-1;
 	int maxNodes = getMaxNodes(minHeight);
-	cout <<"total size:"<<input.size()<<endl;
-	cout <<"minHeight:"<<minHeight<<endl;
+	if(maxNodes < inputSize)
+	{
+		minHeight = minHeight+1;
+		maxNodes = getMaxNodes(minHeight);
+	}
+	cout <<"Height of BTree:"<<minHeight<<endl;
 	cout <<"maxNodes:"<<maxNodes<<endl;
+	bram->maxHeight = minHeight;
 	Bid last = input.rbegin()->first;
 	cout <<"last:"<<last<<endl;
 	for(int m = input.size(); m<maxNodes; m++)
@@ -627,7 +629,7 @@ void BTree::setupInsert(map<Bid,int>input)
 		++last;
 		input[last]=99999;
 	}
-	cout <<"total size:"<<input.size()<<endl;
+	cout <<"Padded input size:"<<input.size()<<endl;
 	/*
 	for(auto it = input.begin();it!=input.end();it++)
 	{
@@ -694,7 +696,8 @@ int BTree::createBTreeNode(int nextbid, int &leafpos, map<Bid,int> input, int mi
 		int i = 0;
 		for(auto it = groups[0].begin(); it!= groups[0].end(); it++)
 		{
-			assert(groups[0].size()==D-1);
+			assert(groups[0].size()<=D-1);
+			assert(T-1 <= groups[0].size());
 			node->keys[i] = it->first;
 			node->values[i] = it->second;
 			i++;
@@ -707,17 +710,18 @@ int BTree::createBTreeNode(int nextbid, int &leafpos, map<Bid,int> input, int mi
 		{
 			map<Bid,int>::iterator it = groups[i].end();
 			it--;
-			node->keys[i]=it->first;
-			node->values[i]=it->second;
+			node->keys[i] = it->first;
+			node->values[i] = it->second;
 			groups[i].erase(it);
-			node->cbids[i]=nextBid();
+			node->cbids[i] = nextBid();
 			node->cpos[i] = RandomPath();
 		}
 		node->cbids[D-1]= nextBid();
 		node->cpos[D-1]= RandomPath();
 		sn.push_back(node);
-	for(int i=0;i<D;i++)
-	 node->cbids[i]=createBTreeNode(node->cbids[i],node->cpos[i],groups[i],minHeight-1);
+		for(int i=0;i<D;i++)
+	 		node->cbids[i] = createBTreeNode(node->cbids[i],
+					node->cpos[i],groups[i],minHeight-1);
 	}
 	return node->bid;
 }
@@ -728,13 +732,6 @@ void BTree::endSetup()
 	{
         	return lhs->pos < rhs->pos;
 	});
-	/*for(auto el = sn.begin(); el != sn.end(); el++)
-	{
-		if(next(el) != sn.end())
-		{
-			assert((*el)->pos <= (*(next(el)))->pos);
-		}
-	}*/
 	bram->setupInsert(sn);
 }
 

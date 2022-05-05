@@ -1,0 +1,5 @@
+#!/bin/bash
+while true
+do
+	./btree_debug 5000 allen-p/del KEYW/smallkw b.txt || exit 1
+done

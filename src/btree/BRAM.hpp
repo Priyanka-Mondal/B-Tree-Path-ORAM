@@ -75,11 +75,12 @@ private:
 public:
     BRAM(int maxSize, bytes<Key> key);
     ~BRAM();
-    int maxheight;
+    int maxHeight;
     BTreeNode* ReadBTreeNode(int bid, int lastLeaf, int mh);
     BTreeNode* ReadBTreeNode(int bid, int lastLeaf);
     BTreeNode* ReadBTreeNode(int bid);
     int get_knumbn(BTreeNode* bn);
+    bool isleafbn(BTreeNode* bn);
     int WriteBTreeNode(int bid, BTreeNode* n);
     int DeleteBTreeNode(int bid, BTreeNode* n);
     void start(bool batchWrite);

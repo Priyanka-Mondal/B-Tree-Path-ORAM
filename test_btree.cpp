@@ -109,16 +109,16 @@ int main(int argc, char**argv)
 		while(getline(kw,line))
 		{
 	        	auto start = high_resolution_clock::now();
-			cout <<"before-----------------"<<endl;
 			auto s = orion.batchSearch(line);
 	        	auto stop = high_resolution_clock::now();
 			auto ss = orion.search(line);
-			//assert(s.size() == ss.size());
+			assert(s.size() == ss.size());
 			auto duration = duration_cast<microseconds>(stop-start);
-			cout <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+			//cout <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
 			sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
 			cout<<"..........................................."<<endl;
-			//orion.remove(line);
+			/*
+			orion.remove(line);
 			cout <<endl;
 			cout <<"after-----------------"<<endl;
 	        	start = high_resolution_clock::now();
@@ -130,6 +130,7 @@ int main(int argc, char**argv)
 			cout <<"====================================="<<endl;
 			cout <<"====================================="<<endl;
 			l++;
+			*/
 		}
 	}
 	
