@@ -310,7 +310,7 @@ void BTree::deletion(Bid kw, BTreeNode *&node, int mh)
   int nodeknum = keynum(node);
   if (idx < nodeknum && node->keys[idx] == kw) //#
   {
-    //if (node->isleaf)
+    ////if (node->isleaf)
     if (isleaf(node))
     {
 	  removeFromLeaf(idx,node);
