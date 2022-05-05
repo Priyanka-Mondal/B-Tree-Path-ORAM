@@ -48,7 +48,7 @@ public:
     void insertNFull(Bid kw,int id, BTreeNode*& bt ); 
     void splitChild(BTreeNode *&par, int i, BTreeNode *&y, BTreeNode *&z);
     int search(Bid kw);
-    void searchkw(int brootKey, int brootPos, Bid kw, int &res, int &mh);
+    void searchkw(int brootKey, int brootPos, Bid kw, int &res, int mh);
     vector<int> batchSearch(vector<Bid> bids);
    
 
@@ -70,7 +70,7 @@ public:
    ~BTree();
     
     void setupInsert(map<Bid,int> pairs);
-    int create_node(int nextbid, int &leafpos, map<Bid,int> input, int maxHeight);
+    int createBTreeNode(int nextbid, int &leafpos, map<Bid,int> input, int maxHeight);
     void endSetup();
     //void setupInsert(int& rootKey, int& rootPos, map<int, string> pairs);
     int sortedArrayToBST(int start, int end, int& pos, int& node);

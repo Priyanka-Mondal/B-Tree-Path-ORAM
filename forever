@@ -1,0 +1,5 @@
+#!/bin/bash
+while true
+do
+	./btree_debug 65000 allen-p/deleted_items KEYW/smallkwdel b.txt
+done

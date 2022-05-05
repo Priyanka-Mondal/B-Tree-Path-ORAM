@@ -19,11 +19,9 @@ BTree::~BTree()
 BTreeNode* BTree::newBTreeNode(int nextbid, int leafpos) 
 {
     BTreeNode* node = new BTreeNode();
-    //node->isleaf=leaf;
     node->bid = nextbid;
     node->pos = leafpos;
-    //node->knum = 0;
-    node->height = 1;
+    node->height = 0;
     for(int i =0;i<D-1;i++)
     {
 	    node->keys[i] = Bid(0); 
@@ -208,8 +206,10 @@ vector<int> BTree::batchSearch(vector<Bid> bids)
 		int res = 0;
 		int mh = minHeight;
 		searchkw(brootKey,brootPos,b,res,mh);
+		cout <<"["<<res<<"] ";
 		results.push_back(res);
 	}
+	cout <<endl<<results.size()<< "end os batchSearch"<<endl;
 	bram->finalize(brootKey,brootPos);
 	return results;
 }
@@ -224,8 +224,9 @@ int BTree::search(Bid kw)
 	return res;
 }
 
-void BTree::searchkw(int rootKey, int rootPos, Bid kw, int &res, int &mh)
+void BTree::searchkw(int rootKey, int rootPos, Bid kw, int &res, int mh)
 {
+	//cout <<"search ms is:"<<mh << endl;
 	if(res != 0)
 	     return;
 	BTreeNode* node = bram->ReadBTreeNode(rootKey,rootPos,mh);
@@ -247,8 +248,7 @@ void BTree::searchkw(int rootKey, int rootPos, Bid kw, int &res, int &mh)
 		//cout <<"NOT Found in BTree"<<endl;
                 return;
 	}
-	mh--;
-        searchkw(node->cbids[i],node->cpos[i],kw,res,mh);
+        searchkw(node->cbids[i],node->cpos[i],kw,res,mh-1);
 }
 
 int BTree::RandomPath() 
@@ -645,7 +645,7 @@ void BTree::setupInsert(map<Bid,int>input)
 	*/
 	brootPos = RandomPath();
 	brootKey = nextBid();
-	brootKey = create_node(brootKey,brootPos,input,minHeight+1);
+	brootKey = createBTreeNode(brootKey,brootPos,input,minHeight);
 }
 
 vector<map<Bid,int>> createGroups(map<Bid,int> mp)
@@ -682,11 +682,10 @@ vector<map<Bid,int>> createGroups(map<Bid,int> mp)
 	return groups;
 }
 
-int BTree::create_node(int nextbid, int &leafpos, map<Bid,int> input, int minHeight)
+int BTree::createBTreeNode(int nextbid, int &leafpos, map<Bid,int> input, int minHeight)
 {
 	BTreeNode* node = newBTreeNode(nextbid,leafpos);
 	node->height = minHeight;
-	cout <<"MIN HEIGHT:"<<minHeight<<endl;
 	vector<map<Bid,int>> groups;
 	groups.reserve(D);
 	groups = createGroups(input);
@@ -718,7 +717,7 @@ int BTree::create_node(int nextbid, int &leafpos, map<Bid,int> input, int minHei
 		node->cpos[D-1]= RandomPath();
 		sn.push_back(node);
 	for(int i=0;i<D;i++)
-	  node->cbids[i]=create_node(node->cbids[i],node->cpos[i],groups[i],minHeight-1);
+	 node->cbids[i]=createBTreeNode(node->cbids[i],node->cpos[i],groups[i],minHeight-1);
 	}
 	return node->bid;
 }

@@ -311,6 +311,7 @@ BTreeNode* BRAM::ReadBTreeNode(int bid, int lastLeaf, int mh)
         Access(bid, node, lastLeaf);
         if (node != NULL) 
 	{
+	    assert(mh == node->height);
 	    hstash[bid]=mh;
             modified.insert(bid);
         }
@@ -322,7 +323,8 @@ BTreeNode* BRAM::ReadBTreeNode(int bid, int lastLeaf, int mh)
         	throw runtime_error("BTreeNode id is not set ReadBTreeNode");
 	}
         return node;
-    } else {
+    } 
+    else {
         modified.insert(bid);
         BTreeNode* node = cache[bid];
         //node->pos = lastLeaf;
@@ -384,37 +386,29 @@ void BRAM::finalize(int& brootKey, int& brootPos)
 	    {
                 int rnd = RandomPath();
                 if (std::find(leafList.begin(), leafList.end(), rnd) == leafList.end()) 
-		{
                     leafList.push_back(rnd);
-                }
                 FetchPath(rnd);
         }
     }
-        int maxHeight = 1;
-        for (auto t : cache) {
-            if (t.second != NULL && t.second->height > maxHeight) {
-                maxHeight = t.second->height;
-            }
-        }
-        /*for (auto t : cache) 
-	{
-            if (t.second != NULL && hstash[t.first] > maxHeight) 
-	    {
-                maxHeight = hstash[t.first];
-            }
-        }*/
-
-    for (unsigned int i = 1; i <= maxHeight; i++) 
+    int maxHeight = 0;
+    for (auto h : hstash) 
     {
-        for (auto t : cache) 
+        if (h.second > maxHeight) 
+            maxHeight = h.second;
+    }
+    for (unsigned int i = 0; i <= maxHeight; i++) 
+    {
+    	for (auto t : cache) 
 	{
-            if (t.second != NULL && t.second->height == i) 
+            if (t.first != NULL )
 	    {
-		cout <<"hstash[t.first]:"<<hstash[t.first]<<" "<<t.second->height<<endl;
-		//assert(hstash[t.first] == t.second->height);
                 BTreeNode* tmp = t.second;
-                if (modified.count(tmp->bid)) 
+                if (modified.count(tmp->bid) && i== hstash[t.first]) 
 		{
+		    //cout << hstash[t.first] <<" "<< t.second->height<<endl;
+		    //assert(hstash[t.first] == t.second->height);
+		    if(hstash[t.first]!=t.second->height)
+			    cout <<"HEIGHT NOT SAME"<<endl;
                     tmp->pos = RandomPath();
                 }
 		for(int k = 0;k<=get_knumbn(tmp);k++)
@@ -426,7 +420,6 @@ void BRAM::finalize(int& brootKey, int& brootPos)
 		}
             }
         }
-	cout <<"--------------------------------"<<endl;
     }
     if (cache.count(brootKey) != 0)
         brootPos = cache[brootKey]->pos;
@@ -444,28 +437,30 @@ void BRAM::finalize(int& brootKey, int& brootPos)
 
 void BRAM::finalizedel(int& brootKey, int& brootPos) 
 {
-        int maxHeight = 1;
-        /*for (auto t : cache) {
+        int maxHeight = 0;
+        for (auto t : cache) {
             if (t.second != NULL && t.second->height > maxHeight) {
                 maxHeight = t.second->height;
             }
-        }*/
-        for (auto t : cache) 
+        }
+        /*for (auto t : cache) 
 	{
             if (t.second != NULL && hstash[t.first] > maxHeight) 
 	    {
                 maxHeight = hstash[t.first];
             }
-        }
+        }*/
 
     for (unsigned int i = 1; i <= maxHeight; i++) 
     {
         for (auto t : cache) 
 	{
-            if (t.second != NULL && hstash[t.first]==i)//t.second->height == i) 
+            if (t.second != NULL )//&& t.second->height == i) 
 	    {
                 BTreeNode* tmp = t.second;
-                if (modified.count(tmp->bid)) 
+		    //assert(hstash[t.first]==tmp->height);
+		    cout <<i<<":"<< hstash[t.first] <<" "<< tmp->height<<endl;
+                if (modified.count(tmp->bid) && i == hstash[t.first]) 
 		{
                     tmp->pos = RandomPath();
                 }
