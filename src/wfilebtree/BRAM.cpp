@@ -616,10 +616,6 @@ void BRAM::setupInsert(vector<BTreeNode*> nodes) {
 */
 void BRAM::setupInsert(vector<BTreeNode*> nodes) 
 {
-//    sort(nodes.begin(), nodes.end(), [ ](const BTreeNode* lhs, const BTreeNode * rhs) {
-//       return lhs->pos < rhs->pos;
-//   });
-//leaf 1, leaf 2 ..   
 	auto el = nodes.begin();
 	int leaf;
 	LEAF: if(el != nodes.end())
@@ -641,13 +637,10 @@ void BRAM::setupInsert(vector<BTreeNode*> nodes)
 					block.data = convertBTreeNodeToBlockb(*el);
 					z++;
 					el++;
-					//cout <<"z:"<<z<<" leaf:"<<leaf<<" ";
 				}
 				//if(z>0)
 				//{
-					//cout <<"going to write bucket"<<endl;
 				      WriteBucketb(node,bucket);
-					//cout <<"written bucket"<<endl;
 				//}
 				if(el != nodes.end() && leaf != (*el)->pos)
 					goto LEAF;

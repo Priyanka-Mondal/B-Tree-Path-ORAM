@@ -38,7 +38,7 @@ int BTreef::keynum(BTreeNodef* bn)
 {
 	int knum = 0;
 	int i = 0;
-	while(i<D-1 && bn->values[i]!=0)
+	while(i<D-1 && bn->keys[i]!=0)
 	{
 		i++;
 		knum++;
@@ -72,7 +72,7 @@ int BTreef::insertblk(Bid kw, string blk, int brootKey, int &brootPos)
 		//BTreeNodef *root = newBTreeNodef(true, nextBid(),RandomPath());
 		BTreeNodef *root = newBTreeNodef(nextBid(),RandomPath());
 		root->keys[0] = kw;
-		root->values[0] = id;
+		//root->values[0] = blk;
     		std::copy(blk.begin(), blk.end(), root->values[0].begin());
 		//root->knum = 1; 
 		brootPos = root->pos;
@@ -123,7 +123,7 @@ void BTreef::insertNFull(Bid kw,string blk, BTreeNodef*& node)
 		{
 			node->keys[i+1] = node->keys[i];
 //			node->values[i+1] = node->values[i];
-std::copy(node->values[i+1].begin(), node->values[i+1].end(), node->values[i].begin());
+std::copy(node->values[i].begin(), node->values[i].end(), node->values[i+1].begin());
 			i--;
 		}
 		node->keys[i+1] = kw;
@@ -194,7 +194,8 @@ std::copy(par->values[j].begin(), par->values[j].end(), par->values[j+1].begin()
 	//y->knum = T - 1;
 	for(int k = T-1; k<D-1; k++) // for keynum
 	{
-		y->values[k]=0;
+		//y->values[k]=0;
+		y->keys[k]=0;
 	}
 	//assert(keynum(y) == y->knum);
 }
@@ -371,7 +372,8 @@ void BTreef::removeFromLeaf(int idx, BTreeNodef *&node)
   }
   node->keys[nodeknum-1]=Bid(0);
   node->cpos[nodeknum]=-1; //# for isleaf
-  node->values[nodeknum-1]=0;
+  //node->values[nodeknum-1]=0;
+  node->keys[nodeknum-1]=0;
   return;
 }
 
@@ -406,7 +408,7 @@ void BTreef::removeFromNonLeaf(int idx, BTreeNodef *&node, int mh)
   return;
 }
 
-pair<Bid,int> BTreef::getPredecessor(int idx, BTreeNodef* node, int mh) 
+pair<Bid,string> BTreef::getPredecessor(int idx, BTreeNodef* node, int mh) 
 {
 	BTreeNodef *cur = bram->ReadBTreeNodef(node->cbids[idx],node->cpos[idx],mh-1);
 	int h = mh-2;
@@ -418,7 +420,7 @@ pair<Bid,int> BTreef::getPredecessor(int idx, BTreeNodef* node, int mh)
 	return make_pair(cur->keys[keynum(cur)-1],cur->values[keynum(cur)-1]);
 }
 
-pair<Bid,int> BTreef::getSuccessor(int idx, BTreeNodef* node,int mh)
+pair<Bid,string> BTreef::getSuccessor(int idx, BTreeNodef* node,int mh)
 {
 	BTreeNodef *cur=bram->ReadBTreeNodef(node->cbids[idx+1],node->cpos[idx+1],mh-1);
 	int h = mh-2;
@@ -488,7 +490,10 @@ void BTreef::borrowFromPrev(int idx, BTreeNodef *&node, int mh)
   node->values[idx-1] = sibling->values[keynum(sibling)-1];
 
   sibling->cpos[keynum(sibling)]=-1; //# for isleaf
-  sibling->values[keynum(sibling)-1]=0; //# for keynum
+
+  //sibling->values[keynum(sibling)-1]=0; //# for keynum
+  sibling->keys[keynum(sibling)-1]=0; //# for keynum
+
   bram->WriteBTreeNodef(child->bid,child);
   bram->WriteBTreeNodef(sibling->bid,sibling);
   bram->WriteBTreeNodef(node->bid,node);
@@ -524,7 +529,8 @@ void BTreef::borrowFromNext(int idx, BTreeNodef *&node,int mh)
       sibling->cpos[i - 1] = sibling->cpos[i];
     }
   }
-  sibling->values[keynum(sibling)-1] = 0; //# for keynum
+  //sibling->values[keynum(sibling)-1] = 0; //# for keynum
+  sibling->keys[keynum(sibling)-1] = 0; //# for keynum
   bram->WriteBTreeNodef(child->bid,child);
   bram->WriteBTreeNodef(sibling->bid,sibling);
   bram->WriteBTreeNodef(node->bid,node);
@@ -562,7 +568,8 @@ void BTreef::merge(int idx, BTreeNodef *&node,int mh)
         node->cpos[i-1] = node->cpos[i];
     }
     node->cpos[keynum(node)]=-1; //# for isleaf
-    node->values[keynum(node)-1]=0; //# for keynum
+    //node->values[keynum(node)-1]=0; //# for keynum
+    node->keys[keynum(node)-1]=0; //# for keynum
     //delete(sibling); //??
     int sbid = sibling->bid;
     sibling->bid = 0;
@@ -584,7 +591,7 @@ int getMaxNodes(int h)
 }
 
 
-void BTreef::setupInsert(map<Bid,int>input)
+void BTreef::setupInsert(map<Bid,string>input)
 {
 	int inputSize = input.size();
 	cout <<"input size:"<<inputSize<<endl;
@@ -626,9 +633,9 @@ void BTreef::setupInsert(map<Bid,int>input)
 	brootKey = createBTreeNodef(brootKey,brootPos,input,minHeight);
 }
 
-vector<map<Bid,int>> createGroups(map<Bid,int> mp)
+vector<map<Bid,string>> createGroups(map<Bid,string> mp)
 {
-	vector<map<Bid,int>> groups;
+	vector<map<Bid,string>> groups;
 	groups.reserve(D);
 	int gb,gl;
 	int g;
@@ -643,7 +650,7 @@ vector<map<Bid,int>> createGroups(map<Bid,int> mp)
 	auto it = mp.begin();
 	for(int v = 0; v < D; v++)
 	{
-		map<Bid,int> m;
+		map<Bid,string> m;
 		for(int gg = 0; gg<g; gg++)
 		{
 			if(it != mp.end())//redundant check ?
@@ -660,11 +667,11 @@ vector<map<Bid,int>> createGroups(map<Bid,int> mp)
 	return groups;
 }
 
-int BTreef::createBTreeNodef(int nextbid, int &leafpos, map<Bid,int> input, int minHeight)
+int BTreef::createBTreeNodef(int nextbid, int &leafpos, map<Bid,string> input, int minHeight)
 {
 	BTreeNodef* node = newBTreeNodef(nextbid,leafpos);
 	//node->height = minHeight;
-	vector<map<Bid,int>> groups;
+	vector<map<Bid,string>> groups;
 	groups.reserve(D);
 	groups = createGroups(input);
 	if(groups.size() ==1)
@@ -675,7 +682,8 @@ int BTreef::createBTreeNodef(int nextbid, int &leafpos, map<Bid,int> input, int 
 			assert(groups[0].size()<=D-1);
 			assert(T-1 <= groups[0].size());
 			node->keys[i] = it->first;
-			node->values[i] = it->second;
+		//	node->values[i] = it->second;
+    	    	std::copy(it->second.begin(),it->second.end(),node->values[i].begin());
 			i++;
 		}
 		sn.push_back(node);
@@ -684,10 +692,10 @@ int BTreef::createBTreeNodef(int nextbid, int &leafpos, map<Bid,int> input, int 
 	{
 		for(int i=0;i<D-1;i++)
 		{
-			map<Bid,int>::iterator it = groups[i].end();
+			map<Bid,string>::iterator it = groups[i].end();
 			it--;
 			node->keys[i] = it->first;
-			node->values[i] = it->second;
+    	    	std::copy(it->second.begin(),it->second.end(),node->values[i].begin());
 			groups[i].erase(it);
 			node->cbids[i] = nextBid();
 			node->cpos[i] = RandomPath();
@@ -696,8 +704,7 @@ int BTreef::createBTreeNodef(int nextbid, int &leafpos, map<Bid,int> input, int 
 		node->cpos[D-1]= RandomPath();
 		sn.push_back(node);
 		for(int i=0;i<D;i++)
-	 		node->cbids[i] = createBTreeNodef(node->cbids[i],
-					node->cpos[i],groups[i],minHeight-1);
+	 		node->cbids[i] = createBTreeNodef(node->cbids[i],node->cpos[i],groups[i],minHeight-1);
 	}
 	return node->bid;
 }

@@ -12,7 +12,7 @@
 #include <type_traits>
 #include <iomanip>
 #include <bits/stdc++.h>
-#include "BRAM.hpp"
+#include "BRAMf.hpp"
 
 using namespace std;
 class BTreef 
@@ -25,7 +25,7 @@ private:
     int setupleaf= -1;
     int setupProgress = 0;
 
-    BRAM *bram;
+    BRAMf *bram;
     int max(int a, int b);
     //BTreeNodef* newBTreeNodef(bool leaf);
     BTreeNodef* newBTreeNodef(bool leaf, int nextBid, int pos);
@@ -60,8 +60,8 @@ public:
     void removekw(Bid);
     void removeFromLeaf(int idx, BTreeNodef *&node) ;
     void removeFromNonLeaf(int, BTreeNodef*&, int mh);
-    pair<Bid,int> getPredecessor(int, BTreeNodef*, int mh);
-    pair<Bid,int> getSuccessor(int, BTreeNodef*, int mh);
+    pair<Bid,string> getPredecessor(int, BTreeNodef*, int mh);
+    pair<Bid,string> getSuccessor(int, BTreeNodef*, int mh);
     void fill(int, BTreeNodef*&, int mh);
     void borrowFromPrev(int, BTreeNodef*&, int mh);
     void borrowFromNext(int, BTreeNodef*&, int mh);
@@ -71,8 +71,8 @@ public:
     BTreef();
    ~BTreef();
     
-    void setupInsert(map<Bid,int> pairs);
-    int createBTreeNodef(int nextbid, int &leafpos, map<Bid,int> input, int maxHeight);
+    void setupInsert(map<Bid,string> pairs);
+    int createBTreeNodef(int nextbid, int &leafpos, map<Bid,string> input, int maxHeight);
     void endSetup();
     //void setupInsert(int& rootKey, int& rootPos, map<int, string> pairs);
     int sortedArrayToBST(int start, int end, int& pos, int& node);
