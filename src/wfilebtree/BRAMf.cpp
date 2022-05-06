@@ -115,7 +115,7 @@ void BRAMf::FetchPath(int leaf)
 
         Bucket bucket = ReadBucket(node); //<<-- here
 	searchf_bytes = searchf_bytes + clen_size;
-	cout <<"searchf:"<<searchf_bytes<<endl;
+	rtt++;
         for (int z = 0; z < Z; z++) {
             Block &block = bucket[z];
 

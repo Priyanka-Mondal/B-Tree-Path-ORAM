@@ -235,10 +235,12 @@ vector<pair<int,string>> Orion::search(string keyword, ofstream& sres, double sp
 
 	 auto stop = high_resolution_clock::now();
 	 int totBytes = srch->searchi_bytes + file->searchf_bytes;
+	 int rtt = srch->rtt + file->rtt;
+	 cout <<"rtt:"<<rtt<<endl;
 	 auto duration = duration_cast<milliseconds>(stop-start);
 	 double time = double(totBytes)/speed;
 	 time = time*1000;
-	 int totTime = time+ duration.count()+latency; //mili
+	 int totTime = time+ duration.count()+(latency*rtt); //mili
          sres<<keyword<<" "<< duration.count()<<" "<<totTime<<" "<<fileblocks.size()<<" " <<srch->searchi_bytes <<" "<< file->searchf_bytes<<endl;
 
 cout<<keyword<<" | "<<duration.count()<<" | "<<totTime<<" | "<<fileblocks.size()<<" | "<<srch->searchi_bytes<<" | "<< file->searchf_bytes<<endl;

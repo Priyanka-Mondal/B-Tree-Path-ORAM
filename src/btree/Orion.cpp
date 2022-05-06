@@ -217,11 +217,10 @@ vector<int> Orion::search(string keyword)
 void Orion::remove(string kw)
 {
 	int fc = fcntbtree[kw];
-	//cout <<"FC:"<<fc<<endl;
 	for(int i = 1 ; i<= fc ; i++)
 	{
 		Bid key = createBid(kw,i);
-		cout <<"removing:"<<kw<<" FC:["<<i<<"]"<<endl;
+		//cout <<"removing:"<<kw<<" FC:["<<i<<"]"<<endl;
 		btreeHandler->remove(key);
 	}
 }

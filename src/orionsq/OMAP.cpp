@@ -59,6 +59,7 @@ string OMAP::find(Bid key) {
         res = res.c_str();
     }
     searchf_bytes = treeHandler->searchf_bytes;
+    rtt = treeHandler->rtt;
     treeHandler->finishOperation(true, rootKey, rootPos);
 //delete node;
 //delete resNode;
@@ -150,6 +151,7 @@ vector<string> OMAP::batchSearch(vector<Bid> keys) {
         }
     }
     searchf_bytes = treeHandler->searchf_bytes;
+    rtt = treeHandler->rtt;
     treeHandler->finishOperation(true, rootKey, rootPos);
     delete node;
     resNodes.clear();

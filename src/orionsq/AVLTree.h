@@ -45,6 +45,7 @@ private:
 
 public:
     int searchf_bytes;
+    int rtt;
     int insertread;
     AVLTree(int maxSize, bytes<Key> key);
     virtual ~AVLTree();

@@ -29,38 +29,52 @@ private:
     int max(int a, int b);
     //BTreeNode* newBTreeNode(bool leaf);
     BTreeNode* newBTreeNode(bool leaf, int nextBid, int pos);
+    BTreeNode* newBTreeNode(int nextBid, int pos);
     int RandomPath();
     int nextBid();
     int nextbid = 0;
-    //vector<BTreeNode*> setupBTreeNodes;
+    map<int,BTreeNode*> setupNodes;
+    vector<BTreeNode*> sn;
+    int minHeight;
 
 public:
     int brootKey;
     int brootPos;
+    bool isleaf(BTreeNode* node);
+    int keynum(BTreeNode* node);
+    int rtt;
     int searchi_bytes;
-    int insert(Bid kw, int id);
+
+    void insert(Bid kw, int id);
     int insertkw(Bid kw, int id, int rootBid, int &rootPos);
     void insertNFull(Bid kw,int id, BTreeNode*& bt ); 
     void splitChild(BTreeNode *&par, int i, BTreeNode *&y, BTreeNode *&z);
     int search(Bid kw);
-    void searchkw(int brootKey, int brootPos, Bid kw, int &res);
+    void searchkw(int brootKey, int brootPos, Bid kw, int &res, int mh);
+    vector<int> batchSearch(vector<Bid> bids);
    
 
-    void deletion(Bid k, BTreeNode *&node);
+    void deletion(Bid k, BTreeNode *&node, int mh);
     void remove(Bid);
-    void removeFromNonLeaf(int, BTreeNode*&);
-    Bid getPredecessor(int, BTreeNode*);
-    Bid getSuccessor(int, BTreeNode*);
-    void fill(int, BTreeNode*&);
-    void borrowFromPrev(int, BTreeNode*&);
-    void borrowFromNext(int, BTreeNode*&);
-    void merge(int, BTreeNode*&);
+    int findKey(Bid k, BTreeNode* node);
+    void removekw(Bid);
+    void removeFromLeaf(int idx, BTreeNode *&node) ;
+    void removeFromNonLeaf(int, BTreeNode*&, int mh);
+    pair<Bid,int> getPredecessor(int, BTreeNode*, int mh);
+    pair<Bid,int> getSuccessor(int, BTreeNode*, int mh);
+    void fill(int, BTreeNode*&, int mh);
+    void borrowFromPrev(int, BTreeNode*&, int mh);
+    void borrowFromNext(int, BTreeNode*&, int mh);
+    void merge(int, BTreeNode*&, int mh);
 
     BTree(int maxSize, bytes<Key> key);
     BTree();
    ~BTree();
     
-    void setupInsert(int& rootKey, int& rootPos, map<int, string> pairs);
+    void setupInsert(map<Bid,int> pairs);
+    int createBTreeNode(int nextbid, int &leafpos, map<Bid,int> input, int maxHeight);
+    void endSetup();
+    //void setupInsert(int& rootKey, int& rootPos, map<int, string> pairs);
     int sortedArrayToBST(int start, int end, int& pos, int& node);
 };
 

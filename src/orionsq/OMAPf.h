@@ -22,6 +22,7 @@ private:
 public:
     int searchi_bytes;
     int insertread;
+    int rtt;
     OMAPf(int maxSize, bytes<Key> key);
     virtual ~OMAPf();
     void remove(Bid delKey);

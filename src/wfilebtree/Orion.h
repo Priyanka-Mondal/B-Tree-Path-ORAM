@@ -16,6 +16,7 @@ private:
     map<Bid, int> UpdtCnt;
     map<Bid,int> srchbids;
     map<Bid,int> fcntbids;
+    map<Bid,int> setup;
     map<string,int> fcntbtree;
     map<Bid,int> updtbids;
     map<Bid,string> filebids;
@@ -26,7 +27,7 @@ public:
     
     void insertWrap(string cont, int fileid, bool batch);
     void insert(vector<string> kws, vector<string> blocks, int ind);
-    void setupinsert(vector<string> kws, vector<string> blocks, int ind);
+    void setupInsert(vector<string> kws, vector<string> blocks, int ind);
     void batchInsert(vector<string> kws, vector<string> blocks, int ind) ;
     
     void remove(string kw);

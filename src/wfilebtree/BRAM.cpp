@@ -44,6 +44,23 @@ BRAM::~BRAM() {
     delete store;
 }
 
+int BRAM::knumbn(BTreeNode* bn)
+{
+	int knum = 0;
+	int i = 0;
+	while(i<D-1 && bn->values[i]!=0)
+	{
+		i++;
+		knum++;
+	}
+	return knum;
+}
+bool BRAM::isleafbn(BTreeNode* bn)
+{
+	if(bn->cpos[0]==-1)
+		return true;
+	else return false;
+}
 int BRAM::GetBTreeNodeOnPath(int leaf, int curDepth) {
     leaf += bucketCount / 2;
     for (int d = depth - 1; d >= curDepth; d--) {
@@ -115,6 +132,7 @@ void BRAM::FetchPath(int leaf)
 
         Bucketb bucket = ReadBucketb(node); //<<-- here
 	searchi_bytes = searchi_bytes+clen_size;
+	rtt++;
         for (int z = 0; z < Z; z++) {
             Blockb &block = bucket[z];
 
@@ -202,7 +220,7 @@ void BRAM::WriteData(int bid, BTreeNode* node)
     if (store->GetEmptySize() > 0) 
     {
         cache[bid] = node;
-	if(node->knum==2*T-1) // still not correct
+	if(knumbn(node)==2*T-1) // still not correct
         	store->ReduceEmptyNumbers();
 	//cout <<"FREE:"<<store->GetEmptySize()<<endl;
     } 
@@ -279,6 +297,36 @@ BTreeNode* BRAM::ReadBTreeNode(int bid, int lastLeaf) {
         return node;
     }
 }
+BTreeNode* BRAM::ReadBTreeNode(int bid, int lastLeaf, int mh) 
+{
+    if (bid == 0) 
+    {
+        throw runtime_error("BTreeNode id is not set ReadBTreeNode");
+        return NULL;
+    }
+    if (cache.count(bid) == 0) 
+    {
+        BTreeNode* node;
+        Access(bid, node, lastLeaf, lastLeaf);
+        if (node != NULL) {
+		hstash[bid]=mh;
+            modified.insert(bid);
+        }
+	else 
+	{
+		cout <<"BTreeNode is NULL : "<< bid << endl ;
+		cout <<"free node:" << store->GetEmptySize() << endl;
+        throw runtime_error("BTreeNode id is not set ReadBTreeNode");
+	}
+        return node;
+    } else {
+		hstash[bid]=mh;
+        modified.insert(bid);
+        BTreeNode* node = cache[bid];
+        node->pos = lastLeaf;
+        return node;
+    }
+}
 
 int BRAM::WriteBTreeNode(int bid, BTreeNode* node) 
 {
@@ -330,6 +378,59 @@ void BRAM::finalize(int& brootKey, int& brootPos)
 {
     if (!batchWrite) 
     {
+            for (int i = readCnt; i <= pad; i++)
+	    {
+                int rnd = RandomPath();
+                if (std::find(leafList.begin(), leafList.end(), rnd) == leafList.end()) 
+                    leafList.push_back(rnd);
+                FetchPath(rnd);
+        }
+    }
+    
+    for (unsigned int i = 0; i <= maxHeight; i++) 
+    {
+	for(auto t: hstash)
+	{
+		if(modified.count(t.first) && t.second == i)
+		{
+                    BTreeNode* tmp = cache[t.first];
+		    if(tmp != NULL)
+		    {
+			//assert(t.second == tmp->height);
+                    	tmp->pos = RandomPath();
+			if(!isleafbn(tmp))
+			{
+			    for(int k = 0;k<=knumbn(tmp);k++)
+			    {
+			        if (tmp->cbids[k] != 0 && cache.count(tmp->cbids[k]) > 0) 
+			        {
+		    		    tmp->cpos[k] = cache[tmp->cbids[k]]->pos;
+                	        }
+			    }
+		         }
+                    }
+		    cache[t.first]=tmp;
+		}
+          }
+    }
+    if (cache.count(brootKey) != 0)
+        brootPos = cache[brootKey]->pos;
+
+    for (int d = depth; d >= 0; d--) 
+    {
+        for (unsigned int i = 0; i < leafList.size(); i++) 
+	{
+            WritePath(leafList[i], d);
+        }
+    }
+    leafList.clear();
+    modified.clear();
+}
+/*
+void BRAM::finalize(int& brootKey, int& brootPos) 
+{
+    if (!batchWrite) 
+    {
             for (int i = readCnt; i < pad; i++)
 	    {
                 int rnd = RandomPath();
@@ -358,7 +459,7 @@ void BRAM::finalize(int& brootKey, int& brootPos)
 		{
                     tmp->pos = RandomPath();
                 }
-		for(int k = 0;k<=tmp->knum;k++)
+		for(int k = 0;k<=knumbn(tmp);k++)
 		{
 			if (tmp->cbids[k] != 0 && cache.count(tmp->cbids[k]) > 0) 
 			{
@@ -381,7 +482,7 @@ void BRAM::finalize(int& brootKey, int& brootPos)
     leafList.clear();
     modified.clear();
 }
-
+*/
 void BRAM::finalizedel(int& brootKey, int& brootPos) 
 {
 	
@@ -513,3 +614,50 @@ void BRAM::setupInsert(vector<BTreeNode*> nodes) {
     }
 }
 */
+void BRAM::setupInsert(vector<BTreeNode*> nodes) 
+{
+//    sort(nodes.begin(), nodes.end(), [ ](const BTreeNode* lhs, const BTreeNode * rhs) {
+//       return lhs->pos < rhs->pos;
+//   });
+//leaf 1, leaf 2 ..   
+	auto el = nodes.begin();
+	int leaf;
+	LEAF: if(el != nodes.end())
+		leaf = (*el)->pos;
+	if(el != nodes.end())
+	{
+		for (size_t d = depth; d >= 0; d--) 
+		{
+			if(leaf == (*el)->pos)
+			{
+		        	int node = GetBTreeNodeOnPath(leaf, d);
+		       		Bucketb bucket = ReadBucketb(node);
+				int z = 0;
+				while(el != nodes.end() && z<Z && leaf == (*el)->pos)
+		        	{
+					assert(leaf == (*el)->pos);
+					Blockb &block = bucket[z];
+					block.id = (*el)->bid;
+					block.data = convertBTreeNodeToBlockb(*el);
+					z++;
+					el++;
+					//cout <<"z:"<<z<<" leaf:"<<leaf<<" ";
+				}
+				//if(z>0)
+				//{
+					//cout <<"going to write bucket"<<endl;
+				      WriteBucketb(node,bucket);
+					//cout <<"written bucket"<<endl;
+				//}
+				if(el != nodes.end() && leaf != (*el)->pos)
+					goto LEAF;
+				else if(el == nodes.end())
+					goto DONE;
+			}
+			else if(el != nodes.end())
+				goto LEAF;
+			else goto DONE;
+		}
+	}
+DONE: cout <<"done setup"<<endl;
+}

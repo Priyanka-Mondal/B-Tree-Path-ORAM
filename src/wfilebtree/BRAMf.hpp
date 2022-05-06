@@ -73,6 +73,7 @@ private:
 
 public:
     int searchf_bytes;
+    int rtt;
     BRAMf(int maxSize, bytes<Key> key);
     ~BRAMf();
     int maxheight;

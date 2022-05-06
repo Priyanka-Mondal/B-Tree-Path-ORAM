@@ -117,22 +117,13 @@ void Orion::insertWrap(string cont, int fileid, bool batch)
       }
       vector<string> blocks;
       blocks = divideString(cont,BLOCK);
-      insert(kws, blocks, fileid);
+      setupInsert(kws, blocks, fileid);
 }
 
 void Orion::insert(vector<string> kws, vector<string> blocks, int ind) 
 {
     for(auto kw: kws)
     {		
-	    /*
-  	      Bid firstKey(kw);
-  	      int fc = fcntbids[firstKey];
-  	      fc++;
-  	      Bid mapKey = createBid(kw, ind);
-  	      fcntbids[firstKey]=fc;
-	      Bid key = createBid(kw, fc);
-  	      srch->insert(key, ind);
-	      */
 	    int fc = 0;
 	    if(fcntbtree.count(kw)!=0)
   	      fc = fcntbtree[kw];
@@ -153,6 +144,34 @@ void Orion::insert(vector<string> kws, vector<string> blocks, int ind)
 
 }
 
+void Orion::setupInsert(vector<string> kws,vector<string> blocks, int ind) 
+{
+    for(auto kw: kws)
+    {	
+	  int fc = 0;
+	  if(fcntbtree.count(kw)>0)
+		fc = fcntbtree[kw];
+  	  fc++;
+	  fcntbtree[kw]= fc;
+  	  Bid mapKey = createBid(kw,fc);
+	  setup[mapKey]=ind;
+    }
+    localBCNT[ind]=blocks.size();
+    string id = to_string(ind);
+    int i = 1;
+    for(auto blk : blocks)
+    {
+	    Bid b = createBid(id,i);
+	    fileHandler->insert(b,blk);
+	    i++;
+    }
+
+}
+void Orion::endSetup() 
+{
+        btreeHandler->setupInsert(setup);
+	btreeHandler->endSetup();
+}
 Bid Orion::createBid(string keyword, int number) 
 {
     Bid bid(keyword);
@@ -197,9 +216,10 @@ vector<string> Orion::search(string keyword,ofstream& sres, double speed, double
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(stop-start);
     int totBytes = fileHandler->searchf_bytes+btreeHandler->searchi_bytes;
+    int rtt = fileHandler->rtt + btreeHandler->rtt;
     double time = double(totBytes)/speed;
     time = time*1000;
-    int totTime = time+ duration.count()+latency; //mili
+    int totTime = time+ duration.count()+latency*rtt; //mili
     sres<<keyword<<" "<< duration.count()<<" "<<totTime<<" "<<fbs.size()<<" " <<btreeHandler->searchi_bytes <<" "<< fileHandler->searchf_bytes<<endl;
 
     cout<<keyword<<" | "<<duration.count()<<" | "<<totTime<<" | "<<fbs.size()<<" | "<<btreeHandler->searchi_bytes<<" | "<< fileHandler->searchf_bytes<<endl;

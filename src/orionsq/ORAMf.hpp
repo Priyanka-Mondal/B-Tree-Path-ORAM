@@ -90,6 +90,7 @@ private:
 
 public:
     int searchi_bytes;
+    int rtt;
     int insertread;
     int maxheight;
     ORAMf(int maxSize, bytes<Key> key);

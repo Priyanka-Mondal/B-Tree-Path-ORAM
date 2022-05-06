@@ -31,6 +31,7 @@ private:
     int pad;
     size_t blockSize;
     map<int, BTreeNode*> cache;
+    map<int, int> hstash;
     vector<int> leafList;
     vector<int> readviewmap;
     vector<int> writeviewmap;
@@ -72,10 +73,15 @@ private:
     void Print();
 
 public:
+    int maxHeight;
     int searchi_bytes;
+    int rtt;
     BRAM(int maxSize, bytes<Key> key);
     ~BRAM();
     int maxheight;
+    int knumbn(BTreeNode* bn);
+    bool isleafbn(BTreeNode* bn);
+    BTreeNode* ReadBTreeNode(int bid, int lastLeaf, int mh) ;
     BTreeNode* ReadBTreeNode(int bid, int lastLeaf);
     BTreeNode* ReadBTreeNode(int bid);
     int WriteBTreeNode(int bid, BTreeNode* n);
@@ -88,7 +94,7 @@ public:
     static block convertBTreeNodeToBlockb(BTreeNode* node);
     void getbid(block b, int &bID) ;
 
-    //void setupInsert(vector<BTreeNode*> nodes);
+    void setupInsert(vector<BTreeNode*> nodes);
 };
 
 #endif

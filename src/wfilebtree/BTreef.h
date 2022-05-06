@@ -12,7 +12,7 @@
 #include <type_traits>
 #include <iomanip>
 #include <bits/stdc++.h>
-#include "BRAMf.hpp"
+#include "BRAM.hpp"
 
 using namespace std;
 class BTreef 
@@ -25,46 +25,60 @@ private:
     int setupleaf= -1;
     int setupProgress = 0;
 
-    BRAMf *bram;
+    BRAM *bram;
     int max(int a, int b);
     //BTreeNodef* newBTreeNodef(bool leaf);
     BTreeNodef* newBTreeNodef(bool leaf, int nextBid, int pos);
+    BTreeNodef* newBTreeNodef(int nextBid, int pos);
     int RandomPath();
     int nextBid();
     int nextbid = 0;
-    //vector<BTreeNodef*> setupBTreeNodefs;
+    map<int,BTreeNodef*> setupNodes;
+    vector<BTreeNodef*> sn;
+    int minHeight;
 
 public:
     int brootKey;
     int brootPos;
-    int searchf_bytes;
-    int insert(Bid kw, string blk);
+    bool isleaf(BTreeNodef* node);
+    int keynum(BTreeNodef* node);
+    int rtt;
+    int searchi_bytes;
+
+    void insert(Bid kw, int id);
     int insertblk(Bid kw, string blk, int rootBid, int &rootPos);
-    void insertNFull(Bid kw,string blk, BTreeNodef*& bt ); 
+    void insertNFull(Bid kw,int id, BTreeNodef*& bt ); 
     void splitChild(BTreeNodef *&par, int i, BTreeNodef *&y, BTreeNodef *&z);
-    string search(Bid kw);
-    void searchkw(int brootKey, int brootPos, Bid kw, string &res);
+    int search(Bid kw);
+    void searchkw(int brootKey, int brootPos, Bid kw, string &res, int mh);
+    vector<int> batchSearch(vector<Bid> bids);
    
 
-    void deletion(Bid k, BTreeNodef *&node);
+    void deletion(Bid k, BTreeNodef *&node, int mh);
     void remove(Bid);
-    void removeFromNonLeaf(int, BTreeNodef*&);
-    Bid getPredecessor(int, BTreeNodef*);
-    Bid getSuccessor(int, BTreeNodef*);
-    void fill(int, BTreeNodef*&);
-    void borrowFromPrev(int, BTreeNodef*&);
-    void borrowFromNext(int, BTreeNodef*&);
-    void merge(int, BTreeNodef*&);
+    int findKey(Bid k, BTreeNodef* node);
+    void removekw(Bid);
+    void removeFromLeaf(int idx, BTreeNodef *&node) ;
+    void removeFromNonLeaf(int, BTreeNodef*&, int mh);
+    pair<Bid,int> getPredecessor(int, BTreeNodef*, int mh);
+    pair<Bid,int> getSuccessor(int, BTreeNodef*, int mh);
+    void fill(int, BTreeNodef*&, int mh);
+    void borrowFromPrev(int, BTreeNodef*&, int mh);
+    void borrowFromNext(int, BTreeNodef*&, int mh);
+    void merge(int, BTreeNodef*&, int mh);
 
     BTreef(int maxSize, bytes<Key> key);
     BTreef();
    ~BTreef();
     
-    void setupInsert(int& rootKey, int& rootPos, map<int, string> pairs);
+    void setupInsert(map<Bid,int> pairs);
+    int createBTreeNodef(int nextbid, int &leafpos, map<Bid,int> input, int maxHeight);
+    void endSetup();
+    //void setupInsert(int& rootKey, int& rootPos, map<int, string> pairs);
     int sortedArrayToBST(int start, int end, int& pos, int& node);
 };
 
-#endif /* BTREE_H */
+#endif /* BTREEF_H */
 
 
 

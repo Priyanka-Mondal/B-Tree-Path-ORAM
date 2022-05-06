@@ -19,7 +19,7 @@ public:
 	int pos; 
         //bool isleaf;
 	//int knum;
-	int height;
+	//int height;
 	array<Bid, D-1>keys;
 	array<int, D-1>values;
         array<int,D> cbids;

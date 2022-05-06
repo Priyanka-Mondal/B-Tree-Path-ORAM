@@ -415,18 +415,22 @@ Nodef* AVLTreef::search(Nodef* head, Bid key) {
     if (head == NULL || head->key == 0)
     {
 	searchi_bytes = oram->searchi_bytes;
+	rtt = oram->rtt;
         return head;
     }
     head = oram->ReadNodef(head->key, head->pos, head->pos);
     if (head->key > key) {
 	searchi_bytes = oram->searchi_bytes;
+	rtt = oram->rtt;
         return search(oram->ReadNodef(head->leftID, head->leftPos, head->leftPos), key);
     } else if (head->key < key) {
 	searchi_bytes = oram->searchi_bytes;
+	rtt = oram->rtt;
         return search(oram->ReadNodef(head->rightID, head->rightPos, head->rightPos), key);
     } else
     {
 	searchi_bytes = oram->searchi_bytes;
+	rtt = oram->rtt;
         return head;
     }
 }
@@ -462,6 +466,7 @@ void AVLTreef::batchSearch(Nodef* head, vector<Bid> keys, vector<Nodef*>* result
         batchSearch(oram->ReadNodef(head->rightID, head->rightPos, head->rightPos), rightkeys, results);
     }
 	searchi_bytes = oram->searchi_bytes;
+	rtt = oram->rtt;
 }
 
 void AVLTreef::printTree(Nodef* root, int indent) {
@@ -487,6 +492,7 @@ void AVLTreef::startOperation(bool batchWrite)
 {
     oram->insertread = 0;
     oram->searchi_bytes = 0;
+    oram->rtt = 0;
     oram->start(batchWrite);
 }
 

@@ -58,9 +58,8 @@ static void list_dir (const char * dir_name, Orion& orion)
 	          file = file.append("/");
 	          file = file.append(d_name);
 	          string cont = getFileContent(file);
-	          cout <<"============================================================" << endl;
-                  cout << file<< " " << fileid <<endl ;
-	     
+	         //cout <<"=======================================================" << endl;
+                 //cout << file<< " " << fileid <<endl ;
 	     	  orion.insertWrap(cont,fileid, batch);
 	     	  fileid++;
              }
@@ -97,13 +96,13 @@ int main(int argc, char**argv)
 	ofstream sres;
 	list_dir(argv[2],orion);
 	orion.endSetup();
+	cout <<"FILES PARSED!"<<endl;
 	//return 0;
 	//cout <<"------------------"<<endl;
 	
 	kw.open(argv[3]);
 	sres.open(argv[4]);	
 	string line;
-	int l = 1;
 	if(local)
 	{
 		while(getline(kw,line))
@@ -114,23 +113,17 @@ int main(int argc, char**argv)
 			auto ss = orion.search(line);
 			assert(s.size() == ss.size());
 			auto duration = duration_cast<microseconds>(stop-start);
-			//cout <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
+			cout <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
 			sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
-			cout<<"..........................................."<<endl;
-			/*
 			orion.remove(line);
-			cout <<endl;
-			cout <<"after-----------------"<<endl;
 	        	start = high_resolution_clock::now();
 			s = orion.search(line);
 	        	stop = high_resolution_clock::now();
+			assert(s.size() == 0);
 			duration = duration_cast<microseconds>(stop-start);
 			sres <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
 			cout <<line<<" "<< duration.count()<<" "<< s.size()<<endl;
 			cout <<"====================================="<<endl;
-			cout <<"====================================="<<endl;
-			l++;
-			*/
 		}
 	}
 	

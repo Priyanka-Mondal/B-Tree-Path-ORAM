@@ -118,6 +118,7 @@ void ORAMf::FetchPath(int leaf) {
 
         Bucketf bucket = ReadBucket(node);
 	searchi_bytes = searchi_bytes+clen_size;
+	rtt++;
 
         for (int z = 0; z < Z; z++) {
             Blockf &block = bucket[z];

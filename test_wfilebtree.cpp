@@ -104,7 +104,6 @@ int main(int argc, char**argv)
 
         ifstream kw;
 	ofstream sres;
-	list_dir(argv[3],orion);
 	//cout <<"------------------"<<endl;
 	
 	kw.open(argv[4]);
@@ -114,13 +113,15 @@ int main(int argc, char**argv)
 	speed2.assign(speed1.begin(),speed1.end()-2);
 	string unit = "";
 	unit.assign(speed1.end()-2,speed1.end());
-	if(unit != "MB")
+	if(unit != "Mb")
 	{
-		cout <<"Give speed in MB"<<endl;
+		cout <<"Give speed in MBits"<<endl;
 		return 0;
 	}
+	list_dir(argv[3],orion);
+	orion.endSetup();
 	double speed = double(to_int(speed2));
-	speed = speed*1024*1024;
+	speed = speed*1024*128; //MBits/sec to Bytes/sec
 	double latency = double(to_int(argv[7]))/double(1000);
 	cout <<"latency:"<<latency;
 ///////////////////////////////////////////////////////////////////////////

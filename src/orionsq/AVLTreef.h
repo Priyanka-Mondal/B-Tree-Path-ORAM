@@ -45,6 +45,7 @@ private:
 
 public:
     int searchi_bytes;
+    int rtt;
     int insertread;
     AVLTreef(int maxSize, bytes<Key> key);
     virtual ~AVLTreef();

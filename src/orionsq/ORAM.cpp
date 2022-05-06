@@ -115,6 +115,7 @@ void ORAM::FetchPath(int leaf) {
 
         Bucket bucket = ReadBucket(node);
 	searchf_bytes = searchf_bytes + clen_size;
+	rtt++;
 
         for (int z = 0; z < Z; z++) {
             Block &block = bucket[z];

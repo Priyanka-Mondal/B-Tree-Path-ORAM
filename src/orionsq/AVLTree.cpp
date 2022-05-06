@@ -414,18 +414,22 @@ Node* AVLTree::search(Node* head, Bid key) {
     {
 
     	searchf_bytes = oram->searchf_bytes;
+    	rtt = oram->rtt;
         return head;
     }
     head = oram->ReadNode(head->key, head->pos, head->pos);
     if (head->key > key) {
     	searchf_bytes = oram->searchf_bytes;
+    	rtt = oram->rtt;
         return search(oram->ReadNode(head->leftID, head->leftPos, head->leftPos), key);
     } else if (head->key < key) {
     	searchf_bytes = oram->searchf_bytes;
+    	rtt = oram->rtt;
         return search(oram->ReadNode(head->rightID, head->rightPos, head->rightPos), key);
     } else
     {
     	searchf_bytes = oram->searchf_bytes;
+    	rtt = oram->rtt;
         return head;
     }
 }
@@ -460,6 +464,7 @@ void AVLTree::batchSearch(Node* head, vector<Bid> keys, vector<Node*>* results) 
         batchSearch(oram->ReadNode(head->rightID, head->rightPos, head->rightPos), rightkeys, results);
     }
     searchf_bytes = oram->searchf_bytes;
+    	rtt = oram->rtt;
 }
 
 void AVLTree::printTree(Node* root, int indent) {
@@ -484,6 +489,7 @@ void AVLTree::printTree(Node* root, int indent) {
 void AVLTree::startOperation(bool batchWrite) {
     oram->start(batchWrite);
     oram->searchf_bytes = 0;
+    oram->rtt = 0;
 }
 
 /*

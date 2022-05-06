@@ -317,7 +317,7 @@ BTreeNode* BRAM::ReadBTreeNode(int bid, int lastLeaf, int mh)
         Access(bid, node, lastLeaf);
         if (node != NULL) 
 	{
-	    assert(mh == node->height);
+	    //assert(mh == node->height);
 	    hstash[bid]=mh;
             modified.insert(bid);
         }
@@ -407,7 +407,7 @@ void BRAM::finalize(int& brootKey, int& brootPos)
                     BTreeNode* tmp = cache[t.first];
 		    if(tmp != NULL)
 		    {
-			assert(t.second == tmp->height);
+			//assert(t.second == tmp->height);
                     	tmp->pos = RandomPath();
 			if(!isleafbn(tmp))
 			{
@@ -437,7 +437,7 @@ void BRAM::finalize(int& brootKey, int& brootPos)
     leafList.clear();
     modified.clear();
 }
-
+/*
 void BRAM::finalizedel(int& brootKey, int& brootPos) 
 {
         int maxHeight = 0;
@@ -483,6 +483,7 @@ void BRAM::finalizedel(int& brootKey, int& brootPos)
     leafList.clear();
     modified.clear();
 }
+*/
 void BRAM::start(bool batchWrite) 
 {
     this->batchWrite = batchWrite;

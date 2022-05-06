@@ -92,6 +92,7 @@ public:
     ORAM(int maxSize, bytes<Key> key);
     ~ORAM();
     int searchf_bytes;
+    int rtt;
     int maxheight;
     Node* ReadNode(Bid bid, int lastLeaf, int newLeaf);
     Node* ReadNode(Bid bid);

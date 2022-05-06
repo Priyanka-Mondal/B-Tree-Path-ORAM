@@ -20,6 +20,7 @@ private:
 
 public:
     int insertread;
+    int rtt;
     OMAP(int maxSize, bytes<Key> key);
     virtual ~OMAP();
     void insert(Bid key, string value);
