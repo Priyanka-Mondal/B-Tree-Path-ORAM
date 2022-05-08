@@ -1,5 +1,5 @@
 #!/bin/bash
 while true
 do
-	./btree_debug 170000 allen-p/deleted_items KEYW/smallkw b.txt || exit 1
+	./btree_debug 1700000 allen KEYW/smallkw b.txt || exit 1
 done

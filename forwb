@@ -1,0 +1,17 @@
+#!/bin/bash
+while true
+do
+ ./wfilebtree_debug 270000 33000 allen KEYW/high 100ww25.txt 100Mb 25 || exit 1
+ ./wfilebtree_debug 270000 33000 allen KEYW/high 100ww50.txt 100Mb 50 || exit 1
+ ./wfilebtree_debug 270000 33000 allen KEYW/high 100ww100.txt 100Mb 100 || exit 1
+ ./wfilebtree_debug 270000 33000 allen KEYW/high 200ww25.txt 200Mb 25 || exit 1
+ ./wfilebtree_debug 270000 33000 allen KEYW/high 200ww50.txt 200Mb 50 || exit 1
+ ./wfilebtree_debug 270000 33000 allen KEYW/high 200ww100.txt 200Mb 100 || exit 1
+ ./wfilebtree_debug 270000 33000 allen KEYW/high 500ww25.txt 500Mb 25 || exit 1
+ ./wfilebtree_debug 270000 33000 allen KEYW/high 500ww50.txt 500Mb 50 || exit 1
+ ./wfilebtree_debug 270000 33000 allen KEYW/high 500ww100.txt 500Mb 100 || exit 1
+ ./wfilebtree_debug 270000 33000 allen KEYW/high 1000ww25.txt 500Mb 25 || exit 1
+ ./wfilebtree_debug 270000 33000 allen KEYW/high 1000ww50.txt 500Mb 50 || exit 1
+ ./wfilebtree_debug 270000 33000 allen KEYW/high 1000ww100.txt 500Mb 100 || exit 1
+ #./wfilebtree_debug 270000 50000 allen KEYW/high test.txt 1Mb 50 || exit 1
+done

@@ -139,7 +139,8 @@ int main(int argc, char**argv)
 
 	string line;
 	int l = 1;
-	cout <<endl<<"keyword||SearchTime||TotalTime||resultSize||indexBytes||fileBytes"<<endl;
+	cout <<endl<<"keyword||SearchTime||TotalTime||resultSize||indexBytes||fileBytes||rtt"<<endl;
+	sres <<"keyword||SearchTime||TotalTime||resultSize||indexBytes||fileBytes||rtt"<<endl;
 	if(local)
 	{
 		while(getline(kw,line))

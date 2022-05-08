@@ -34,7 +34,7 @@ env.Append(CXXFLAGS = ['-std=c++14'])
 env.Append(CPPPATH = ['/usr/local/include', config['cryto_include'], config['db-parser_include'],'/usr/local/include/cryptopp'])
 env.Append(LIBPATH = ['/usr/local/lib', config['cryto_lib'], config['db-parser_lib']])
 env.Append(RPATH = [config['cryto_lib'], config['db-parser_lib']])
-env.Append(LINKFLAGS = ['-Wl,--copy-dt-needed-entries','-pg','-no-pie','-fno-builtin'])
+env.Append(LINKFLAGS = ['-Wl,--copy-dt-needed-entries'])
 env.Append(LIBS = ['crypto','ssl', 'sse_crypto', 'grpc++_unsecure', 'grpc', 'protobuf', 'dl', 'sse_dbparser', 'rocksdb', 'snappy', 'z', 'bz2',  'lz4','cryptopp','pthread'])
  
 #Workaround for OS X
@@ -49,7 +49,7 @@ if env['PLATFORM'] == 'darwin':
 
 env['STATIC_AND_SHARED_OBJECTS_ARE_THE_SAME']=1
 
-env.Append(CCFLAGS = ['-g','-O0', '-pg', '-no-pie', '-fno-builtin'])
+env.Append(CCFLAGS = ['-g','-O0'])
 
 static_relic = ARGUMENTS.get('static_relic', 0)
 
@@ -75,8 +75,10 @@ objects = SConscript('src/build.scons', exports='env', variant_dir='build')
 env.Depends(objects["orionsq"],[crypto_lib_target , db_parser_target])
 env.Depends(objects["btree"],[crypto_lib_target , db_parser_target])
 env.Depends(objects["wfilebtree"],[crypto_lib_target , db_parser_target])
+env.Depends(objects["twowfilebtree"],[crypto_lib_target , db_parser_target])
+env.Depends(objects["eight"],[crypto_lib_target , db_parser_target])
 
-Clean(objects["orionsq"]+objects["btree"]+objects["wfilebtree"], 'build')
+Clean(objects["orionsq"]+objects["btree"]+objects["wfilebtree"]+objects["twowfilebtree"]+objects["eight"], 'build')
 
 outter_env = env.Clone()
 outter_env.Append(CPPPATH = ['build'])
@@ -86,12 +88,18 @@ outter_env.Append(CPPPATH = ['build'])
 orionsq_debug_prog   = outter_env.Program('orionsq_debug',    ['test_orionsq.cpp']     + objects["orionsq"])
 btree_debug_prog   = outter_env.Program('btree_debug',    ['test_btree.cpp']     + objects["btree"])
 wfilebtree_debug_prog   = outter_env.Program('wfilebtree_debug',    ['test_wfilebtree.cpp']     + objects["wfilebtree"])
+twowfilebtree_debug_prog   = outter_env.Program('twowfilebtree_debug',    ['test_twowf.cpp']     + objects["twowfilebtree"])
+eight_debug_prog   = outter_env.Program('eight_debug',    ['test_eight.cpp']     + objects["eight"])
 
 
 env.Alias('orionsq', [orionsq_debug_prog])
 env.Alias('btree', [btree_debug_prog])
+env.Alias('eight', [eight_debug_prog])
 env.Alias('wfilebtree', [wfilebtree_debug_prog])
+env.Alias('twowfilebtree', [twowfilebtree_debug_prog])
 
 env.Default(['orionsq'])
 env.Default(['btree'])
+env.Default(['eight'])
 env.Default(['wfilebtree'])
+env.Default(['twowfilebtree'])

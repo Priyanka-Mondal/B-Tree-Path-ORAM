@@ -58,8 +58,8 @@ static void list_dir (const char * dir_name, Orion& orion)
 	          file = file.append("/");
 	          file = file.append(d_name);
 	          string cont = getFileContent(file);
-	          cout <<"============================================================" << endl;
-                  cout << file<< " " << fileid <<endl ;
+	          //cout <<"============================================================" << endl;
+                  //cout << file<< " " << fileid <<endl ;
 	     
 	     	  orion.insertWrap(cont,fileid, batch);
 	     	  fileid++;
@@ -120,6 +120,7 @@ int main(int argc, char**argv)
 	}
 	list_dir(argv[3],orion);
 	orion.endSetup();
+	cout <<"FILES PARSED!"<<endl;
 	double speed = double(to_int(speed2));
 	speed = speed*1024*128; //MBits/sec to Bytes/sec
 	double latency = double(to_int(argv[7]))/double(1000);
@@ -136,7 +137,8 @@ int main(int argc, char**argv)
 	sres<<first<<endl;
 ///////////////////////////////////////////////////////////////////////////
 
-cout <<endl<<"keyword||SearchTime||TotalTime||resultSize||indexBytes||fileBytes"<<endl;
+cout <<endl<<"keyword||SearchTime||TotalTime||resultSize||indexBytes||fileBytes||rtt"<<endl;
+sres <<"keyword||SearchTime||TotalTime||resultSize||indexBytes||fileBytes||rtt"<<endl;
 	string line;
 	if(local)
 	{

@@ -17,7 +17,7 @@ template <size_t N>
 using bytes = std::array<byte_t, N>;
 
 constexpr int Z = 4;// A bucket contains a number of Blocks
-constexpr int T = 5; //T>6 creates problem
+constexpr int T = 4; //T>6 creates problem
 constexpr int D = 2*T;// Each node of Btree has 3 keys
 
 enum Op {

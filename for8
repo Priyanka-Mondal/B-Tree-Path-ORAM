@@ -1,0 +1,27 @@
+#!/bin/bash
+while true
+do
+   
+ ./eight_debug 270000 33000 allen KEYW/high 1www25.txt 1Mb 25 || exit 1
+ ./eight_debug 270000 33000 allen KEYW/high 1www50.txt 1Mb 50 || exit 1
+ ./eight_debug 270000 33000 allen KEYW/high 1www100.txt 1Mb 100 || exit 1
+ ./eight_debug 270000 33000 allen KEYW/high 10www25.txt 10Mb 25 || exit 1
+ ./eight_debug 270000 33000 allen KEYW/high 10www50.txt 10Mb 50 || exit 1
+ ./eight_debug 270000 33000 allen KEYW/high 10www100.txt 10Mb 100 || exit 1
+ ./eight_debug 270000 33000 allen KEYW/high 50www25.txt 50Mb 25 || exit 1
+ ./eight_debug 270000 33000 allen KEYW/high 50www50.txt 50Mb 50 || exit 1
+ ./eight_debug 270000 33000 allen KEYW/high 50www100.txt 50Mb 100 || exit 1
+ ./eight_debug 270000 33000 allen KEYW/high 100www25.txt 100Mb 25 || exit 1
+ ./eight_debug 270000 33000 allen KEYW/high 100www50.txt 100Mb 50 || exit 1
+ ./eight_debug 270000 33000 allen KEYW/high 100www100.txt 100Mb 100 || exit 1
+ ./eight_debug 270000 33000 allen KEYW/high 200www25.txt 200Mb 25 || exit 1
+ ./eight_debug 270000 33000 allen KEYW/high 200www50.txt 200Mb 50 || exit 1
+ ./eight_debug 270000 33000 allen KEYW/high 200www100.txt 200Mb 100 || exit 1
+ ./eight_debug 270000 33000 allen KEYW/high 500www25.txt 500Mb 25 || exit 1
+ ./eight_debug 270000 33000 allen KEYW/high 500www50.txt 500Mb 50 || exit 1
+ ./eight_debug 270000 33000 allen KEYW/high 500www100.txt 500Mb 100 || exit 1
+ ./eight_debug 270000 33000 allen KEYW/high 1000www25.txt 1000Mb 25 || exit 1
+ ./eight_debug 270000 33000 allen KEYW/high 1000www50.txt 1000Mb 50 || exit 1
+ ./eight_debug 270000 33000 allen KEYW/high 1000www100.txt 1000Mb 100 || exit 1
+ #./eight_debug 270000 50000 allen KEYW/high test.txt 1Mb 50 || exit 1
+done

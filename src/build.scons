@@ -23,6 +23,8 @@ baseline_files = Glob('baseline/*.cpp')
 t111_files = Glob('t111/*.cpp')
 btree_files = Glob('btree/*.cpp')
 wfilebtree_files = Glob('wfilebtree/*.cpp')
+twowfilebtree_files = Glob('twowfilebtree/*.cpp')
+eight_files = Glob('eight/*.cpp')
 
 protos = env.SConscript('protos/build.scons', exports='env')
 
@@ -42,6 +44,8 @@ t111_objs = env.Object(t111_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 baseline_objs = env.Object(baseline_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 btree_objs = env.Object(btree_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 wfilebtree_objs = env.Object(wfilebtree_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
+twowfilebtree_objs = env.Object(twowfilebtree_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
+eight_objs = env.Object(eight_files, CPPPATH = ['.'] + env.get('CPPPATH', []))
 
 objs = {}
 objs["mzorion"] = mzorion_objs + common_objs
@@ -59,4 +63,7 @@ objs["orion2"] = orion2_objs + common_objs
 objs["baseline"] = baseline_objs + common_objs
 objs["btree"] = btree_objs + common_objs
 objs["wfilebtree"] = wfilebtree_objs + common_objs
+objs["twowfilebtree"] = twowfilebtree_objs + common_objs
+objs["eight"] = eight_objs + common_objs
+
 Return('objs')
