@@ -5,6 +5,7 @@ sudo apt-get update
 sudo apt-get install -y autoconf automake build-essential clang curl git libbz2-dev libc++-dev libcrypto++-dev libgflags-dev libgmp-dev libgtest-dev liblz4-dev libsnappy-dev libssl-dev libssl1.0.0 libtool make openssl pkg-config scons unzip yasm zlib1g-dev
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test
 sudo apt-get update
+sudo apt-get install libssl-dev
 sudo apt-get install -y gcc-5 g++-5
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 1
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 1
